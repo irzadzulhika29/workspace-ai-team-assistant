@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { UploadCloud, CheckCircle, XCircle, Loader2, FileText } from 'lucide-react'
-import { api } from '../../services/api'
+import { fileApi } from '../../services/fileService'
 
 const ACCEPTED_TYPES = {
   'application/pdf': ['.pdf'],

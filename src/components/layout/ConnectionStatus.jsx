@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useChatStore } from '../../store/chatStore'
-import { api } from '../../services/api'
+import { statusApi } from '../../services/api'
 
 const POLL_INTERVAL = 30_000 // 30 seconds as per spec
 

@@ -1,5 +1,13 @@
 import axios from "axios";
 
+// ─── Re-exports ───────────────────────────────────────────────────────────────
+// Barrel module: import dari sini untuk backward-compatibility,
+// atau langsung dari masing-masing service module.
+export { chatApi } from "./chatService";
+export { sessionApi } from "./sessionService";
+export { fileApi } from "./fileService";
+export { SUPABASE_URL, SUPABASE_ANON_KEY, supabaseHeaders } from "./supabase";
+
 // ─── localStorage keys ───────────────────────────────────────────────────────
 const KEYS = {
   SUPERVISOR: "n8n_supervisor_url",
@@ -60,27 +68,8 @@ export const urls = {
   },
 };
 
-// ─── Axios instance factory ──────────────────────────────────────────────────
-const makeClient = (getUrl) =>
-  axios.create({
-    timeout: 60_000,
-    headers: { "Content-Type": "application/json" },
-    get baseURL() {
-      return getUrl();
-    },
-  });
-
-// Each call builds a fresh baseURL from localStorage so URL changes take effect immediately.
-const post = async (getUrl, payload) => {
-  const res = await axios.post(getUrl(), payload, {
-    timeout: 60_000,
-    headers: { "Content-Type": "application/json" },
-  });
-  return res.data;
-};
-
 // ─── Session ID (per-tab) ────────────────────────────────────────────────────
-const getSessionId = () => {
+export const getSessionId = () => {
   let id = sessionStorage.getItem("session_id");
   if (!id) {
     id = crypto.randomUUID();
@@ -89,8 +78,8 @@ const getSessionId = () => {
   return id;
 };
 
-// ─── API methods ──────────────────────────────────────────────────────────────
-export const api = {
+// ─── Status check ─────────────────────────────────────────────────────────────
+export const statusApi = {
   /**
    * Check n8n connectivity. Resolves true/false — never throws.
    */
@@ -101,84 +90,5 @@ export const api = {
     } catch {
       return false;
     }
-  },
-
-  /**
-   * Send a message to the Supervisor Agent.
-   * @param {string} message
-   * @param {string} action
-   * @returns {Promise<import('./api.types').AgentResponse>}
-   */
-  sendToSupervisor: (message, action = "chat") =>
-    post(urls.getSupervisor, {
-      action,
-      session_id: getSessionId(),
-      message,
-      context_filter: null,
-      timestamp: new Date().toISOString(),
-    }),
-
-  /**
-   * Send a message to the Knowledge Agent (RAG).
-   * @param {string} message
-   * @param {string|null} contextFilter
-   * @returns {Promise<import('./api.types').AgentResponse>}
-   */
-  sendToKnowledge: (message, contextFilter = null) =>
-    post(urls.getKnowledge, {
-      action: "chat",
-      session_id: getSessionId(),
-      message,
-      context_filter: contextFilter,
-      timestamp: new Date().toISOString(),
-    }),
-
-  /**
-   * Upload a document for indexing.
-   * @param {File} file
-   * @param {string} folder - "input" | "output"
-   * @param {string} fileName
-   * @returns {Promise<any>}
-   */
-  uploadDocument: async (file, folder = "input", fileName = "") => {
-    const formData = new FormData();
-    formData.append("action", "upload");
-    formData.append("file", file);
-    formData.append("file_name", (fileName || file?.name || "").trim());
-    formData.append("kategori", folder);
-    formData.append("folder", folder);
-    formData.append("session_id", getSessionId());
-    const res = await axios.post(urls.getUpload(), formData, {
-      timeout: 120_000,
-      // Let the browser set multipart boundary automatically.
-      headers: { Accept: "application/json" },
-    });
-    return res.data;
-  },
-
-  /**
-   * Fetch all documents from the Supabase `dokumen` table.
-   * @returns {Promise<Array>} array of document records
-   */
-  fetchDokumen: async () => {
-    const SUPABASE_URL = "http://localhost:8000";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE";
-
-    const url = `${SUPABASE_URL}/rest/v1/dokumen?select=*&order=created_at.desc`;
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Gagal menarik data dari Supabase");
-    }
-
-    return res.json();
   },
 };

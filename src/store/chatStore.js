@@ -18,6 +18,10 @@ const initialState = {
   supervisorMessages: [],
   knowledgeMessages:  [],
   isConnected:        null,  // null = unknown, true/false after first check
+
+  // ── Knowledge sessions ──────────────────────────────────────────────────
+  knowledgeSessions:          [],   // array sesi dari Supabase
+  activeKnowledgeSessionId:   null, // UUID sesi yang sedang aktif
 }
 
 export const useChatStore = create(
@@ -49,13 +53,23 @@ export const useChatStore = create(
         })),
 
       clearKnowledge: () => set({ knowledgeMessages: [] }),
+
+      // Ganti seluruh array pesan (untuk load riwayat dari Supabase)
+      setKnowledgeMessages: (messages) => set({ knowledgeMessages: messages }),
+
+      // ── Knowledge sessions ────────────────────────────────────────────────
+      setKnowledgeSessions: (sessions) => set({ knowledgeSessions: sessions }),
+
+      setActiveKnowledgeSession: (id) =>
+        set({ activeKnowledgeSessionId: id }),
     }),
     {
       name: 'team-workspace-chat',
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
-        supervisorMessages: state.supervisorMessages,
-        knowledgeMessages:  state.knowledgeMessages,
+        supervisorMessages:        state.supervisorMessages,
+        knowledgeMessages:         state.knowledgeMessages,
+        activeKnowledgeSessionId:  state.activeKnowledgeSessionId,
       }),
     }
   )

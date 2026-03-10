@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
 import { useChatStore } from '../store/chatStore'
-import { api } from '../services/api'
+import { chatApi } from '../services/chatService'
 import ChatBubble from '../components/chat/ChatBubble'
 import MessageInput from '../components/chat/MessageInput'
 import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
