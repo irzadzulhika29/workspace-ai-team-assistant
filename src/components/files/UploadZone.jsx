@@ -51,7 +51,7 @@ export default function UploadZone({ onUploaded, targetFolder = 'input' }) {
       )))
 
       try {
-        const result = await api.uploadDocument(entry.file, targetFolder, docName)
+        const result = await fileApi.uploadDocument(entry.file, targetFolder, docName)
         setUploads((u) => u.map((item) => (
           item.id === entry.id ? { ...item, status: 'done', name: docName } : item
         )))

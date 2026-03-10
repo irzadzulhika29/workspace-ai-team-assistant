@@ -11,21 +11,26 @@ export const sessionApi = {
    */
   buatSesiBaru: async (judulChat = "Obrolan Baru") => {
     try {
+      const newSessionId = crypto.randomUUID();
+      const payload = {
+        id: newSessionId,
+        judul: judulChat
+      };
       const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_sessions`, {
         method: "POST",
         headers: {
           ...supabaseHeaders,
-          Prefer: "return=representation",
+          Prefer: "return=representation"
         },
-        body: JSON.stringify({ judul: judulChat }),
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
         throw new Error(`HTTP Error! Status: ${res.status}`);
       }
 
-      const data = await res.json();
-      return data[0];
+      const rows = await res.json();
+      return rows[0] || payload;
     } catch (error) {
       console.error("Gagal membuat sesi baru:", error);
       return null;
@@ -38,7 +43,7 @@ export const sessionApi = {
    */
   ambilSemuaSesi: async () => {
     try {
-      const url = `${SUPABASE_URL}/rest/v1/chat_sessions?select=*&order=created_at.desc`;
+      const url = `${SUPABASE_URL}/rest/v1/chat_sessions?select=id,judul,created_at&order=created_at.desc`;
       const res = await fetch(url, {
         method: "GET",
         headers: supabaseHeaders,
@@ -62,7 +67,7 @@ export const sessionApi = {
    */
   ambilRiwayatChat: async (sessionId) => {
     try {
-      const url = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?sessionId=eq.${sessionId}&order=id.asc`;
+      const url = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}&order=id.asc`;
       const res = await fetch(url, {
         method: "GET",
         headers: supabaseHeaders,
@@ -87,8 +92,8 @@ export const sessionApi = {
    */
   hapusSesiChat: async (sessionId) => {
     try {
-      // 1. Hapus isi pesan di tabel n8n_chat_histories
-      const urlPesan = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?sessionId=eq.${sessionId}`;
+      // Hapus isi pesan di tabel n8n_chat_histories
+      const urlPesan = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}`;
       const responsPesan = await fetch(urlPesan, {
         method: "DELETE",
         headers: supabaseHeaders,
@@ -97,9 +102,8 @@ export const sessionApi = {
       if (!responsPesan.ok) {
         throw new Error(`Gagal menghapus pesan. Status: ${responsPesan.status}`);
       }
-      console.log("Isi pesan berhasil dihapus dari database.");
 
-      // 2. Hapus judul sesi di tabel chat_sessions
+      // Hapus sesi di tabel chat_sessions
       const urlSesi = `${SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${sessionId}`;
       const responsSesi = await fetch(urlSesi, {
         method: "DELETE",
@@ -109,7 +113,8 @@ export const sessionApi = {
       if (!responsSesi.ok) {
         throw new Error(`Gagal menghapus sesi. Status: ${responsSesi.status}`);
       }
-      console.log("Sesi obrolan berhasil dihapus permanen.");
+
+      console.log(`Riwayat chat untuk sesi ${sessionId} berhasil dihapus.`);
 
       return true;
     } catch (error) {

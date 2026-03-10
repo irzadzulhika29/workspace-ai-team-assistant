@@ -3,7 +3,7 @@ import { FolderOpen, Loader2, AlertCircle } from "lucide-react";
 import UploadZone from "../components/files/UploadZone";
 import FolderTree from "../components/files/FolderTree";
 import FilePreviewModal from "../components/files/FilePreviewModal";
-import { api } from "../services/api";
+import { fileApi } from "../services/api";
 
 const TABS = [
   { key: "input", label: "Input (SOP)", folder: "input" },
@@ -24,7 +24,7 @@ export default function FileWorkspace() {
       try {
         setIsLoading(true);
         setFetchError(null);
-        const data = await api.fetchDokumen();
+        const data = await fileApi.fetchDokumen();
 
         // Group documents by kategori field
         const grouped = { input: [], output: [] };

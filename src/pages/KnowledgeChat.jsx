@@ -62,7 +62,7 @@ export default function KnowledgeChat() {
     setLoading(true)
 
     try {
-      const data = await api.sendToKnowledge(
+      const data = await chatApi.sendToKnowledge(
         message,
         contextFilter,
         activeKnowledgeSessionId,

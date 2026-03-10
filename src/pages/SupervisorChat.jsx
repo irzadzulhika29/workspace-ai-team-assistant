@@ -59,7 +59,7 @@ export default function SupervisorChat() {
     setAgentLabel('Supervisor Agent')
 
     try {
-      const data = await api.sendToSupervisor(text, 'chat')
+      const data = await chatApi.sendToSupervisor(text, 'chat')
       const normalizedData = Array.isArray(data) ? (data[0] ?? {}) : (data ?? {})
 
       // Optimistically update agent label if routing info available

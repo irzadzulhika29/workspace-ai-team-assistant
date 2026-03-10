@@ -9,7 +9,7 @@ export default function ConnectionStatus() {
 
   useEffect(() => {
     const check = async () => {
-      const ok = await api.checkStatus()
+      const ok = await statusApi.checkStatus()
       setConnected(ok)
     }
     check()

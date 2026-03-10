@@ -29,7 +29,7 @@ export default function KnowledgeSidebar() {
   const loadSessions = async () => {
     setLoadingSessions(true)
     try {
-      const sessions = await api.ambilSemuaSesi()
+      const sessions = await sessionApi.ambilSemuaSesi()
       setKnowledgeSessions(sessions)
 
       // Jika belum ada sesi aktif, auto-buat sesi baru
@@ -50,12 +50,12 @@ export default function KnowledgeSidebar() {
   const handleNewChat = async () => {
     setCreatingSession(true)
     try {
-      const sesi = await api.buatSesiBaru('Obrolan Baru')
+      const sesi = await sessionApi.buatSesiBaru('Obrolan Baru')
       if (sesi) {
         setActiveKnowledgeSession(sesi.id)
         clearKnowledge()
         // Refresh daftar sesi
-        const sessions = await api.ambilSemuaSesi()
+        const sessions = await sessionApi.ambilSemuaSesi()
         setKnowledgeSessions(sessions)
       }
     } catch (err) {
@@ -72,15 +72,18 @@ export default function KnowledgeSidebar() {
     setActiveKnowledgeSession(sessionId)
     setLoadingHistory(true)
     try {
-      const riwayat = await api.ambilRiwayatChat(sessionId)
+      const riwayat = await sessionApi.ambilRiwayatChat(sessionId)
 
       // Transform n8n_chat_histories rows ke format ChatMessage store
-      const messages = riwayat.map((row) => ({
-        id: row.id?.toString() || crypto.randomUUID(),
-        role: row.role === 'user' || row.type === 'human' ? 'user' : 'ai',
-        content: row.message || row.content || row.text || '',
-        timestamp: row.created_at || row.timestamp || new Date().toISOString(),
-      }))
+      const messages = riwayat.map((row) => {
+        const msgData = row.message || {};
+        return {
+          id: row.id?.toString() || crypto.randomUUID(),
+          role: msgData.type === 'human' ? 'user' : 'ai',
+          content: msgData.content || '',
+          timestamp: row.created_at || new Date().toISOString(),
+        };
+      })
 
       setKnowledgeMessages(messages)
     } catch (err) {
