@@ -22,6 +22,10 @@ const initialState = {
   // ── Knowledge sessions ──────────────────────────────────────────────────
   knowledgeSessions:          [],   // array sesi dari Supabase
   activeKnowledgeSessionId:   null, // UUID sesi yang sedang aktif
+
+  // ── Supervisor sessions ─────────────────────────────────────────────────
+  supervisorSessions:         [],   // array sesi dari Supabase
+  activeSupervisorSessionId:  null, // UUID sesi yang sedang aktif
 }
 
 export const useChatStore = create(
@@ -62,6 +66,14 @@ export const useChatStore = create(
 
       setActiveKnowledgeSession: (id) =>
         set({ activeKnowledgeSessionId: id }),
+
+      // ── Supervisor sessions ───────────────────────────────────────────────
+      setSupervisorSessions: (sessions) => set({ supervisorSessions: sessions }),
+
+      setActiveSupervisorSession: (id) =>
+        set({ activeSupervisorSessionId: id }),
+
+      setSupervisorMessages: (messages) => set({ supervisorMessages: messages }),
     }),
     {
       name: 'team-workspace-chat',
@@ -70,6 +82,7 @@ export const useChatStore = create(
         supervisorMessages:        state.supervisorMessages,
         knowledgeMessages:         state.knowledgeMessages,
         activeKnowledgeSessionId:  state.activeKnowledgeSessionId,
+        activeSupervisorSessionId: state.activeSupervisorSessionId,
       }),
     }
   )

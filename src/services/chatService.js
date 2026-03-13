@@ -16,13 +16,15 @@ export const chatApi = {
    * Send a message to the Supervisor Agent.
    * @param {string} message
    * @param {string} action
+   * @param {string|null} sessionId - Optional explicit session ID
    */
-  sendToSupervisor: (message, action = "chat") =>
+  sendToSupervisor: (message, action = "chat", sessionId = null) =>
     post(urls.getSupervisor, {
       action,
-      session_id: getSessionId(),
+      session_id: sessionId || getSessionId(),
       message,
       context_filter: null,
+      chat_type: "general_chat",
       timestamp: new Date().toISOString(),
     }),
 
@@ -38,6 +40,7 @@ export const chatApi = {
       session_id: sessionId || getSessionId(),
       message,
       context_filter: contextFilter,
+      chat_type: "rag_chat",
       timestamp: new Date().toISOString(),
     }),
 };

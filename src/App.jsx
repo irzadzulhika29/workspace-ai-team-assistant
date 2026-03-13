@@ -9,22 +9,22 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="flex min-h-screen w-full">
-        {/* Persistent sidebar */}
         <Sidebar />
-
-        {/* Main content — offset by sidebar width */}
         <main
-          className="flex-1 min-h-screen bg-surface overflow-hidden"
+          className="flex-1 min-h-screen overflow-hidden"
           style={{ marginLeft: 'var(--sidebar-width)' }}
         >
-          <Routes>
-            <Route path="/"                 element={<Dashboard />}        />
-            <Route path="/chat/supervisor"  element={<SupervisorChat />}   />
-            <Route path="/chat/knowledge"   element={<KnowledgeChat />}    />
-            <Route path="/workspace/files"  element={<FileWorkspace />}    />
-            {/* Fallback → Dashboard */}
-            <Route path="*"                 element={<Dashboard />}        />
-          </Routes>
+          <div className="min-h-screen p-3 md:p-5">
+            <div className="min-h-[calc(100dvh-1.5rem)] md:min-h-[calc(100dvh-2.5rem)] panel overflow-hidden">
+              <Routes>
+                <Route path="/"                 element={<Dashboard />}        />
+                <Route path="/chat/supervisor"  element={<SupervisorChat />}   />
+                <Route path="/chat/knowledge"   element={<KnowledgeChat />}    />
+                <Route path="/workspace/files"  element={<FileWorkspace />}    />
+                <Route path="*"                 element={<Dashboard />}        />
+              </Routes>
+            </div>
+          </div>
         </main>
       </div>
     </BrowserRouter>

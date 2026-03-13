@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Folder, FolderOpen, FileText, File, ChevronRight,
+  Folder, FolderOpen, FileText, ChevronRight,
   Plus, Download
 } from 'lucide-react'
 
@@ -9,38 +9,64 @@ import {
  * @param {Array}    props.folders  - tree data
  * @param {Function} props.onFileClick
  */
-export default function FolderTree({ folders = DEFAULT_FOLDERS, onFileClick }) {
+function FolderTree({ folders = DEFAULT_FOLDERS, onFileClick }) {
   return (
     <div className="space-y-0.5">
       {folders.map((folder) => (
-        <FolderNode key={folder.id} node={folder} onFileClick={onFileClick} />
+        <MemoFolderNode key={folder.id} node={folder} onFileClick={onFileClick} />
       ))}
     </div>
   )
 }
 
+const MemoFolderNode = memo(FolderNode)
+
 function FolderNode({ node, onFileClick, depth = 0 }) {
   const [open, setOpen] = useState(node.defaultOpen ?? true)
-  const [children, setChildren] = useState(node.children ?? [])
+  const [localChildren, setLocalChildren] = useState([])
   const [naming, setNaming] = useState(false)
   const [newName, setNewName] = useState('')
 
-  const addSubfolder = () => {
+  useEffect(() => {
+    if (node.type === 'folder') {
+      setOpen(node.defaultOpen ?? true)
+    }
+  }, [node.defaultOpen, node.type])
+
+  const children = useMemo(
+    () => [...(node.children ?? []), ...localChildren],
+    [localChildren, node.children],
+  )
+
+  const fileCount = useMemo(
+    () => children.filter((child) => child.type === 'file').length,
+    [children],
+  )
+
+  const addSubfolder = useCallback(() => {
     if (!newName.trim()) return
-    setChildren((c) => [
+    setLocalChildren((c) => [
       ...c,
       { id: crypto.randomUUID(), name: newName.trim(), type: 'folder', children: [] },
     ])
     setNewName('')
     setNaming(false)
-  }
+  }, [newName])
+
+  const handleToggleOpen = useCallback(() => {
+    setOpen((isOpen) => !isOpen)
+  }, [])
+
+  const handleFileClick = useCallback(() => {
+    onFileClick?.(node)
+  }, [node, onFileClick])
 
   const indent = depth * 16
 
   if (node.type === 'file') {
     return (
       <button
-        onClick={() => onFileClick?.(node)}
+        onClick={handleFileClick}
         className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-slate-600 hover:bg-gray-100 hover:text-slate-800 transition-colors text-left"
         style={{ paddingLeft: `${12 + indent}px` }}
       >
@@ -63,7 +89,7 @@ function FolderNode({ node, onFileClick, depth = 0 }) {
   return (
     <div>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggleOpen}
         className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium text-slate-700 hover:bg-gray-100 transition-colors"
         style={{ paddingLeft: `${12 + indent}px` }}
       >
@@ -77,14 +103,14 @@ function FolderNode({ node, onFileClick, depth = 0 }) {
         }
         <span className="truncate flex-1 text-left">{node.name}</span>
         <span className="text-[10px] font-mono text-slate-400 flex-shrink-0">
-          {children.filter((c) => c.type === 'file').length} file
+          {fileCount} file
         </span>
       </button>
 
       {open && (
         <div>
           {children.map((child) => (
-            <FolderNode key={child.id} node={child} depth={depth + 1} onFileClick={onFileClick} />
+            <MemoFolderNode key={child.id} node={child} depth={depth + 1} onFileClick={onFileClick} />
           ))}
 
           {/* New subfolder */}
@@ -114,6 +140,8 @@ function FolderNode({ node, onFileClick, depth = 0 }) {
     </div>
   )
 }
+
+export default memo(FolderTree)
 
 // Default folder structure
 const DEFAULT_FOLDERS = [

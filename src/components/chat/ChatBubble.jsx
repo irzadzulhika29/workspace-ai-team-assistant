@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import DOMPurify from 'dompurify'
 import { Bot, User } from 'lucide-react'
@@ -8,15 +9,30 @@ import SourceCitation from './SourceCitation'
  * ChatBubble — renders a single chat message (user or AI)
  * @param {import('../../store/chatStore').ChatMessage} props.message
  */
-export default function ChatBubble({ message }) {
+function ChatBubble({ message }) {
   const isUser = message.role === 'user'
 
-  const safeContent = isUser
-    ? DOMPurify.sanitize(message.content)
-    : message.content // react-markdown handles its own escaping
+  const safeContent = useMemo(
+    () => (isUser ? DOMPurify.sanitize(message.content) : message.content),
+    [isUser, message.content],
+  )
 
-  const hasActions = message.actionResults?.jira_ticket_url || message.actionResults?.calendar_event_url
-  const hasSources = message.sources?.length > 0
+  const hasActions = Boolean(
+    message.actionResults?.jira_ticket_url || message.actionResults?.calendar_event_url,
+  )
+  const hasSources = (message.sources?.length ?? 0) > 0
+  const timeLabel = useMemo(() => {
+    const time = new Date(message.timestamp).toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    if (!message.processingTime) {
+      return time
+    }
+
+    return `${time} · ${(message.processingTime / 1000).toFixed(1)}s`
+  }, [message.processingTime, message.timestamp])
 
   return (
     <div className={`flex gap-3 items-start animate-slide-up ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -49,17 +65,12 @@ export default function ChatBubble({ message }) {
 
         {/* Timestamp + processing time */}
         <span className="text-[10px] text-slate-400 px-1 font-mono">
-          {new Date(message.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-          {message.processingTime && ` · ${(message.processingTime / 1000).toFixed(1)}s`}
+          {timeLabel}
         </span>
 
         {/* Source citations (RAG) */}
         {hasSources && (
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {message.sources.map((src, i) => (
-              <SourceCitation key={i} filename={src.filename} page={src.page} />
-            ))}
-          </div>
+          <MemoSourceList sources={message.sources} />
         )}
 
         {/* Action result card (PM Agent) */}
@@ -74,3 +85,21 @@ export default function ChatBubble({ message }) {
     </div>
   )
 }
+
+function SourceList({ sources }) {
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-1">
+      {sources.map((src, i) => (
+        <SourceCitation key={i} filename={src.filename} page={src.page} />
+      ))}
+    </div>
+  )
+}
+
+const MemoSourceList = memo(SourceList)
+
+function areMessagePropsEqual(prevProps, nextProps) {
+  return prevProps.message === nextProps.message
+}
+
+export default memo(ChatBubble, areMessagePropsEqual)

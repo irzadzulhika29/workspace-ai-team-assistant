@@ -1,12 +1,14 @@
-import { useRef, useEffect, useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Brain, Trash2, ChevronDown } from 'lucide-react'
+import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
 import ChatBubble from '../components/chat/ChatBubble'
 import MessageInput from '../components/chat/MessageInput'
 import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
 import SkeletonLoader from '../components/ui/SkeletonLoader'
-import KnowledgeSidebar from '../components/chat/KnowledgeSidebar'
+import { useAutoScroll } from '../hooks/useAutoScroll'
+import { getReplyContent } from '../utils/chatResponse'
 
 const CONTEXT_OPTIONS = [
   { value: null,           label: 'Semua Dokumen' },
@@ -14,46 +16,28 @@ const CONTEXT_OPTIONS = [
   { value: 'output',       label: 'Folder: Output' },
 ]
 
-const getReplyContent = (payload) => {
-  if (!payload) return '_(Respons kosong)_'
-
-  if (typeof payload === 'string') {
-    return payload.trim() || '_(Respons kosong)_'
-  }
-
-  if (Array.isArray(payload)) {
-    return getReplyContent(payload[0])
-  }
-
-  if (typeof payload.myField === 'string' && payload.myField.trim()) {
-    return payload.myField
-  }
-
-  if (typeof payload.reply === 'string' && payload.reply.trim()) {
-    return payload.reply
-  }
-
-  return 'Format balasan dari server tidak sesuai dugaan.'
-}
-
 export default function KnowledgeChat() {
   const {
     knowledgeMessages,
     addKnowledgeMessage,
     clearKnowledge,
     activeKnowledgeSessionId,
-  } = useChatStore()
+  } = useChatStore(
+    (state) => ({
+      knowledgeMessages: state.knowledgeMessages,
+      addKnowledgeMessage: state.addKnowledgeMessage,
+      clearKnowledge: state.clearKnowledge,
+      activeKnowledgeSessionId: state.activeKnowledgeSessionId,
+    }),
+    shallow,
+  )
 
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState(null)
   const [contextFilter, setContextFilter] = useState(null)
-  const bottomRef = useRef(null)
+  const bottomRef = useAutoScroll([knowledgeMessages, loading])
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [knowledgeMessages, loading])
-
-  const handleSend = async (text) => {
+  const handleSend = useCallback(async (text) => {
     const message = text.trim()
     if (!message) return
 
@@ -85,13 +69,10 @@ export default function KnowledgeChat() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeKnowledgeSessionId, addKnowledgeMessage, contextFilter])
 
   return (
     <div className="flex h-screen">
-      {/* Session sidebar */}
-      <KnowledgeSidebar />
-
       {/* Main chat area */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Page header */}

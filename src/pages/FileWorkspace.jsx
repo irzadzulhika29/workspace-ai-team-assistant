@@ -1,89 +1,89 @@
-import { useState, useEffect } from "react";
-import { FolderOpen, Loader2, AlertCircle } from "lucide-react";
-import UploadZone from "../components/files/UploadZone";
-import FolderTree from "../components/files/FolderTree";
-import FilePreviewModal from "../components/files/FilePreviewModal";
-import { fileApi } from "../services/api";
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { FolderOpen, Loader2, AlertCircle } from 'lucide-react'
+import UploadZone from '../components/files/UploadZone'
+import FolderTree from '../components/files/FolderTree'
+import FilePreviewModal from '../components/files/FilePreviewModal'
+import { fileApi } from '../services/api'
 
 const TABS = [
-  { key: "input", label: "Input (SOP)", folder: "input" },
-  { key: "output", label: "Output (AI Reports)", folder: "output" },
-];
+  { key: 'input', label: 'Input (SOP)' },
+  { key: 'output', label: 'Output (AI Reports)' },
+]
 
 export default function FileWorkspace() {
-  const [activeTab, setActiveTab] = useState("input");
-  const [previewFile, setPreviewFile] = useState(null);
-  const [uploadedFiles, setUploadedFiles] = useState({ input: [], output: [] });
-  const [supabaseDocs, setSupabaseDocs] = useState({ input: [], output: [] });
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(null);
+  const [activeTab, setActiveTab] = useState('input')
+  const [previewFile, setPreviewFile] = useState(null)
+  const [uploadedFiles, setUploadedFiles] = useState({ input: [], output: [] })
+  const [supabaseDocs, setSupabaseDocs] = useState({ input: [], output: [] })
+  const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
 
-  // Fetch documents from Supabase on mount
   useEffect(() => {
     const loadDokumen = async () => {
       try {
-        setIsLoading(true);
-        setFetchError(null);
-        const data = await fileApi.fetchDokumen();
+        setIsLoading(true)
+        setFetchError(null)
+        const data = await fileApi.fetchDokumen()
 
-        // Group documents by kategori field
-        const grouped = { input: [], output: [] };
+        const grouped = { input: [], output: [] }
         for (const doc of data) {
-          const folder = doc.kategori === "output" ? "output" : "input";
-          // file_url may contain extra quotes — strip them
-          const rawUrl = doc.file_url ?? "";
-          const cleanUrl = rawUrl.replace(/^"|"$/g, "") || null;
+          const folder = doc.kategori === 'output' ? 'output' : 'input'
+          const rawUrl = doc.file_url ?? ''
+          const cleanUrl = rawUrl.replace(/^"|"$/g, '') || null
           grouped[folder].push({
             id: doc.id ?? crypto.randomUUID(),
-            name: doc.nama_file ?? "Untitled",
-            type: "file",
+            name: doc.nama_file ?? 'Untitled',
+            type: 'file',
             url: cleanUrl,
             downloadUrl: cleanUrl,
-            source: "supabase",
-          });
+            source: 'supabase',
+          })
         }
-        setSupabaseDocs(grouped);
+        setSupabaseDocs(grouped)
       } catch (err) {
-        console.error("Gagal memuat dokumen dari Supabase:", err);
-        setFetchError(err.message);
+        console.error('Gagal memuat dokumen dari Supabase:', err)
+        setFetchError(err.message)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    loadDokumen();
-  }, []);
+    }
 
-  const handleUploaded = (result) => {
-    // Append newly uploaded file to the correct folder tree
+    loadDokumen()
+  }, [])
+
+  const handleUploaded = useCallback((result) => {
     const file = {
       id: crypto.randomUUID(),
-      name: result?.filename ?? "Dokumen baru",
-      type: "file",
+      name: result?.filename ?? 'Dokumen baru',
+      type: 'file',
       url: result?.url ?? null,
-    };
+    }
+
     setUploadedFiles((prev) => ({
       ...prev,
       [activeTab]: [...prev[activeTab], file],
-    }));
-  };
+    }))
+  }, [activeTab])
 
-  // Build folder data for FolderTree — merge Supabase + locally-uploaded files
-  const folderData = [
-    {
-      id: "input",
-      name: "Input (SOP)",
-      type: "folder",
-      defaultOpen: activeTab === "input",
-      children: [...supabaseDocs.input, ...uploadedFiles.input],
-    },
-    {
-      id: "output",
-      name: "Output (AI Reports)",
-      type: "folder",
-      defaultOpen: activeTab === "output",
-      children: [...supabaseDocs.output, ...uploadedFiles.output],
-    },
-  ];
+  const folderData = useMemo(
+    () => [
+      {
+        id: 'input',
+        name: 'Input (SOP)',
+        type: 'folder',
+        defaultOpen: activeTab === 'input',
+        children: [...supabaseDocs.input, ...uploadedFiles.input],
+      },
+      {
+        id: 'output',
+        name: 'Output (AI Reports)',
+        type: 'folder',
+        defaultOpen: activeTab === 'output',
+        children: [...supabaseDocs.output, ...uploadedFiles.output],
+      },
+    ],
+    [activeTab, supabaseDocs, uploadedFiles],
+  )
 
   return (
     <>
@@ -184,10 +184,7 @@ export default function FileWorkspace() {
         </div>
       </div>
 
-      <FilePreviewModal
-        file={previewFile}
-        onClose={() => setPreviewFile(null)}
-      />
+      <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
     </>
-  );
+  )
 }

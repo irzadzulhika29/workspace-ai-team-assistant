@@ -1,11 +1,14 @@
-import { useRef, useEffect, useState } from 'react'
+import { useState, useCallback } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
+import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
 import ChatBubble from '../components/chat/ChatBubble'
 import MessageInput from '../components/chat/MessageInput'
 import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
 import SkeletonLoader from '../components/ui/SkeletonLoader'
+import { useAutoScroll } from '../hooks/useAutoScroll'
+import { getReplyContent, normalizeResponsePayload } from '../utils/chatResponse'
 
 const AGENT_STATUS_LABELS = {
   supervisor: 'Supervisor Agent',
@@ -14,55 +17,37 @@ const AGENT_STATUS_LABELS = {
   reporting:  'Reporting Agent',
 }
 
-const getReplyContent = (payload) => {
-  if (!payload) return '_(Respons kosong)_'
-
-  if (typeof payload === 'string') {
-    return payload.trim() || '_(Respons kosong)_'
-  }
-
-  if (Array.isArray(payload)) {
-    return getReplyContent(payload[0])
-  }
-
-  if (typeof payload.output === 'string' && payload.output.trim()) {
-    return payload.output
-  }
-
-  if (typeof payload.myField === 'string' && payload.myField.trim()) {
-    return payload.myField
-  }
-
-  if (typeof payload.reply === 'string' && payload.reply.trim()) {
-    return payload.reply
-  }
-
-  return 'Format balasan dari server tidak sesuai dugaan.'
-}
-
 export default function SupervisorChat() {
-  const { supervisorMessages, addSupervisorMessage, clearSupervisor } = useChatStore()
-  const [loading, setLoading]   = useState(false)
+  const {
+    supervisorMessages,
+    addSupervisorMessage,
+    clearSupervisor,
+    activeSupervisorSessionId,
+  } = useChatStore(
+    (state) => ({
+      supervisorMessages: state.supervisorMessages,
+      addSupervisorMessage: state.addSupervisorMessage,
+      clearSupervisor: state.clearSupervisor,
+      activeSupervisorSessionId: state.activeSupervisorSessionId,
+    }),
+    shallow,
+  )
+
+  const [loading, setLoading] = useState(false)
   const [agentLabel, setAgentLabel] = useState('Supervisor Agent')
-  const [error, setError]       = useState(null)
-  const bottomRef = useRef(null)
+  const [error, setError] = useState(null)
+  const bottomRef = useAutoScroll([supervisorMessages, loading])
 
-  // Scroll to bottom on new message
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [supervisorMessages, loading])
-
-  const handleSend = async (text) => {
+  const handleSend = useCallback(async (text) => {
     setError(null)
     addSupervisorMessage({ role: 'user', content: text })
     setLoading(true)
     setAgentLabel('Supervisor Agent')
 
     try {
-      const data = await chatApi.sendToSupervisor(text, 'chat')
-      const normalizedData = Array.isArray(data) ? (data[0] ?? {}) : (data ?? {})
+      const data = await chatApi.sendToSupervisor(text, 'chat', activeSupervisorSessionId)
+      const normalizedData = normalizeResponsePayload(data)
 
-      // Optimistically update agent label if routing info available
       const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
       if (usedAgent && AGENT_STATUS_LABELS[usedAgent]) {
         setAgentLabel(AGENT_STATUS_LABELS[usedAgent])
@@ -70,7 +55,7 @@ export default function SupervisorChat() {
 
       addSupervisorMessage({
         role:           'ai',
-        content:        getReplyContent(data),
+        content:        getReplyContent(data, ['output', 'myField', 'reply']),
         agentUsed:      usedAgent,
         sources:        Array.isArray(normalizedData?.sources) ? normalizedData.sources : [],
         actionResults:  normalizedData?.action_results ?? normalizedData?.actionResults ?? {},
@@ -88,7 +73,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [addSupervisorMessage, activeSupervisorSessionId])
 
   return (
     <div className="flex flex-col h-screen">
@@ -121,7 +106,7 @@ export default function SupervisorChat() {
             <MessageSquare size={36} className="opacity-20" />
             <p className="text-sm font-medium">Belum ada percakapan</p>
             <p className="text-xs max-w-xs">
-              Coba kirim: <em>"Buat tiket Jira untuk bug login page"</em> atau <em>"Jadwalkan meeting review sprint besok jam 10."</em>
+              Coba kirim: <em>&quot;Buat tiket Jira untuk bug login page&quot;</em> atau <em>&quot;Jadwalkan meeting review sprint besok jam 10.&quot;</em>
             </p>
           </div>
         )}
