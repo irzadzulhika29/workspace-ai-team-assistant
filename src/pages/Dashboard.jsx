@@ -53,7 +53,7 @@ export default function Dashboard() {
           </span>
         </div>
         <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-tight">
-          Selamat datang, <span className="text-cyan-700">Tim Jalin Mayantara</span>
+          Selamat datang, <span className="text-cyan-700">Admin</span>
         </h1>
         <p className="text-slate-500 mt-3 text-sm max-w-2xl leading-relaxed">
           Satu platform terpadu untuk delegasi tugas operasional, akses knowledge base internal, dan manajemen dokumen SOP.

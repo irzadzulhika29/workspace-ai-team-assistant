@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, Brain, FolderOpen, Settings, Plus, Loader2 } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Settings, Plus, Loader2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/chat/supervisor',  icon: MessageSquare,   label: 'Supervisor Agent'  },
   { to: '/chat/knowledge',   icon: Brain,           label: 'Knowledge Agent'   },
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
+  { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
 ]
 
 export default function Sidebar() {
@@ -222,6 +223,41 @@ export default function Sidebar() {
   }
 
   // ─────────────────────────────────────────────────────────────────────
+  // DELETE handlers
+  // ─────────────────────────────────────────────────────────────────────
+  const hapusSesi = async (e, sessionId) => {
+    e.stopPropagation()
+    const berhasil = await sessionApi.hapusSesiChat(sessionId)
+    if (!berhasil) return
+    const sessions = await sessionApi.ambilSemuaSesi('rag_chat')
+    setKnowledgeSessions(sessions)
+    if (sessionId === activeKnowledgeSessionId) {
+      if (sessions.length > 0) {
+        setActiveKnowledgeSession(sessions[0].id)
+        await loadSessionHistory(sessions[0].id)
+      } else {
+        await handleNewChat()
+      }
+    }
+  }
+
+  const hapusSupSesi = async (e, sessionId) => {
+    e.stopPropagation()
+    const berhasil = await sessionApi.hapusSesiChat(sessionId)
+    if (!berhasil) return
+    const sessions = await sessionApi.ambilSemuaSesi('general_chat')
+    setSupervisorSessions(sessions)
+    if (sessionId === activeSupervisorSessionId) {
+      if (sessions.length > 0) {
+        setActiveSupervisorSession(sessions[0].id)
+        await loadSupSessionHistory(sessions[0].id)
+      } else {
+        await handleNewSupChat()
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────────────────────────────
   const formatDate = (dateStr) => {
@@ -249,6 +285,7 @@ export default function Sidebar() {
     creating,
     onNewChat,
     onSelectSession,
+    onDeleteSession,
   }) => (
     <div className="hidden md:block mt-1 ml-3 pl-3 border-l border-slate-200 space-y-1 animate-fade-in">
       <button
@@ -287,11 +324,10 @@ export default function Sidebar() {
           sessions.map((session) => {
             const isActive = session.id === activeSessionId
             return (
-              <button
+              <div
                 key={session.id}
-                onClick={() => onSelectSession(session.id)}
                 className={`
-                  w-full flex items-start gap-2 px-2 py-1.5 rounded-md text-left
+                  w-full flex items-center gap-1 rounded-md
                   transition-all duration-150 group relative
                   ${isActive
                     ? 'bg-slate-900 text-white'
@@ -302,21 +338,40 @@ export default function Sidebar() {
                 {isActive && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-cyan-400 rounded-r-full" />
                 )}
-                <MessageSquare
-                  size={11}
-                  className={`mt-0.5 flex-shrink-0 ${
-                    isActive ? 'text-cyan-300' : 'text-slate-400 group-hover:text-slate-600'
-                  }`}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-medium truncate">
-                    {session.judul || 'Obrolan Baru'}
-                  </p>
-                  <p className={`text-[9px] mt-0.5 ${isActive ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {formatDate(session.created_at)}
-                  </p>
-                </div>
-              </button>
+                <button
+                  onClick={() => onSelectSession(session.id)}
+                  className="flex items-start gap-2 px-2 py-1.5 text-left flex-1 min-w-0"
+                >
+                  <MessageSquare
+                    size={11}
+                    className={`mt-0.5 flex-shrink-0 ${
+                      isActive ? 'text-cyan-300' : 'text-slate-400 group-hover:text-slate-600'
+                    }`}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium truncate">
+                      {session.judul || 'Obrolan Baru'}
+                    </p>
+                    <p className={`text-[9px] mt-0.5 ${isActive ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {formatDate(session.created_at)}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => onDeleteSession(e, session.id)}
+                  title="Hapus sesi"
+                  className={`
+                    flex-shrink-0 p-1 mr-1 rounded opacity-0 group-hover:opacity-100
+                    transition-opacity duration-150
+                    ${isActive
+                      ? 'hover:bg-slate-700 text-slate-400 hover:text-red-400'
+                      : 'hover:bg-slate-200 text-slate-400 hover:text-red-500'
+                    }
+                  `}
+                >
+                  <Trash2 size={11} />
+                </button>
+              </div>
             )
           })
         )}
@@ -389,6 +444,7 @@ export default function Sidebar() {
                 creating: creatingSession,
                 onNewChat: handleNewChat,
                 onSelectSession: handleSelectKnowledgeSession,
+                onDeleteSession: hapusSesi,
               })}
 
               {/* Supervisor session sub-menu */}
@@ -400,6 +456,7 @@ export default function Sidebar() {
                 creating: creatingSupSession,
                 onNewChat: handleNewSupChat,
                 onSelectSession: handleSelectSupSession,
+                onDeleteSession: hapusSupSesi,
               })}
             </div>
           ))}

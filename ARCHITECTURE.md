@@ -3,150 +3,248 @@
 ## Overview
 
 This project is a Vite + React single-page application for an AI team workspace.
-Core capabilities:
 
-- Supervisor chat (task delegation to n8n webhook)
+Main capabilities:
+
+- Supervisor chat (delegates operational requests to n8n webhook)
 - Knowledge chat (RAG-style chat with document context)
-- File workspace (upload + browse documents)
-- Knowledge session management via Supabase
+- Session history management in sidebar (create, switch, delete)
+- Document workspace (upload and browse files from n8n + Supabase)
+- Google Calendar workspace (read upcoming events)
 
-The app uses:
+Technology stack:
 
-- `react-router-dom` for page routing
-- `zustand` for client state management (persisted to `sessionStorage`)
-- `axios` and `fetch` for HTTP calls
-- Supabase REST API (direct calls via anon key)
+- `react-router-dom` for routing
+- `zustand` for client state (`sessionStorage` persistence)
+- `axios` + `fetch` for network calls
+- Supabase REST API (direct call, no `supabase-js` SDK)
+- n8n webhooks as backend orchestration layer
 
-## Directory Structure
+## High-Level Architecture
+
+The app uses a simple layered architecture:
+
+1. **UI Layer** (`pages/`, `components/`)
+   - Renders screens and handles user interaction.
+   - Triggers state actions and service calls.
+
+2. **State Layer** (`store/chatStore.js`)
+   - Stores chat messages, selected sessions, and connection status.
+   - Persists selected fields to `sessionStorage` via Zustand `persist`.
+
+3. **Service Layer** (`services/`)
+   - Encapsulates all external calls: n8n webhooks, Supabase REST, Google Calendar API.
+   - Keeps endpoint details and payload formats out of page components.
+
+4. **Utility Layer** (`utils/`, `hooks/`)
+   - Shared helpers for response normalization and UX behavior (auto-scroll).
+
+## Source Tree
 
 ```text
 src/
-  main.jsx                 # app bootstrap
-  App.jsx                  # router + global layout
-  index.css                # global styles / Tailwind layers
+  main.jsx
+  App.jsx
+  index.css
 
-  pages/                   # route-level pages
+  pages/
     Dashboard.jsx
     SupervisorChat.jsx
     KnowledgeChat.jsx
     FileWorkspace.jsx
+    CalendarPage.jsx
 
   components/
-    layout/                # shell/navigation components
+    layout/
       Sidebar.jsx
-    chat/                  # chat UI building blocks
+    chat/
       ChatBubble.jsx
       MessageInput.jsx
       AgentStatusIndicator.jsx
       SourceCitation.jsx
-    files/                 # file tree/upload/preview components
+    files/
       FolderTree.jsx
       UploadZone.jsx
       FilePreviewModal.jsx
-    ui/                    # shared presentational UI
+    ui/
       AgentCard.jsx
       SkeletonLoader.jsx
       SettingsModal.jsx
 
-  services/                # external API boundary
-    api.js                 # endpoint settings + session id helpers
-    chatService.js         # n8n chat calls
-    fileService.js         # upload + Supabase docs fetch
-    sessionService.js      # Supabase session/history CRUD
-    supabase.js            # env-based Supabase config
+  services/
+    api.js
+    chatService.js
+    sessionService.js
+    fileService.js
+    calendarService.js
+    supabase.js
 
   store/
-    chatStore.js           # zustand store (messages, sessions, connection)
+    chatStore.js
 
   hooks/
-    useAutoScroll.js       # shared chat autoscroll behavior
+    useAutoScroll.js
 
   utils/
-    chatResponse.js        # response normalization/parsing helpers
+    chatResponse.js
 ```
 
-## Layered Design
+## Routing and Shell
 
-1. **UI Layer** (`pages/`, `components/`)
-   - Renders interface, handles user interactions.
-   - Calls actions from store and service functions.
-
-2. **State Layer** (`store/chatStore.js`)
-   - Holds in-memory session state for chats.
-   - Persists selected state to `sessionStorage` using Zustand `persist` middleware.
-
-3. **Service Layer** (`services/`)
-   - Encapsulates network calls to n8n and Supabase REST.
-   - Keeps endpoint and payload details out of UI components.
-
-4. **Utility/Hook Layer** (`utils/`, `hooks/`)
-   - Shared logic reused by multiple UI modules.
-
-## Runtime Flow
-
-### 1) App bootstrap and routing
-
-- `main.jsx` mounts `<App />` under `React.StrictMode`.
-- `App.jsx` defines routes and wraps pages with a persistent sidebar layout.
-
-### 2) Chat message flow (Supervisor/Knowledge)
-
-1. User types in `MessageInput`.
-2. Page (`SupervisorChat` or `KnowledgeChat`) adds a user message to Zustand store.
-3. Page calls `chatApi` (`chatService.js`) to send payload to n8n webhook.
-4. Response is normalized via `utils/chatResponse.js`.
-5. Page adds AI message (content, metadata, sources, timing) to store.
-6. `ChatBubble` renders message list; `useAutoScroll` keeps viewport at latest message.
-
-### 3) Knowledge session flow
-
-1. `Sidebar` detects active knowledge page.
-2. `sessionApi` fetches session list from Supabase (`chat_sessions`).
-3. On session change, history is fetched from `n8n_chat_histories`.
-4. `setKnowledgeMessages` hydrates message list in store.
-
-### 4) File workspace flow
-
-1. `FileWorkspace` loads documents via `fileApi.fetchDokumen()` from Supabase table `dokumen`.
-2. Upload uses `fileApi.uploadDocument()` to n8n upload webhook.
-3. Folder tree merges Supabase docs with local uploaded state for display.
+- Router is defined in `src/App.jsx` using `BrowserRouter`.
+- A persistent sidebar layout wraps all routes.
+- Route map:
+  - `/` -> `Dashboard`
+  - `/chat/supervisor` -> `SupervisorChat`
+  - `/chat/knowledge` -> `KnowledgeChat`
+  - `/workspace/files` -> `FileWorkspace`
+  - `/workspace/calendar` -> `CalendarPage`
+  - `*` -> `Dashboard`
 
 ## State Model (Zustand)
 
-Primary state in `chatStore.js`:
+Store file: `src/store/chatStore.js`
+
+Core state:
 
 - `supervisorMessages[]`
 - `knowledgeMessages[]`
+- `isConnected`
 - `knowledgeSessions[]`
 - `activeKnowledgeSessionId`
-- `isConnected`
+- `supervisorSessions[]`
+- `activeSupervisorSessionId`
 
-Persisted subset (`sessionStorage`):
+Main actions:
+
+- Add/clear/set messages for each chat channel
+- Set sessions and active session ID for each chat type
+- Set backend connection status
+
+Persisted subset (`sessionStorage`, key: `team-workspace-chat`):
 
 - `supervisorMessages`
 - `knowledgeMessages`
 - `activeKnowledgeSessionId`
+- `activeSupervisorSessionId`
 
-## Configuration and Environment
+## Service Layer Details
 
-Environment variables (from `.env`):
+### `src/services/api.js`
+
+- Barrel re-export for `chatApi`, `sessionApi`, `fileApi`, and Supabase config.
+- Manages webhook URLs in `localStorage` via `urls` object.
+- Provides `getSessionId()` (per-tab session UUID in `sessionStorage`).
+- Provides `statusApi.checkStatus()` (health check to n8n status endpoint).
+
+### `src/services/chatService.js`
+
+- Sends chat payload to n8n via axios with 60s timeout.
+- `sendToSupervisor(message, action, sessionId)` sends `chat_type: general_chat`.
+- `sendToKnowledge(message, contextFilter, sessionId)` sends `chat_type: rag_chat`.
+- Uses explicit selected session when available, fallback to `getSessionId()`.
+
+### `src/services/sessionService.js`
+
+Supabase REST CRUD for:
+
+- `chat_sessions`
+- `n8n_chat_histories`
+
+Functions:
+
+- `buatSesiBaru(judulChat, chatType)`
+- `ambilSemuaSesi(chatType)`
+- `ambilRiwayatChat(sessionId)` (filters tool traces/internal agent logs)
+- `hapusSesiChat(sessionId)` (deletes histories first, then session row)
+
+### `src/services/fileService.js`
+
+- Uploads document to n8n upload webhook with `FormData`.
+- Reads document list from Supabase table `dokumen`.
+
+### `src/services/calendarService.js`
+
+- Reads upcoming events from Google Calendar REST API.
+- Uses env vars:
+  - `VITE_GOOGLE_CALENDAR_API_KEY`
+  - `VITE_GOOGLE_CALENDAR_ID`
+
+### `src/services/supabase.js`
+
+- Exposes:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `supabaseHeaders` (apikey + Bearer token + JSON content type)
+
+## Runtime Flows
+
+### 1) Chat send flow (Supervisor and Knowledge)
+
+1. User sends message from `MessageInput`.
+2. Page appends user message to Zustand.
+3. Page calls `chatApi` service to n8n webhook.
+4. Response is normalized by `utils/chatResponse.js`.
+5. Page appends AI message (content + optional metadata/sources/actions).
+6. `ChatBubble` renders markdown AI response; `useAutoScroll` scrolls to latest.
+
+### 2) Session history flow (Sidebar)
+
+1. When opening `/chat/knowledge` or `/chat/supervisor`, `Sidebar` loads sessions by `chat_type`.
+2. If no session exists, sidebar auto-creates a new one.
+3. Selecting a session loads chat history from `n8n_chat_histories`.
+4. History rows are mapped into UI messages and stored via `setKnowledgeMessages` or `setSupervisorMessages`.
+5. Deleting a session from history bubble calls `sessionApi.hapusSesiChat(sessionId)`, then refreshes session list and reselects a valid active session.
+
+### 3) File workspace flow
+
+1. `FileWorkspace` fetches existing docs from Supabase table `dokumen`.
+2. UI groups docs by folder (`input` or `output`).
+3. `UploadZone` uploads selected files to n8n upload webhook.
+4. Uploaded files are merged with fetched docs for display and preview.
+
+### 4) Calendar flow
+
+1. `CalendarPage` calls `calendarApi.fetchCalendarEvents()` on load.
+2. Service builds Google Calendar URL with query parameters.
+3. Page renders loading, error, empty state, or event list.
+
+## Data Contracts and Persistence
+
+### Supabase tables used by frontend
+
+- `chat_sessions`
+  - fields used: `id`, `judul`, `chat_type`, `created_at`
+- `n8n_chat_histories`
+  - fields used: `id`, `session_id`, `message`, `created_at`
+- `dokumen`
+  - fields used: `id`, `nama_file`, `kategori`, `file_url`, `created_at`
+
+### Browser persistence
+
+- `sessionStorage`
+  - Zustand persisted chat state (`team-workspace-chat`)
+  - per-tab generated session id (`session_id`)
+- `localStorage`
+  - n8n webhook URL settings saved from `SettingsModal`
+
+## Environment Configuration
+
+Required env variables:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_GOOGLE_CALENDAR_API_KEY`
+- `VITE_GOOGLE_CALENDAR_ID`
 
-Webhook URLs are managed in browser `localStorage` through `services/api.js`:
+Notes:
 
-- supervisor, knowledge, pm, report, status, upload endpoints
+- n8n webhook endpoints are configurable at runtime from Settings modal and stored in `localStorage`.
+- Supabase requests are executed directly from frontend using anon key headers.
 
-## Architectural Conventions
+## Boundaries and Responsibilities
 
-- Keep API calls inside `services/`, not inside deeply nested presentational components.
-- Keep reusable cross-page logic in `hooks/` and `utils/`.
-- Use Zustand selectors (and `shallow` when relevant) to reduce unnecessary rerenders.
-- Keep route-level orchestration in `pages/`; move reusable visuals into `components/`.
-
-## Known Boundaries
-
-- This frontend talks directly to Supabase REST with anon key headers.
-- Business workflow orchestration lives in n8n webhooks (external to this repository).
-- `dist/` is build output, not source architecture.
+- This repository contains frontend only.
+- n8n handles orchestration/business workflow outside this codebase.
+- Supabase enforces data access policy and stores chat/document data.
+- Build output (`dist/`) is generated artifact and not part of source architecture.

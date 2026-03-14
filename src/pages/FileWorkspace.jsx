@@ -5,6 +5,23 @@ import FolderTree from '../components/files/FolderTree'
 import FilePreviewModal from '../components/files/FilePreviewModal'
 import { fileApi } from '../services/api'
 
+const SUPABASE_BASE_URL = import.meta.env.VITE_SUPABASE_URL
+
+const normalizeFileUrl = (rawUrl) => {
+  const cleaned = String(rawUrl ?? '').replace(/^"|"$/g, '')
+  if (!cleaned) return null
+
+  if (cleaned.startsWith('http://localhost:8000/')) {
+    return `${SUPABASE_BASE_URL}${cleaned.replace('http://localhost:8000', '')}`
+  }
+
+  if (cleaned.startsWith('/')) {
+    return `${SUPABASE_BASE_URL}${cleaned}`
+  }
+
+  return cleaned
+}
+
 const TABS = [
   { key: 'input', label: 'Input (SOP)' },
   { key: 'output', label: 'Output (AI Reports)' },
@@ -28,8 +45,7 @@ export default function FileWorkspace() {
         const grouped = { input: [], output: [] }
         for (const doc of data) {
           const folder = doc.kategori === 'output' ? 'output' : 'input'
-          const rawUrl = doc.file_url ?? ''
-          const cleanUrl = rawUrl.replace(/^"|"$/g, '') || null
+          const cleanUrl = normalizeFileUrl(doc.file_url)
           grouped[folder].push({
             id: doc.id ?? crypto.randomUUID(),
             name: doc.nama_file ?? 'Untitled',

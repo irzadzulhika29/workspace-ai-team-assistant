@@ -63,7 +63,7 @@ export default function KnowledgeChat() {
     } catch (err) {
       setError(
         err.code === 'ECONNABORTED'
-          ? 'Request timeout. Coba lagi atau periksa koneksi ke n8n.'
+          ? 'Request timeout setelah 120 detik. Coba lagi atau periksa koneksi ke n8n.'
           : 'Tidak dapat terhubung ke Knowledge Agent. Periksa URL webhook di Settings.'
       )
     } finally {

@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import SupervisorChat from './pages/SupervisorChat'
 import KnowledgeChat from './pages/KnowledgeChat'
 import FileWorkspace from './pages/FileWorkspace'
+import CalendarPage from './pages/CalendarPage'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
                 <Route path="/chat/supervisor"  element={<SupervisorChat />}   />
                 <Route path="/chat/knowledge"   element={<KnowledgeChat />}    />
                 <Route path="/workspace/files"  element={<FileWorkspace />}    />
+                <Route path="/workspace/calendar" element={<CalendarPage />}   />
                 <Route path="*"                 element={<Dashboard />}        />
               </Routes>
             </div>

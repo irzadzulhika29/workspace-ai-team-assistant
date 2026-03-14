@@ -38,14 +38,18 @@ export default function SupervisorChat() {
   const [error, setError] = useState(null)
   const bottomRef = useAutoScroll([supervisorMessages, loading])
 
-  const handleSend = useCallback(async (text) => {
+  const handleSend = useCallback(async (text, file) => {
     setError(null)
-    addSupervisorMessage({ role: 'user', content: text })
+    
+    // Create UI message (show filename if no text, or both)
+    const displayContent = file && text ? `${text}\n\n*(Attachment: ${file.name})*` : file ? `*(Attachment: ${file.name})*` : text
+    
+    addSupervisorMessage({ role: 'user', content: displayContent })
     setLoading(true)
     setAgentLabel('Supervisor Agent')
 
     try {
-      const data = await chatApi.sendToSupervisor(text, 'chat', activeSupervisorSessionId)
+      const data = await chatApi.sendToSupervisor(text, 'chat', activeSupervisorSessionId, file)
       const normalizedData = normalizeResponsePayload(data)
 
       const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
@@ -65,7 +69,7 @@ export default function SupervisorChat() {
     } catch (err) {
       setError(
         err.code === 'ECONNABORTED'
-          ? 'Request timeout. Backend n8n tidak merespons dalam 60 detik.'
+          ? 'Request timeout. Backend n8n tidak merespons dalam 120 detik.'
           : err.response?.status
             ? `Error ${err.response.status}: ${err.response.data?.message ?? 'Terjadi kesalahan.'}`
             : 'Tidak dapat terhubung ke n8n. Periksa URL webhook di Settings.'
@@ -137,6 +141,7 @@ export default function SupervisorChat() {
         onSend={handleSend}
         disabled={loading}
         placeholder="Delegasikan tugas ke Supervisor Agent…"
+        allowFile={true}
       />
     </div>
   )

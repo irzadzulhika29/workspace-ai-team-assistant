@@ -1,5 +1,7 @@
 import { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import DOMPurify from 'dompurify'
 import { Bot, User } from 'lucide-react'
 import AgentCard from '../ui/AgentCard'
@@ -57,8 +59,13 @@ function ChatBubble({ message }) {
           {isUser ? (
             <p dangerouslySetInnerHTML={{ __html: safeContent }} />
           ) : (
-            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-a:text-brand-600">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-a:text-brand-600 prose-table:w-full prose-table:border-collapse prose-table:my-4 prose-th:bg-slate-100 prose-th:border prose-th:border-slate-300 prose-th:p-2 prose-th:text-left prose-td:border prose-td:border-slate-300 prose-td:p-2">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           )}
         </div>
