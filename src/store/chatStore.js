@@ -30,7 +30,7 @@ const initialState = {
 
 export const useChatStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       // ── Connection status ─────────────────────────────────────────────────
