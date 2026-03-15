@@ -1,13 +1,10 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { X, Save, RotateCcw } from 'lucide-react'
 import { urls } from '../../services/api'
 
 const FIELDS = [
   { key: 'supervisor', label: 'Supervisor Agent',    getter: urls.getSupervisor },
   { key: 'knowledge',  label: 'Knowledge Agent',     getter: urls.getKnowledge  },
-  { key: 'pm',         label: 'PM Agent',            getter: urls.getPM         },
-  { key: 'report',     label: 'Reporting Agent',     getter: urls.getReport     },
-  { key: 'status',     label: 'Status / Health URL', getter: urls.getStatus     },
   { key: 'upload',     label: 'Upload Dokumen',      getter: urls.getUpload     },
 ]
 
@@ -18,18 +15,28 @@ export default function SettingsModal({ open, onClose }) {
   const [values, setValues] = useState(() =>
     Object.fromEntries(FIELDS.map(({ key, getter }) => [key, getter()]))
   )
+  const [environment, setEnvironment] = useState(() => urls.getEnvironment())
   const [saved, setSaved] = useState(false)
 
   if (!open) return null
 
   const handleSave = () => {
-    urls.setAll(values)
+    const convertedValues = urls.convertForEnvironment(values, environment)
+    urls.setAll(convertedValues)
+    urls.setEnvironment(environment)
+    setValues(convertedValues)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
   const handleReset = () => {
     setValues(Object.fromEntries(FIELDS.map(({ key, getter }) => [key, getter()])))
+    setEnvironment(urls.getEnvironment())
+  }
+
+  const handleEnvironmentChange = (nextEnvironment) => {
+    setEnvironment(nextEnvironment)
+    setValues((currentValues) => urls.convertForEnvironment(currentValues, nextEnvironment))
   }
 
   return (
@@ -58,6 +65,37 @@ export default function SettingsModal({ open, onClose }) {
 
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
+              Environment
+            </label>
+            <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1">
+              <button
+                onClick={() => handleEnvironmentChange('dev')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                  environment === 'dev'
+                    ? 'bg-brand-600 text-white'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                Dev
+              </button>
+              <button
+                onClick={() => handleEnvironmentChange('prod')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                  environment === 'prod'
+                    ? 'bg-brand-600 text-white'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                Prod
+              </button>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">
+              Dev: otomatis pakai <span className="font-mono">/webhook-test</span>, Prod: otomatis pakai <span className="font-mono">/webhook</span>
+            </p>
+          </div>
+
           {FIELDS.map(({ key, label }) => (
             <div key={key}>
               <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">

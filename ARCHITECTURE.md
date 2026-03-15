@@ -1,250 +1,428 @@
-# Project Architecture
+# Team Assistant Workspace - Architecture Overview
 
-## Overview
+## Project Summary
 
-This project is a Vite + React single-page application for an AI team workspace.
+**Team Assistant Workspace** adalah aplikasi React + Vite yang berfungsi sebagai platform terpadu untuk delegasi tugas operasional, akses knowledge base internal, dan manajemen dokumen SOP. Aplikasi ini terintegrasi dengan n8n workflow automation (backend) dan Supabase (database).
 
-Main capabilities:
+---
 
-- Supervisor chat (delegates operational requests to n8n webhook)
-- Knowledge chat (RAG-style chat with document context)
-- Session history management in sidebar (create, switch, delete)
-- Document workspace (upload and browse files from n8n + Supabase)
-- Google Calendar workspace (read upcoming events)
+## Tech Stack
 
-Technology stack:
+| Layer        | Technology                |
+|--------------|---------------------------|
+| Frontend     | React 18.3 + Vite 5.2     |
+| Routing      | React Router DOM 6.23     |
+| State Mgmt   | Zustand 4.5.2             |
+| Styling      | Tailwind CSS 3.4.4        |
+| HTTP Client  | Axios 1.6.8               |
+| Backend      | n8n (via webhooks)        |
+| Database     | Supabase (PostgreSQL)     |
+| Markdown     | react-markdown 9.1.0      |
 
-- `react-router-dom` for routing
-- `zustand` for client state (`sessionStorage` persistence)
-- `axios` + `fetch` for network calls
-- Supabase REST API (direct call, no `supabase-js` SDK)
-- n8n webhooks as backend orchestration layer
+---
 
 ## High-Level Architecture
 
-The app uses a simple layered architecture:
-
-1. **UI Layer** (`pages/`, `components/`)
-   - Renders screens and handles user interaction.
-   - Triggers state actions and service calls.
-
-2. **State Layer** (`store/chatStore.js`)
-   - Stores chat messages, selected sessions, and connection status.
-   - Persists selected fields to `sessionStorage` via Zustand `persist`.
-
-3. **Service Layer** (`services/`)
-   - Encapsulates all external calls: n8n webhooks, Supabase REST, Google Calendar API.
-   - Keeps endpoint details and payload formats out of page components.
-
-4. **Utility Layer** (`utils/`, `hooks/`)
-   - Shared helpers for response normalization and UX behavior (auto-scroll).
-
-## Source Tree
-
-```text
-src/
-  main.jsx
-  App.jsx
-  index.css
-
-  pages/
-    Dashboard.jsx
-    SupervisorChat.jsx
-    KnowledgeChat.jsx
-    FileWorkspace.jsx
-    CalendarPage.jsx
-
-  components/
-    layout/
-      Sidebar.jsx
-    chat/
-      ChatBubble.jsx
-      MessageInput.jsx
-      AgentStatusIndicator.jsx
-      SourceCitation.jsx
-    files/
-      FolderTree.jsx
-      UploadZone.jsx
-      FilePreviewModal.jsx
-    ui/
-      AgentCard.jsx
-      SkeletonLoader.jsx
-      SettingsModal.jsx
-
-  services/
-    api.js
-    chatService.js
-    sessionService.js
-    fileService.js
-    calendarService.js
-    supabase.js
-
-  store/
-    chatStore.js
-
-  hooks/
-    useAutoScroll.js
-
-  utils/
-    chatResponse.js
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         BROWSER (Client)                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                 React Application                        │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐              │   │
+│  │  │  Pages   │  │Components│  │  Hooks   │              │   │
+│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘              │   │
+│  │       │             │             │                     │   │
+│  │  ┌────┴─────────────┴─────────────┴─────┐               │   │
+│  │  │         State Management (Zustand)   │               │   │
+│  │  └──────────────────────────────────────┘               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│   n8n Webhooks  │  │   Supabase DB   │  │  LocalStorage   │
+│  (Backend AI)   │  │  (PostgreSQL)   │  │  (User Config)  │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
 ```
 
-## Routing and Shell
+---
 
-- Router is defined in `src/App.jsx` using `BrowserRouter`.
-- A persistent sidebar layout wraps all routes.
-- Route map:
-  - `/` -> `Dashboard`
-  - `/chat/supervisor` -> `SupervisorChat`
-  - `/chat/knowledge` -> `KnowledgeChat`
-  - `/workspace/files` -> `FileWorkspace`
-  - `/workspace/calendar` -> `CalendarPage`
-  - `*` -> `Dashboard`
+## Directory Structure
 
-## State Model (Zustand)
+```
+src/
+├── main.jsx                  # Entry point aplikasi
+├── App.jsx                   # Root component dengan routing
+├── index.css                 # Global styles + Tailwind
+│
+├── pages/                    # Page-level components
+│   ├── Dashboard.jsx         # Halaman utama
+│   ├── SupervisorChat.jsx    # Chat dengan Supervisor Agent
+│   ├── KnowledgeChat.jsx     # Chat dengan Knowledge Agent (RAG)
+│   ├── FileWorkspace.jsx     # Manajemen dokumen
+│   └── CalendarPage.jsx      # Integrasi Google Calendar
+│
+├── components/
+│   ├── layout/
+│   │   └── Sidebar.jsx       # Navigasi utama + session management
+│   ├── chat/
+│   │   ├── ChatBubble.jsx    # Komponen pesan chat
+│   │   ├── MessageInput.jsx  # Input field untuk chat
+│   │   ├── AgentStatusIndicator.jsx
+│   │   └── SourceCitation.jsx
+│   ├── files/
+│   │   ├── UploadZone.jsx    # Drag-drop upload area
+│   │   ├── FolderTree.jsx    # File explorer component
+│   │   └── FilePreviewModal.jsx
+│   └── ui/
+│       ├── AgentCard.jsx
+│       ├── SkeletonLoader.jsx
+│       └── SettingsModal.jsx # Konfigurasi webhook URLs
+│
+├── services/                 # API layer & external integrations
+│   ├── api.js                # Core API utilities + URL management
+│   ├── chatService.js        # Chat API (Supervisor + Knowledge)
+│   ├── sessionService.js     # Session CRUD (Supabase)
+│   ├── fileService.js        # File upload & document API
+│   ├── calendarService.js    # Google Calendar integration
+│   └── supabase.js           # Supabase config & headers
+│
+├── store/
+│   └── chatStore.js          # Zustand global state
+│
+└── hooks/
+    └── useAutoScroll.js      # Auto-scroll hook untuk chat
+```
 
-Store file: `src/store/chatStore.js`
+---
 
-Core state:
+## Core Modules
 
-- `supervisorMessages[]`
-- `knowledgeMessages[]`
-- `isConnected`
-- `knowledgeSessions[]`
-- `activeKnowledgeSessionId`
-- `supervisorSessions[]`
-- `activeSupervisorSessionId`
+### 1. Routing (App.jsx)
 
-Main actions:
+Aplikasi menggunakan React Router dengan 5 route utama:
 
-- Add/clear/set messages for each chat channel
-- Set sessions and active session ID for each chat type
-- Set backend connection status
+| Path                   | Component      | Deskripsi                          |
+|------------------------|----------------|------------------------------------|
+| `/`                    | Dashboard      | Halaman utama dengan quick access  |
+| `/chat/supervisor`     | SupervisorChat | Delegasi tugas operasional         |
+| `/chat/knowledge`      | KnowledgeChat  | RAG chat dengan dokumen SOP        |
+| `/workspace/files`     | FileWorkspace  | Upload & manajemen dokumen         |
+| `/workspace/calendar`  | CalendarPage   | Integrasi Google Calendar          |
 
-Persisted subset (`sessionStorage`, key: `team-workspace-chat`):
+---
 
-- `supervisorMessages`
-- `knowledgeMessages`
-- `activeKnowledgeSessionId`
-- `activeSupervisorSessionId`
+### 2. State Management (chatStore.js)
 
-## Service Layer Details
+Zustand store dengan persist ke `sessionStorage`:
 
-### `src/services/api.js`
+```javascript
+{
+  // Messages
+  supervisorMessages: [],
+  knowledgeMessages: [],
 
-- Barrel re-export for `chatApi`, `sessionApi`, `fileApi`, and Supabase config.
-- Manages webhook URLs in `localStorage` via `urls` object.
-- Provides `getSessionId()` (per-tab session UUID in `sessionStorage`).
-- Provides `statusApi.checkStatus()` (health check to n8n status endpoint).
+  // Connection status
+  isConnected: null,
 
-### `src/services/chatService.js`
+  // Knowledge sessions
+  knowledgeSessions: [],
+  activeKnowledgeSessionId: null,
 
-- Sends chat payload to n8n via axios with 60s timeout.
-- `sendToSupervisor(message, action, sessionId)` sends `chat_type: general_chat`.
-- `sendToKnowledge(message, contextFilter, sessionId)` sends `chat_type: rag_chat`.
-- Uses explicit selected session when available, fallback to `getSessionId()`.
+  // Supervisor sessions
+  supervisorSessions: [],
+  activeSupervisorSessionId: null
+}
+```
 
-### `src/services/sessionService.js`
+**Persisted fields:** `supervisorMessages`, `knowledgeMessages`, `activeKnowledgeSessionId`, `activeSupervisorSessionId`
 
-Supabase REST CRUD for:
+---
 
-- `chat_sessions`
-- `n8n_chat_histories`
+### 3. API Layer
 
-Functions:
+#### api.js - Core Configuration
 
-- `buatSesiBaru(judulChat, chatType)`
-- `ambilSemuaSesi(chatType)`
-- `ambilRiwayatChat(sessionId)` (filters tool traces/internal agent logs)
-- `hapusSesiChat(sessionId)` (deletes histories first, then session row)
+- **URL Management:** Semua webhook URLs disimpan di `localStorage`
+- **Environment Modes:** Dev (`/webhook-test`) dan Prod (`/webhook`)
+- **Session ID:** Per-tab session menggunakan `crypto.randomUUID()`
 
-### `src/services/fileService.js`
+**LocalStorage Keys:**
+```javascript
+{
+  SUPERVISOR: "n8n_supervisor_url",
+  KNOWLEDGE: "n8n_knowledge_url",
+  PM: "n8n_pm_url",
+  REPORT: "n8n_report_url",
+  STATUS: "n8n_status_url",
+  UPLOAD: "n8n_upload_url",
+  ENV_MODE: "n8n_env_mode"
+}
+```
 
-- Uploads document to n8n upload webhook with `FormData`.
-- Reads document list from Supabase table `dokumen`.
+#### chatService.js
 
-### `src/services/calendarService.js`
+```javascript
+chatApi.sendToSupervisor(message, action, sessionId, file)
+chatApi.sendToKnowledge(message, contextFilter, sessionId)
+```
 
-- Reads upcoming events from Google Calendar REST API.
-- Uses env vars:
-  - `VITE_GOOGLE_CALENDAR_API_KEY`
-  - `VITE_GOOGLE_CALENDAR_ID`
+#### sessionService.js
 
-### `src/services/supabase.js`
+CRUD operasi untuk `chat_sessions` dan `n8n_chat_histories` di Supabase:
 
-- Exposes:
-  - `SUPABASE_URL`
-  - `SUPABASE_ANON_KEY`
-  - `supabaseHeaders` (apikey + Bearer token + JSON content type)
+- `buatSesiBaru(judul, chatType)` - Create session
+- `ambilSemuaSesi(chatType)` - List sessions
+- `ambilRiwayatChat(sessionId)` - Get chat history (with filtering)
+- `hapusSesiChat(sessionId)` - Delete session + messages
 
-## Runtime Flows
+#### fileService.js
 
-### 1) Chat send flow (Supervisor and Knowledge)
+```javascript
+fileApi.uploadDocument(file, folder, fileName)  // Upload ke n8n
+fileApi.fetchDokumen()                          // Fetch dari Supabase
+```
 
-1. User sends message from `MessageInput`.
-2. Page appends user message to Zustand.
-3. Page calls `chatApi` service to n8n webhook.
-4. Response is normalized by `utils/chatResponse.js`.
-5. Page appends AI message (content + optional metadata/sources/actions).
-6. `ChatBubble` renders markdown AI response; `useAutoScroll` scrolls to latest.
+---
 
-### 2) Session history flow (Sidebar)
+### 4. Session Management
 
-1. When opening `/chat/knowledge` or `/chat/supervisor`, `Sidebar` loads sessions by `chat_type`.
-2. If no session exists, sidebar auto-creates a new one.
-3. Selecting a session loads chat history from `n8n_chat_histories`.
-4. History rows are mapped into UI messages and stored via `setKnowledgeMessages` or `setSupervisorMessages`.
-5. Deleting a session from history bubble calls `sessionApi.hapusSesiChat(sessionId)`, then refreshes session list and reselects a valid active session.
+Session architecture menggunakan hybrid approach:
 
-### 3) File workspace flow
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SESSION FLOW                              │
+│                                                              │
+│  1. Browser tab opens → generates session_id (UUID)         │
+│     stored in sessionStorage                                │
+│                                                              │
+│  2. Chat messages sent to n8n with session_id              │
+│                                                              │
+│  3. n8n stores messages to Supabase:                        │
+│     - chat_sessions (metadata)                              │
+│     - n8n_chat_histories (message content)                  │
+│                                                              │
+│  4. Sidebar loads sessions from Supabase via sessionApi     │
+│                                                              │
+│  5. User switches session → loads history from Supabase     │
+└─────────────────────────────────────────────────────────────┘
+```
 
-1. `FileWorkspace` fetches existing docs from Supabase table `dokumen`.
-2. UI groups docs by folder (`input` or `output`).
-3. `UploadZone` uploads selected files to n8n upload webhook.
-4. Uploaded files are merged with fetched docs for display and preview.
+---
 
-### 4) Calendar flow
+### 5. Sidebar Component
 
-1. `CalendarPage` calls `calendarApi.fetchCalendarEvents()` on load.
-2. Service builds Google Calendar URL with query parameters.
-3. Page renders loading, error, empty state, or event list.
+`Sidebar.jsx` adalah komponen paling kompleks dengan fitur:
 
-## Data Contracts and Persistence
+- **Navigation:** 5 menu items dengan active state
+- **Session Management:**
+  - Auto-load sessions saat masuk halaman chat
+  - Create new chat session
+  - Switch between sessions
+  - Delete session (cascade delete messages)
+- **Real-time History Loading:** Fetch chat history dari Supabase
+- **Sub-menu System:** Session list muncul sebagai sub-menu saat di halaman chat
 
-### Supabase tables used by frontend
+---
 
-- `chat_sessions`
-  - fields used: `id`, `judul`, `chat_type`, `created_at`
-- `n8n_chat_histories`
-  - fields used: `id`, `session_id`, `message`, `created_at`
-- `dokumen`
-  - fields used: `id`, `nama_file`, `kategori`, `file_url`, `created_at`
+### 6. Settings Modal
 
-### Browser persistence
+Komponen untuk konfigurasi runtime tanpa rebuild:
 
-- `sessionStorage`
-  - Zustand persisted chat state (`team-workspace-chat`)
-  - per-tab generated session id (`session_id`)
-- `localStorage`
-  - n8n webhook URL settings saved from `SettingsModal`
+- **Environment Toggle:** Dev ↔ Prod (auto-convert webhook URLs)
+- **Webhook URL Inputs:**
+  - Supervisor Agent
+  - Knowledge Agent
+  - Upload Dokumen
+- **Persistence:** Semua settings disimpan di `localStorage`
+
+---
+
+## Data Flow
+
+### Chat Message Flow (Supervisor Agent)
+
+```
+User types message
+       │
+       ▼
+┌──────────────┐
+│ MessageInput │
+└──────┬───────┘
+       │ onSubmit
+       ▼
+┌─────────────────────────────┐
+│ SupervisorChat (page)       │
+│  - addSupervisorMessage     │
+│  - chatApi.sendToSupervisor │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│ n8n Webhook (backend)       │
+│  - Process with AI agents   │
+│  - Store to Supabase        │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│ Response handler            │
+│  - addSupervisorMessage (AI)│
+│  - Update chatStore         │
+└─────────────────────────────┘
+```
+
+---
+
+### File Upload Flow
+
+```
+User drops file
+       │
+       ▼
+┌──────────────┐
+│ UploadZone   │
+└──────┬───────┘
+       │ onDrop
+       ▼
+┌─────────────────────────────┐
+│ FileWorkspace (page)        │
+│  - fileApi.uploadDocument   │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│ n8n Upload Webhook          │
+│  - Store file to storage    │
+│  - Trigger indexing (RAG)   │
+│  - Insert to dokumen table  │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│ Success handler             │
+│  - Refresh document list    │
+└─────────────────────────────┘
+```
+
+---
+
+## Database Schema (Supabase)
+
+### chat_sessions
+| Column     | Type      | Description                      |
+|------------|-----------|----------------------------------|
+| id         | UUID      | Primary key                      |
+| judul      | TEXT      | Session title                    |
+| chat_type  | TEXT      | 'rag_chat' atau 'general_chat'   |
+| created_at | TIMESTAMP | Auto-generated                   |
+
+### n8n_chat_histories
+| Column     | Type      | Description                      |
+|------------|-----------|----------------------------------|
+| id         | SERIAL    | Primary key                      |
+| session_id | UUID      | FK to chat_sessions              |
+| message    | JSONB     | LangChain message structure      |
+| created_at | TIMESTAMP | Auto-generated                   |
+
+### dokumen
+| Column     | Type      | Description                      |
+|------------|-----------|----------------------------------|
+| id         | SERIAL    | Primary key                      |
+| filename   | TEXT      | Original filename                |
+| folder     | TEXT      | 'input' atau 'output'            |
+| content    | TEXT      | Extracted text content           |
+| created_at | TIMESTAMP | Auto-generated                   |
+
+---
+
+## Key Design Patterns
+
+### 1. Service Layer Pattern
+
+Semua API calls di-abstractkan ke dalam service modules:
+```javascript
+// Usage example
+import { chatApi } from '@/services/api'
+await chatApi.sendToKnowledge("What is SOP?")
+```
+
+### 2. Custom Store Pattern (Zustand)
+
+State management dengan middleware `persist`:
+```javascript
+export const useChatStore = create(
+  persist(
+    (set) => ({ ...actions }),
+    { name: 'team-workspace-chat', storage: createJSONStorage(() => sessionStorage) }
+  )
+)
+```
+
+### 3. Barrel Export Pattern
+
+`services/api.js` sebagai barrel module untuk backward compatibility:
+```javascript
+export { chatApi } from "./chatService"
+export { sessionApi } from "./sessionService"
+export { fileApi } from "./fileService"
+```
+
+---
 
 ## Environment Configuration
 
-Required env variables:
+### Required Environment Variables
 
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- `VITE_GOOGLE_CALENDAR_API_KEY`
-- `VITE_GOOGLE_CALENDAR_ID`
+| Variable              | Description            |
+|-----------------------|------------------------|
+| `VITE_SUPABASE_URL`   | Supabase project URL   |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key   |
 
-Notes:
+### Default Webhook URLs
 
-- n8n webhook endpoints are configurable at runtime from Settings modal and stored in `localStorage`.
-- Supabase requests are executed directly from frontend using anon key headers.
+| Agent        | Default URL                                    |
+|--------------|------------------------------------------------|
+| Supervisor   | `http://localhost:5678/webhook/supervisor`     |
+| Knowledge    | ngrok tunnel (dev) / production webhook        |
+| Upload       | ngrok tunnel (dev) / production webhook        |
 
-## Boundaries and Responsibilities
+---
 
-- This repository contains frontend only.
-- n8n handles orchestration/business workflow outside this codebase.
-- Supabase enforces data access policy and stores chat/document data.
-- Build output (`dist/`) is generated artifact and not part of source architecture.
+## Build & Development
+
+```bash
+# Install dependencies
+npm install
+
+# Development server
+npm run dev
+
+# Production build
+npm run build
+
+# Linting
+npm run lint
+```
+
+**Pre-commit hooks:** Husky + lint-staged (auto-fix ESLint)
+
+---
+
+## File Conventions
+
+- **Components:** PascalCase (e.g., `ChatBubble.jsx`)
+- **Services:** camelCase (e.g., `chatService.js`)
+- **State exports:** Named export `useChatStore`
+- **API exports:** Named exports from barrel module
+
+---
+
+## Notes
+
+1. **Session Persistence:** Chat messages tersimpan di `sessionStorage` (hilang saat tab ditutup)
+2. **Session ID:** Unik per tab browser menggunakan `crypto.randomUUID()`
+3. **Message Filtering:** `sessionService.ambilRiwayatChat()` melakukan filtering untuk menghapus internal AI logs dan tool messages
+4. **Environment Switching:** Dev mode otomatis convert `/webhook` → `/webhook-test` dan sebaliknya
