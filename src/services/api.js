@@ -16,6 +16,12 @@ const KEYS = {
   REPORT: "n8n_report_url",
   STATUS: "n8n_status_url",
   UPLOAD: "n8n_upload_url",
+  ENV_MODE: "n8n_env_mode",
+};
+
+const ENV_MODES = {
+  DEV: "dev",
+  PROD: "prod",
 };
 
 const DEFAULTS = {
@@ -29,6 +35,39 @@ const DEFAULTS = {
     "https://undappled-deliriously-yukiko.ngrok-free.dev/webhook-test/f08f222b-93fb-4de3-84df-8342eec065da",
 };
 
+const normalizeEnvMode = (mode) =>
+  mode === ENV_MODES.PROD ? ENV_MODES.PROD : ENV_MODES.DEV;
+
+const convertWebhookUrlForEnv = (rawUrl, mode) => {
+  if (!rawUrl) return rawUrl;
+
+  const normalizedMode = normalizeEnvMode(mode);
+
+  try {
+    const parsedUrl = new URL(rawUrl);
+    const nextPathname =
+      normalizedMode === ENV_MODES.DEV
+        ? parsedUrl.pathname.replace(/\/webhook(?!-test)(?=\/|$)/g, "/webhook-test")
+        : parsedUrl.pathname.replace(/\/webhook-test(?=\/|$)/g, "/webhook");
+
+    parsedUrl.pathname = nextPathname;
+    return parsedUrl.toString();
+  } catch {
+    return normalizedMode === ENV_MODES.DEV
+      ? rawUrl.replace(/\/webhook(?!-test)(?=\/|$)/g, "/webhook-test")
+      : rawUrl.replace(/\/webhook-test(?=\/|$)/g, "/webhook");
+  }
+};
+
+const convertAllWebhookUrlsForEnv = (values, mode) => ({
+  supervisor: convertWebhookUrlForEnv(values.supervisor, mode),
+  knowledge: convertWebhookUrlForEnv(values.knowledge, mode),
+  pm: convertWebhookUrlForEnv(values.pm, mode),
+  report: convertWebhookUrlForEnv(values.report, mode),
+  status: convertWebhookUrlForEnv(values.status, mode),
+  upload: convertWebhookUrlForEnv(values.upload, mode),
+});
+
 // ─── URL getters / setters ────────────────────────────────────────────────────
 export const urls = {
   getSupervisor: () =>
@@ -39,6 +78,7 @@ export const urls = {
   getReport: () => localStorage.getItem(KEYS.REPORT) || DEFAULTS.REPORT,
   getStatus: () => localStorage.getItem(KEYS.STATUS) || DEFAULTS.STATUS,
   getUpload: () => localStorage.getItem(KEYS.UPLOAD) || DEFAULTS.UPLOAD,
+  getEnvironment: () => normalizeEnvMode(localStorage.getItem(KEYS.ENV_MODE)),
 
   setSupervisor: (url) => localStorage.setItem(KEYS.SUPERVISOR, url),
   setKnowledge: (url) => localStorage.setItem(KEYS.KNOWLEDGE, url),
@@ -46,6 +86,8 @@ export const urls = {
   setReport: (url) => localStorage.setItem(KEYS.REPORT, url),
   setStatus: (url) => localStorage.setItem(KEYS.STATUS, url),
   setUpload: (url) => localStorage.setItem(KEYS.UPLOAD, url),
+  setEnvironment: (mode) =>
+    localStorage.setItem(KEYS.ENV_MODE, normalizeEnvMode(mode)),
 
   getAll: () => ({
     supervisor: localStorage.getItem(KEYS.SUPERVISOR) || DEFAULTS.SUPERVISOR,
@@ -65,6 +107,21 @@ export const urls = {
     if (report !== undefined) localStorage.setItem(KEYS.REPORT, report);
     if (status !== undefined) localStorage.setItem(KEYS.STATUS, status);
     if (upload !== undefined) localStorage.setItem(KEYS.UPLOAD, upload);
+  },
+
+  convertForEnvironment: (values, mode) =>
+    convertAllWebhookUrlsForEnv(values, mode),
+
+  applyEnvironment: (mode) => {
+    const normalizedMode = normalizeEnvMode(mode);
+    const currentValues = urls.getAll();
+    const convertedValues = convertAllWebhookUrlsForEnv(
+      currentValues,
+      normalizedMode
+    );
+    urls.setAll(convertedValues);
+    urls.setEnvironment(normalizedMode);
+    return convertedValues;
   },
 };
 

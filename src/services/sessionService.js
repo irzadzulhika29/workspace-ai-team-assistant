@@ -97,8 +97,8 @@ export const sessionApi = {
         // 1. Buang jika ini adalah pesan dari Tool
         if (type.includes("tool") || type.includes("function")) return false;
 
-        // 2. Buang jika ini adalah jejak aksi AI internal (Calling Agent)
-        if (content.includes("Calling RAG_Agent") || content.includes("Calling Planner_Agent")) return false;
+        // 2. Buang jika ini adalah jejak aksi AI internal (Calling ...)
+        if (type.includes("ai") && /calling/i.test(content)) return false;
 
         // 3. Buang jika ini adalah data mentah JSON output
         if (content.trim().startsWith('[{"output"')) return false;
@@ -108,6 +108,25 @@ export const sessionApi = {
 
         // Jika lolos semua filter di atas, simpan pesan ini
         return true;
+      }).map((row) => {
+        const msg = row.message;
+        const content = msg.kwargs?.content || msg.data?.content || msg.content || "";
+        const type = (msg.id?.[msg.id.length - 1] || msg.type || "").toLowerCase();
+
+        // Untuk pesan Human, buang bagian instruction: dan document_text: beserta isinya
+        if (type.includes("human")) {
+          const cleaned = content
+            .replace(/^instruction:\s*/i, "")   // buang prefix "instruction:" di awal
+            .replace(/\n?document_text:\s*[\s\S]*/i, "")  // buang bagian document_text ke bawah
+            .trim();
+          const newMsg = { ...msg };
+          if (msg.kwargs?.content !== undefined) newMsg.kwargs = { ...msg.kwargs, content: cleaned };
+          else if (msg.data?.content !== undefined) newMsg.data = { ...msg.data, content: cleaned };
+          else newMsg.content = cleaned;
+          return { ...row, message: newMsg };
+        }
+
+        return row;
       });
 
       return barisBersih;
