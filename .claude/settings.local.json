@@ -1,7 +1,7 @@
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://dashscope-intl.aliyuncs.com/apps/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "sk-2e6190e1832b42359f5a9e213ae11ea0",
-    "ANTHROPIC_MODEL": "qwen3.5-plus"
+    "ANTHROPIC_BASE_URL": "https://agentrouter.org",
+    "ANTHROPIC_AUTH_TOKEN": "sk-bGve4U8RKjFiAzSteR0U0YyTqaeKRlpuHbFCkyDGFjP4Vleq",
+    "ANTHROPIC_MODEL": "deepseek-v3.2"
   }
 }

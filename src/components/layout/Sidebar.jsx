@@ -1,5 +1,6 @@
+import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Settings, Plus, Loader2, Trash2 } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
@@ -12,6 +13,7 @@ const navItems = [
   { to: '/chat/knowledge',   icon: Brain,           label: 'Knowledge Agent'   },
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
   { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
+  { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
 ]
 
 export default function Sidebar() {

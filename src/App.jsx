@@ -1,3 +1,4 @@
+import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Sidebar from './components/layout/Sidebar'
 import Dashboard from './pages/Dashboard'
@@ -5,6 +6,7 @@ import SupervisorChat from './pages/SupervisorChat'
 import KnowledgeChat from './pages/KnowledgeChat'
 import FileWorkspace from './pages/FileWorkspace'
 import CalendarPage from './pages/CalendarPage'
+import JiraPage from './pages/JiraPage'
 
 export default function App() {
   return (
@@ -23,6 +25,7 @@ export default function App() {
                 <Route path="/chat/knowledge"   element={<KnowledgeChat />}    />
                 <Route path="/workspace/files"  element={<FileWorkspace />}    />
                 <Route path="/workspace/calendar" element={<CalendarPage />}   />
+                <Route path="/workspace/jira" element={<JiraPage />}          />
                 <Route path="*"                 element={<Dashboard />}        />
               </Routes>
             </div>
