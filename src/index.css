@@ -16,7 +16,7 @@
 
   @media (max-width: 768px) {
     :root {
-      --sidebar-width: 84px;
+      --sidebar-width: 0px;
     }
   }
 

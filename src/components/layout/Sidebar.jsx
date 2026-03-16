@@ -1,11 +1,12 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2 } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
 import { useChatStore } from '../../store/chatStore'
 import { sessionApi } from '../../services/sessionService'
+import { useSidebar } from '../../context/SidebarContext'
 
 const navItems = [
   { to: '/',                 icon: LayoutDashboard, label: 'Dashboard'         },
@@ -21,6 +22,7 @@ export default function Sidebar() {
   const location = useLocation()
   const isKnowledgePage  = location.pathname === '/chat/knowledge'
   const isSupervisorPage = location.pathname === '/chat/supervisor'
+  const { open: mobileOpen, close: closeMobile } = useSidebar()
 
   // ── Knowledge session state ───────────────────────────────────────────
   const {
@@ -289,7 +291,7 @@ export default function Sidebar() {
     onSelectSession,
     onDeleteSession,
   }) => (
-    <div className="hidden md:block mt-1 ml-3 pl-3 border-l border-slate-200 space-y-1 animate-fade-in">
+    <div className="mt-1 ml-3 pl-3 border-l border-slate-200 space-y-1 animate-fade-in">
       <button
         onClick={onNewChat}
         disabled={creating}
@@ -390,26 +392,38 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="
-        fixed top-0 left-0 h-screen
-        w-[var(--sidebar-width)] z-40
-        bg-white/82 backdrop-blur-xl flex flex-col
+      <aside className={`
+        fixed top-0 left-0 h-screen z-40
+        bg-white/95 backdrop-blur-xl flex flex-col
         border-r border-slate-200
-        select-none
-      ">
-        <div className="flex items-center md:gap-3 gap-0 px-3 md:px-5 py-4 border-b border-slate-200 md:justify-start justify-center">
-          <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0 shadow-sm">
-            <MessageSquare size={14} className="text-white" />
+        select-none transition-transform duration-300
+        w-[240px]
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 md:w-[var(--sidebar-width)]
+      `} style={{ '--sidebar-width': '240px' }}>
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <MessageSquare size={14} className="text-white" />
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-slate-900 text-sm font-semibold leading-tight truncate">
+                AI Team Assistant
+              </p>
+            </div>
           </div>
-          <div className="overflow-hidden hidden md:block">
-            <p className="text-slate-900 text-sm font-semibold leading-tight truncate">
-              AI Team Assistant
-            </p>
-          </div>
+          {/* Close button — mobile only */}
+          <button
+            onClick={closeMobile}
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto sidebar-scrollbar">
-          <p className="hidden md:block text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2">
+          <p className="text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2">
             Workspace
           </p>
           {navItems.map(({ to, icon: Icon, label }) => (
@@ -417,8 +431,9 @@ export default function Sidebar() {
               <NavLink
                 to={to}
                 end={to === '/'}
+                onClick={closeMobile}
                 className={({ isActive }) =>
-                  `group flex items-center md:justify-start justify-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                  `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                    transition-all duration-150 relative
                    ${isActive
                       ? 'bg-slate-900 text-white shadow-sm'
@@ -432,7 +447,7 @@ export default function Sidebar() {
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-cyan-400 rounded-r-full" />
                     )}
                     <Icon size={16} className={isActive ? 'text-cyan-300' : 'text-slate-500 group-hover:text-slate-700'} />
-                    <span className="hidden md:inline">{label}</span>
+                    <span>{label}</span>
                   </>
                 )}
               </NavLink>
@@ -468,13 +483,13 @@ export default function Sidebar() {
           <button
             onClick={() => setSettingsOpen(true)}
             className="
-              w-full flex items-center md:justify-start justify-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+              w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
               text-slate-500 hover:text-slate-900 hover:bg-slate-100
               transition-colors duration-150
             "
           >
             <Settings size={16} className="text-slate-500" />
-            <span className="hidden md:inline">Settings</span>
+            <span>Settings</span>
           </button>
         </div>
       </aside>
