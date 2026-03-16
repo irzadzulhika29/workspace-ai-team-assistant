@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageSquare, Brain, FolderOpen, ArrowRight, Zap, Database, FileStack, CalendarDays, Clock3, MapPin } from 'lucide-react'
-import { shallow } from 'zustand/shallow'
-import { useChatStore } from '../store/chatStore'
+import { MessageSquare, Brain, FolderOpen, ArrowRight, Zap, Database, FileStack, CalendarDays, Clock3, MapPin, Bug, CheckCircle2 } from 'lucide-react'
 import { calendarApi } from '../services/calendarService'
+import { jiraApi } from '../services/jiraService'
 
 const CARDS = [
   {
@@ -32,23 +31,49 @@ const CARDS = [
   },
 ]
 
+const DONE_STATUS_KEYWORDS = ['done', 'closed', 'resolved', 'complete', 'completed']
+
+const getIssueStatus = (issue) => {
+  if (!issue || typeof issue !== 'object') return 'Unknown'
+  return issue.fields?.status?.name || issue.status?.name || issue.status || issue.state || 'Unknown'
+}
+
+const buildJiraSummary = (items) => {
+  const statusCount = {}
+  let doneCount = 0
+
+  for (const issue of items) {
+    const status = getIssueStatus(issue)
+    const normalizedStatus = String(status).trim() || 'Unknown'
+    statusCount[normalizedStatus] = (statusCount[normalizedStatus] || 0) + 1
+
+    const lowerStatus = normalizedStatus.toLowerCase()
+    if (DONE_STATUS_KEYWORDS.some((keyword) => lowerStatus.includes(keyword))) {
+      doneCount += 1
+    }
+  }
+
+  const total = items.length
+  const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0
+  const byStatus = Object.entries(statusCount)
+    .sort((a, b) => b[1] - a[1])
+    .map(([status, count]) => ({ status, count }))
+
+  return {
+    total,
+    done: doneCount,
+    percent,
+    byStatus,
+  }
+}
+
 export default function Dashboard() {
-  const { supervisorMessages, knowledgeMessages } = useChatStore(
-    (state) => ({
-      supervisorMessages: state.supervisorMessages,
-      knowledgeMessages: state.knowledgeMessages,
-    }),
-    shallow,
-  )
-
-  const stats = [
-    { label: 'Pesan Supervisor',  value: supervisorMessages.length },
-    { label: 'Pesan Knowledge',   value: knowledgeMessages.length  },
-  ]
-
   const [nextEvents, setNextEvents] = useState([])
   const [loadingEvents, setLoadingEvents] = useState(true)
   const [calendarError, setCalendarError] = useState('')
+  const [jiraSummary, setJiraSummary] = useState({ total: 0, done: 0, percent: 0, byStatus: [] })
+  const [loadingJira, setLoadingJira] = useState(true)
+  const [jiraError, setJiraError] = useState('')
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -68,6 +93,25 @@ export default function Dashboard() {
     loadEvents()
   }, [])
 
+  useEffect(() => {
+    const loadJiraProgress = async () => {
+      setLoadingJira(true)
+      setJiraError('')
+
+      try {
+        const items = await jiraApi.fetchIssues()
+        const safeItems = Array.isArray(items) ? items : []
+        setJiraSummary(buildJiraSummary(safeItems))
+      } catch (err) {
+        setJiraError(err.message || 'Tidak dapat mengambil progres Jira.')
+      } finally {
+        setLoadingJira(false)
+      }
+    }
+
+    loadJiraProgress()
+  }, [])
+
   return (
     <div className="p-5 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
@@ -82,20 +126,6 @@ export default function Dashboard() {
         <p className="text-slate-500 mt-3 text-sm max-w-2xl leading-relaxed">
           Satu platform terpadu untuk delegasi tugas operasional, akses knowledge base internal, dan manajemen dokumen SOP.
         </p>
-      </div>
-
-      <div className="panel-muted p-4 md:p-5 mb-7">
-        <div className="flex flex-wrap items-center gap-6">
-          {stats.map(({ label, value, valueClass = 'text-slate-900' }) => (
-            <div key={label} className="flex flex-col">
-              <span className={`text-2xl font-semibold font-mono tracking-tight ${valueClass}`}>{value}</span>
-              <span className="text-xs text-slate-500">{label}</span>
-            </div>
-          ))}
-          <div className="ml-auto text-xs text-slate-500 font-mono">
-            {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
@@ -187,6 +217,73 @@ export default function Dashboard() {
                 </div>
               )
             })}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8 panel p-4 md:p-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ringkasan Jira</p>
+            <h2 className="text-sm md:text-base font-semibold text-slate-900 mt-1">Progres Penyelesaian Issue</h2>
+          </div>
+          <Link to="/workspace/jira" className="text-xs font-semibold text-cyan-700 hover:text-cyan-800">
+            Lihat detail
+          </Link>
+        </div>
+
+        {loadingJira ? (
+          <div className="space-y-2">
+            <div className="skeleton h-20 rounded-xl" />
+            <div className="skeleton h-14 rounded-xl" />
+            <div className="skeleton h-14 rounded-xl" />
+          </div>
+        ) : jiraError ? (
+          <p className="text-sm text-rose-600">{jiraError}</p>
+        ) : jiraSummary.total === 0 ? (
+          <p className="text-sm text-slate-500">Belum ada issue Jira yang terdeteksi.</p>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <Bug size={15} className="text-cyan-700" />
+                  {jiraSummary.total} total issue
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                  <CheckCircle2 size={13} />
+                  {jiraSummary.done} selesai ({jiraSummary.percent}%)
+                </div>
+              </div>
+
+              <div className="h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-600 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${jiraSummary.percent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {jiraSummary.byStatus.slice(0, 5).map(({ status, count }) => {
+                const statusPercent = Math.round((count / jiraSummary.total) * 100)
+
+                return (
+                  <div key={status} className="rounded-xl border border-slate-200 bg-white px-3.5 py-3">
+                    <div className="flex items-center justify-between gap-3 text-xs mb-2">
+                      <span className="font-medium text-slate-700">{status}</span>
+                      <span className="font-mono text-slate-500">{count} issue</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full bg-cyan-500/70"
+                        style={{ width: `${statusPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

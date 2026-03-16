@@ -27,9 +27,9 @@ const ENV_MODES = {
 const DEFAULTS = {
   SUPERVISOR: "https://n8n.karyatech.web.id/webhook/chat",
   KNOWLEDGE: "https://n8n.karyatech.web.id/webhook/chat",
-  PM: "http://localhost:5678/webhook/pm",
-  REPORT: "http://localhost:5678/webhook/report",
-  STATUS: "http://localhost:5678/webhook/status",
+  PM: "https://n8n.karyatech.web.id/webhook/pm",
+  REPORT: "https://n8n.karyatech.web.id/webhook/report",
+  STATUS: "https://n8n.karyatech.web.id/webhook/status",
   UPLOAD: "https://n8n.karyatech.web.id/webhook/upload-file",
 };
 
@@ -121,6 +121,10 @@ export const urls = {
     urls.setEnvironment(normalizedMode);
     return convertedValues;
   },
+};
+
+export const ensureProdEnvironmentOnStartup = () => {
+  urls.applyEnvironment(ENV_MODES.PROD);
 };
 
 // ─── Session ID (per-tab) ────────────────────────────────────────────────────
