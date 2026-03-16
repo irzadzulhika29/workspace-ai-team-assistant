@@ -25,16 +25,16 @@ const ENV_MODES = {
 };
 
 const DEFAULTS = {
-  SUPERVISOR: "https://n8n.karyatech.web.id/webhook-test/chat",
-  KNOWLEDGE: "https://n8n.karyatech.web.id/webhook-test/chat",
+  SUPERVISOR: "https://n8n.karyatech.web.id/webhook/chat",
+  KNOWLEDGE: "https://n8n.karyatech.web.id/webhook/chat",
   PM: "http://localhost:5678/webhook/pm",
   REPORT: "http://localhost:5678/webhook/report",
   STATUS: "http://localhost:5678/webhook/status",
-  UPLOAD: "https://n8n.karyatech.web.id/webhook-test/upload-file",
+  UPLOAD: "https://n8n.karyatech.web.id/webhook/upload-file",
 };
 
 const normalizeEnvMode = (mode) =>
-  mode === ENV_MODES.PROD ? ENV_MODES.PROD : ENV_MODES.DEV;
+  mode === ENV_MODES.DEV ? ENV_MODES.DEV : ENV_MODES.PROD;
 
 const convertWebhookUrlForEnv = (rawUrl, mode) => {
   if (!rawUrl) return rawUrl;

@@ -2,9 +2,9 @@ const JIRA_BASE = 'https://n8n.karyatech.web.id'
 
 const getJiraWebhookUrl = () => {
   const mode = localStorage.getItem('n8n_env_mode')
-  return mode === 'prod'
-    ? `${JIRA_BASE}/webhook/jira`
-    : `${JIRA_BASE}/webhook-test/jira`
+  return mode === 'dev'
+    ? `${JIRA_BASE}/webhook-test/jira`
+    : `${JIRA_BASE}/webhook/jira`
 }
 
 /** @deprecated gunakan getJiraWebhookUrl() agar mengikuti env mode */
