@@ -25,14 +25,12 @@ const ENV_MODES = {
 };
 
 const DEFAULTS = {
-  SUPERVISOR: "http://localhost:5678/webhook/supervisor",
-  KNOWLEDGE:
-    "https://undappled-deliriously-yukiko.ngrok-free.dev/webhook-test/f08f222b-93fb-4de3-84df-8342eec065da",
+  SUPERVISOR: "https://n8n.karyatech.web.id/webhook-test/chat",
+  KNOWLEDGE: "https://n8n.karyatech.web.id/webhook-test/chat",
   PM: "http://localhost:5678/webhook/pm",
   REPORT: "http://localhost:5678/webhook/report",
   STATUS: "http://localhost:5678/webhook/status",
-  UPLOAD:
-    "https://undappled-deliriously-yukiko.ngrok-free.dev/webhook-test/f08f222b-93fb-4de3-84df-8342eec065da",
+  UPLOAD: "https://n8n.karyatech.web.id/webhook-test/upload-file",
 };
 
 const normalizeEnvMode = (mode) =>
