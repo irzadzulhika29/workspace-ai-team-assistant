@@ -10,121 +10,162 @@ export { SUPABASE_URL, SUPABASE_ANON_KEY, supabaseHeaders } from "./supabase";
 
 // ─── localStorage keys ───────────────────────────────────────────────────────
 const KEYS = {
-  SUPERVISOR: "n8n_supervisor_url",
-  KNOWLEDGE: "n8n_knowledge_url",
-  PM: "n8n_pm_url",
-  REPORT: "n8n_report_url",
-  STATUS: "n8n_status_url",
-  UPLOAD: "n8n_upload_url",
-  ENV_MODE: "n8n_env_mode",
+  ENVIRONMENT: "n8n_environment", // prod | dev
+  MODE: "n8n_mode", // publish | test
+  DEV_BASE_URL: "n8n_dev_base_url", // ngrok URL
 };
 
-const ENV_MODES = {
-  DEV: "dev",
+const ENVIRONMENTS = {
   PROD: "prod",
+  DEV: "dev",
 };
 
-const DEFAULTS = {
-  SUPERVISOR: "https://n8n.karyatech.web.id/webhook/chat",
-  KNOWLEDGE: "https://n8n.karyatech.web.id/webhook/chat",
-  PM: "https://n8n.karyatech.web.id/webhook/pm",
-  REPORT: "https://n8n.karyatech.web.id/webhook/report",
-  STATUS: "https://n8n.karyatech.web.id/webhook/status",
-  UPLOAD: "https://n8n.karyatech.web.id/webhook/upload-file",
+const MODES = {
+  PUBLISH: "publish",
+  TEST: "test",
 };
 
-const normalizeEnvMode = (mode) =>
-  mode === ENV_MODES.DEV ? ENV_MODES.DEV : ENV_MODES.PROD;
+const PROD_BASE_URL = "https://n8n.karyatech.web.id";
+const DEFAULT_DEV_BASE_URL = import.meta.env.VITE_N8N_DEV_URL || "https://your-ngrok-url.ngrok.io";
 
-const convertWebhookUrlForEnv = (rawUrl, mode) => {
-  if (!rawUrl) return rawUrl;
+// Default values from .env
+const DEFAULT_ENVIRONMENT = import.meta.env.VITE_N8N_ENV || "prod";
+const DEFAULT_MODE = import.meta.env.VITE_N8N_MODE || "publish";
 
-  const normalizedMode = normalizeEnvMode(mode);
-
-  try {
-    const parsedUrl = new URL(rawUrl);
-    const nextPathname =
-      normalizedMode === ENV_MODES.DEV
-        ? parsedUrl.pathname.replace(/\/webhook(?!-test)(?=\/|$)/g, "/webhook-test")
-        : parsedUrl.pathname.replace(/\/webhook-test(?=\/|$)/g, "/webhook");
-
-    parsedUrl.pathname = nextPathname;
-    return parsedUrl.toString();
-  } catch {
-    return normalizedMode === ENV_MODES.DEV
-      ? rawUrl.replace(/\/webhook(?!-test)(?=\/|$)/g, "/webhook-test")
-      : rawUrl.replace(/\/webhook-test(?=\/|$)/g, "/webhook");
-  }
+// Webhook endpoints
+const ENDPOINTS = {
+  SUPERVISOR: "chat",
+  KNOWLEDGE: "chat",
+  PM: "pm",
+  REPORT: "report",
+  STATUS: "status",
+  UPLOAD: "upload-file",
 };
 
-const convertAllWebhookUrlsForEnv = (values, mode) => ({
-  supervisor: convertWebhookUrlForEnv(values.supervisor, mode),
-  knowledge: convertWebhookUrlForEnv(values.knowledge, mode),
-  pm: convertWebhookUrlForEnv(values.pm, mode),
-  report: convertWebhookUrlForEnv(values.report, mode),
-  status: convertWebhookUrlForEnv(values.status, mode),
-  upload: convertWebhookUrlForEnv(values.upload, mode),
-});
+// ─── Helper functions ─────────────────────────────────────────────────────────
+const normalizeEnvironment = (env) =>
+  env === ENVIRONMENTS.DEV ? ENVIRONMENTS.DEV : ENVIRONMENTS.PROD;
+
+const normalizeMode = (mode) =>
+  mode === MODES.TEST ? MODES.TEST : MODES.PUBLISH;
+
+/**
+ * Generate webhook URL based on environment and mode
+ * @param {string} endpoint - Endpoint name (e.g., 'chat', 'upload-file')
+ * @param {string} environment - 'prod' or 'dev'
+ * @param {string} mode - 'publish' or 'test'
+ * @param {string} devBaseUrl - Custom dev base URL (ngrok)
+ * @returns {string} Complete webhook URL
+ */
+const buildWebhookUrl = (endpoint, environment, mode, devBaseUrl) => {
+  const baseUrl = environment === ENVIRONMENTS.PROD
+    ? PROD_BASE_URL
+    : (devBaseUrl || DEFAULT_DEV_BASE_URL);
+
+  // Remove trailing slash from baseUrl
+  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+  const webhookPath = mode === MODES.TEST ? "webhook-test" : "webhook";
+
+  return `${cleanBaseUrl}/${webhookPath}/${endpoint}`;
+};
 
 // ─── URL getters / setters ────────────────────────────────────────────────────
 export const urls = {
-  getSupervisor: () =>
-    localStorage.getItem(KEYS.SUPERVISOR) || DEFAULTS.SUPERVISOR,
-  getKnowledge: () =>
-    localStorage.getItem(KEYS.KNOWLEDGE) || DEFAULTS.KNOWLEDGE,
-  getPM: () => localStorage.getItem(KEYS.PM) || DEFAULTS.PM,
-  getReport: () => localStorage.getItem(KEYS.REPORT) || DEFAULTS.REPORT,
-  getStatus: () => localStorage.getItem(KEYS.STATUS) || DEFAULTS.STATUS,
-  getUpload: () => localStorage.getItem(KEYS.UPLOAD) || DEFAULTS.UPLOAD,
-  getEnvironment: () => normalizeEnvMode(localStorage.getItem(KEYS.ENV_MODE)),
+  // Get current environment (prod/dev)
+  getEnvironment: () => {
+    const stored = localStorage.getItem(KEYS.ENVIRONMENT);
+    return stored ? normalizeEnvironment(stored) : DEFAULT_ENVIRONMENT;
+  },
 
-  setSupervisor: (url) => localStorage.setItem(KEYS.SUPERVISOR, url),
-  setKnowledge: (url) => localStorage.setItem(KEYS.KNOWLEDGE, url),
-  setPM: (url) => localStorage.setItem(KEYS.PM, url),
-  setReport: (url) => localStorage.setItem(KEYS.REPORT, url),
-  setStatus: (url) => localStorage.setItem(KEYS.STATUS, url),
-  setUpload: (url) => localStorage.setItem(KEYS.UPLOAD, url),
-  setEnvironment: (mode) =>
-    localStorage.setItem(KEYS.ENV_MODE, normalizeEnvMode(mode)),
+  // Get current mode (publish/test)
+  getMode: () => {
+    const stored = localStorage.getItem(KEYS.MODE);
+    return stored ? normalizeMode(stored) : DEFAULT_MODE;
+  },
 
+  // Get dev base URL (ngrok)
+  getDevBaseUrl: () =>
+    localStorage.getItem(KEYS.DEV_BASE_URL) || DEFAULT_DEV_BASE_URL,
+
+  // Set environment
+  setEnvironment: (env) =>
+    localStorage.setItem(KEYS.ENVIRONMENT, normalizeEnvironment(env)),
+
+  // Set mode
+  setMode: (mode) =>
+    localStorage.setItem(KEYS.MODE, normalizeMode(mode)),
+
+  // Set dev base URL
+  setDevBaseUrl: (url) =>
+    localStorage.setItem(KEYS.DEV_BASE_URL, url),
+
+  // Get specific webhook URLs
+  getSupervisor: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.SUPERVISOR, env, mode, devUrl);
+  },
+
+  getKnowledge: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.KNOWLEDGE, env, mode, devUrl);
+  },
+
+  getPM: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.PM, env, mode, devUrl);
+  },
+
+  getReport: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.REPORT, env, mode, devUrl);
+  },
+
+  getStatus: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.STATUS, env, mode, devUrl);
+  },
+
+  getUpload: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.UPLOAD, env, mode, devUrl);
+  },
+
+  // Get all webhook URLs
   getAll: () => ({
-    supervisor: localStorage.getItem(KEYS.SUPERVISOR) || DEFAULTS.SUPERVISOR,
-    knowledge: localStorage.getItem(KEYS.KNOWLEDGE) || DEFAULTS.KNOWLEDGE,
-    pm: localStorage.getItem(KEYS.PM) || DEFAULTS.PM,
-    report: localStorage.getItem(KEYS.REPORT) || DEFAULTS.REPORT,
-    status: localStorage.getItem(KEYS.STATUS) || DEFAULTS.STATUS,
-    upload: localStorage.getItem(KEYS.UPLOAD) || DEFAULTS.UPLOAD,
+    supervisor: urls.getSupervisor(),
+    knowledge: urls.getKnowledge(),
+    pm: urls.getPM(),
+    report: urls.getReport(),
+    status: urls.getStatus(),
+    upload: urls.getUpload(),
   }),
 
-  setAll: ({ supervisor, knowledge, pm, report, status, upload }) => {
-    if (supervisor !== undefined)
-      localStorage.setItem(KEYS.SUPERVISOR, supervisor);
-    if (knowledge !== undefined)
-      localStorage.setItem(KEYS.KNOWLEDGE, knowledge);
-    if (pm !== undefined) localStorage.setItem(KEYS.PM, pm);
-    if (report !== undefined) localStorage.setItem(KEYS.REPORT, report);
-    if (status !== undefined) localStorage.setItem(KEYS.STATUS, status);
-    if (upload !== undefined) localStorage.setItem(KEYS.UPLOAD, upload);
-  },
-
-  convertForEnvironment: (values, mode) =>
-    convertAllWebhookUrlsForEnv(values, mode),
-
-  applyEnvironment: (mode) => {
-    const normalizedMode = normalizeEnvMode(mode);
-    const currentValues = urls.getAll();
-    const convertedValues = convertAllWebhookUrlsForEnv(
-      currentValues,
-      normalizedMode
-    );
-    urls.setAll(convertedValues);
-    urls.setEnvironment(normalizedMode);
-    return convertedValues;
-  },
+  // Get current config
+  getConfig: () => ({
+    environment: urls.getEnvironment(),
+    mode: urls.getMode(),
+    devBaseUrl: urls.getDevBaseUrl(),
+    prodBaseUrl: PROD_BASE_URL,
+  }),
 };
 
 export const ensureProdEnvironmentOnStartup = () => {
-  urls.applyEnvironment(ENV_MODES.PROD);
+  // Defaults are now handled by getEnvironment() and getMode()
+  // which fallback to .env values if localStorage is empty
+  // This function is kept for backward compatibility
 };
 
 // ─── Session ID (per-tab) ────────────────────────────────────────────────────
