@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Brain, Trash2, ChevronDown } from 'lucide-react'
 import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
@@ -9,12 +9,7 @@ import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
 import SkeletonLoader from '../components/ui/SkeletonLoader'
 import { useAutoScroll } from '../hooks/useAutoScroll'
 import { getReplyContent } from '../utils/chatResponse'
-
-const CONTEXT_OPTIONS = [
-  { value: null,           label: 'Semua Dokumen' },
-  { value: 'input',        label: 'Folder: Input (SOP)' },
-  { value: 'output',       label: 'Folder: Output' },
-]
+import { CONTEXT_OPTIONS, ERROR_MESSAGES } from '../constants/chat'
 
 export default function KnowledgeChat() {
   const {
@@ -63,8 +58,8 @@ export default function KnowledgeChat() {
     } catch (err) {
       setError(
         err.code === 'ECONNABORTED'
-          ? 'Request timeout setelah 120 detik. Coba lagi atau periksa koneksi ke n8n.'
-          : 'Tidak dapat terhubung ke Knowledge Agent. Periksa URL webhook di Settings.'
+          ? ERROR_MESSAGES.KNOWLEDGE_TIMEOUT
+          : ERROR_MESSAGES.KNOWLEDGE_CONNECTION
       )
     } finally {
       setLoading(false)
@@ -128,7 +123,7 @@ export default function KnowledgeChat() {
               <Brain size={36} className="opacity-20" />
               <p className="text-sm font-medium">Mulai bertanya tentang SOP</p>
               <p className="text-xs max-w-xs">
-                Contoh: <em>"Berapa hari cuti tahunan karyawan kontrak?"</em> atau <em>"Apa prosedur pengajuan reimbursement?"</em>
+                Contoh: <em>&quot;Berapa hari cuti tahunan karyawan kontrak?&quot;</em> atau <em>&quot;Apa prosedur pengajuan reimbursement?&quot;</em>
               </p>
             </div>
           )}

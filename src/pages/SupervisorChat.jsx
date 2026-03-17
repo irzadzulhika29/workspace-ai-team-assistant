@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
 import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
@@ -9,13 +9,7 @@ import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
 import SkeletonLoader from '../components/ui/SkeletonLoader'
 import { useAutoScroll } from '../hooks/useAutoScroll'
 import { getReplyContent, normalizeResponsePayload } from '../utils/chatResponse'
-
-const AGENT_STATUS_LABELS = {
-  supervisor: 'Supervisor Agent',
-  pm:         'Project Manager Agent',
-  knowledge:  'Knowledge Agent',
-  reporting:  'Reporting Agent',
-}
+import { AGENT_STATUS_LABELS, ERROR_MESSAGES } from '../constants/chat'
 
 export default function SupervisorChat() {
   const {
@@ -69,10 +63,10 @@ export default function SupervisorChat() {
     } catch (err) {
       setError(
         err.code === 'ECONNABORTED'
-          ? 'Request timeout. Backend n8n tidak merespons dalam 120 detik.'
+          ? ERROR_MESSAGES.TIMEOUT
           : err.response?.status
             ? `Error ${err.response.status}: ${err.response.data?.message ?? 'Terjadi kesalahan.'}`
-            : 'Tidak dapat terhubung ke n8n. Periksa URL webhook di Settings.'
+            : ERROR_MESSAGES.CONNECTION
       )
     } finally {
       setLoading(false)
