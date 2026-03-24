@@ -1,0 +1,2 @@
+-- CreateTable (baseline migration - tables already exist)
+-- This migration marks existing tables as managed by Prisma

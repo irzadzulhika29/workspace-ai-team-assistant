@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { FolderOpen, Loader2, AlertCircle } from 'lucide-react'
 import UploadZone from '../components/files/UploadZone'
@@ -8,18 +9,34 @@ import { fileApi } from '../services/api'
 const SUPABASE_BASE_URL = import.meta.env.VITE_SUPABASE_URL
 
 const normalizeFileUrl = (rawUrl) => {
-  const cleaned = String(rawUrl ?? '').replace(/^"|"$/g, '')
+  // Handle null, undefined, atau empty string
+  if (!rawUrl) return null
+
+  // Clean: hapus quotes, tanda =, dan whitespace
+  const cleaned = String(rawUrl)
+    .trim()
+    .replace(/^["'=]+|["']+$/g, '') // Hapus quotes dan = di awal/akhir
+    .trim()
+
   if (!cleaned) return null
 
-  if (cleaned.startsWith('http://localhost:8000/')) {
-    return `${SUPABASE_BASE_URL}${cleaned.replace('http://localhost:8000', '')}`
+  // Jika sudah valid URL (http/https), return as-is
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+    // Ganti localhost dengan Supabase URL jika ada
+    if (cleaned.startsWith('http://localhost:8000/')) {
+      return `${SUPABASE_BASE_URL}${cleaned.replace('http://localhost:8000', '')}`
+    }
+    return cleaned
   }
 
+  // Jika path relatif, tambahkan base URL
   if (cleaned.startsWith('/')) {
     return `${SUPABASE_BASE_URL}${cleaned}`
   }
 
-  return cleaned
+  // Jika format tidak dikenali, log warning dan return null
+  console.warn('[normalizeFileUrl] Format URL tidak dikenali:', rawUrl)
+  return null
 }
 
 const TABS = [
@@ -42,10 +59,26 @@ export default function FileWorkspace() {
         setFetchError(null)
         const data = await fileApi.fetchDokumen()
 
+        console.log('[FileWorkspace] Raw data from Supabase:', data)
+
         const grouped = { input: [], output: [] }
+        let skippedCount = 0
+
         for (const doc of data) {
           const folder = doc.kategori === 'output' ? 'output' : 'input'
           const cleanUrl = normalizeFileUrl(doc.file_url)
+
+          // Skip dokumen dengan URL invalid
+          if (!cleanUrl) {
+            skippedCount++
+            console.warn('[FileWorkspace] Skipping document with invalid URL:', {
+              id: doc.id,
+              name: doc.nama_file,
+              rawUrl: doc.file_url
+            })
+            continue
+          }
+
           grouped[folder].push({
             id: doc.id ?? crypto.randomUUID(),
             name: doc.nama_file ?? 'Untitled',
@@ -55,6 +88,14 @@ export default function FileWorkspace() {
             source: 'supabase',
           })
         }
+
+        console.log('[FileWorkspace] Processed documents:', {
+          total: data.length,
+          loaded: grouped.input.length + grouped.output.length,
+          skipped: skippedCount,
+          grouped
+        })
+
         setSupabaseDocs(grouped)
       } catch (err) {
         console.error('Gagal memuat dokumen dari Supabase:', err)

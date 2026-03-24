@@ -1,7 +1,19 @@
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://agentrouter.org",
-    "ANTHROPIC_AUTH_TOKEN": "sk-bGve4U8RKjFiAzSteR0U0YyTqaeKRlpuHbFCkyDGFjP4Vleq",
-    "ANTHROPIC_MODEL": "deepseek-v3.2"
+    "ANTHROPIC_BASE_URL": "https://api.enowxlabs.com",
+    "ANTHROPIC_AUTH_TOKEN": "enx_9e093ee3377e5079a755f9fce058ff710081ead8933e6d048078fc99c36ba86e",
+    "ANTHROPIC_MODEL": "claude-sonnet-4.5"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp:*)",
+      "Bash(find .claude -name *.json -type f)",
+      "Bash(sqlite3 ~/.claude/state.db \"SELECT name FROM sqlite_master WHERE type=''''table'''';\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)"
+    ]
   }
 }

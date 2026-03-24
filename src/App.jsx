@@ -8,6 +8,7 @@ import KnowledgeChat from './pages/KnowledgeChat'
 import FileWorkspace from './pages/FileWorkspace'
 import CalendarPage from './pages/CalendarPage'
 import JiraPage from './pages/JiraPage'
+import IntegrationsPage from './pages/IntegrationsPage'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
 
 function Layout() {
@@ -41,6 +42,7 @@ function Layout() {
               <Route path="/workspace/files"    element={<FileWorkspace />}    />
               <Route path="/workspace/calendar" element={<CalendarPage />}     />
               <Route path="/workspace/jira"     element={<JiraPage />}         />
+              <Route path="/integrations"       element={<IntegrationsPage />} />
               <Route path="*"                   element={<Dashboard />}        />
             </Routes>
           </div>
