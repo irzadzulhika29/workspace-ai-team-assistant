@@ -3,79 +3,81 @@
 ## Tujuan
 Gunakan skill ini untuk membuat materi presentasi atau slide. Jangan gunakan skill ini untuk menyusun laporan dokumen teks panjang.
 
-## Struktur Slide Wajib
-Bagi informasi menjadi beberapa bagian menggunakan tag `<section class="slide">`. **WAJIB** menambahkan `class="slide"` pada setiap section agar format ukuran slide bekerja.
+## Aturan Batas Slide (SANGAT PENTING)
+Logika pembuatan slide Anda harus mengikuti aturan ini:
+1. **Satu Slide = Satu Section:** Setiap slide presentasi **WAJIB** dibungkus oleh tag `<section class="slide">` dan diakhiri dengan `</section>`.
+2. **Batas `<h1>`:** Setiap `<section class="slide">` **HANYA BOLEH MEMILIKI SATU** tag `<h1>` sebagai judul utama slide di bagian paling atas.
+3. **Isi Slide:** Semua konten pendukung untuk judul tersebut (seperti `<h2>`, `<ul>`, `<table>`, atau diagram) harus diletakkan **di dalam** `<section>` yang sama, di bawah `<h1>`. 
+4. **Pindah Slide:** Jika Anda ingin membuat judul `<h1>` baru (topik baru), Anda **WAJIB** menutup slide saat ini dengan `</section>` terlebih dahulu, lalu buka `<section class="slide">` baru.
 
-1. **Slide Judul:** Gunakan `<h1>` untuk judul utama dan `<h2>` untuk subjudul.
-2. **Slide Konten (Teks):** Gunakan `<ul>` dan `<li>` untuk poin-poin.
-3. **Slide Konten (Data/Tabel):** Gunakan format tabel HTML (`<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`) untuk matriks atau perbandingan.
-4. **Slide Konten (Alur/Diagram):** WAJIB gunakan struktur div khusus ini untuk membuat alur proses atau diagram langkah:
-   ```html
-   <div class="flow-container">
-     <div class="flow-box">Langkah 1</div>
-     <div class="flow-arrow">&#8594;</div>
-     <div class="flow-box">Langkah 2</div>
-     <div class="flow-arrow">&#8594;</div>
-     <div class="flow-box">Langkah 3</div>
-   </div>
-   ```
+## Pilihan Format Konten Slide
+Pilih format yang paling cocok untuk isi slide Anda agar rapi dan tidak membosankan:
+* **Teks Biasa:** Gunakan `<ul>` dan `<li>`. Batasi teks agar tetap ringkas. Gunakan tag `<strong>` untuk menebalkan kata kunci.
+* **Matriks/Perbandingan:** WAJIB gunakan format tabel (`<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`).
+* **Alur/Langkah-langkah:** WAJIB gunakan struktur diagram HTML ini:
+  ```html
+  <div class="flow-container">
+    <div class="flow-box">Langkah 1</div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-box">Langkah 2</div>
+  </div>
+  ```
 
 ## Aturan Penulisan HTML
 * Hasilkan kode HTML yang valid dan bersih tanpa CSS sebaris (inline CSS).
-* Variasikan isi presentasi! Gunakan *list*, tabel, atau *flow-container* sesuai konteks data.
-* Gunakan tag `<strong>` untuk menebalkan kata kunci.
+* Jangan pernah meletakkan teks atau elemen HTML apa pun di luar tag `<section class="slide">`.
 
-## Contoh Keluaran (Referensi Format)
-Keluarkan hasil akhir dalam format HTML murni seperti contoh di bawah ini:
+## Contoh Keluaran Wajib (Referensi Format)
+Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah ini:
 
 ```html
 <section class="slide">
-  <h1>Arsitektur Document Agent</h1>
-  <h2>Penerapan <strong>Router Pattern</strong></h2>
+  <h1>Judul Presentasi Utama</h1>
+  <h2>Subjudul atau Nama Pemateri</h2>
 </section>
 
 <section class="slide">
-  <h1>Alur Kerja Sistem</h1>
-  <div class="flow-container">
-    <div class="flow-box">Input Pengguna</div>
-    <div class="flow-arrow">&#8594;</div>
-    <div class="flow-box">AI Klasifikasi</div>
-    <div class="flow-arrow">&#8594;</div>
-    <div class="flow-box">Cetak Dokumen</div>
-  </div>
+  <h1>Agenda Pembahasan</h1>
+  <ul>
+    <li>Poin Pembahasan Pertama</li>
+    <li>Poin Pembahasan Kedua</li>
+  </ul>
 </section>
 
 <section class="slide">
-  <h1>Perbandingan Kinerja</h1>
+  <h1>Perbandingan Kinerja (Contoh Tabel)</h1>
   <table>
     <thead>
       <tr>
-        <th>Metode</th>
-        <th>Akurasi</th>
-        <th>Kecepatan</th>
+        <th>Kategori A</th>
+        <th>Kategori B</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Prompt Tunggal</td>
-        <td>Rendah</td>
-        <td>Cepat</td>
-      </tr>
-      <tr>
-        <td>Skill Terpisah</td>
-        <td><strong>Tinggi</strong></td>
-        <td>Stabil</td>
+        <td>Data 1</td>
+        <td>Data 2</td>
       </tr>
     </tbody>
   </table>
 </section>
 
 <section class="slide">
+  <h1>Proses Eksekusi (Contoh Diagram Alur)</h1>
+  <div class="flow-container">
+    <div class="flow-box">Input Data</div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-box">Proses AI</div>
+    <div class="flow-arrow">&#8594;</div>
+    <div class="flow-box">Output Selesai</div>
+  </div>
+</section>
+
+<section class="slide">
   <h1>Kesimpulan</h1>
   <ul>
-    <li>Pemisahan tugas meningkatkan keandalan sistem.</li>
-    <li>Penggunaan diagram memperjelas proses kompleks.</li>
+    <li>Satu section hanya untuk satu H1.</li>
+    <li>Semua isi terkunci rapi di dalam section.</li>
   </ul>
-  <h2>Terima Kasih</h2>
 </section>
 ```
