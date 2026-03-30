@@ -1,0 +1,1865 @@
+{
+  "name": "AI Assistant Team",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-ai-agent",
+          "mode": "list",
+          "cachedResultName": "rag-ai-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1056,
+        1328
+      ],
+      "id": "fe67b786-bb94-4392-a30e-dca1d5221428",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "qjoVsvnMKymAPQQw",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "BAAI/bge-m3",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        1536
+      ],
+      "id": "ed0c41f6-62ce-4750-a322-02eca5b6d2d9",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "133wsOINxPjAEron",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -960,
+        1552
+      ],
+      "id": "b66ede99-7b73-48e8-986c-00ed5718e913",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        1696
+      ],
+      "id": "7d3da8bd-d6b3-47a4-a049-6900c384cf3a",
+      "name": "Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "modelName": "BAAI/bge-m3",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        80,
+        2336
+      ],
+      "id": "f18f71c0-2795-4299-b484-6774a58ebaab",
+      "name": "Embeddings HuggingFace Inference2",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "133wsOINxPjAEron",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n  {\n    \"myField\": $json.output\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1504,
+        1632
+      ],
+      "id": "9ae6ebcb-8eab-47c3-b742-9a8b6327d1ad",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.PromptFinal }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Kamu adalah AI Supervisor. Tugas utamamu adalah menganalisis maksud instruksi pengguna untuk mendelegasikan tugas kepada agen spesialis yang tepat, ATAU menjawabnya secara langsung jika permintaan tersebut tidak membutuhkan bantuan agen spesialis.\n\nAnalisis permintaan pengguna dan patuhi aturan eksekusi berikut secara ketat:\n\n1. Jika pengguna bertanya tentang kebijakan internal, aturan, Standar Operasional Prosedur (SOP), referensi dokumen, atau pencarian fakta spesifik dari basis pengetahuan perusahaan, SELALU gunakan tool 'RAG_Agent'.\n\n2. Jika pengguna meminta untuk MEMBUAT TIKET/TASK DI JIRA (seperti \"buat tiket\", \"masukkan ke backlog\", \"catat tugas\"), MENGECEK/MELIHAT JADWAL (kalender), menanyakan agenda hari ini/minggu depan, menyusun jadwal baru, merencanakan alur kerja, membuat daftar tugas, atau mengorganisasi sebuah acara, SELALU gunakan tool 'Planner_Agent'. Planner_Agent adalah satu-satunya agen yang memiliki akses ke sistem Jira dan Google Calendar.\n\n3. Jika pengguna meminta untuk merangkum obrolan, membuat rekapitulasi data operasional, menyusun draf laporan tertulis, atau secara spesifik menginstruksikan pembuatan dokumen atau file PDF, SELALU gunakan tool 'Report_Agent'.\n\n4. Jika pengguna memberikan sapaan, percakapan santai (chit-chat), atau menanyakan informasi umum yang BUKAN merupakan SOP internal, urusan Jira/kalender, maupun pembuatan laporan, JAWAB SECARA LANGSUNG menggunakan pengetahuan bawaanmu tanpa memanggil tool atau agen apa pun.\n\nInstruksi Eksekusi Mutlak:\n- Dilarang keras menggunakan pengetahuan bawaanmu untuk menjawab pertanyaan faktual seputar kebijakan perusahaan; biarkan RAG_Agent yang mencari fakta tersebut.\n- Jika menjawab secara langsung (tanpa tool), berikan respons yang profesional, ramah, dan relevan.\n- ATURAN DELEGASI REPORT_AGENT: Jika kamu mendelegasikan tugas ke 'Report_Agent' untuk merangkum atau membuat PDF, kamu TIDAK BOLEH hanya mengirimkan instruksi kosong. Kamu WAJIB mengekstrak informasi, jadwal, atau data terkait dari riwayat obrolan sebelumnya, lalu MENYERTAKAN data lengkap tersebut ke dalam input perintahmu kepada Report_Agent, agar ia memiliki bahan teks untuk dirangkum.\n- ATURAN PENYALURAN HASIL (PASS-THROUGH): Jika kamu baru saja mendapatkan hasil/output dari tool 'Report_Agent' atau 'Planner_Agent', kamu WAJIB memberikan jawaban tersebut kepada pengguna secara utuh (copy-paste 100%). DILARANG KERAS memparafrase, merangkum, merusak format tabel Markdown, atau menambahkan kalimat pengantar/penutup buatanmu sendiri. Tampilkan hasil kerja mereka secara MENTAH."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        1552
+      ],
+      "id": "3fb2209a-ebd3-415f-ac9c-b0931bcada32",
+      "name": "Supervisor Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Gunakan agen ini HANYA untuk mencari, mengekstrak, dan menjawab pertanyaan terkait informasi faktual, kebijakan internal, aturan perusahaan, atau Standar Operasional Prosedur (SOP) seperti proses onboarding dan payroll. Agen ini terhubung ke basis data vektor (Pinecone) untuk mengambil dokumen referensi internal.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Kamu adalah Spesialis Pencarian Dokumen Internal (RAG Agent). Tugas tunggalmu adalah memberikan jawaban yang 100% objektif, akurat, dan dapat dipertanggungjawabkan berdasarkan dokumen atau konteks yang diambil dari basis data.\n\nPatuhi aturan mutlak berikut:\n\nJawab pertanyaan HANYA berdasarkan informasi yang dikembalikan oleh tool pencarian dokumen (Pinecone).\n\nDilarang keras menggunakan opini subjektif, spekulasi, atau pengetahuan umum di luar dokumen yang diberikan.\n\nJika dokumen yang ditarik tidak memuat informasi yang relevan untuk menjawab pertanyaan, kamu WAJIB menjawab: \"Maaf, informasi tersebut tidak ditemukan di dalam dokumen SOP atau kebijakan internal kami.\" Jangan pernah mencoba mengarang jawaban.\n\nSertakan nama dokumen atau poin referensi (jika tersedia di metadata) saat memberikan jawaban agar pengguna mengetahui sumber faktanya."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        1920
+      ],
+      "id": "ff459516-97f7-4a18-808e-7b8092e57b15",
+      "name": "RAG_Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Kamu adalah Planner Agent, spesialis manajer proyek dan pengatur jadwal. Tugas utamamu adalah menyusun jadwal, merencanakan alur kerja operasional, memecah instruksi kompleks menjadi daftar tugas (to-do list) yang terstruktur, dan menetapkan tenggat waktu.\n\nINSTRUKSI MUTLAK PENGGUNAAN ALAT (TOOLS):\nKamu terhubung dengan dua sistem utama: Jira (untuk manajemen tugas) dan Google Calendar (untuk penjadwalan waktu/acara). Kamu WAJIB memilih alat yang tepat berdasarkan instruksi pengguna:\n\n1. GOOGLE CALENDAR (Untuk Acara, Rapat, dan Blok Waktu)\n- TRIGGER: Gunakan tool ini HANYA jika pengguna meminta \"jadwalkan rapat\", \"buat agenda\", \"ingatkan saya besok\", atau menetapkan aktivitas yang memiliki jam mulai dan jam selesai yang spesifik.\n- PARAMETER: Kamu wajib merumuskan 'Event Title' (Nama acara), 'Start Time', dan 'End Time'.\n\n2. JIRA (Untuk Tugas, Proyek, dan To-Do List)\n- TRIGGER: Gunakan tool ini HANYA jika pengguna meminta \"buatkan task\", \"masukkan ke backlog\", \"catat tiket\", atau jika kamu memecah sebuah proyek besar menjadi langkah-langkah kerja yang harus ditindaklanjuti oleh tim.\n- PARAMETER: Kamu wajib merumuskan 'Summary' (Judul tugas profesional) dan 'Description' (Rincian langkah pengerjaan).\n\nATURAN EKSEKUSI GANDA:\nJika pengguna memberikan instruksi gabungan (Contoh: \"Buat task untuk riset PDF dan jadwalkan meeting pembahasannya besok jam 10\"), kamu DIIZINKAN dan WAJIB memanggil KEDUA tool tersebut secara berurutan.\n\nKONFIRMASI:\nSetelah eksekusi alat berhasil, berikan laporan yang ringkas, objektif, dan profesional. Sebutkan secara spesifik apa yang masuk ke Jira dan apa yang masuk ke Google Calendar.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Kamu adalah Spesialis Perencana Proyek dan Manajemen Waktu (Planner Agent). Tugas utamamu adalah merancang jadwal operasional dan WAJIB mengeksekusinya ke Google Calendar menggunakan tool yang tersedia.\n\nFAKTA WAKTU SAAT INI (SANGAT PENTING):\nHari ini adalah {{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm:ss') }} (Zona Waktu: Asia/Jakarta). Jadikan ini sebagai patokan mutlak untuk menghitung kalender ke depan.\n\nPROTOKOL PENYUSUNAN JADWAL (TEKS BALASAN):\n- Sajikan rencana dalam format visual (bullet points/markdown table).\n- Pisahkan proyek besar menjadi tugas kecil yang dapat ditindaklanjuti.\n- Jika instruksi ambigu (\"minggu depan\"), asumsikan hari kerja terdekat (Senin-Jumat) dan jam kerja standar (09:00 - 16:00). Asumsikan durasi rapat 1 jam jika tidak disebutkan.\n- Fokus murni pada perencanaan operasional. Dilarang mengarang kebijakan SOP.\n\nATURAN MUTLAK PENGGUNAAN TOOL GOOGLE CALENDAR:\n1. SCOPE ACARA (PENTING): Jika merancang \"Sprint/Proyek\", masukkan HANYA rapat utama (Sprint Planning, Daily Standup, Sprint Review, Retrospective) ke dalam kalender. DILARANG KERAS memasukkan rincian tugas individu (coding, design) atau waktu istirahat (coffee break/lunch) ke kalender. Rincian tugas tersebut cukup tuliskan di teks balasan chat saja.\n2. FORMAT WAKTU: Kamu WAJIB memformat parameter waktu mulai (start) dan selesai (end) menggunakan format ISO 8601 lengkap dengan offset zona waktu Jakarta (+07:00). Contoh: \"2026-03-12T09:00:00+07:00\".\n3. MULTI-EVENT LOOPING: Jika diminta jadwal berulang (seperti Daily Standup selama 5 hari), kamu WAJIB memanggil tool kalender ini berkali-kali secara berurutan dalam satu siklus kerjamu hingga semua acara utama terjadwal. Jangan berhenti di 1 acara jika pengguna meminta rutinitas.\n4. URUTAN EKSEKUSI: Kamu TIDAK BOLEH memberikan teks balasan ke pengguna SEBELUM tool kalender selesai kamu eksekusi untuk jadwal-jadwal utama tersebut."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        704,
+        1904
+      ],
+      "id": "088cdcf6-ba90-4ab4-95cf-665626293111",
+      "name": "Planner_Agent"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -544,
+        1536
+      ],
+      "id": "04b0e95b-c21c-4d11-9801-f728f861cd73",
+      "name": "Main Webhook",
+      "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-document",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1984,
+        1552
+      ],
+      "id": "bf80e21b-919d-4990-a660-d763266bbf09",
+      "name": "Upload Document",
+      "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/dokumen_sop/{{ $json.body.file_name }}\n\n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5bm1uZXpta3JqdXlnZGtkc2ZlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQ3MjY4NiwiZXhwIjoyMDg5MDQ4Njg2fQ.hY5_h4s1hcCF0KdfV2YQGHS07246V9H3VnVqsSPkbo0"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1744,
+        1408
+      ],
+      "id": "719a60c4-b7c4-4616-8926-268df7255107",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "tableId": "dokumen",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nama_file",
+              "fieldValue": "={{ $('Upload Document').item.json.body.file_name }}"
+            },
+            {
+              "fieldId": "kategori",
+              "fieldValue": "={{ $('Upload Document').item.json.body.kategori }}"
+            },
+            {
+              "fieldId": "file_url",
+              "fieldValue": "=\"http://localhost:8000/storage/v1/object/public/dokumen_sop/{{ $('Upload Document').item.json.body.file_name }}\""
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        1408
+      ],
+      "id": "655fcb29-9d39-48e8-a737-98da2c53cc95",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1312,
+        1536
+      ],
+      "id": "c388cc19-5d10-48af-a393-33b05ea9a703",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Main Webhook').item.json.body.session_id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        1808
+      ],
+      "id": "21d5fc66-9554-4256-ada4-d97964726b70",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "wNO8IbSKtGmYxykw",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Main Webhook').item.json.body.message }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Kamu adalah ahli perangkum topik obrolan (Chat Title Generator).\nTugasmu adalah mengekstrak inti permasalahan atau topik utama dari pesan pengguna dan mengubahnya menjadi judul obrolan yang sangat singkat, padat, dan profesional (maksimal 4 kata).\n\nATURAN MUTLAK:\n1. DILARANG KERAS menggunakan tanda kutip (\"...\") atau titik (.) pada hasil akhir.\n2. Gunakan format Huruf Kapital di setiap awal kata (Title Case).\n3. Jangan pernah menjawab atau merespons isi pesan pengguna, berikan HANYA teks judulnya saja.\n\nCONTOH REFERENSI:\nPesan: \"Apa yang harus saya lakukan jika tidak mendapatkan slip gaji bulan ini?\"\nJudul: Masalah Slip Gaji\n\nPesan: \"Tolong dong buatin saya jadwal untuk event onboarding minggu depan.\"\nJudul: Jadwal Event Onboarding\n\nPesan: \"Gimana sih aturan perusahaan soal jatah cuti tahunan dan cuti sakit?\"\nJudul: Aturan Cuti Karyawan\n\nEKSEKUSI SEKARANG:\nPesan: {{ $json.body.message }}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        208,
+        736
+      ],
+      "id": "414b0521-aea9-4188-aca2-0cf4b8951b78",
+      "name": "Generate Chat Tittle"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Gunakan agen ini untuk membuat rekap laporan atau dokumen PDF. \nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agen ini, kamu WAJIB menyalin dan memasukkan seluruh teks/data/jadwal yang ingin direkap dari riwayat obrolan ke dalam parameter 'input'. DILARANG KERAS mengirim input kosong atau hanya menyuruh \"buatkan laporan\". Kamu harus memberikan bahan mentahnya di dalam input.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "Kamu adalah Spesialis Pelaporan dan Dokumentasi (Report Agent). Tugas tunggalmu adalah memformat data mentah yang diberikan kepadamu menjadi laporan visual yang rapi.\n\nATURAN MUTLAK (ZERO-HALLUCINATION):\n1. BACA DATA INPUT: Kamu WAJIB HANYA menggunakan data (tanggal, waktu, nama acara, catatan) yang secara eksplisit dikirimkan di dalam input/prompt.\n2. HARAM MENGARANG: DILARANG KERAS menambahkan, mengubah, atau mengarang hari, tanggal, nama orang, atau acara fiktif di luar data yang diberikan. Jika data di input adalah bulan Maret 2026, kamu WAJIB menulis Maret 2026.\n3. FORMAT TABEL (SANGAT KRITIS): Jika menyajikan data dalam bentuk tabel, kamu WAJIB menggunakan format tabel Markdown standar (menggunakan simbol pipa |).\n   - ATURAN SUPER MUTLAK: Kamu HARUS memberikan 1 baris kosong (2 kali Enter) tepat sebelum membuat baris pertama (header) tabel. Jika tidak ada baris kosong, tabel akan rusak.\n   - DILARANG KERAS menggunakan tag HTML mentah (seperti <table>, <div>, dll).\n   - Dilarang memasukkan baris baru (Enter) di dalam sel tabel. Jika teks terlalu panjang, tulis saja memanjang ke samping.\n\nPROTOKOL KONFIRMASI PDF (WAJIB DIPATUHI):\n- SKENARIO A (MINTA REKAP/LAPORAN BIASA):\nJika pengguna hanya minta \"tolong rekap\", sajikan tabel laporan Markdown tersebut secara lengkap. Setelah tabel selesai, tutup balasanmu DENGAN PERSIS kalimat ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\n- SKENARIO B (EKSPLISIT MINTA PDF / MENJAWAB 'YA'):\nJika di input tertulis \"buatkan laporan PDF\" atau pengguna menjawab \"Ya\", sajikan tabel laporan Markdown tersebut dengan rapi. Setelah tabel selesai, tutup balasanmu DENGAN PERSIS kalimat ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)' yang telah muncul di layar Anda untuk menyimpan dokumen ini.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        1904
+      ],
+      "id": "cd3eb7fd-0196-444e-85b9-356387f6dfcc",
+      "name": "Report_Agent"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "chat_sessions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.body.session_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        752
+      ],
+      "id": "5c46314a-d1c8-495f-9bc2-ce6c3a98d8a3",
+      "name": "Get a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6420fbf7-3084-464c-8ef7-0ae8595f57af",
+              "leftValue": "={{ Object.keys($binary || {}).length > 0 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -336,
+        1536
+      ],
+      "id": "b4e3742c-f765-44f3-a324-820f407e2bc1",
+      "name": "is file exist?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81e74b75-a18e-4d88-be2f-e3eb6dd618d1",
+              "name": "PromptFinal",
+              "value": "=instruction: {{ $('Main Webhook').item.json.body.message }}  \n\ndocument_text: {{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1200
+      ],
+      "id": "b61c1ea5-6995-4421-8bd6-22c48f523014",
+      "name": "combine promt + text file"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81e74b75-a18e-4d88-be2f-e3eb6dd618d1",
+              "name": "PromptFinal",
+              "value": "={{ $('Main Webhook').item.json.body.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        1552
+      ],
+      "id": "da586ec1-4d53-4f33-a311-1177f2978cb3",
+      "name": "user promt only"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "seed-2-0-lite-free",
+          "mode": "list",
+          "cachedResultName": "seed-2-0-lite-free"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        1808
+      ],
+      "id": "cfe7146e-273a-4337-86d2-9db800cd1146",
+      "name": "Seed-2-0-lite-free",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "seed-2-0-lite-free",
+          "mode": "list",
+          "cachedResultName": "seed-2-0-lite-free"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        2080
+      ],
+      "id": "bdceff06-2231-4d3a-a96a-7a8b408c224e",
+      "name": "Seed-2-0-lite-free-2",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "arcee-ai/trinity-large-preview:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        2096
+      ],
+      "id": "d8994ef6-b2b3-4334-9b42-6676c5f834a9",
+      "name": "arcee-ai/trinity-large-preview:free",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Bn1tGFgNk3U5Ux6Y",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Gunakan tool ini untuk mencari dan mengambil informasi, referensi, atau konteks faktual dari basis data dokumen internal berdasarkan pertanyaan pengguna. Input harus berupa pertanyaan inti atau kata kunci pencarian yang spesifik.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-ai-agent",
+          "mode": "list",
+          "cachedResultName": "rag-ai-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        2176
+      ],
+      "id": "99737cce-efeb-44e1-a60f-3b8ca9c068a0",
+      "name": "retrieve vector data",
+      "credentials": {
+        "pineconeApi": {
+          "id": "qjoVsvnMKymAPQQw",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "arcee-ai/trinity-large-preview:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        512,
+        2064
+      ],
+      "id": "bfdffaa4-2909-4245-83bb-75d45d5c6313",
+      "name": "arcee-ai/trinity-large-preview:free-2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Bn1tGFgNk3U5Ux6Y",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "seed-2-0-lite-free",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        2080
+      ],
+      "id": "5dcd4dfe-94ce-4526-8e31-a45982d06f84",
+      "name": "seed-2-0-lite-free-3",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Gunakan tool ini untuk membuat atau menjadwalkan acara baru di Google Calendar pengguna",
+        "calendar": {
+          "__rl": true,
+          "value": "74958bcbbc4ab71e72395293996e5675d95c77ce58ae5b54bf830dfce543fe65@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Karya Tech Calendar"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        2192
+      ],
+      "id": "67a09556-14f8-4ef3-b969-9ef7c4d121b1",
+      "name": "create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hRTA3p2ajCtwCNsv",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Gunakan tool ini HANYA ketika pengguna meminta untuk melihat jadwal mereka, menanyakan agenda rapat, memeriksa ketersediaan waktu kosong, atau mencari acara yang sudah ada di Google Calendar. \n\nInstruksi Eksekusi Tool:\n1. Analisis rentang waktu yang diminta pengguna (contoh: \"jadwal hari ini\" berarti dari jam 00:00 hingga 23:59 di hari ini).\n2. Kamu WAJIB memasukkan parameter batas waktu pencarian ('time_min' dan 'time_max') menggunakan format ISO 8601 dengan offset zona waktu Jakarta (+07:00).\n3. Setelah tool ini mengembalikan data, baca daftar acaranya, lalu buatkan rangkuman jadwal yang rapi untuk dibaca oleh pengguna. Jika data kosong, beri tahu pengguna bahwa jadwal mereka kosong.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "74958bcbbc4ab71e72395293996e5675d95c77ce58ae5b54bf830dfce543fe65@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Karya Tech Calendar"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {
+          "orderBy": "startTime"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        2192
+      ],
+      "id": "8b920e85-f710-41cd-901e-782a47d6f4de",
+      "name": "get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hRTA3p2ajCtwCNsv",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "=deepseek-v3-2",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        2096
+      ],
+      "id": "c6f76645-f94f-474a-b26d-55f65143af49",
+      "name": "deepseek-v3-2",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "arcee-ai/trinity-large-preview:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        448,
+        1808
+      ],
+      "id": "9cd4595f-a1f7-494c-8c13-717303c16e1e",
+      "name": "arcee-ai/trinity-large-preview:free-",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Bn1tGFgNk3U5Ux6Y",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "580d58dd-aabe-4f20-98ea-66fea74f8233",
+              "leftValue": "={{ $json.judul }}",
+              "rightValue": "Obrolan Baru",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -32,
+        752
+      ],
+      "id": "db9e87e7-8b51-4827-9edc-263ecbd767cf",
+      "name": "is first chat?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "chat_sessions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Main Webhook').item.json.body.session_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "judul",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        512,
+        736
+      ],
+      "id": "107e7d2b-e2ee-47bc-abc6-a0c670a633ce",
+      "name": "update chat title",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Upload an document \n",
+        "height": 544,
+        "width": 1424,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2032,
+        1296
+      ],
+      "id": "95c6f972-0671-417e-9cf6-b0cb73622c30",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "file",
+        "options": {
+          "language": "ind"
+        }
+      },
+      "type": "n8n-nodes-tesseractjs.tesseractNode",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1040
+      ],
+      "id": "93194bb8-c554-4a1e-9723-001870a613b1",
+      "name": "Tesseract"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81e74b75-a18e-4d88-be2f-e3eb6dd618d1",
+              "name": "PromptFinal",
+              "value": "=instruction:\n{{ $('Main Webhook').item.json.body.message }}\n\ndocument_text:\n{{ $json.text }}\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1040
+      ],
+      "id": "e872310c-c9ee-46a2-bf4b-1257d8e93f40",
+      "name": "combine promt + text image"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $binary.file.mimeType }}",
+                    "rightValue": "image/",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "ed644e68-e9ab-46be-810c-b0a86db89d45"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e317eec9-132f-4a1b-a370-53ba7f193cd3",
+                    "leftValue": "={{ $binary.file.mimeType }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c4ec4cb1-ad5b-4216-97f5-925b76cc79e7",
+                    "leftValue": "={{ $binary.file.mimeType }}",
+                    "rightValue": "text/csv",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        1184
+      ],
+      "id": "12fc60fb-1e89-4fd8-af7d-bb577ba56e5c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        1008
+      ],
+      "id": "ada97a34-dc69-4334-a4a1-25db2625e75c",
+      "name": "extract pdf text"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        1376
+      ],
+      "id": "2dfa115c-fb26-49ff-b66f-90126ac824cd",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81e74b75-a18e-4d88-be2f-e3eb6dd618d1",
+              "name": "PromptFinal",
+              "value": "=instruction: {{ $('Main Webhook').item.json.body.message }}  \n\ndocument_text: {{ JSON.stringify($input.all().map(item => item.json)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1376
+      ],
+      "id": "526bb9a1-7584-4259-9947-2b8631ed10cd",
+      "name": "combine promt + text csv"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        2176
+      ],
+      "id": "2b766694-cfdb-409d-b51b-7111026c2172",
+      "name": "Get many issues in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "FN3ogldgdl8zS3TZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Menghapus event dari Google Calendar berdasarkan event ID atau informasi event yang ditemukan sebelumnya. Gunakan tool ini ketika pengguna meminta untuk membatalkan, menghapus, atau menghilangkan jadwal dari kalender.\n\nTool ini hanya digunakan jika event yang dimaksud sudah diidentifikasi dengan jelas, biasanya melalui pencarian event sebelumnya.\n\nWhen to Use\n\nGunakan tool ini jika pengguna mengatakan hal seperti:\n\nhapus jadwal\n\nbatalkan meeting\n\ndelete event\n\nremove calendar event\n\ncancel appointment\n\nhilangkan agenda dari kalender\n\nPastikan event yang akan dihapus sudah diketahui event ID-nya atau telah ditemukan melalui proses pencarian sebelumnya.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "74958bcbbc4ab71e72395293996e5675d95c77ce58ae5b54bf830dfce543fe65@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Karya Tech Calendar"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        2192
+      ],
+      "id": "dda043f9-c666-4ac0-8cb7-e8978d46952f",
+      "name": "delete events calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hRTA3p2ajCtwCNsv",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a9e801e7-7ba5-4244-977d-54e72e094372",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Silakan klik tombol 'Unduh Laporan",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        1552
+      ],
+      "id": "b62e942f-7d19-4db5-aab8-18ed779d92d3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "destinationKey": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        1392
+      ],
+      "id": "805a8ad7-e08d-4059-82a3-1e07acea376f",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://v2.api2pdf.com/chrome/pdf/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "b794cd07-9281-4b5e-a564-17be14813673"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "=={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1712,
+        1392
+      ],
+      "id": "ccf0c519-f44a-4108-9322-5f593e9918a4",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('HTTP Request1').item.json.FileUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data_pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2144,
+        1392
+      ],
+      "id": "1bc44a81-7775-406a-9ec6-e6299b6cc2c9",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/dokumen_sop/{{ $json.nama_file_laporan }}\n\n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5bm1uZXpta3JqdXlnZGtkc2ZlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQ3MjY4NiwiZXhwIjoyMDg5MDQ4Njg2fQ.hY5_h4s1hcCF0KdfV2YQGHS07246V9H3VnVqsSPkbo0"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/pdf"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data_pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2352,
+        1392
+      ],
+      "id": "2056b389-edb3-4d7f-b9cc-37e4b1b69b93",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "tableId": "dokumen",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nama_file",
+              "fieldValue": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf"
+            },
+            {
+              "fieldId": "kategori",
+              "fieldValue": "output"
+            },
+            {
+              "fieldId": "file_url",
+              "fieldValue": "={{\"https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/public/dokumen_sop/\" + $('HTTP Request2').item.json.nama_file_laporan}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        1392
+      ],
+      "id": "05e15f49-9f72-403e-b54a-df02501197ca",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b327c4a6-84df-4551-8d9e-0487a616cf0a",
+              "name": "nama_file_laporan",
+              "value": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        1392
+      ],
+      "id": "ca7ff6f5-54ca-47b2-a184-4e614d6bbe7f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"myField\": \"Laporan Anda sudah siap! Silakan unduh dokumen PDF-nya melalui tautan aman berikut ini:\\n\\n{{ $('Create a row1').item.json.file_url }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2768,
+        1392
+      ],
+      "id": "e9d5c5f2-c3bb-4945-9d5b-5080b055fe4d",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "deepseek-v3-2",
+          "mode": "list",
+          "cachedResultName": "deepseek-v3-2"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        912
+      ],
+      "id": "599ba5e1-b6e5-462c-a23e-a8bf8adfc4ac",
+      "name": "deepseek-v3.2",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function convertMarkdownTableToHtml(markdown) {\n    // Regex untuk detect markdown table\n    const tableRegex = /(\\|.+\\|[\\r\\n]+\\|[-:\\s|]+\\|[\\r\\n]+(?:\\|.+\\|[\\r\\n]*)+)/g;\n\n    return markdown.replace(tableRegex, (match) => {\n      const lines = match.trim().split('\\n').map(line =>\n        line.trim().split('|').filter(cell => cell.trim())\n      );\n\n      if (lines.length < 3) return match; // Not a valid table\n\n      const headers = lines[0];\n      const rows = lines.slice(2); // Skip separator line\n\n      let html = '<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">\\n';\n\n      // Header\n      html += '  <thead>\\n    <tr>\\n';\n      headers.forEach(header => {\n        html += `      <th style=\"padding: 8px; text-align: left; background-color: #f2f2f2;\">${header.trim()}</th>\\n`;\n      });\n      html += '    </tr>\\n  </thead>\\n';\n\n      // Body\n      html += '  <tbody>\\n';\n      rows.forEach(row => {\n        html += '    <tr>\\n';\n        row.forEach(cell => {\n          html += `      <td style=\"padding: 8px; border: 1px solid #ddd;\">${cell.trim()}</td>\\n`;\n        });\n        html += '    </tr>\\n';\n      });\n      html += '  </tbody>\\n</table>\\n';\n\n      return html;\n    });\n  }\n\n  const markdown = $input.first().json.output;\n  const processedMarkdown = convertMarkdownTableToHtml(markdown);\n\n  return [{ json: { output: processedMarkdown } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1552
+      ],
+      "id": "d603fd32-8914-4fd3-85cc-35e4d872ee61",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "binaryProperty": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1200
+      ],
+      "id": "8fa9a7d9-e484-4ec1-abfe-99fd8b2f06ee",
+      "name": "Extract text",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "w8uzdoMNkfX3gHSw",
+          "name": "Mistral Cloud account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "retrieve vector data",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "Supervisor Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Planner_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "is file exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Upload Document": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Chat Tittle": {
+      "main": [
+        [
+          {
+            "node": "update chat title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "is first chat?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is file exist?": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "user promt only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "combine promt + text file": {
+      "main": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user promt only": {
+      "main": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed-2-0-lite-free": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed-2-0-lite-free-2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG_Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arcee-ai/trinity-large-preview:free": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG_Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "retrieve vector data": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arcee-ai/trinity-large-preview:free-2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "seed-2-0-lite-free-3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create an event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get many events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deepseek-v3-2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Report_Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "arcee-ai/trinity-large-preview:free-": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "is first chat?": {
+      "main": [
+        [
+          {
+            "node": "Generate Chat Tittle",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Tesseract": {
+      "main": [
+        [
+          {
+            "node": "combine promt + text image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "combine promt + text image": {
+      "main": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Tesseract",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract pdf text": {
+      "main": [
+        []
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "combine promt + text csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "combine promt + text csv": {
+      "main": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many issues in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete events calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deepseek-v3.2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Chat Tittle",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract text": {
+      "main": [
+        [
+          {
+            "node": "combine promt + text file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "72b6bbe8-627a-4ce6-a9e4-9be31a5052a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
+  },
+  "id": "BLMbTrF0h5rwPEXP",
+  "tags": []
+}
