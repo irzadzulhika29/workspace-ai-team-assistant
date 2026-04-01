@@ -84,8 +84,14 @@ Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah i
 
 ## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
 
-Setelah seluruh slide selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
+Setelah seluruh slide selesai ditulis, tutup respons dengan kalimat PERSIS berikut — tidak boleh diparafrase, disingkat, atau diganti dengan kalimat lain apapun:
 
 "Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya."
 
-Frasa **'Unduh Presentasi (PDF)'** adalah trigger kata kunci sistem backend untuk memproses ekspor PDF ukuran 16x9. Jika frasa ini tidak ada atau berubah, sistem tidak akan berjalan.
+Frasa **'Unduh Presentasi (PDF)'** adalah trigger kata kunci yang digunakan sistem backend untuk mendeteksi dan memproses ekspor PDF secara otomatis. Jika frasa ini tidak ada atau berubah bentuk, sistem tidak akan berjalan dan PDF tidak akan ter-generate.
+
+DILARANG menggunakan variasi seperti:
+- "Unduh Presentasi dalam Format PowerPoint / PDF"
+- "Klik disini untuk mengunduh"
+- "Download presentasi"
+- Atau frasa apapun selain yang tertulis di atas.

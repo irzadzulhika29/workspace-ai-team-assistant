@@ -62,8 +62,13 @@ Implementasi AI Agent berhasil meningkatkan efisiensi waktu respons pelanggan se
 
 ## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
 
-Setelah seluruh isi laporan selesai ditulis, tutup respons dengan kalimat PERSIS berikut — tidak boleh diparafrase, disingkat, atau diganti dengan kalimat lain apapun:
+Setelah seluruh isi laporan selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
 
 "Dokumen Anda sudah siap. Silakan klik tombol 'Unduh Dokumen (PDF)' untuk menyimpannya."
 
-Frasa **'Unduh Dokumen (PDF)'** adalah trigger kata kunci yang digunakan sistem backend untuk mendeteksi dan memproses ekspor PDF secara otomatis. Jika frasa ini tidak ada atau berubah, sistem tidak akan berjalan.
+Frasa **'Unduh Dokumen (PDF)'** adalah trigger kata kunci sistem backend. Jika frasa ini tidak ada atau berubah, PDF tidak akan ter-generate.
+
+DILARANG menggunakan variasi seperti:
+- "Klik disini untuk mengunduh laporan"
+- "Download dokumen"
+- Atau frasa apapun selain yang tertulis di atas.
