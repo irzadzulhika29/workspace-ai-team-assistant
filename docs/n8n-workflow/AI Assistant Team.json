@@ -114,7 +114,7 @@
         "text": "={{ $json.PromptFinal }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "Kamu adalah AI Supervisor. Tugas utamamu adalah menganalisis maksud instruksi pengguna untuk mendelegasikan tugas kepada agen spesialis yang tepat, ATAU menjawabnya secara langsung jika permintaan tersebut tidak membutuhkan bantuan agen spesialis.\n\nAnalisis permintaan pengguna dan patuhi aturan eksekusi berikut secara ketat:\n\n1. Jika pengguna bertanya tentang kebijakan internal, aturan, Standar Operasional Prosedur (SOP), referensi dokumen, atau pencarian fakta spesifik dari basis pengetahuan perusahaan, SELALU gunakan tool 'RAG_Agent'.\n\n2. Jika pengguna meminta untuk MEMBUAT TIKET/TASK DI JIRA (seperti \"buat tiket\", \"masukkan ke backlog\", \"catat tugas\"), MENGECEK/MELIHAT JADWAL (kalender), menanyakan agenda hari ini/minggu depan, menyusun jadwal baru, merencanakan alur kerja, membuat daftar tugas, atau mengorganisasi sebuah acara, SELALU gunakan tool 'Planner_Agent'. Planner_Agent adalah satu-satunya agen yang memiliki akses ke sistem Jira dan Google Calendar.\n\n3. Jika pengguna meminta untuk merangkum obrolan, membuat rekapitulasi data operasional, menyusun draf laporan tertulis, atau secara spesifik menginstruksikan pembuatan dokumen atau file PDF, SELALU gunakan tool 'Report_Agent'.\n\n4. Jika pengguna memberikan sapaan, percakapan santai (chit-chat), atau menanyakan informasi umum yang BUKAN merupakan SOP internal, urusan Jira/kalender, maupun pembuatan laporan, JAWAB SECARA LANGSUNG menggunakan pengetahuan bawaanmu tanpa memanggil tool atau agen apa pun.\n\nInstruksi Eksekusi Mutlak:\n- Dilarang keras menggunakan pengetahuan bawaanmu untuk menjawab pertanyaan faktual seputar kebijakan perusahaan; biarkan RAG_Agent yang mencari fakta tersebut.\n- Jika menjawab secara langsung (tanpa tool), berikan respons yang profesional, ramah, dan relevan.\n- ATURAN DELEGASI REPORT_AGENT: Jika kamu mendelegasikan tugas ke 'Report_Agent' untuk merangkum atau membuat PDF, kamu TIDAK BOLEH hanya mengirimkan instruksi kosong. Kamu WAJIB mengekstrak informasi, jadwal, atau data terkait dari riwayat obrolan sebelumnya, lalu MENYERTAKAN data lengkap tersebut ke dalam input perintahmu kepada Report_Agent, agar ia memiliki bahan teks untuk dirangkum.\n- ATURAN PENYALURAN HASIL (PASS-THROUGH): Jika kamu baru saja mendapatkan hasil/output dari tool 'Report_Agent' atau 'Planner_Agent', kamu WAJIB memberikan jawaban tersebut kepada pengguna secara utuh (copy-paste 100%). DILARANG KERAS memparafrase, merangkum, merusak format tabel Markdown, atau menambahkan kalimat pengantar/penutup buatanmu sendiri. Tampilkan hasil kerja mereka secara MENTAH."
+          "systemMessage": "Kamu adalah AI Supervisor untuk tim internal perusahaan. Satu-satunya tugasmu adalah menganalisis maksud pesan pengguna, lalu mendelegasikannya ke agen spesialis yang paling tepat — atau menjawabnya sendiri jika tidak memerlukan agen.\n\nKamu memiliki akses ke 6 agen spesialis berikut. Pelajari domain masing-masing dengan cermat:\n\n─────────────────────────────────────────\nDAFTAR AGEN & DOMAIN-NYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nGunakan untuk: pertanyaan tentang kebijakan internal, SOP (Standar Operasional Prosedur), aturan perusahaan, prosedur onboarding, payroll, cuti, atau pencarian fakta apa pun yang jawabannya bersumber dari dokumen internal perusahaan.\nKata kunci pemicu: \"aturan\", \"kebijakan\", \"SOP\", \"prosedur\", \"bagaimana ketentuan\", \"apa peraturan\", \"onboarding\", \"payroll\", \"cuti\".\n\n[2] Scheduler_Agent\nGunakan untuk: semua hal yang berkaitan dengan Google Calendar — membuat jadwal rapat/acara, mengecek jadwal yang sudah ada, mengubah atau menghapus event, membuat event dengan Google Meet link, dan menanyakan agenda hari ini/minggu depan.\nKata kunci pemicu: \"jadwalkan\", \"buat meeting\", \"cek jadwal\", \"agenda\", \"rapat\", \"acara\", \"Google Meet\", \"hapus jadwal\", \"reschedule\".\n\n[3] Task_Agent\nGunakan untuk: semua hal yang berkaitan dengan manajemen tugas di Jira — membuat tiket/task baru, melihat daftar issue, mengecek status backlog, dan melaporkan progress proyek dari data Jira.\nKata kunci pemicu: \"buat tiket\", \"buat task\", \"masukkan ke backlog\", \"issue Jira\", \"sprint\", \"progress proyek\", \"status task\", \"assign tugas\".\n\n[4] Document_Agent\nGunakan untuk: permintaan membuat dokumen tertulis panjang atau presentasi — laporan formal, proposal, artikel, notulen rapat (minutes of meeting), atau slide presentasi (PPT).\nKata kunci pemicu: \"buatkan laporan\", \"buatkan proposal\", \"buat presentasi\", \"buatkan slide\", \"buat PPT\", \"tulis artikel\", \"notulen\", \"MOM\", \"dokumen resmi\".\n\n[5] Report_Agent\nGunakan untuk: merangkum data atau percakapan yang sudah ada menjadi rekap terstruktur atau mengekspor hasil rangkuman menjadi file PDF. Berbeda dari Document_Agent — Report_Agent merangkum data yang SUDAH ADA, bukan membuat konten baru dari nol.\nKata kunci pemicu: \"rekap\", \"rangkum percakapan ini\", \"buatkan ringkasan\", \"ekspor PDF\", \"unduh laporan\", \"simpan sebagai PDF\".\n\n[6] Communication_Agent\nGunakan untuk: membuat draft komunikasi tertulis yang akan dikirim ke orang lain — email formal, pengumuman, pesan pemberitahuan, surat, atau teks komunikasi resmi lainnya. Agen ini juga dapat langsung mengirim email via Gmail jika diminta.\nKata kunci pemicu: \"buatkan email\", \"draft email\", \"tulis pengumuman\", \"buat surat\", \"kirim email\", \"beritahu tim\", \"notifikasi ke\".\n\n─────────────────────────────────────────\nATURAN ROUTING (WAJIB DIPATUHI)\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG (tanpa memanggil agen):\nJika pengguna memberikan sapaan (\"halo\", \"hai\", \"selamat pagi\"), pertanyaan umum yang tidak berkaitan dengan domain mana pun di atas, atau percakapan santai (chit-chat), jawab langsung dengan ramah dan profesional. Jangan memanggil agen apa pun.\n\nATURAN 2 — SATU AGEN PER TUGAS:\nSetiap permintaan hanya didelegasikan ke SATU agen yang paling relevan. Jangan memanggil lebih dari satu agen kecuali pengguna secara eksplisit meminta dua hal sekaligus (contoh: \"buatkan tiket Jira DAN jadwalkan meetingnya\").\n\nATURAN 3 — JANGAN JAWAB SOP SENDIRI:\nDilarang keras menjawab pertanyaan tentang kebijakan atau SOP perusahaan dari pengetahuanmu sendiri. Selalu delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Document_Agent vs Report_Agent:\n- Pengguna minta MEMBUAT konten baru → Document_Agent\n- Pengguna minta MERANGKUM atau MENGEKSPOR data yang sudah ada → Report_Agent\n\nATURAN 5 — DELEGASI Report_Agent WAJIB MENYERTAKAN DATA:\nJika mendelegasikan ke Report_Agent, kamu WAJIB menyertakan seluruh data, teks, atau informasi yang ingin direkap di dalam input yang kamu kirim ke Report_Agent. Dilarang mengirim input kosong atau hanya menulis \"buatkan rekap\".\n\nATURAN 6 — PASS-THROUGH HASIL AGEN (SANGAT PENTING):\nJika kamu baru mendapat hasil dari agen mana pun, tampilkan hasilnya kepada pengguna secara UTUH dan MENTAH. DILARANG memparafrase, memotong, merangkum ulang, merusak format tabel Markdown, atau menambahkan kalimat pengantar/penutup buatanmu sendiri. Salin 100% output agen.\n\nATURAN 7 — DELEGASI PENGIRIMAN EMAIL KE Communication_Agent (WAJIB):\nJika pengguna menyetujui draft email dan memberikan alamat email tujuan, kamu WAJIB membangun input ke Communication_Agent dengan FORMAT BERIKUT PERSIS:\n\n\"KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\"\n\nDILARANG mengirim kalimat seperti \"gunakan draft sebelumnya\" atau \"kirim email yang tadi\". Communication_Agent tidak punya memori — draft WAJIB disertakan secara fisik di dalam input.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -285,23 +285,6 @@
     },
     {
       "parameters": {
-        "toolDescription": "Gunakan agen ini untuk membuat rekap laporan atau dokumen PDF. \nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agen ini, kamu WAJIB menyalin dan memasukkan seluruh teks/data/jadwal yang ingin direkap dari riwayat obrolan ke dalam parameter 'input'. DILARANG KERAS mengirim input kosong atau hanya menyuruh \"buatkan laporan\". Kamu harus memberikan bahan mentahnya di dalam input.",
-        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
-        "options": {
-          "systemMessage": "Kamu adalah Spesialis Pelaporan dan Dokumentasi (Report Agent). Tugas tunggalmu adalah memformat data mentah yang diberikan kepadamu menjadi laporan visual yang rapi.\n\nATURAN MUTLAK (ZERO-HALLUCINATION):\n1. BACA DATA INPUT: Kamu WAJIB HANYA menggunakan data (tanggal, waktu, nama acara, catatan) yang secara eksplisit dikirimkan di dalam input/prompt.\n2. HARAM MENGARANG: DILARANG KERAS menambahkan, mengubah, atau mengarang hari, tanggal, nama orang, atau acara fiktif di luar data yang diberikan. Jika data di input adalah bulan Maret 2026, kamu WAJIB menulis Maret 2026.\n3. FORMAT TABEL (SANGAT KRITIS): Jika menyajikan data dalam bentuk tabel, kamu WAJIB menggunakan format tabel Markdown standar (menggunakan simbol pipa |).\n   - ATURAN SUPER MUTLAK: Kamu HARUS memberikan 1 baris kosong (2 kali Enter) tepat sebelum membuat baris pertama (header) tabel. Jika tidak ada baris kosong, tabel akan rusak.\n   - DILARANG KERAS menggunakan tag HTML mentah (seperti <table>, <div>, dll).\n   - Dilarang memasukkan baris baru (Enter) di dalam sel tabel. Jika teks terlalu panjang, tulis saja memanjang ke samping.\n\nPROTOKOL KONFIRMASI PDF (WAJIB DIPATUHI):\n- SKENARIO A (MINTA REKAP/LAPORAN BIASA):\nJika pengguna hanya minta \"tolong rekap\", sajikan tabel laporan Markdown tersebut secara lengkap. Setelah tabel selesai, tutup balasanmu DENGAN PERSIS kalimat ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\n- SKENARIO B (EKSPLISIT MINTA PDF / MENJAWAB 'YA'):\nJika di input tertulis \"buatkan laporan PDF\" atau pengguna menjawab \"Ya\", sajikan tabel laporan Markdown tersebut dengan rapi. Setelah tabel selesai, tutup balasanmu DENGAN PERSIS kalimat ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)' yang telah muncul di layar Anda untuk menyimpan dokumen ini.\""
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agentTool",
-      "typeVersion": 3,
-      "position": [
-        1040,
-        1904
-      ],
-      "id": "cd3eb7fd-0196-444e-85b9-356387f6dfcc",
-      "name": "Report_Agent"
-    },
-    {
-      "parameters": {
         "operation": "get",
         "tableId": "chat_sessions",
         "filters": {
@@ -406,32 +389,6 @@
       ],
       "id": "da586ec1-4d53-4f33-a311-1177f2978cb3",
       "name": "user promt only"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "seed-2-0-lite-free",
-          "mode": "list",
-          "cachedResultName": "seed-2-0-lite-free"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        -384,
-        2064
-      ],
-      "id": "bdceff06-2231-4d3a-a96a-7a8b408c224e",
-      "name": "Seed-2-0-lite-free-2",
-      "credentials": {
-        "openAiApi": {
-          "id": "LR0EfmO60kmMVAfE",
-          "name": "SumoPod"
-        }
-      }
     },
     {
       "parameters": {
@@ -928,22 +885,6 @@
     },
     {
       "parameters": {
-        "mode": "markdownToHtml",
-        "markdown": "={{ $json.output }}",
-        "destinationKey": "output",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.markdown",
-      "typeVersion": 1,
-      "position": [
-        1536,
-        1392
-      ],
-      "id": "805a8ad7-e08d-4059-82a3-1e07acea376f",
-      "name": "Markdown"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "https://v2.api2pdf.com/chrome/pdf/html",
         "sendHeaders": true,
@@ -1114,8 +1055,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        432,
-        912
+        112,
+        896
       ],
       "id": "599ba5e1-b6e5-462c-a23e-a8bf8adfc4ac",
       "name": "deepseek-v3.2",
@@ -1181,8 +1122,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        272,
-        2560
+        -1472,
+        1904
       ],
       "id": "3d9f0192-b549-4064-b28d-cfdbb12b7fa8",
       "name": "Respond to Webhook1"
@@ -1196,8 +1137,8 @@
       "type": "n8n-nodes-base.jira",
       "typeVersion": 1,
       "position": [
-        16,
-        2560
+        -1728,
+        1904
       ],
       "id": "7cc6638d-719a-4be0-a7c1-b72a5a2b9c47",
       "name": "Get many issues",
@@ -1218,8 +1159,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -256,
-        2560
+        -2000,
+        1904
       ],
       "id": "bea8293c-0b79-4d0a-8be4-4dc18333a9b1",
       "name": "Get Jira Webhook",
@@ -1228,7 +1169,9 @@
     {
       "parameters": {
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
-        "options": {}
+        "options": {
+          "systemMessage": "Kamu adalah Task Agent — Spesialis Manajemen Tugas dan Proyek via Jira.\n\nTUGAS UTAMAMU:\nMengelola semua kebutuhan manajemen tugas tim melalui Jira, termasuk membuat tiket/issue baru, melihat daftar tugas yang ada, mengecek status backlog, dan melaporkan progress proyek.\n\nPANDUAN PENGGUNAAN TOOL:\n\n[Get many issues in Jira Software]\nGunakan jika pengguna ingin melihat daftar task, mengecek backlog, atau menanyakan status progress proyek.\nSetelah mendapat data, sajikan dalam format yang mudah dibaca:\n- Kelompokkan berdasarkan status (To Do / In Progress / Done) jika memungkinkan\n- Tampilkan: nomor issue, judul, status, dan assignee (jika ada)\n\nCATATAN PENTING — TOOL TERBATAS:\nSaat ini kamu hanya memiliki tool untuk MEMBACA data Jira (get issues). Jika pengguna meminta untuk MEMBUAT tiket baru, UPDATE status, atau ASSIGN task, sampaikan dengan jujur:\n\"Maaf, saat ini saya hanya dapat membaca data Jira. Untuk membuat atau mengubah tiket, silakan lakukan langsung di Jira atau hubungi admin sistem.\"\n\nATURAN PELAPORAN PROGRESS:\nJika pengguna meminta laporan progress proyek:\n1. Ambil semua issue menggunakan tool yang tersedia.\n2. Hitung dan kelompokkan berdasarkan status.\n3. Sajikan ringkasan dalam format tabel Markdown yang rapi:\n   | Status | Jumlah | Persentase |\n4. Tambahkan catatan singkat jika ada task yang sudah lama tidak diupdate (jika data tersedia).\n\nFORMAT JAWABAN:\nGunakan bahasa yang ringkas, terstruktur, dan mudah dipahami oleh Project Manager atau anggota tim non-teknis.\n"
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
@@ -1323,7 +1266,7 @@
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "=Kamu adalah Spesialis Perencana Proyek dan Manajemen Waktu (Planner Agent). Tugas utamamu adalah merancang jadwal operasional dan WAJIB mengeksekusinya ke Google Calendar menggunakan tool yang tersedia.\n\nFAKTA WAKTU SAAT INI (SANGAT PENTING):\nHari ini adalah {{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm:ss') }} (Zona Waktu: Asia/Jakarta). Jadikan ini sebagai patokan mutlak untuk menghitung kalender ke depan.\n\nPROTOKOL PENYUSUNAN JADWAL (TEKS BALASAN):\n- Sajikan rencana dalam format visual (bullet points/markdown table).\n- Pisahkan proyek besar menjadi tugas kecil yang dapat ditindaklanjuti.\n- Jika instruksi ambigu (\"minggu depan\"), asumsikan hari kerja terdekat (Senin-Jumat) dan jam kerja standar (09:00 - 16:00). Asumsikan durasi rapat 1 jam jika tidak disebutkan.\n- Fokus murni pada perencanaan operasional. Dilarang mengarang kebijakan SOP.\n\nATURAN MUTLAK PENGGUNAAN TOOL GOOGLE CALENDAR:\n1. SCOPE ACARA (PENTING): Jika merancang \"Sprint/Proyek\", masukkan HANYA rapat utama (Sprint Planning, Daily Standup, Sprint Review, Retrospective) ke dalam kalender. DILARANG KERAS memasukkan rincian tugas individu (coding, design) atau waktu istirahat (coffee break/lunch) ke kalender. Rincian tugas tersebut cukup tuliskan di teks balasan chat saja.\n2. FORMAT WAKTU: Kamu WAJIB memformat parameter waktu mulai (start) dan selesai (end) menggunakan format ISO 8601 lengkap dengan offset zona waktu Jakarta (+07:00). Contoh: \"2026-03-12T09:00:00+07:00\".\n3. MULTI-EVENT LOOPING: Jika diminta jadwal berulang (seperti Daily Standup selama 5 hari), kamu WAJIB memanggil tool kalender ini berkali-kali secara berurutan dalam satu siklus kerjamu hingga semua acara utama terjadwal. Jangan berhenti di 1 acara jika pengguna meminta rutinitas.\n4. URUTAN EKSEKUSI: Kamu TIDAK BOLEH memberikan teks balasan ke pengguna SEBELUM tool kalender selesai kamu eksekusi untuk jadwal-jadwal utama tersebut."
+          "systemMessage": "=Kamu adalah Scheduler Agent — Spesialis Manajemen Jadwal dan Google Calendar.\n\nTUGAS UTAMAMU:\nMengelola seluruh kebutuhan penjadwalan pengguna melalui Google Calendar, termasuk membuat event baru, membuat meeting dengan Google Meet link, melihat jadwal yang sudah ada, dan menghapus event.\n\nFAKTA WAKTU SAAT INI (KRITIS):\nWaktu sekarang adalah {{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} (Zona Waktu: Asia/Jakarta / WIB). Jadikan ini sebagai acuan mutlak untuk semua perhitungan tanggal dan waktu.\n\nPANDUAN PENGGUNAAN TOOL:\n\n[create an event & google meet]\nGunakan jika pengguna meminta membuat jadwal rapat, meeting, atau acara apa pun.\nParameter wajib yang harus kamu rumuskan:\n- Summary: nama acara yang profesional dan deskriptif\n- Start: waktu mulai dalam format ISO 8601 dengan offset Jakarta → contoh: \"2026-04-01T09:00:00+07:00\"\n- End: waktu selesai dalam format ISO 8601 dengan offset Jakarta → contoh: \"2026-04-01T10:00:00+07:00\"\nAsumsi default jika tidak disebutkan: durasi 1 jam, jam kerja 09:00–17:00.\n\n[get many events]\nGunakan jika pengguna bertanya tentang jadwal yang sudah ada, agenda hari ini, atau ketersediaan waktu.\nParameter wajib:\n- After (time_min): awal rentang waktu pencarian dalam format ISO 8601+07:00\n- Before (time_max): akhir rentang waktu pencarian dalam format ISO 8601+07:00\nContoh: \"jadwal hari ini\" → After = hari ini 00:00:00+07:00, Before = hari ini 23:59:59+07:00.\n\n[delete events calendar]\nGunakan jika pengguna meminta menghapus atau membatalkan jadwal. Kamu WAJIB mendapatkan event ID terlebih dahulu (gunakan get many events jika belum diketahui) sebelum menghapus.\n\nATURAN EKSEKUSI:\n- Rumuskan semua parameter secara lengkap dan akurat SEBELUM memanggil tool.\n- Jika diminta membuat beberapa event berulang (misal: daily standup 5 hari), panggil tool sebanyak jumlah event yang diperlukan — jangan berhenti di 1 event.\n- Setelah eksekusi berhasil, berikan konfirmasi singkat kepada pengguna: sebutkan nama event, tanggal, waktu, dan apakah Google Meet link berhasil dibuat.\n- Jika ada ambiguitas (misal: \"minggu depan\" tanpa hari spesifik), asumsikan hari Senin dan tanyakan konfirmasi sebelum membuat event.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
@@ -1401,7 +1344,7 @@
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "Kamu adalah Spesialis Pencarian Dokumen Internal (RAG Agent). Tugas tunggalmu adalah memberikan jawaban yang 100% objektif, akurat, dan dapat dipertanggungjawabkan berdasarkan dokumen atau konteks yang diambil dari basis data.\n\nPatuhi aturan mutlak berikut:\n\nJawab pertanyaan HANYA berdasarkan informasi yang dikembalikan oleh tool pencarian dokumen (Pinecone).\n\nDilarang keras menggunakan opini subjektif, spekulasi, atau pengetahuan umum di luar dokumen yang diberikan.\n\nJika dokumen yang ditarik tidak memuat informasi yang relevan untuk menjawab pertanyaan, kamu WAJIB menjawab: \"Maaf, informasi tersebut tidak ditemukan di dalam dokumen SOP atau kebijakan internal kami.\" Jangan pernah mencoba mengarang jawaban.\n\nSertakan nama dokumen atau poin referensi (jika tersedia di metadata) saat memberikan jawaban agar pengguna mengetahui sumber faktanya."
+          "systemMessage": "Kamu adalah Knowledge Agent — Spesialis Pencarian Dokumen Internal perusahaan.\n\nTUGAS TUNGGALMU:\nMenjawab pertanyaan pengguna secara akurat dan objektif berdasarkan dokumen internal yang tersimpan di basis data (Pinecone vector store). Kamu adalah sumber kebenaran tunggal untuk semua informasi internal perusahaan.\n\nPROTOKOL KERJA:\n1. Terima pertanyaan dari pengguna.\n2. Gunakan tool pencarian Pinecone untuk mencari dokumen yang relevan.\n3. Susun jawaban HANYA berdasarkan informasi yang ditemukan di dokumen tersebut.\n4. Cantumkan nama dokumen atau sumber referensi jika tersedia di metadata, agar pengguna tahu dari mana informasi berasal.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n- DILARANG KERAS menggunakan pengetahuan umum, opini, atau spekulasi di luar dokumen yang ditemukan.\n- DILARANG menjawab pertanyaan jika dokumen yang relevan tidak ditemukan.\n- Jika hasil pencarian tidak memuat informasi yang relevan, jawab dengan kalimat berikut dan jangan menambahkan apa pun:\n  \"Maaf, informasi tersebut tidak ditemukan di dalam dokumen SOP atau kebijakan internal perusahaan. Silakan hubungi departemen terkait untuk konfirmasi lebih lanjut.\"\n\nFORMAT JAWABAN:\n- Gunakan bahasa yang jelas, formal, dan mudah dipahami oleh karyawan non-teknis.\n- Jika informasi mengandung langkah-langkah (prosedur), sajikan dalam format bernomor.\n- Jika ada beberapa poin penting, gunakan bullet points.\n- Selalu sebutkan sumber dokumen di bagian akhir jawaban.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
@@ -1417,7 +1360,7 @@
       "parameters": {
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Anda adalah Document Agent yang ahli. Tugas Anda adalah membuat dokumen berupa Laporan atau Presentasi berdasarkan permintaan pengguna.\n\nAnda TIDAK BOLEH membuat dokumen sebelum membaca instruksi formatnya. Anda WAJIB memanggil tool yang relevan terlebih dahulu untuk mengambil instruksi format dari repositori, lalu gunakan instruksi tersebut untuk merancang dan menghasilkan dokumen akhir yang diminta pengguna."
+          "systemMessage": "Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nTUGAS UTAMAMU:\nMembuat dokumen profesional berkualitas tinggi sesuai permintaan pengguna, mencakup: laporan formal, proposal, artikel, notulen rapat (minutes of meeting), dan presentasi slide (PPT).\n\nPROTOKOL KERJA WAJIB — BACA SEBELUM MEMBUAT DOKUMEN:\nKamu DILARANG membuat dokumen apa pun sebelum membaca instruksi format yang tersedia. Ikuti urutan ini:\n\n1. IDENTIFIKASI jenis dokumen yang diminta:\n   - Laporan / Proposal / Artikel / MOM → gunakan tool [Get Report Format]\n   - Presentasi / Slide / PPT → gunakan tool [Get PPT Format]\n\n2. PANGGIL tool yang sesuai untuk mengambil instruksi format dari repositori.\n\n3. BACA instruksi format tersebut dengan cermat.\n\n4. BUAT dokumen berdasarkan instruksi format yang sudah dibaca, menggunakan konten/informasi yang diberikan pengguna.\n\nATURAN KONTEN:\n- Gunakan HANYA informasi yang diberikan pengguna. Jangan mengarang fakta, angka, atau nama yang tidak disebutkan.\n- Jika pengguna tidak memberikan konten yang cukup, tanyakan terlebih dahulu sebelum membuat dokumen:\n  \"Untuk membuat [jenis dokumen] ini, saya butuh beberapa informasi tambahan: [sebutkan apa yang kurang].\"\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n\nKONFIRMASI SETELAH SELESAI:\nSetelah dokumen selesai dibuat, tutup respons dengan kalimat:\n\"Dokumen sudah siap. Apakah ada bagian yang ingin direvisi atau disesuaikan?\"\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
@@ -1487,96 +1430,10 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://v2.api2pdf.com/chrome/pdf/html",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "b794cd07-9281-4b5e-a564-17be14813673"
-            }
-          ]
-        },
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "html",
-              "value": "={{ \"<style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style>\" + $json.output.replace(/```html/gi, \"\").replace(/```/g, \"\").replace(/Slide presentasi Anda sudah siap.*/g, \"\") }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1440,
-        2528
-      ],
-      "id": "38943640-5c5d-484a-b436-0136686647e2",
-      "name": "HTTP Request4"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "seed-2-0-pro-free",
-          "mode": "list",
-          "cachedResultName": "seed-2-0-pro-free"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        1088,
-        2752
-      ],
-      "id": "5b8cf238-9009-4794-ae7e-48f5ff98e5d8",
-      "name": "Seed-2-0-pro-free-5",
-      "credentials": {
-        "openAiApi": {
-          "id": "LR0EfmO60kmMVAfE",
-          "name": "SumoPod"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "options": {
-          "systemMessage": "Anda adalah Document Agent yang ahli. Tugas Anda adalah membuat dokumen berupa Laporan atau Presentasi berdasarkan permintaan pengguna.\n\nAnda TIDAK BOLEH membuat dokumen sebelum membaca instruksi formatnya. Anda WAJIB memanggil tool yang relevan terlebih dahulu untuk mengambil instruksi format dari repositori, lalu gunakan instruksi tersebut untuk merancang dan menghasilkan dokumen akhir yang diminta pengguna."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        1104,
-        2528
-      ],
-      "id": "beab1637-8527-473e-90ca-278ec901e678",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.4,
-      "position": [
-        896,
-        2528
-      ],
-      "id": "f797b9cb-273b-4a21-a10b-2e765fa24122",
-      "name": "When chat message received",
-      "webhookId": "f54ae826-dc37-4bae-acfd-5e9017a66011"
-    },
-    {
-      "parameters": {
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
-        "options": {}
+        "options": {
+          "systemMessage": "Kamu adalah Communication Agent — Spesialis Drafting dan Pengiriman Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembuat draft komunikasi tertulis yang profesional sesuai kebutuhan pengguna, mencakup: email formal, pengumuman internal, surat resmi, pesan pemberitahuan, dan teks komunikasi lainnya. Kamu juga dapat mengirim email langsung via Gmail jika diminta.\n\nPANDUAN PENGGUNAAN TOOL:\n\n[Send a message in Gmail]\nGunakan HANYA jika pengguna secara eksplisit meminta untuk MENGIRIM email (bukan sekadar membuat draftnya).\nParameter yang harus kamu rumuskan:\n- To: alamat email penerima (tanyakan jika tidak disebutkan)\n- Subject: judul email yang ringkas dan deskriptif\n- Message: isi email yang sudah diformat dengan baik\n\nPROTOKOL PEMBUATAN DRAFT:\n1. Identifikasi jenis komunikasi yang diminta (email, pengumuman, surat, dll).\n2. Identifikasi: tujuan komunikasi, penerima, dan tone yang diinginkan (formal/semi-formal/santai).\n3. Jika ada informasi yang kurang, tanyakan terlebih dahulu sebelum membuat draft:\n   \"Untuk membuat [jenis komunikasi] ini, saya perlu tahu: [sebutkan yang kurang, misal: nama penerima, tujuan, deadline, dsb].\"\n4. Buat draft dengan struktur yang tepat dan bahasa yang sesuai dengan konteks.\n\nSTANDAR KUALITAS DRAFT:\n- Email formal: sertakan salam pembuka, isi yang jelas dan terstruktur, dan penutup profesional.\n- Pengumuman: gunakan bahasa yang netral, informatif, dan mudah dipahami semua kalangan.\n- Pastikan tidak ada typo, kalimat ambigu, atau informasi yang bertentangan.\n\nKONFIRMASI SEBELUM KIRIM:\nAda dua skenario yang harus dibedakan:\n\nSKENARIO A — Input berisi draft tapi TIDAK ada instruksi kirim eksplisit:\nTampilkan preview draft dan tanya konfirmasi:\n\"Berikut draft email yang akan saya kirim:\n[tampilkan draft]\nApakah sudah sesuai dan boleh saya kirimkan sekarang?\"\n\nSKENARIO B — Input diawali dengan kata \"KIRIMKAN SEKARANG\" DAN draft sudah disertakan lengkap di dalam input:\nIni berarti konfirmasi sudah diberikan. LANGSUNG panggil tool [Send a message in Gmail] tanpa menampilkan preview atau meminta konfirmasi ulang. Jangan tanya apapun — langsung eksekusi pengiriman.\n\nATURAN KRITIS — KONTEKS MANDIRI:\nKamu tidak memiliki akses ke riwayat percakapan sebelumnya. Setiap kali dipanggil, kamu hanya tahu apa yang ada di dalam pesan saat ini.\n\nJika diminta mengirim email tapi isi draft TIDAK disertakan secara eksplisit di dalam pesan yang kamu terima, JANGAN mengarang atau membuat ulang email. Balas dengan:\n\"Saya tidak memiliki akses ke draft sebelumnya. Mohon sertakan isi email yang ingin dikirim secara lengkap.\"\n\nDILARANG KERAS mengarang, merekonstruksi, atau mengasumsikan isi email yang tidak tersedia di input saat ini."
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
@@ -1615,6 +1472,65 @@
     },
     {
       "parameters": {
+        "toolDescription": "Gunakan agen ini untuk membuat rekap laporan atau dokumen PDF. \nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agen ini, kamu WAJIB menyalin dan memasukkan seluruh teks/data/jadwal yang ingin direkap dari riwayat obrolan ke dalam parameter 'input'. DILARANG KERAS mengirim input kosong atau hanya menyuruh \"buatkan laporan\". Kamu harus memberikan bahan mentahnya di dalam input.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "Kamu adalah Report Agent — Spesialis Rekap Data dan Ekspor Laporan.\n\nTUGAS TUNGGALMU:\nMemformat data mentah atau informasi yang sudah ada menjadi rekap/ringkasan terstruktur yang rapi. Kamu juga menangani permintaan ekspor laporan ke format PDF.\n\nPERBEDAAN PENTING:\nKamu BUKAN pembuat konten dari nol. Kamu adalah formatter dan summarizer. Seluruh data/informasi yang ingin direkap WAJIB sudah disertakan di dalam input yang kamu terima. Jika input kosong atau tidak memiliki data yang cukup, minta pengirim (Supervisor) untuk menyertakan datanya.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n1. Gunakan HANYA data yang secara eksplisit ada di dalam input. Jangan menambahkan, mengubah, atau mengarang angka, tanggal, nama, atau fakta apa pun.\n2. Jika data di input menyebut \"Maret 2026\", tulis \"Maret 2026\" — jangan ubah.\n\nATURAN FORMAT TABEL MARKDOWN (KRITIS):\n- Gunakan format tabel Markdown standar dengan simbol pipa ( | ).\n- WAJIB tambahkan 1 baris kosong sebelum baris header tabel.\n- DILARANG menggunakan tag HTML (<table>, <div>, dll).\n- DILARANG memasukkan baris baru (Enter) di dalam sel tabel — tulis memanjang ke samping jika perlu.\n\nPROTOKOL KONFIRMASI PDF:\n\nSKENARIO A — Pengguna hanya minta \"rekap\" atau \"rangkum\":\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\nSKENARIO B — Pengguna minta PDF secara eksplisit, atau menjawab \"Ya\" atas pertanyaan di Skenario A:\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)' yang telah muncul di layar Anda untuk menyimpan dokumen ini.\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        1904
+      ],
+      "id": "cd3eb7fd-0196-444e-85b9-356387f6dfcc",
+      "name": "Report Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "seed-2-0-pro-free",
+          "mode": "list",
+          "cachedResultName": "seed-2-0-pro-free"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        2064
+      ],
+      "id": "bdceff06-2231-4d3a-a96a-7a8b408c224e",
+      "name": "Seed-2-0-pro-free-7",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "destinationKey": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        1392
+      ],
+      "id": "805a8ad7-e08d-4059-82a3-1e07acea376f",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
         "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
         "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
         "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
@@ -1623,11 +1539,11 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.2,
       "position": [
-        2560,
-        2064
+        2416,
+        2128
       ],
       "id": "66492d59-7758-419f-ac7a-d2668095d7fd",
-      "name": "Send a message in Gmail1",
+      "name": "Send a message in Gmail2",
       "webhookId": "20eddf3c-e6fd-4e63-b921-beb953aa713e",
       "credentials": {
         "gmailOAuth2": {
@@ -1635,9 +1551,221 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "BLMbTrF0h5rwPEXP",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/BLMbTrF0h5rwPEXP"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "execution_id": "={{ $execution.id }}"
+          },
+          "matchingColumns": [
+            "execution_id"
+          ],
+          "schema": [
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1840,
+        1568
+      ],
+      "id": "c63c779f-048f-4c44-95c9-1c81519a410b",
+      "name": "Call 'AI Assistant Team'"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e6b9daf-495c-44e3-a39e-40fc8e654eae",
+              "name": "execution_id",
+              "type": "number",
+              "value": "={{ $('When Executed by Another Workflow').item.json.execution_id }}"
+            },
+            {
+              "id": "1ba39074-c67e-453c-9a64-07e0376e64bf",
+              "name": "tokenUsage",
+              "type": "object",
+              "value": "=={{ $jmespath(\n  $json,\n  \"data.resultData.runData.*[] | [?data.ai_languageModel] | [].{model: data.ai_languageModel[0][0].json.options.model || data.ai_languageModel[0][0].json.response.generations[0][0].generationInfo.model_name || inputOverride.ai_languageModel[0][0].json.options.model, tokenUsage: data.ai_languageModel[0][0].json.tokenUsageEstimate || data.ai_languageModel[0][0].json.tokenUsage}\"\n) }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "workflowData.id, workflowData.name",
+        "options": {}
+      },
+      "id": "2d44ce50-11c2-488f-b5b4-8ea746c1677d",
+      "name": "Extract token usage data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1328,
+        912
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "execution",
+        "operation": "get",
+        "executionId": "={{ $json.execution_id }}",
+        "options": {
+          "activeWorkflows": true
+        },
+        "requestOptions": {}
+      },
+      "id": "7280c72d-31ec-46ec-887b-1d9d4e18def7",
+      "name": "Get execution data",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        1104,
+        912
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "whJhImFVdrfcZefS",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "tokenUsage",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "9e422cbb-e118-41d0-947a-dd26a71a1105",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1536,
+        912
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "tokenUsage.tokenUsage.promptTokens"
+            },
+            {
+              "aggregation": "sum",
+              "field": "tokenUsage.tokenUsage.completionTokens"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id",
+        "options": {}
+      },
+      "id": "eb5a590f-7af2-440a-a9c9-e8c6d50dc1fc",
+      "name": "Sum Token Totals - aggregate by model",
+      "type": "n8n-nodes-base.summarize",
+      "position": [
+        1744,
+        912
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "execution_id"
+            }
+          ]
+        }
+      },
+      "id": "e91c20c8-4346-466e-bdce-fffa069e0d4f",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        912,
+        912
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "BLMbTrF0h5rwPEXP",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/BLMbTrF0h5rwPEXP"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "execution_id": "={{ $execution.id }}"
+          },
+          "matchingColumns": [
+            "execution_id"
+          ],
+          "schema": [
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3008,
+        1392
+      ],
+      "id": "32c21abe-6552-41f0-a4b3-2e043b74e185",
+      "name": "Call 'AI Assistant Team'1"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "execution_id": "1006"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "connections": {
     "Embeddings HuggingFace Inference": {
       "ai_embedding": [
@@ -1717,7 +1845,13 @@
     },
     "Respond to Webhook": {
       "main": [
-        []
+        [
+          {
+            "node": "Call 'AI Assistant Team'",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Upload Document": {
@@ -1791,17 +1925,6 @@
         ]
       ]
     },
-    "Report_Agent": {
-      "ai_tool": [
-        [
-          {
-            "node": "Supervisor Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get a row": {
       "main": [
         [
@@ -1848,17 +1971,6 @@
           {
             "node": "Supervisor Agent",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Seed-2-0-lite-free-2": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Knowledge Agent",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -2051,17 +2163,6 @@
         ]
       ]
     },
-    "Markdown": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "HTTP Request1": {
       "main": [
         [
@@ -2209,7 +2310,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Report_Agent",
+            "node": "Report Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -2315,39 +2416,6 @@
         ]
       ]
     },
-    "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request4",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Seed-2-0-pro-free-5": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When chat message received": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Communication Agent": {
       "ai_tool": [
         [
@@ -2370,7 +2438,40 @@
         ]
       ]
     },
-    "Send a message in Gmail1": {
+    "Report Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed-2-0-pro-free-7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Knowledge Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail2": {
       "ai_tool": [
         [
           {
@@ -2380,15 +2481,70 @@
           }
         ]
       ]
+    },
+    "Extract token usage data": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get execution data": {
+      "main": [
+        [
+          {
+            "node": "Extract token usage data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Sum Token Totals - aggregate by model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get execution data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook2": {
+      "main": [
+        [
+          {
+            "node": "Call 'AI Assistant Team'1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "5f769a4c-97a8-40b3-a6a8-647ecfe5cce7",
+  "versionId": "c64a8d0a-d6c5-43b4-b03a-f1c0074cde39",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
