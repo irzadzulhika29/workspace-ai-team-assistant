@@ -81,3 +81,11 @@ Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah i
   </ul>
 </section>
 ```
+
+## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
+
+Setelah seluruh slide selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
+
+"Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya."
+
+Frasa **'Unduh Presentasi (PDF)'** adalah trigger kata kunci sistem backend untuk memproses ekspor PDF ukuran 16x9. Jika frasa ini tidak ada atau berubah, sistem tidak akan berjalan.

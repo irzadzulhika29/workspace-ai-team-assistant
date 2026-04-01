@@ -852,36 +852,94 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
+        "rules": {
+          "values": [
             {
-              "id": "a9e801e7-7ba5-4244-977d-54e72e094372",
-              "leftValue": "={{ $json.output }}",
-              "rightValue": "Silakan klik tombol 'Unduh Laporan",
-              "operator": {
-                "type": "string",
-                "operation": "contains"
-              }
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "rule-report-pdf",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Unduh Laporan (PDF)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Laporan PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "rule-doc-pdf",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Unduh Dokumen (PDF)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Dokumen PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "rule-ppt-pdf",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Unduh Presentasi (PDF)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Presentasi PDF"
             }
-          ],
-          "combinator": "and"
+          ]
         },
-        "options": {}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
       "position": [
         2112,
         1968
       ],
       "id": "00c9f98e-577c-46f1-ab51-3b8454360af1",
-      "name": "If"
+      "name": "Route Output Type"
     },
     {
       "parameters": {
@@ -1010,7 +1068,7 @@
             {
               "id": "b327c4a6-84df-4551-8d9e-0487a616cf0a",
               "name": "nama_file_laporan",
-              "value": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "value": "=Dokumen_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
               "type": "string"
             }
           ]
@@ -1334,7 +1392,7 @@
       "parameters": {
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nTUGAS UTAMAMU:\nMembuat dokumen profesional berkualitas tinggi sesuai permintaan pengguna, mencakup: laporan formal, proposal, artikel, notulen rapat (minutes of meeting), dan presentasi slide (PPT).\n\nPROTOKOL KERJA WAJIB — BACA SEBELUM MEMBUAT DOKUMEN:\nKamu DILARANG membuat dokumen apa pun sebelum membaca instruksi format yang tersedia. Ikuti urutan ini:\n\n1. IDENTIFIKASI jenis dokumen yang diminta:\n   - Laporan / Proposal / Artikel / MOM → gunakan tool [Get Report Format]\n   - Presentasi / Slide / PPT → gunakan tool [Get PPT Format]\n\n2. PANGGIL tool yang sesuai untuk mengambil instruksi format dari repositori.\n\n3. BACA instruksi format tersebut dengan cermat.\n\n4. BUAT dokumen berdasarkan instruksi format yang sudah dibaca, menggunakan konten/informasi yang diberikan pengguna.\n\nATURAN KONTEN:\n- Gunakan HANYA informasi yang diberikan pengguna. Jangan mengarang fakta, angka, atau nama yang tidak disebutkan.\n- Jika pengguna tidak memberikan konten yang cukup, tanyakan terlebih dahulu sebelum membuat dokumen:\n  \"Untuk membuat [jenis dokumen] ini, saya butuh beberapa informasi tambahan: [sebutkan apa yang kurang].\"\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n\nKONFIRMASI SETELAH SELESAI:\nSetelah dokumen selesai dibuat, tutup respons dengan kalimat:\n\"Dokumen sudah siap. Apakah ada bagian yang ingin direvisi atau disesuaikan?\"\n"
+          "systemMessage": "Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nTUGAS UTAMAMU:\nMembuat dokumen profesional berkualitas tinggi sesuai permintaan pengguna, mencakup: laporan formal, proposal, artikel, notulen rapat (minutes of meeting), dan presentasi slide (PPT).\n\nPROTOKOL KERJA WAJIB — BACA SEBELUM MEMBUAT DOKUMEN:\nKamu DILARANG membuat dokumen apa pun sebelum membaca instruksi format yang tersedia. Ikuti urutan ini:\n\n1. IDENTIFIKASI jenis dokumen yang diminta:\n   - Laporan / Proposal / Artikel / MOM → gunakan tool [Get Report Format]\n   - Presentasi / Slide / PPT → gunakan tool [Get PPT Format]\n\n2. PANGGIL tool yang sesuai untuk mengambil instruksi format dari repositori.\n\n3. BACA instruksi format tersebut dengan cermat.\n\n4. BUAT dokumen berdasarkan instruksi format yang sudah dibaca, menggunakan konten/informasi yang diberikan pengguna.\n\nATURAN KONTEN:\n- Gunakan HANYA informasi yang diberikan pengguna. Jangan mengarang fakta, angka, atau nama yang tidak disebutkan.\n- Jika pengguna tidak memberikan konten yang cukup, tanyakan terlebih dahulu sebelum membuat dokumen:\n  \"Untuk membuat [jenis dokumen] ini, saya butuh beberapa informasi tambahan: [sebutkan apa yang kurang].\"\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n\nKONFIRMASI SETELAH SELESAI:\nSetelah dokumen selesai dibuat, tutup respons dengan kalimat yang sesuai jenis dokumennya:\n\nJika dokumen berupa LAPORAN / PROPOSAL / ARTIKEL / MOM:\n\"Dokumen Anda sudah siap. Silakan klik tombol 'Unduh Dokumen (PDF)' untuk menyimpannya.\"\n\nJika dokumen berupa PRESENTASI / SLIDE / PPT:\n\"Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya.\"\n\nPENTING: Kalimat penutup ini WAJIB mengandung salah satu frasa trigger di atas agar sistem dapat mendeteksi jenis dokumen dan memproses PDF dengan benar.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
@@ -1423,7 +1481,7 @@
         "toolDescription": "Gunakan agen ini untuk membuat rekap laporan atau dokumen PDF. \nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agen ini, kamu WAJIB menyalin dan memasukkan seluruh teks/data/jadwal yang ingin direkap dari riwayat obrolan ke dalam parameter 'input'. DILARANG KERAS mengirim input kosong atau hanya menyuruh \"buatkan laporan\". Kamu harus memberikan bahan mentahnya di dalam input.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Report Agent — Spesialis Rekap Data dan Ekspor Laporan.\n\nTUGAS TUNGGALMU:\nMemformat data mentah atau informasi yang sudah ada menjadi rekap/ringkasan terstruktur yang rapi. Kamu juga menangani permintaan ekspor laporan ke format PDF.\n\nPERBEDAAN PENTING:\nKamu BUKAN pembuat konten dari nol. Kamu adalah formatter dan summarizer. Seluruh data/informasi yang ingin direkap WAJIB sudah disertakan di dalam input yang kamu terima. Jika input kosong atau tidak memiliki data yang cukup, minta pengirim (Supervisor) untuk menyertakan datanya.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n1. Gunakan HANYA data yang secara eksplisit ada di dalam input. Jangan menambahkan, mengubah, atau mengarang angka, tanggal, nama, atau fakta apa pun.\n2. Jika data di input menyebut \"Maret 2026\", tulis \"Maret 2026\" — jangan ubah.\n\nATURAN FORMAT TABEL MARKDOWN (KRITIS):\n- Gunakan format tabel Markdown standar dengan simbol pipa ( | ).\n- WAJIB tambahkan 1 baris kosong sebelum baris header tabel.\n- DILARANG menggunakan tag HTML (<table>, <div>, dll).\n- DILARANG memasukkan baris baru (Enter) di dalam sel tabel — tulis memanjang ke samping jika perlu.\n\nPROTOKOL KONFIRMASI PDF:\n\nSKENARIO A — Pengguna hanya minta \"rekap\" atau \"rangkum\":\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\nSKENARIO B — Pengguna minta PDF secara eksplisit, atau menjawab \"Ya\" atas pertanyaan di Skenario A:\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)' yang telah muncul di layar Anda untuk menyimpan dokumen ini.\"\n"
+          "systemMessage": "Kamu adalah Report Agent — Spesialis Rekap Data dan Ekspor Laporan.\n\nTUGAS TUNGGALMU:\nMemformat data mentah atau informasi yang sudah ada menjadi rekap/ringkasan terstruktur yang rapi. Kamu juga menangani permintaan ekspor laporan ke format PDF.\n\nPERBEDAAN PENTING:\nKamu BUKAN pembuat konten dari nol. Kamu adalah formatter dan summarizer. Seluruh data/informasi yang ingin direkap WAJIB sudah disertakan di dalam input yang kamu terima. Jika input kosong atau tidak memiliki data yang cukup, minta pengirim (Supervisor) untuk menyertakan datanya.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n1. Gunakan HANYA data yang secara eksplisit ada di dalam input. Jangan menambahkan, mengubah, atau mengarang angka, tanggal, nama, atau fakta apa pun.\n2. Jika data di input menyebut \"Maret 2026\", tulis \"Maret 2026\" — jangan ubah.\n\nATURAN FORMAT TABEL MARKDOWN (KRITIS):\n- Gunakan format tabel Markdown standar dengan simbol pipa ( | ).\n- WAJIB tambahkan 1 baris kosong sebelum baris header tabel.\n- DILARANG menggunakan tag HTML (<table>, <div>, dll).\n- DILARANG memasukkan baris baru (Enter) di dalam sel tabel — tulis memanjang ke samping jika perlu.\n\nPROTOKOL KONFIRMASI PDF:\n\nSKENARIO A — Pengguna hanya minta \"rekap\" atau \"rangkum\":\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\nSKENARIO B — Pengguna minta PDF secara eksplisit, atau menjawab \"Ya\" atas pertanyaan di Skenario A:\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)'.\"\n\nKata trigger WAJIB ada di balasan: 'Unduh Laporan (PDF)'\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
@@ -1904,6 +1962,106 @@
           "name": "SumoPod"
         }
       }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const output = $input.first().json.output;\nconst cleaned = output\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap.*/gs, '')\n  .trim();\n\nconst css = `<style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style>`;\nconst fullHtml = css + cleaned;\n\nreturn [{ json: { output: fullHtml } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2432,
+        1600
+      ],
+      "id": "ppt-css-inject-node-001",
+      "name": "Inject PPT CSS"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://v2.api2pdf.com/chrome/pdf/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "b794cd07-9281-4b5e-a564-17be14813673"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "options",
+              "value": "={{ JSON.stringify({ pageWidth: '16in', pageHeight: '9in', marginTop: '0', marginBottom: '0', marginLeft: '0', marginRight: '0' }) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2640,
+        1600
+      ],
+      "id": "ppt-api2pdf-node-001",
+      "name": "api2pdf PPT"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ppt-filename-001",
+              "name": "nama_file_laporan",
+              "value": "=Presentasi_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2848,
+        1600
+      ],
+      "id": "ppt-edit-fields-node-001",
+      "name": "Edit Fields PPT"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "doc-filename-001",
+              "name": "nama_file_laporan",
+              "value": "=Dokumen_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2992,
+        1600
+      ],
+      "id": "doc-edit-fields-node-001",
+      "name": "Edit Fields Dokumen"
     }
   ],
   "pinData": {
@@ -2286,24 +2444,6 @@
           {
             "node": "Scheduler Agent",
             "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
             "index": 0
           }
         ]
@@ -2711,6 +2851,71 @@
           {
             "node": "Document Agent",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Output Type": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inject PPT CSS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject PPT CSS": {
+      "main": [
+        [
+          {
+            "node": "api2pdf PPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "api2pdf PPT": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields PPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields PPT": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
             "index": 0
           }
         ]

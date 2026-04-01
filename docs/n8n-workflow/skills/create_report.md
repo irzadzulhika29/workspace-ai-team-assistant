@@ -59,3 +59,11 @@ Implementasi AI Agent berhasil meningkatkan efisiensi waktu respons pelanggan se
 * Tingkatkan spesifikasi peladen ke level berikutnya sebelum kuartal kedua.
 * Latih ulang model AI menggunakan data percakapan terbaru untuk meningkatkan akurasi.
 ```
+
+## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
+
+Setelah seluruh isi laporan selesai ditulis, tutup respons dengan kalimat PERSIS berikut — tidak boleh diparafrase, disingkat, atau diganti dengan kalimat lain apapun:
+
+"Dokumen Anda sudah siap. Silakan klik tombol 'Unduh Dokumen (PDF)' untuk menyimpannya."
+
+Frasa **'Unduh Dokumen (PDF)'** adalah trigger kata kunci yang digunakan sistem backend untuk mendeteksi dan memproses ekspor PDF secara otomatis. Jika frasa ini tidak ada atau berubah, sistem tidak akan berjalan.
