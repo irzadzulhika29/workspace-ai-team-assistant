@@ -22,12 +22,14 @@ export default function KnowledgeChat() {
     addKnowledgeMessage,
     clearKnowledge,
     activeKnowledgeSessionId,
+    setActiveKnowledgeSession,
   } = useChatStore(
     (state) => ({
       knowledgeMessages: state.knowledgeMessages,
       addKnowledgeMessage: state.addKnowledgeMessage,
       clearKnowledge: state.clearKnowledge,
       activeKnowledgeSessionId: state.activeKnowledgeSessionId,
+      setActiveKnowledgeSession: state.setActiveKnowledgeSession,
     }),
     shallow,
   )
@@ -46,10 +48,21 @@ export default function KnowledgeChat() {
     setLoading(true)
 
     try {
+      // Auto-create session jika belum ada
+      let sessionId = activeKnowledgeSessionId
+      if (!sessionId) {
+        const { sessionApi } = await import('../services/sessionService')
+        const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'rag_chat')
+        if (newSession) {
+          sessionId = newSession.id
+          setActiveKnowledgeSession(sessionId)
+        }
+      }
+
       const data = await chatApi.sendToKnowledge(
         message,
         contextFilter,
-        activeKnowledgeSessionId,
+        sessionId,
       )
       addKnowledgeMessage({
         role:           'ai',
@@ -69,7 +82,7 @@ export default function KnowledgeChat() {
     } finally {
       setLoading(false)
     }
-  }, [activeKnowledgeSessionId, addKnowledgeMessage, contextFilter])
+  }, [activeKnowledgeSessionId, addKnowledgeMessage, contextFilter, setActiveKnowledgeSession])
 
   return (
     <div className="flex h-screen">

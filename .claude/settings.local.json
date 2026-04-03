@@ -1,9 +1,11 @@
 {
+  
   "env": {
-    "ANTHROPIC_BASE_URL": "https://api.enowxlabs.com",
-    "ANTHROPIC_AUTH_TOKEN": "enx_9e093ee3377e5079a755f9fce058ff710081ead8933e6d048078fc99c36ba86e",
-    "ANTHROPIC_MODEL": "claude-sonnet-4.5"
+    "ANTHROPIC_BASE_URL": "http://localhost:4141",
+    "ANTHROPIC_MODEL": "gpt-5.1-codex",
+    "ANTHROPIC_API_KEY": "dummy"
   },
+  "model": "gpt-5.1-codex",
   "permissions": {
     "allow": [
       "Bash(claude mcp:*)",

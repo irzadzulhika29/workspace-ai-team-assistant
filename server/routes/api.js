@@ -2,6 +2,7 @@ import express from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -12,6 +13,181 @@ router.get('/protected', requireAuth, (req, res) => {
     message: 'This is a protected route',
     user: req.user
   });
+});
+
+// Fetch documents from Supabase using service role key
+router.get('/dokumen', async (req, res) => {
+  try {
+    const url = `${process.env.SUPABASE_URL}/rest/v1/dokumen?select=*&order=created_at.desc`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching dokumen:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new chat session
+router.post('/sessions', async (req, res) => {
+  try {
+    const { judul = "Obrolan Baru", chat_type = "general_chat" } = req.body;
+    const newSessionId = crypto.randomUUID();
+    const payload = {
+      id: newSessionId,
+      judul,
+      chat_type,
+    };
+
+    const url = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase error: ${response.status} ${response.statusText}`);
+    }
+
+    const rows = await response.json();
+    res.json(rows[0] || payload);
+  } catch (error) {
+    console.error('Error creating session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all chat sessions
+router.get('/sessions', async (req, res) => {
+  try {
+    const { chat_type } = req.query;
+    const filter = chat_type ? `&chat_type=eq.${chat_type}` : "";
+    const url = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?select=id,judul,chat_type,created_at&order=created_at.desc${filter}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get chat history for a session
+router.get('/sessions/:sessionId/history', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    // Fetch chat history
+    const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}&order=id.asc`;
+    const historyResponse = await fetch(historyUrl, {
+      method: 'GET',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!historyResponse.ok) {
+      throw new Error(`Supabase error: ${historyResponse.status} ${historyResponse.statusText}`);
+    }
+
+    const rows = await historyResponse.json();
+
+    // Fetch dokumen output for this session
+    const dokumenUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?session_id=eq.${sessionId}&kategori=eq.output&order=created_at.asc&select=file_url,nama_file,created_at`;
+    const dokumenResponse = await fetch(dokumenUrl, {
+      method: 'GET',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    let dokumen = [];
+    if (dokumenResponse.ok) {
+      dokumen = await dokumenResponse.json();
+    }
+
+    res.json({ history: rows, dokumen });
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete chat session
+router.delete('/sessions/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    // Delete messages first
+    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}`;
+    const messagesResponse = await fetch(messagesUrl, {
+      method: 'DELETE',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!messagesResponse.ok) {
+      throw new Error(`Failed to delete messages: ${messagesResponse.status}`);
+    }
+
+    // Delete session
+    const sessionUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${sessionId}`;
+    const sessionResponse = await fetch(sessionUrl, {
+      method: 'DELETE',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!sessionResponse.ok) {
+      throw new Error(`Failed to delete session: ${sessionResponse.status}`);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Fetch Google Docs

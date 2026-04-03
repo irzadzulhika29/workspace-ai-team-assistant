@@ -15,10 +15,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        0,
-        1744
+        1568,
+        3040
       ],
-      "id": "ea0fa0d0-7485-4e82-9845-206e7256f70a",
+      "id": "38c704a7-c34f-45b4-8e26-511dc5a9e0e3",
       "name": "Pinecone Vector Store",
       "credentials": {
         "pineconeApi": {
@@ -35,10 +35,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        -48,
-        1952
+        1520,
+        3248
       ],
-      "id": "f0146635-37af-491f-ad9a-18e3ff529a1a",
+      "id": "e2f2b9be-4c0a-44c9-9a9a-2bf695a85bab",
       "name": "Embeddings HuggingFace Inference",
       "credentials": {
         "huggingFaceApi": {
@@ -56,10 +56,10 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        96,
-        1968
+        1664,
+        3264
       ],
-      "id": "e3d6ee67-529b-4dcb-acf8-8c14b035328b",
+      "id": "0034d4ab-02ad-468c-bec6-6a97b798c505",
       "name": "Default Data Loader"
     },
     {
@@ -67,10 +67,10 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
       "typeVersion": 1,
       "position": [
-        304,
-        2112
+        1872,
+        3408
       ],
-      "id": "9ccfcf27-97fe-460d-b681-1a3617edc728",
+      "id": "c2a3136a-c7de-4fcd-840d-f6793e4041c2",
       "name": "Character Text Splitter"
     },
     {
@@ -81,10 +81,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        1136,
-        2752
+        2704,
+        4048
       ],
-      "id": "4fa03032-20b7-4a58-b604-287057afc8fd",
+      "id": "fb64b5e0-b5bc-4029-9592-d9afdf1fbcdb",
       "name": "Embeddings HuggingFace Inference2",
       "credentials": {
         "huggingFaceApi": {
@@ -102,10 +102,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2432,
-        1984
+        3856,
+        3264
       ],
-      "id": "77cb4dd4-b233-458b-98e7-21ceeebe5378",
+      "id": "f87b9164-15f5-400f-883b-4f0c390f1b4f",
       "name": "Respond to Webhook"
     },
     {
@@ -114,16 +114,16 @@
         "text": "={{ $json.PromptFinal }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "Kamu adalah AI Supervisor untuk tim internal perusahaan. Satu-satunya tugasmu adalah menganalisis maksud pesan pengguna, lalu mendelegasikannya ke agen spesialis yang paling tepat — atau menjawabnya sendiri jika tidak memerlukan agen.\n\nKamu memiliki akses ke 6 agen spesialis berikut. Pelajari domain masing-masing dengan cermat:\n\n─────────────────────────────────────────\nDAFTAR AGEN & DOMAIN-NYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nGunakan untuk: pertanyaan tentang kebijakan internal, SOP (Standar Operasional Prosedur), aturan perusahaan, prosedur onboarding, payroll, cuti, atau pencarian fakta apa pun yang jawabannya bersumber dari dokumen internal perusahaan.\nKata kunci pemicu: \"aturan\", \"kebijakan\", \"SOP\", \"prosedur\", \"bagaimana ketentuan\", \"apa peraturan\", \"onboarding\", \"payroll\", \"cuti\".\n\n[2] Scheduler_Agent\nGunakan untuk: semua hal yang berkaitan dengan Google Calendar — membuat jadwal rapat/acara, mengecek jadwal yang sudah ada, mengubah atau menghapus event, membuat event dengan Google Meet link, dan menanyakan agenda hari ini/minggu depan.\nKata kunci pemicu: \"jadwalkan\", \"buat meeting\", \"cek jadwal\", \"agenda\", \"rapat\", \"acara\", \"Google Meet\", \"hapus jadwal\", \"reschedule\".\n\n[3] Task_Agent\nGunakan untuk: semua hal yang berkaitan dengan manajemen tugas di Jira — membuat tiket/task baru, melihat daftar issue, mengecek status backlog, dan melaporkan progress proyek dari data Jira.\nKata kunci pemicu: \"buat tiket\", \"buat task\", \"masukkan ke backlog\", \"issue Jira\", \"sprint\", \"progress proyek\", \"status task\", \"assign tugas\".\n\n[4] Document_Agent\nGunakan untuk: permintaan membuat dokumen tertulis panjang atau presentasi — laporan formal, proposal, artikel, notulen rapat (minutes of meeting), atau slide presentasi (PPT).\nKata kunci pemicu: \"buatkan laporan\", \"buatkan proposal\", \"buat presentasi\", \"buatkan slide\", \"buat PPT\", \"tulis artikel\", \"notulen\", \"MOM\", \"dokumen resmi\".\n\n[5] Report_Agent\nGunakan untuk: merangkum data atau percakapan yang sudah ada menjadi rekap terstruktur atau mengekspor hasil rangkuman menjadi file PDF. Berbeda dari Document_Agent — Report_Agent merangkum data yang SUDAH ADA, bukan membuat konten baru dari nol.\nKata kunci pemicu: \"rekap\", \"rangkum percakapan ini\", \"buatkan ringkasan\", \"ekspor PDF\", \"unduh laporan\", \"simpan sebagai PDF\".\n\n[6] Communication_Agent\nGunakan untuk: membuat draft komunikasi tertulis yang akan dikirim ke orang lain — email formal, pengumuman, pesan pemberitahuan, surat, atau teks komunikasi resmi lainnya. Agen ini juga dapat langsung mengirim email via Gmail jika diminta.\nKata kunci pemicu: \"buatkan email\", \"draft email\", \"tulis pengumuman\", \"buat surat\", \"kirim email\", \"beritahu tim\", \"notifikasi ke\".\n\n─────────────────────────────────────────\nATURAN ROUTING (WAJIB DIPATUHI)\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG (tanpa memanggil agen):\nJika pengguna memberikan sapaan (\"halo\", \"hai\", \"selamat pagi\"), pertanyaan umum yang tidak berkaitan dengan domain mana pun di atas, atau percakapan santai (chit-chat), jawab langsung dengan ramah dan profesional. Jangan memanggil agen apa pun.\n\nATURAN 2 — SATU AGEN PER TUGAS:\nSetiap permintaan hanya didelegasikan ke SATU agen yang paling relevan. Jangan memanggil lebih dari satu agen kecuali pengguna secara eksplisit meminta dua hal sekaligus (contoh: \"buatkan tiket Jira DAN jadwalkan meetingnya\").\n\nATURAN 3 — JANGAN JAWAB SOP SENDIRI:\nDilarang keras menjawab pertanyaan tentang kebijakan atau SOP perusahaan dari pengetahuanmu sendiri. Selalu delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Document_Agent vs Report_Agent:\n- Pengguna minta MEMBUAT konten baru → Document_Agent\n- Pengguna minta MERANGKUM atau MENGEKSPOR data yang sudah ada → Report_Agent\n\nATURAN 5 — DELEGASI Report_Agent WAJIB MENYERTAKAN DATA:\nJika mendelegasikan ke Report_Agent, kamu WAJIB menyertakan seluruh data, teks, atau informasi yang ingin direkap di dalam input yang kamu kirim ke Report_Agent. Dilarang mengirim input kosong atau hanya menulis \"buatkan rekap\".\n\nATURAN 6 — PASS-THROUGH HASIL AGEN (SANGAT PENTING):\nJika kamu baru mendapat hasil dari agen mana pun, tampilkan hasilnya kepada pengguna secara UTUH dan MENTAH. DILARANG memparafrase, memotong, merangkum ulang, merusak format tabel Markdown, atau menambahkan kalimat pengantar/penutup buatanmu sendiri. Salin 100% output agen.\n\nATURAN 7 — DELEGASI PENGIRIMAN EMAIL KE Communication_Agent (WAJIB):\nJika pengguna menyetujui draft email dan memberikan alamat email tujuan, kamu WAJIB membangun input ke Communication_Agent dengan FORMAT BERIKUT PERSIS:\n\n\"KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\"\n\nDILARANG mengirim kalimat seperti \"gunakan draft sebelumnya\" atau \"kirim email yang tadi\". Communication_Agent tidak punya memori — draft WAJIB disertakan secara fisik di dalam input.\n"
+          "systemMessage": "Kamu adalah AI Supervisor untuk tim internal perusahaan. Satu-satunya tugasmu adalah menganalisis maksud pesan pengguna, lalu mendelegasikannya ke agen spesialis yang paling tepat — atau menjawabnya sendiri jika tidak memerlukan agen.\n\nKamu memiliki akses ke 6 agen spesialis berikut. Pelajari domain masing-masing dengan cermat:\n\n─────────────────────────────────────────\nDAFTAR AGEN & DOMAIN-NYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nGunakan untuk: pertanyaan tentang kebijakan internal, SOP (Standar Operasional Prosedur), aturan perusahaan, prosedur onboarding, payroll, cuti, atau pencarian fakta apa pun yang jawabannya bersumber dari dokumen internal perusahaan.\nKata kunci pemicu: \"aturan\", \"kebijakan\", \"SOP\", \"prosedur\", \"bagaimana ketentuan\", \"apa peraturan\", \"onboarding\", \"payroll\", \"cuti\".\n\n[2] Scheduler_Agent\nGunakan untuk: semua hal yang berkaitan dengan Google Calendar — membuat jadwal rapat/acara, mengecek jadwal yang sudah ada, mengubah atau menghapus event, membuat event dengan Google Meet link, dan menanyakan agenda hari ini/minggu depan.\nKata kunci pemicu: \"jadwalkan\", \"buat meeting\", \"cek jadwal\", \"agenda\", \"rapat\", \"acara\", \"Google Meet\", \"hapus jadwal\", \"reschedule\".\n\n[3] Task_Agent\nGunakan untuk: semua hal yang berkaitan dengan manajemen tugas di Jira — membuat tiket/task baru, melihat daftar issue, mengecek status backlog, dan melaporkan progress proyek dari data Jira.\nKata kunci pemicu: \"buat tiket\", \"buat task\", \"masukkan ke backlog\", \"issue Jira\", \"sprint\", \"progress proyek\", \"status task\", \"assign tugas\".\n\n[4] Document_Agent\nGunakan untuk: permintaan membuat dokumen tertulis panjang atau presentasi — laporan formal, proposal, artikel, notulen rapat (minutes of meeting), atau slide presentasi (PPT).\nKata kunci pemicu: \"buatkan laporan\", \"buatkan proposal\", \"buat presentasi\", \"buatkan slide\", \"buat PPT\", \"tulis artikel\", \"notulen\", \"MOM\", \"dokumen resmi\".\n\n[5] Report_Agent\nGunakan untuk: merangkum data atau percakapan yang sudah ada menjadi rekap terstruktur atau mengekspor hasil rangkuman menjadi file PDF. Berbeda dari Document_Agent — Report_Agent merangkum data yang SUDAH ADA, bukan membuat konten baru dari nol.\nKata kunci pemicu: \"rekap\", \"rangkum percakapan ini\", \"buatkan ringkasan\", \"ekspor PDF\", \"unduh laporan\", \"simpan sebagai PDF\".\n\n[6] Communication_Agent\nGunakan untuk: membuat draft komunikasi tertulis yang akan dikirim ke orang lain — email formal, pengumuman, pesan pemberitahuan, surat, atau teks komunikasi resmi lainnya. Agen ini juga dapat langsung mengirim email via Gmail jika diminta.\nKata kunci pemicu: \"buatkan email\", \"draft email\", \"tulis pengumuman\", \"buat surat\", \"kirim email\", \"beritahu tim\", \"notifikasi ke\".\n\n─────────────────────────────────────────\nATURAN ROUTING (WAJIB DIPATUHI)\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG (tanpa memanggil agen):\nJika pengguna memberikan sapaan (\"halo\", \"hai\", \"selamat pagi\"), pertanyaan umum yang tidak berkaitan dengan domain mana pun di atas, atau percakapan santai (chit-chat), jawab langsung dengan ramah dan profesional. Jangan memanggil agen apa pun.\n\nATURAN 2 — SATU AGEN PER TUGAS:\nSetiap permintaan hanya didelegasikan ke SATU agen yang paling relevan. Jangan memanggil lebih dari satu agen kecuali pengguna secara eksplisit meminta dua hal sekaligus (contoh: \"buatkan tiket Jira DAN jadwalkan meetingnya\").\n\nATURAN 3 — JANGAN JAWAB SOP SENDIRI:\nDilarang keras menjawab pertanyaan tentang kebijakan atau SOP perusahaan dari pengetahuanmu sendiri. Selalu delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Document_Agent vs Report_Agent:\n- Pengguna minta MEMBUAT konten baru → Document_Agent\n- Pengguna minta MERANGKUM atau MENGEKSPOR data yang sudah ada → Report_Agent\n\nATURAN 5 — DELEGASI Report_Agent WAJIB MENYERTAKAN DATA:\nJika mendelegasikan ke Report_Agent, kamu WAJIB menyertakan seluruh data, teks, atau informasi yang ingin direkap di dalam input yang kamu kirim ke Report_Agent. Dilarang mengirim input kosong atau hanya menulis \"buatkan rekap\".\n\nATURAN 6 — PASS-THROUGH HASIL AGEN (SANGAT PENTING):\nJika kamu baru mendapat hasil dari agen mana pun (KECUALI Document_Agent), \ntampilkan hasilnya kepada pengguna secara UTUH dan MENTAH. DILARANG memparafrase, \nmemotong, merangkum ulang, merusak format tabel Markdown, atau menambahkan \nkalimat pengantar/penutup buatanmu sendiri. Salin 100% output agen.\nUntuk Document_Agent, ikuti Aturan 6B.\n\nATURAN 6B - DOCUMENT AGENT OUTPUT:\nJika Document_Agent mengembalikan output berupa kode (HTML/Markdown) beserta frasa 'Unduh Dokumen (PDF)' atau 'Unduh Presentasi (PDF)', kamu WAJIB meneruskan SELURUH output tersebut secara UTUH. Jangan memotong kode HTML atau Markdown apapun. Teruskan hasil mentah 100% ke pengguna agar sistem backend dapat memproses kodenya menjadi PDF.\n\nATURAN 7 — DELEGASI PENGIRIMAN EMAIL KE Communication_Agent (WAJIB):\nJika pengguna menyetujui draft email dan memberikan alamat email tujuan, kamu WAJIB membangun input ke Communication_Agent dengan FORMAT BERIKUT PERSIS:\n\n\"KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\"\n\nDILARANG mengirim kalimat seperti \"gunakan draft sebelumnya\" atau \"kirim email yang tadi\". Communication_Agent tidak punya memori — draft WAJIB disertakan secara fisik di dalam input.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1760,
-        1968
+        3328,
+        3264
       ],
-      "id": "dc116609-4966-4f73-b366-ebd5d54bdc0d",
+      "id": "dba8012d-ea31-4de9-81d3-479f10199402",
       "name": "Supervisor Agent"
     },
     {
@@ -136,10 +136,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        512,
-        1952
+        2080,
+        3248
       ],
-      "id": "201f505d-bc02-4efc-880d-71e21fdde4d0",
+      "id": "b7c3185b-47ae-4899-8516-e2b31d04b3db",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -153,10 +153,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -928,
-        1968
+        640,
+        3264
       ],
-      "id": "a8fe47b2-d0ec-4d47-bf8c-164b80c22ece",
+      "id": "b0b7fa15-ed2f-48d6-b12d-96af6dc21ff1",
       "name": "Upload Document",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -185,10 +185,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -688,
-        1824
+        880,
+        3120
       ],
-      "id": "fa566711-09f5-46f1-bdba-33b0910d6f97",
+      "id": "7d1a7758-6a19-4234-b3cc-5b8ddd47d245",
       "name": "HTTP Request"
     },
     {
@@ -214,10 +214,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -480,
-        1824
+        1088,
+        3120
       ],
-      "id": "a33398eb-0b1c-486b-9ba4-7957bf4e425a",
+      "id": "45fc7e40-6119-4863-b134-9f759ed71cd4",
       "name": "Create a row",
       "credentials": {
         "supabaseApi": {
@@ -235,10 +235,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -256,
-        1952
+        1312,
+        3248
       ],
-      "id": "4e956746-8592-42b7-a886-0ea5b4322b56",
+      "id": "85cfbb9d-7a4c-48bd-9629-2711fca61951",
       "name": "Merge"
     },
     {
@@ -249,10 +249,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        1648,
-        2224
+        3216,
+        3520
       ],
-      "id": "f18f102e-d1ca-4fae-9282-df1fe66c092e",
+      "id": "7db8183e-b274-4944-8e34-f18e1501c308",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -277,10 +277,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        1264,
-        1152
+        2832,
+        2448
       ],
-      "id": "371aca7f-f74b-4035-9b89-6eb67f0e43c5",
+      "id": "e7473808-5510-4af2-aff8-ac4541e126c9",
       "name": "Generate Chat Tittle"
     },
     {
@@ -299,10 +299,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        768,
-        1168
+        2336,
+        2464
       ],
-      "id": "36c514dd-d6e5-46bb-8b7f-3878d9dc3ab1",
+      "id": "f01d0270-fcd9-478a-9506-1983da0d1e40",
       "name": "Get a row",
       "credentials": {
         "supabaseApi": {
@@ -338,10 +338,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        720,
-        1952
+        2288,
+        3248
       ],
-      "id": "f095e372-4693-427d-8b06-9ef8a1e08dfa",
+      "id": "fc1f7ac5-fbf7-4f9b-b590-58fd411976e5",
       "name": "is file exist?"
     },
     {
@@ -351,7 +351,7 @@
             {
               "id": "81e74b75-a18e-4d88-be2f-e3eb6dd618d1",
               "name": "PromptFinal",
-              "value": "=instruction: {{ $('Main Webhook').item.json.body.message }}  \n\ndocument_text: {{ $json.text }}",
+              "value": "==instruction: {{ $('Main Webhook').item.json.body.message }}\n\ndocument_text: {{ $json.pages.map(page => page.markdown).join('\\n\\n') }}",
               "type": "string"
             }
           ]
@@ -361,10 +361,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1344,
-        1616
+        2912,
+        2912
       ],
-      "id": "da81a6ad-8b3f-475c-b74c-c93f2ec38f4b",
+      "id": "d1a8b19b-808c-4428-82af-22c549dcceb5",
       "name": "combine promt + text file"
     },
     {
@@ -384,10 +384,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1120,
-        1968
+        2688,
+        3264
       ],
-      "id": "ad430f0a-57d5-4f37-9154-efc6bbce2d31",
+      "id": "8b47d0a4-4a69-49a0-8713-66bd39ed11a4",
       "name": "user promt only"
     },
     {
@@ -398,10 +398,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        816,
-        2576
+        2384,
+        3872
       ],
-      "id": "89c9b4b3-4b1c-4e3a-9eac-e1ddedd8755d",
+      "id": "34e51c67-78c9-4ef7-a33b-8c591b2a442f",
       "name": "arcee-ai/trinity-large-preview:free",
       "credentials": {
         "openRouterApi": {
@@ -425,10 +425,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        1088,
-        2592
+        2656,
+        3888
       ],
-      "id": "99048abe-e853-4c8d-b9fc-d44642b02048",
+      "id": "c3cf2bd7-d922-400d-97c9-d19575cff5d6",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -445,10 +445,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1520,
-        2464
+        3088,
+        3760
       ],
-      "id": "87579023-238a-49d5-b004-eadd8e6709c1",
+      "id": "c622496a-e26b-4a0a-b839-50e38f41d354",
       "name": "arcee-ai/trinity-large-preview:free-2",
       "credentials": {
         "openRouterApi": {
@@ -471,10 +471,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1360,
-        2464
+        2928,
+        3760
       ],
-      "id": "460416b4-ed95-4c03-9340-502720ea4ac9",
+      "id": "9bb19398-26b4-4c3f-9a91-62a389f282f7",
       "name": "seed-2-0-lite-free-3",
       "credentials": {
         "openAiApi": {
@@ -503,10 +503,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1376,
-        2704
+        2944,
+        4000
       ],
-      "id": "8c1a51e9-db3e-4452-8ef0-a9fdbccb702c",
+      "id": "ebd0a0f3-f12a-4eb8-a6fe-a85fe7b74263",
       "name": "create an event",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -535,10 +535,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1680,
-        2704
+        3248,
+        4000
       ],
-      "id": "5108b302-2fe1-47eb-a388-2e04c82ad2e4",
+      "id": "5f7bd65b-220f-461b-b518-5cf08ffb72f6",
       "name": "get many events",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -555,10 +555,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        1504,
-        2224
+        3072,
+        3520
       ],
-      "id": "71242ec1-267c-4fe9-a26d-c0705289d82b",
+      "id": "6441f0e5-1f2a-435a-ad6d-529d50e8b309",
       "name": "arcee-ai/trinity-large-preview:free-",
       "credentials": {
         "openRouterApi": {
@@ -594,10 +594,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1024,
-        1168
+        2592,
+        2464
       ],
-      "id": "b5d4b1ce-431f-453a-882f-cf808a4325ba",
+      "id": "2eda3d41-948b-404b-9dd5-f4f3c077e9bd",
       "name": "is first chat?"
     },
     {
@@ -625,10 +625,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1568,
-        1152
+        3136,
+        2448
       ],
-      "id": "f6473914-d1c0-44b0-8fc9-30f559b830a6",
+      "id": "17a5bcf8-0a8b-42a6-86bc-672e4ad915e4",
       "name": "update chat title",
       "credentials": {
         "supabaseApi": {
@@ -647,10 +647,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -976,
-        1712
+        592,
+        3008
       ],
-      "id": "b0f91650-2e5c-46d6-80a4-3bf63dfc4751",
+      "id": "c86acced-2889-4654-a422-9e577f3a9c65",
       "name": "Sticky Note"
     },
     {
@@ -663,10 +663,10 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        1120,
-        1456
+        2688,
+        2752
       ],
-      "id": "fa362bdd-aed4-4565-afee-a0234dc59bc9",
+      "id": "30c4ccf0-53aa-4caa-b579-b46bee8f7862",
       "name": "Tesseract"
     },
     {
@@ -686,10 +686,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1344,
-        1456
+        2912,
+        2752
       ],
-      "id": "32c6af5b-6851-4613-891d-a5169ab89ce7",
+      "id": "fb1b76ba-903b-4db8-ae61-3d72468e9105",
       "name": "combine promt + text image"
     },
     {
@@ -771,10 +771,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        880,
-        1600
+        2448,
+        2896
       ],
-      "id": "88620e1c-9a6e-498c-a5ab-36d39e28d3e0",
+      "id": "be52c7d5-6275-4bc7-ab8d-afcc7067ff71",
       "name": "Switch"
     },
     {
@@ -794,10 +794,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1344,
-        1792
+        2912,
+        3088
       ],
-      "id": "cd5d71d1-4284-4c2e-8919-482feedd0d85",
+      "id": "c14afee8-2be5-4086-a703-3535623e275e",
       "name": "combine promt + text csv"
     },
     {
@@ -809,10 +809,10 @@
       "type": "n8n-nodes-base.jiraTool",
       "typeVersion": 1,
       "position": [
-        3024,
-        2576
+        4656,
+        3872
       ],
-      "id": "5345c337-d27b-4a0d-806c-c68323768d8e",
+      "id": "da6d697e-2a4b-4eda-b034-8e9f4338cfd1",
       "name": "Get many issues in Jira Software",
       "credentials": {
         "jiraSoftwareCloudApi": {
@@ -838,10 +838,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1824,
-        2688
+        3392,
+        3984
       ],
-      "id": "14058020-e6bd-4441-9db5-5d6457e057cd",
+      "id": "e37c7d3e-b9e2-45a4-810e-5cc46461c7f8",
       "name": "delete events calendar",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -852,36 +852,70 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
+        "rules": {
+          "values": [
             {
-              "id": "a9e801e7-7ba5-4244-977d-54e72e094372",
-              "leftValue": "={{ $json.output }}",
-              "rightValue": "Silakan klik tombol 'Unduh Laporan",
-              "operator": {
-                "type": "string",
-                "operation": "contains"
-              }
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "af7a3fbc-cf44-47c6-a8ef-4d7cdf5c3588",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Unduh Dokumen (PDF)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unduh Dokumen (PDF)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "657983e5-01b7-47f5-ba9f-a958ad8516a6",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Unduh Presentasi (PDF)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unduh Presentasi (PDF)"
             }
-          ],
-          "combinator": "and"
+          ]
         },
-        "options": {}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
       "position": [
-        2112,
-        1968
+        3632,
+        3056
       ],
-      "id": "00c9f98e-577c-46f1-ab51-3b8454360af1",
-      "name": "If"
+      "id": "24e16ba0-63ca-416b-ba01-23b5c7f69f89",
+      "name": "Route Output Type"
     },
     {
       "parameters": {
@@ -910,15 +944,15 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2768,
-        1808
+        4304,
+        2784
       ],
-      "id": "2911f05e-a73c-4b78-849d-5f53db27661a",
+      "id": "4dbb22e6-6e4d-444c-a200-99727c958761",
       "name": "HTTP Request1"
     },
     {
       "parameters": {
-        "url": "={{ $('HTTP Request1').item.json.FileUrl }}",
+        "url": "={{ $('api2pdf PPT').item.json.FileUrl }}",
         "options": {
           "response": {
             "response": {
@@ -931,10 +965,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3200,
-        1808
+        4736,
+        2784
       ],
-      "id": "1b51d505-135c-40d6-bd1c-7c0cc82d0d8f",
+      "id": "7b601609-7350-4fec-8a38-1c15affca65a",
       "name": "HTTP Request2"
     },
     {
@@ -962,10 +996,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3408,
-        1808
+        4944,
+        2784
       ],
-      "id": "30e00644-b6d0-4caa-ade6-4c6fe230e2aa",
+      "id": "303c895f-96db-40e6-b7b0-ec690f45bfe1",
       "name": "HTTP Request3"
     },
     {
@@ -984,6 +1018,10 @@
             {
               "fieldId": "file_url",
               "fieldValue": "={{\"https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/public/dokumen_sop/\" + $('HTTP Request2').item.json.nama_file_laporan}}"
+            },
+            {
+              "fieldId": "session_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.session_id }}"
             }
           ]
         }
@@ -991,10 +1029,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        3616,
-        1808
+        5152,
+        2784
       ],
-      "id": "9415dc5e-eeb1-44b5-9de4-49c70edb9408",
+      "id": "8e8acf2a-54ef-41ee-93fa-8edb10042dcc",
       "name": "Create a row1",
       "credentials": {
         "supabaseApi": {
@@ -1010,7 +1048,7 @@
             {
               "id": "b327c4a6-84df-4551-8d9e-0487a616cf0a",
               "name": "nama_file_laporan",
-              "value": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "value": "=Dokumen_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
               "type": "string"
             }
           ]
@@ -1020,10 +1058,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2992,
-        1808
+        4528,
+        2784
       ],
-      "id": "54690b21-1463-450f-9fc9-6546161b3ac5",
+      "id": "e4287b6a-1d97-404e-999f-f43f74e9c0bb",
       "name": "Edit Fields"
     },
     {
@@ -1035,10 +1073,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3824,
-        1808
+        5360,
+        2784
       ],
-      "id": "997a3492-933a-4cd6-9416-2cd248731ae6",
+      "id": "36d51013-3cfa-4dae-bdfe-2d3bcf21bdd2",
       "name": "Respond to Webhook2"
     },
     {
@@ -1055,10 +1093,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1168,
-        1312
+        2736,
+        2608
       ],
-      "id": "5b457689-ace9-4900-bcaa-14918feb3540",
+      "id": "fd115066-c0e7-4494-b628-f9ad7496531a",
       "name": "deepseek-v3.2",
       "credentials": {
         "openAiApi": {
@@ -1074,10 +1112,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2432,
-        1808
+        3968,
+        2784
       ],
-      "id": "37f8f65f-94d0-40c4-9daf-1c26012e20f5",
+      "id": "a5cb8653-d4d9-44d1-b829-fdee1dff0e35",
       "name": "Code in JavaScript"
     },
     {
@@ -1088,10 +1126,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        1120,
-        1616
+        2688,
+        2912
       ],
-      "id": "bda8f423-be6b-483f-9373-4cf9086645d2",
+      "id": "f727fa74-0503-4f69-9722-a460b6e38b68",
       "name": "Extract text",
       "credentials": {
         "mistralCloudApi": {
@@ -1108,10 +1146,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        1120,
-        1792
+        2688,
+        3088
       ],
-      "id": "3b309c3a-8dc7-4c73-9a44-b30169846cc5",
+      "id": "aebc38e6-2692-4926-97c0-17ef5d9cac36",
       "name": "Extract CSV File"
     },
     {
@@ -1122,10 +1160,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -416,
-        2320
+        1152,
+        3616
       ],
-      "id": "80badb61-5ad2-4031-a9ee-28feba40ce02",
+      "id": "ddeccaf0-a73b-4ef6-8a1a-8fcf7cbd8bc9",
       "name": "Respond to Webhook1"
     },
     {
@@ -1137,10 +1175,10 @@
       "type": "n8n-nodes-base.jira",
       "typeVersion": 1,
       "position": [
-        -672,
-        2320
+        896,
+        3616
       ],
-      "id": "f3bf4064-8f59-4c76-94b4-1661e74509e4",
+      "id": "f45af2df-357f-463c-84b6-6115711cdfbe",
       "name": "Get many issues",
       "credentials": {
         "jiraSoftwareCloudApi": {
@@ -1159,10 +1197,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -944,
-        2320
+        624,
+        3616
       ],
-      "id": "f999e35c-9851-47e9-952b-2e282b794780",
+      "id": "2dcebd67-cc6f-43ed-9da5-51edc7859818",
       "name": "Get Jira Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1176,10 +1214,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        2928,
-        2304
+        4496,
+        3600
       ],
-      "id": "10797b5e-c97d-4777-aa43-75eaa8573f9b",
+      "id": "546afeb0-0330-4b11-a800-313d7c8a8f06",
       "name": "Task Agent"
     },
     {
@@ -1196,10 +1234,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2144,
-        2496
+        3712,
+        3792
       ],
-      "id": "d63ae64c-db64-4ce6-8580-b047ebe686e4",
+      "id": "67bc14b2-975e-4f36-b1d5-3998fc01a17b",
       "name": "Seed-2-0-pro-free-2",
       "credentials": {
         "openAiApi": {
@@ -1222,10 +1260,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2896,
-        2576
+        4464,
+        3872
       ],
-      "id": "941beffb-bdc5-4cca-8637-583f789eee76",
+      "id": "c31dc189-200b-484e-9eb3-647e5d1453ac",
       "name": "Seed-2-0-pro-free-3",
       "credentials": {
         "openAiApi": {
@@ -1246,10 +1284,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        1760,
-        2320
+        3328,
+        3616
       ],
-      "id": "cd3a3ac3-0bb0-444c-b592-77ad33415abc",
+      "id": "b24bfd20-dc45-4821-909c-3a1f3101f636",
       "name": "Scheduler Agent"
     },
     {
@@ -1262,10 +1300,10 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.2,
       "position": [
-        2000,
-        2688
+        3568,
+        3984
       ],
-      "id": "a068c781-0a93-4d46-8e4c-6e1bc9ffa0b4",
+      "id": "f94f6187-0d9c-48f6-ae2d-6e53e965d4e1",
       "name": "Send a message in Gmail",
       "webhookId": "20eddf3c-e6fd-4e63-b921-beb953aa713e",
       "credentials": {
@@ -1300,10 +1338,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        1520,
-        2704
+        3088,
+        4000
       ],
-      "id": "5390105d-a892-4910-bb60-9480923429fb",
+      "id": "a1822133-1966-400a-9e37-16d0912b37dd",
       "name": "create an event & google meet",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -1324,26 +1362,26 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        1024,
-        2336
+        2592,
+        3632
       ],
-      "id": "3807a72f-45a3-4b67-9461-2edabf78f907",
+      "id": "9d47cc5c-246f-483a-9aac-bc7d4fa6a091",
       "name": "Knowledge Agent"
     },
     {
       "parameters": {
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nTUGAS UTAMAMU:\nMembuat dokumen profesional berkualitas tinggi sesuai permintaan pengguna, mencakup: laporan formal, proposal, artikel, notulen rapat (minutes of meeting), dan presentasi slide (PPT).\n\nPROTOKOL KERJA WAJIB — BACA SEBELUM MEMBUAT DOKUMEN:\nKamu DILARANG membuat dokumen apa pun sebelum membaca instruksi format yang tersedia. Ikuti urutan ini:\n\n1. IDENTIFIKASI jenis dokumen yang diminta:\n   - Laporan / Proposal / Artikel / MOM → gunakan tool [Get Report Format]\n   - Presentasi / Slide / PPT → gunakan tool [Get PPT Format]\n\n2. PANGGIL tool yang sesuai untuk mengambil instruksi format dari repositori.\n\n3. BACA instruksi format tersebut dengan cermat.\n\n4. BUAT dokumen berdasarkan instruksi format yang sudah dibaca, menggunakan konten/informasi yang diberikan pengguna.\n\nATURAN KONTEN:\n- Gunakan HANYA informasi yang diberikan pengguna. Jangan mengarang fakta, angka, atau nama yang tidak disebutkan.\n- Jika pengguna tidak memberikan konten yang cukup, tanyakan terlebih dahulu sebelum membuat dokumen:\n  \"Untuk membuat [jenis dokumen] ini, saya butuh beberapa informasi tambahan: [sebutkan apa yang kurang].\"\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n\nKONFIRMASI SETELAH SELESAI:\nSetelah dokumen selesai dibuat, tutup respons dengan kalimat:\n\"Dokumen sudah siap. Apakah ada bagian yang ingin direvisi atau disesuaikan?\"\n"
+          "systemMessage": "Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nIDENTITAS DAN TUGAS:\nTugasmu satu-satunya adalah membuat dokumen profesional berdasarkan informasi yang diberikan pengguna. Jenis dokumen yang kamu tangani: laporan formal, proposal, artikel, notulen rapat (MOM), dan presentasi slide (PPT).\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPROTOKOL WAJIB SEBELUM MEMBUAT DOKUMEN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nLANGKAH 1 — Identifikasi jenis dokumen:\n  • Laporan / Proposal / Artikel / MOM  →  panggil tool [Get Report Format]\n  • Presentasi / Slide / PPT            →  panggil tool [Get PPT Format]\n\nLANGKAH 2 — Panggil tool yang sesuai, baca SELURUH instruksi yang dikembalikan,\n            termasuk kalimat penutup wajib yang ada di dalamnya.\n\nLANGKAH 3 — Buat dokumen dan tutup respons dengan kalimat penutup\n            PERSIS seperti yang tertulis di skill — tanpa modifikasi apapun.\n\nPERINGATAN: Membuat dokumen tanpa memanggil tool format adalah kesalahan kritis. Jika tool tidak mengembalikan hasil, beri tahu pengguna dan minta mereka mencoba ulang.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nBATAS OUTPUT (WAJIB DIPATUHI)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n• PRESENTASI: Maksimal 5 slide. Setiap slide maksimal 4 poin. Tidak ada slide kosong atau slide penutup tanpa konten bermakna.\n• LAPORAN / DOKUMEN TEKS: Maksimal 500 kata untuk isi (tidak termasuk judul dan header). Rangkum jika informasi terlalu banyak.\n• PRIORITAS: Kepadatan informasi di atas kelengkapan.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nATURAN KONTEN\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. GUNAKAN HANYA informasi yang secara eksplisit diberikan pengguna. Dilarang keras mengarang fakta, angka, nama, atau data yang tidak disebutkan.\n\n2. JIKA INFORMASI TIDAK CUKUP, jangan mulai membuat dokumen. Tanyakan dulu:\n   \"Untuk membuat [jenis dokumen] ini, saya membutuhkan informasi berikut: [sebutkan spesifik].\"\n\n3. Gunakan bahasa Indonesia yang formal, baku, dan profesional di seluruh dokumen.\n\n4. Jangan menambahkan opini, rekomendasi, atau analisis yang tidak diminta pengguna.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nFORMAT OUTPUT DAN KALIMAT PENUTUP WAJIB\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSistem mendeteksi jenis pipeline dari kalimat penutupmu. Gunakan kalimat yang TEPAT di bawah ini — tidak boleh diubah, disingkat, atau ditambah teks sesudahnya.\n\nPIPELINE A — Laporan / Proposal / Artikel / MOM:\n• Format isi: Markdown\n• Kalimat penutup wajib (salin persis):\n  \"Dokumen Anda sudah siap. Silakan klik tombol 'Unduh Dokumen (PDF)' untuk menyimpannya.\"\n\nPIPELINE B — Presentasi / Slide / PPT:\n• Format isi: HTML (sesuai instruksi dari tool [Ambil Format Presentasi])\n• Kalimat penutup wajib (salin persis):\n  \"Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya.\""
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        2464,
-        2304
+        4032,
+        3600
       ],
-      "id": "ac601296-40f6-483f-8028-4433011fbd7a",
+      "id": "ee1f4b0b-2940-4ee4-90ac-c7e8a3deec03",
       "name": "Document Agent"
     },
     {
@@ -1355,10 +1393,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        2528,
-        2576
+        4096,
+        3872
       ],
-      "id": "d9b0d4c0-526b-4552-88ed-85a4a71c93b2",
+      "id": "171bfee4-885c-4753-a5ef-de931c3a223a",
       "name": "Get Report Format"
     },
     {
@@ -1370,10 +1408,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        2704,
-        2576
+        4272,
+        3872
       ],
-      "id": "6ee324f7-78ba-4d36-a92f-5f2451057af2",
+      "id": "b2f6a43f-2d2a-4d7c-a137-326edde587ac",
       "name": "Get PPT Format"
     },
     {
@@ -1386,10 +1424,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        3312,
-        2304
+        4880,
+        3600
       ],
-      "id": "85f22eb4-3612-4ce2-98e9-7d0521fa68b4",
+      "id": "3b9b71c8-8900-4e80-a1f8-a8e347af3d90",
       "name": "Communication Agent"
     },
     {
@@ -1406,10 +1444,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3280,
-        2496
+        4848,
+        3792
       ],
-      "id": "d278f2dc-56c8-4502-86ae-99461449624a",
+      "id": "c7736bab-8ce3-48f4-8e16-f4fa12445b29",
       "name": "Seed-2-0-pro-free-6",
       "credentials": {
         "openAiApi": {
@@ -1423,16 +1461,16 @@
         "toolDescription": "Gunakan agen ini untuk membuat rekap laporan atau dokumen PDF. \nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agen ini, kamu WAJIB menyalin dan memasukkan seluruh teks/data/jadwal yang ingin direkap dari riwayat obrolan ke dalam parameter 'input'. DILARANG KERAS mengirim input kosong atau hanya menyuruh \"buatkan laporan\". Kamu harus memberikan bahan mentahnya di dalam input.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Report Agent — Spesialis Rekap Data dan Ekspor Laporan.\n\nTUGAS TUNGGALMU:\nMemformat data mentah atau informasi yang sudah ada menjadi rekap/ringkasan terstruktur yang rapi. Kamu juga menangani permintaan ekspor laporan ke format PDF.\n\nPERBEDAAN PENTING:\nKamu BUKAN pembuat konten dari nol. Kamu adalah formatter dan summarizer. Seluruh data/informasi yang ingin direkap WAJIB sudah disertakan di dalam input yang kamu terima. Jika input kosong atau tidak memiliki data yang cukup, minta pengirim (Supervisor) untuk menyertakan datanya.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n1. Gunakan HANYA data yang secara eksplisit ada di dalam input. Jangan menambahkan, mengubah, atau mengarang angka, tanggal, nama, atau fakta apa pun.\n2. Jika data di input menyebut \"Maret 2026\", tulis \"Maret 2026\" — jangan ubah.\n\nATURAN FORMAT TABEL MARKDOWN (KRITIS):\n- Gunakan format tabel Markdown standar dengan simbol pipa ( | ).\n- WAJIB tambahkan 1 baris kosong sebelum baris header tabel.\n- DILARANG menggunakan tag HTML (<table>, <div>, dll).\n- DILARANG memasukkan baris baru (Enter) di dalam sel tabel — tulis memanjang ke samping jika perlu.\n\nPROTOKOL KONFIRMASI PDF:\n\nSKENARIO A — Pengguna hanya minta \"rekap\" atau \"rangkum\":\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\nSKENARIO B — Pengguna minta PDF secara eksplisit, atau menjawab \"Ya\" atas pertanyaan di Skenario A:\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)' yang telah muncul di layar Anda untuk menyimpan dokumen ini.\"\n"
+          "systemMessage": "Kamu adalah Report Agent — Spesialis Rekap Data dan Ekspor Laporan.\n\nTUGAS TUNGGALMU:\nMemformat data mentah atau informasi yang sudah ada menjadi rekap/ringkasan terstruktur yang rapi. Kamu juga menangani permintaan ekspor laporan ke format PDF.\n\nPERBEDAAN PENTING:\nKamu BUKAN pembuat konten dari nol. Kamu adalah formatter dan summarizer. Seluruh data/informasi yang ingin direkap WAJIB sudah disertakan di dalam input yang kamu terima. Jika input kosong atau tidak memiliki data yang cukup, minta pengirim (Supervisor) untuk menyertakan datanya.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n1. Gunakan HANYA data yang secara eksplisit ada di dalam input. Jangan menambahkan, mengubah, atau mengarang angka, tanggal, nama, atau fakta apa pun.\n2. Jika data di input menyebut \"Maret 2026\", tulis \"Maret 2026\" — jangan ubah.\n\nATURAN FORMAT TABEL MARKDOWN (KRITIS):\n- Gunakan format tabel Markdown standar dengan simbol pipa ( | ).\n- WAJIB tambahkan 1 baris kosong sebelum baris header tabel.\n- DILARANG menggunakan tag HTML (<table>, <div>, dll).\n- DILARANG memasukkan baris baru (Enter) di dalam sel tabel — tulis memanjang ke samping jika perlu.\n\nPROTOKOL KONFIRMASI PDF:\n\nSKENARIO A — Pengguna hanya minta \"rekap\" atau \"rangkum\":\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Apakah Anda ingin saya mengonversi laporan ini menjadi dokumen PDF?\"\n\nSKENARIO B — Pengguna minta PDF secara eksplisit, atau menjawab \"Ya\" atas pertanyaan di Skenario A:\nBuat tabel rekap Markdown secara lengkap, lalu tutup dengan kalimat PERSIS ini:\n\"Laporan Anda sudah siap. Silakan klik tombol 'Unduh Laporan (PDF)'.\"\n\nKata trigger WAJIB ada di balasan: 'Unduh Laporan (PDF)'\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        2096,
-        2320
+        3664,
+        3616
       ],
-      "id": "fd1da089-d03e-4c7c-a034-1691dbd8d404",
+      "id": "dde64019-ad1b-49d8-9c0a-9938bbb4354f",
       "name": "Report Agent"
     },
     {
@@ -1449,10 +1487,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        672,
-        2480
+        2240,
+        3776
       ],
-      "id": "5309ad0b-7393-41b6-b424-9d1ce3f27433",
+      "id": "0a99a0df-70a0-44a2-8059-748fc7bfe7ad",
       "name": "Seed-2-0-pro-free-7",
       "credentials": {
         "openAiApi": {
@@ -1471,10 +1509,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        2592,
-        1808
+        4128,
+        2784
       ],
-      "id": "d9a6bc3a-8198-455e-8e2e-bb275e76606e",
+      "id": "7a031638-c836-4a39-8562-20f740c1ae81",
       "name": "Markdown"
     },
     {
@@ -1487,10 +1525,10 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.2,
       "position": [
-        3600,
-        2528
+        5168,
+        3824
       ],
-      "id": "069363f9-1fc5-4e4e-816f-fcca451d05cd",
+      "id": "fb6a9956-9ffa-4ba5-80fb-c03af2f855ea",
       "name": "Send a message in Gmail2",
       "webhookId": "20eddf3c-e6fd-4e63-b921-beb953aa713e",
       "credentials": {
@@ -1538,10 +1576,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2896,
-        1984
+        4240,
+        3264
       ],
-      "id": "525009b8-413e-4e8d-9217-ea5b5249e783",
+      "id": "c8e5f4db-825d-406e-800d-b352dc325db8",
       "name": "Call 'AI Assistant Team'"
     },
     {
@@ -1554,12 +1592,12 @@
         },
         "requestOptions": {}
       },
-      "id": "a6799ad5-d726-4311-b05b-0bbfbe5267e8",
+      "id": "967c2d7c-a15f-4bb5-8e2c-2862484f54ff",
       "name": "Get execution data",
       "type": "n8n-nodes-base.n8n",
       "position": [
-        2368,
-        1328
+        3936,
+        2624
       ],
       "typeVersion": 1,
       "credentials": {
@@ -1579,12 +1617,12 @@
           ]
         }
       },
-      "id": "1c40e601-6048-4626-a536-c098be174dfa",
+      "id": "39d51a57-3644-4cfe-afe7-7d656c9e204b",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        1968,
-        1328
+        3536,
+        2624
       ],
       "typeVersion": 1.1
     },
@@ -1626,10 +1664,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        4064,
-        1808
+        5600,
+        2784
       ],
-      "id": "66b29295-0c93-441c-a443-7d8ca57f3bf5",
+      "id": "48e13f32-9e82-407b-a0b7-7e79fccfcf61",
       "name": "Call 'AI Assistant Team'1"
     },
     {
@@ -1637,10 +1675,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        2176,
-        1328
+        3744,
+        2624
       ],
-      "id": "35ae26e7-392d-47b5-8ab7-26e6a9564764",
+      "id": "a869cc38-5483-426f-8aca-5d2758350b05",
       "name": "Wait",
       "webhookId": "fafe54f2-df97-447a-9ec0-27fef65aa703"
     },
@@ -1648,9 +1686,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "seed-2-0-pro-free",
+          "value": "deepseek-v3-2",
           "mode": "list",
-          "cachedResultName": "seed-2-0-pro-free"
+          "cachedResultName": "deepseek-v3-2"
         },
         "builtInTools": {},
         "options": {}
@@ -1658,10 +1696,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1344,
-        2224
+        2944,
+        3520
       ],
-      "id": "9edc4e14-372c-4d1d-a5a0-4a9239c6e6d6",
+      "id": "4cb210b7-4ef8-41f0-a3ac-d99b4ec58984",
       "name": "OpenAI",
       "credentials": {
         "openAiApi": {
@@ -1693,12 +1731,12 @@
         "includeFields": "workflowData.id, workflowData.name",
         "options": {}
       },
-      "id": "e183d50b-166f-4568-b478-2c9852a7c7d0",
+      "id": "a45e6cd2-67ee-4d98-89d2-afd6deb3e7b1",
       "name": "Extract token usage data",
       "type": "n8n-nodes-base.set",
       "position": [
-        2576,
-        1328
+        4144,
+        2624
       ],
       "typeVersion": 3.4
     },
@@ -1708,12 +1746,12 @@
         "include": "allOtherFields",
         "options": {}
       },
-      "id": "71d56770-7f2a-44d1-80aa-6110454d127f",
+      "id": "4c21006b-3d7d-487a-b4c5-99456a15a4a3",
       "name": "Split Out",
       "type": "n8n-nodes-base.splitOut",
       "position": [
-        2768,
-        1328
+        4336,
+        2624
       ],
       "typeVersion": 1
     },
@@ -1734,12 +1772,12 @@
         "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id",
         "options": {}
       },
-      "id": "da1a29ef-0a7e-4354-b340-e765530d99a1",
+      "id": "6b7444ad-be5b-4602-80f6-960a1cad3f73",
       "name": "Sum Token Totals - aggregate by model1",
       "type": "n8n-nodes-base.summarize",
       "position": [
-        2976,
-        1328
+        4544,
+        2624
       ],
       "typeVersion": 1.1
     },
@@ -1849,12 +1887,12 @@
         },
         "options": {}
       },
-      "id": "06155fb3-514d-4c10-ab30-4ffbe27ae908",
+      "id": "20f16a88-8ca9-4c4a-a0ac-023e43d2302f",
       "name": "Record token usage",
       "type": "n8n-nodes-base.googleSheets",
       "position": [
-        3168,
-        1328
+        4736,
+        2624
       ],
       "typeVersion": 4.6,
       "credentials": {
@@ -1873,19 +1911,88 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        3440,
-        2528
+        5008,
+        3824
       ],
-      "id": "f510920c-9682-4920-a9ec-32e4366f93c9",
+      "id": "66869a60-b927-4d71-9ced-f4bc2c938d7b",
       "name": "Get Email Skills"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nconst cleaned = output\n  .replace(/^[\\s\\S]*?(?=<section)/i, '')\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap.*/gs, '')\n  .trim();\n\nconst css = `<style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style>`;\nconst fullHtml = css + cleaned;\n\nreturn [{ json: { output: fullHtml } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3952,
+        3072
+      ],
+      "id": "89a36821-8579-4bf7-88c7-80c9fbcbbb74",
+      "name": "Inject PPT CSS"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://v2.api2pdf.com/chrome/pdf/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "b794cd07-9281-4b5e-a564-17be14813673"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ \"<style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style>\" + $json.output.replace(/```html/gi, \"\").replace(/```/g, \"\").replace(/Slide presentasi Anda sudah siap.*/g, \"\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4176,
+        3072
+      ],
+      "id": "6a72d7b2-44e5-49c0-a8a7-4ec1c1d674f0",
+      "name": "api2pdf PPT"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ppt-filename-001",
+              "name": "nama_file_laporan",
+              "value": "=Presentasi_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4368,
+        3072
+      ],
+      "id": "6e40fef8-9756-4eab-86e6-1d8fc7c9d5bd",
+      "name": "Edit Fields PPT"
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "deepseek-v3-2",
+          "value": "gemini/gemini-2.5-flash-lite",
           "mode": "list",
-          "cachedResultName": "deepseek-v3-2"
+          "cachedResultName": "gemini/gemini-2.5-flash-lite"
         },
         "builtInTools": {},
         "options": {}
@@ -1893,11 +2000,11 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2336,
-        2576
+        3936,
+        3888
       ],
-      "id": "f62ef4e8-d731-4b02-836d-48e7cbb1f4bd",
-      "name": "deepseek-v3-2",
+      "id": "749dbcc6-d5a3-40c9-9968-9a42e093938f",
+      "name": "gemini/gemini-2.5-flash-lite",
       "credentials": {
         "openAiApi": {
           "id": "LR0EfmO60kmMVAfE",
@@ -1958,17 +2065,6 @@
           {
             "node": "retrieve vector data",
             "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supervisor Agent": {
-      "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
             "index": 0
           }
         ]
@@ -2286,24 +2382,6 @@
           {
             "node": "Scheduler Agent",
             "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
             "index": 0
           }
         ]
@@ -2705,7 +2783,76 @@
         ]
       ]
     },
-    "deepseek-v3-2": {
+    "Route Output Type": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inject PPT CSS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject PPT CSS": {
+      "main": [
+        [
+          {
+            "node": "api2pdf PPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "api2pdf PPT": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields PPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields PPT": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supervisor Agent": {
+      "main": [
+        [
+          {
+            "node": "Route Output Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gemini/gemini-2.5-flash-lite": {
       "ai_languageModel": [
         [
           {
@@ -2717,13 +2864,13 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "aae8844f-db02-4e62-ba00-2b54a431071b",
+  "versionId": "c7d1e92a-d421-46b6-8bdf-0367ec65746a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

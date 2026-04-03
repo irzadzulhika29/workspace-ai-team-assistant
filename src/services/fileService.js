@@ -27,20 +27,11 @@ export const fileApi = {
   },
 
   /**
-   * Fetch all documents from the Supabase `dokumen` table.
+   * Fetch all documents from the Supabase `dokumen` table via backend.
    * @returns {Promise<Array>} array of document records
    */
   fetchDokumen: async () => {
-    const url = `${SUPABASE_URL}/rest/v1/dokumen?select=*&order=created_at.desc`;
-    const res = await fetch(url, {
-      method: "GET",
-      headers: supabaseHeaders,
-    });
-
-    if (!res.ok) {
-      throw new Error("Gagal menarik data dari Supabase");
-    }
-
-    return res.json();
+    const res = await axios.get(`${urls.getBackendUrl()}/api/dokumen`);
+    return res.data;
   },
 };

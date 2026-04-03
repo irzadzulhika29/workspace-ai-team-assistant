@@ -1,4 +1,5 @@
-import { SUPABASE_URL, supabaseHeaders } from "./supabase";
+import axios from "axios";
+import { urls } from "./api";
 
 // ─── Chat Session API ─────────────────────────────────────────────────────────
 // CRUD operasi untuk tabel `chat_sessions` dan `n8n_chat_histories`.
@@ -12,27 +13,11 @@ export const sessionApi = {
    */
   buatSesiBaru: async (judulChat = "Obrolan Baru", chatType = "general_chat") => {
     try {
-      const newSessionId = crypto.randomUUID();
-      const payload = {
-        id: newSessionId,
+      const res = await axios.post(`${urls.getBackendUrl()}/api/sessions`, {
         judul: judulChat,
         chat_type: chatType,
-      };
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_sessions`, {
-        method: "POST",
-        headers: {
-          ...supabaseHeaders,
-          Prefer: "return=representation"
-        },
-        body: JSON.stringify(payload)
       });
-
-      if (!res.ok) {
-        throw new Error(`HTTP Error! Status: ${res.status}`);
-      }
-
-      const rows = await res.json();
-      return rows[0] || payload;
+      return res.data;
     } catch (error) {
       console.error("Gagal membuat sesi baru:", error);
       return null;
@@ -46,18 +31,9 @@ export const sessionApi = {
    */
   ambilSemuaSesi: async (chatType = null) => {
     try {
-      const filter = chatType ? `&chat_type=eq.${chatType}` : "";
-      const url = `${SUPABASE_URL}/rest/v1/chat_sessions?select=id,judul,chat_type,created_at&order=created_at.desc${filter}`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: supabaseHeaders,
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP Error! Status: ${res.status}`);
-      }
-
-      return await res.json();
+      const params = chatType ? { chat_type: chatType } : {};
+      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions`, { params });
+      return res.data;
     } catch (error) {
       console.error("Gagal mengambil daftar sesi:", error);
       return [];
@@ -66,22 +42,16 @@ export const sessionApi = {
 
   /**
    * Mengambil riwayat chat dari sesi tertentu dan menyaring jejak internal AI.
+   * Juga inject URL dokumen untuk pesan yang memiliki trigger PDF.
    * @param {string} sessionId - UUID sesi
    * @returns {Promise<Array>} array pesan yang sudah bersih
    */
   ambilRiwayatChat: async (sessionId) => {
     try {
-      const url = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}&order=id.asc`;
-      const res = await fetch(url, {
-        method: "GET",
-        headers: supabaseHeaders,
-      });
+      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions/${sessionId}/history`);
+      const { history: rows, dokumen } = res.data;
 
-      if (!res.ok) {
-        throw new Error(`HTTP Error! Status: ${res.status}`);
-      }
-
-      const rows = await res.json();
+      let docIndex = 0;
 
       // PROSES FILTERING: Membuang log internal dan pesan tool
       const barisBersih = rows.filter((row) => {
@@ -126,6 +96,33 @@ export const sessionApi = {
           return { ...row, message: newMsg };
         }
 
+        // Untuk pesan AI, cek apakah ini trigger PDF dan inject URL jika ada
+        if (type.includes("ai")) {
+          const isPdfTrigger =
+            content.includes("Unduh Dokumen (PDF)") ||
+            content.includes("Unduh Presentasi (PDF)") ||
+            content.includes("Unduh Laporan (PDF)");
+
+          if (isPdfTrigger && dokumen?.[docIndex]) {
+            const url = dokumen[docIndex].file_url;
+            const namaFile = dokumen[docIndex].nama_file;
+            docIndex++;
+
+            const newMsg = { ...msg };
+            const newContent = `Laporan Anda sudah siap! Silakan unduh dokumen PDF-nya melalui tautan aman berikut ini:\n\n📄 ${namaFile}\n🔗 ${url}`;
+
+            if (msg.kwargs?.content !== undefined) {
+              newMsg.kwargs = { ...msg.kwargs, content: newContent };
+            } else if (msg.data?.content !== undefined) {
+              newMsg.data = { ...msg.data, content: newContent };
+            } else {
+              newMsg.content = newContent;
+            }
+
+            return { ...row, message: newMsg };
+          }
+        }
+
         return row;
       });
 
@@ -144,30 +141,8 @@ export const sessionApi = {
    */
   hapusSesiChat: async (sessionId) => {
     try {
-      // Hapus isi pesan di tabel n8n_chat_histories
-      const urlPesan = `${SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}`;
-      const responsPesan = await fetch(urlPesan, {
-        method: "DELETE",
-        headers: supabaseHeaders,
-      });
-
-      if (!responsPesan.ok) {
-        throw new Error(`Gagal menghapus pesan. Status: ${responsPesan.status}`);
-      }
-
-      // Hapus sesi di tabel chat_sessions
-      const urlSesi = `${SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${sessionId}`;
-      const responsSesi = await fetch(urlSesi, {
-        method: "DELETE",
-        headers: supabaseHeaders,
-      });
-
-      if (!responsSesi.ok) {
-        throw new Error(`Gagal menghapus sesi. Status: ${responsSesi.status}`);
-      }
-
+      await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}`);
       console.log(`Riwayat chat untuk sesi ${sessionId} berhasil dihapus.`);
-
       return true;
     } catch (error) {
       console.error("Terjadi kesalahan saat menghapus:", error);

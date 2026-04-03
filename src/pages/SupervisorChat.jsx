@@ -23,12 +23,14 @@ export default function SupervisorChat() {
     addSupervisorMessage,
     clearSupervisor,
     activeSupervisorSessionId,
+    setActiveSupervisorSession,
   } = useChatStore(
     (state) => ({
       supervisorMessages: state.supervisorMessages,
       addSupervisorMessage: state.addSupervisorMessage,
       clearSupervisor: state.clearSupervisor,
       activeSupervisorSessionId: state.activeSupervisorSessionId,
+      setActiveSupervisorSession: state.setActiveSupervisorSession,
     }),
     shallow,
   )
@@ -49,7 +51,18 @@ export default function SupervisorChat() {
     setAgentLabel('Supervisor Agent')
 
     try {
-      const data = await chatApi.sendToSupervisor(text, 'chat', activeSupervisorSessionId, file)
+      // Auto-create session jika belum ada
+      let sessionId = activeSupervisorSessionId
+      if (!sessionId) {
+        const { sessionApi } = await import('../services/sessionService')
+        const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
+        if (newSession) {
+          sessionId = newSession.id
+          setActiveSupervisorSession(sessionId)
+        }
+      }
+
+      const data = await chatApi.sendToSupervisor(text, 'chat', sessionId, file)
       const normalizedData = normalizeResponsePayload(data)
 
       const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
@@ -77,7 +90,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }, [addSupervisorMessage, activeSupervisorSessionId])
+  }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession])
 
   return (
     <div className="flex flex-col h-screen">
