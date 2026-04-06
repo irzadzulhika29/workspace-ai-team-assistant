@@ -1,10 +1,22 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
 
-const N8N_API_URL = process.env.N8N_API_URL;
-const N8N_API_KEY = process.env.N8N_API_KEY;
+dotenv.config();
 
-if (!N8N_API_URL || !N8N_API_KEY) {
-  console.warn('⚠️  N8N_API_URL or N8N_API_KEY not configured');
+function getN8nConfig() {
+  return {
+    apiUrl: process.env.N8N_API_URL,
+    apiKey: process.env.N8N_API_KEY
+  };
+}
+
+function warnIfN8nNotConfigured() {
+  const { apiUrl, apiKey } = getN8nConfig();
+  if (!apiUrl || !apiKey) {
+    console.warn('⚠️  N8N_API_URL or N8N_API_KEY not configured');
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -12,9 +24,16 @@ if (!N8N_API_URL || !N8N_API_KEY) {
  */
 export async function createN8nCredential({ email, accessToken, refreshToken }) {
   try {
+    const isConfigured = warnIfN8nNotConfigured();
+    if (!isConfigured) {
+      throw new Error('N8N is not configured');
+    }
+
+    const { apiUrl, apiKey } = getN8nConfig();
+
     console.log('📤 Creating n8n credential for:', email);
-    console.log('🔗 N8N API URL:', N8N_API_URL);
-    console.log('🔑 Has API Key:', !!N8N_API_KEY);
+    console.log('🔗 N8N API URL:', apiUrl);
+    console.log('🔑 Has API Key:', !!apiKey);
     console.log('🎫 Has Access Token:', !!accessToken);
     console.log('🎫 Has Refresh Token:', !!refreshToken);
 
@@ -66,12 +85,12 @@ export async function createN8nCredential({ email, accessToken, refreshToken }) 
         console.log('📦 Payload:', JSON.stringify(payloads[i], null, 2));
 
         const response = await axios.post(
-          `${N8N_API_URL}/credentials`,
+          `${apiUrl}/credentials`,
           payloads[i],
           {
             headers: {
               'Content-Type': 'application/json',
-              'X-N8N-API-KEY': N8N_API_KEY
+              'X-N8N-API-KEY': apiKey
             }
           }
         );
@@ -102,6 +121,13 @@ export async function createN8nCredential({ email, accessToken, refreshToken }) 
  */
 export async function updateN8nCredential(credentialId, { accessToken, refreshToken }) {
   try {
+    const isConfigured = warnIfN8nNotConfigured();
+    if (!isConfigured) {
+      throw new Error('N8N is not configured');
+    }
+
+    const { apiUrl, apiKey } = getN8nConfig();
+
     const payload = {
       data: {
         clientId: process.env.GOOGLE_CLIENT_ID,
@@ -117,12 +143,12 @@ export async function updateN8nCredential(credentialId, { accessToken, refreshTo
     };
 
     await axios.patch(
-      `${N8N_API_URL}/credentials/${credentialId}`,
+      `${apiUrl}/credentials/${credentialId}`,
       payload,
       {
         headers: {
           'Content-Type': 'application/json',
-          'X-N8N-API-KEY': N8N_API_KEY
+          'X-N8N-API-KEY': apiKey
         }
       }
     );
@@ -139,11 +165,18 @@ export async function updateN8nCredential(credentialId, { accessToken, refreshTo
  */
 export async function deleteN8nCredential(credentialId) {
   try {
+    const isConfigured = warnIfN8nNotConfigured();
+    if (!isConfigured) {
+      return;
+    }
+
+    const { apiUrl, apiKey } = getN8nConfig();
+
     await axios.delete(
-      `${N8N_API_URL}/credentials/${credentialId}`,
+      `${apiUrl}/credentials/${credentialId}`,
       {
         headers: {
-          'X-N8N-API-KEY': N8N_API_KEY
+          'X-N8N-API-KEY': apiKey
         }
       }
     );
@@ -160,11 +193,18 @@ export async function deleteN8nCredential(credentialId) {
  */
 export async function getN8nCredential(credentialId) {
   try {
+    const isConfigured = warnIfN8nNotConfigured();
+    if (!isConfigured) {
+      throw new Error('N8N is not configured');
+    }
+
+    const { apiUrl, apiKey } = getN8nConfig();
+
     const response = await axios.get(
-      `${N8N_API_URL}/credentials/${credentialId}`,
+      `${apiUrl}/credentials/${credentialId}`,
       {
         headers: {
-          'X-N8N-API-KEY': N8N_API_KEY
+          'X-N8N-API-KEY': apiKey
         }
       }
     );

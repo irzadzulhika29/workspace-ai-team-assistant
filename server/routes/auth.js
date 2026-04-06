@@ -5,9 +5,20 @@ import { deleteN8nCredential } from '../services/n8nService.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const isGoogleOAuthConfigured = () => Boolean(
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+);
 
 // Initiate Google OAuth
 router.get('/google',
+  (req, res, next) => {
+    if (!isGoogleOAuthConfigured()) {
+      return res.status(503).json({
+        error: 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.'
+      });
+    }
+    next();
+  },
   passport.authenticate('google', {
     scope: [
       'profile',
@@ -23,6 +34,12 @@ router.get('/google',
 
 // Google OAuth callback
 router.get('/google/callback',
+  (req, res, next) => {
+    if (!isGoogleOAuthConfigured()) {
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_not_configured`);
+    }
+    next();
+  },
   passport.authenticate('google', {
     failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`
   }),

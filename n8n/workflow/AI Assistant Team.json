@@ -114,7 +114,7 @@
         "text": "={{ $json.PromptFinal }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "Kamu adalah AI Supervisor untuk tim internal perusahaan. Satu-satunya tugasmu adalah menganalisis maksud pesan pengguna, lalu mendelegasikannya ke agen spesialis yang paling tepat — atau menjawabnya sendiri jika tidak memerlukan agen.\n\nKamu memiliki akses ke 6 agen spesialis berikut. Pelajari domain masing-masing dengan cermat:\n\n─────────────────────────────────────────\nDAFTAR AGEN & DOMAIN-NYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nGunakan untuk: pertanyaan tentang kebijakan internal, SOP (Standar Operasional Prosedur), aturan perusahaan, prosedur onboarding, payroll, cuti, atau pencarian fakta apa pun yang jawabannya bersumber dari dokumen internal perusahaan.\nKata kunci pemicu: \"aturan\", \"kebijakan\", \"SOP\", \"prosedur\", \"bagaimana ketentuan\", \"apa peraturan\", \"onboarding\", \"payroll\", \"cuti\".\n\n[2] Scheduler_Agent\nGunakan untuk: semua hal yang berkaitan dengan Google Calendar — membuat jadwal rapat/acara, mengecek jadwal yang sudah ada, mengubah atau menghapus event, membuat event dengan Google Meet link, dan menanyakan agenda hari ini/minggu depan.\nKata kunci pemicu: \"jadwalkan\", \"buat meeting\", \"cek jadwal\", \"agenda\", \"rapat\", \"acara\", \"Google Meet\", \"hapus jadwal\", \"reschedule\".\n\n[3] Task_Agent\nGunakan untuk: semua hal yang berkaitan dengan manajemen tugas di Jira — membuat tiket/task baru, melihat daftar issue, mengecek status backlog, dan melaporkan progress proyek dari data Jira.\nKata kunci pemicu: \"buat tiket\", \"buat task\", \"masukkan ke backlog\", \"issue Jira\", \"sprint\", \"progress proyek\", \"status task\", \"assign tugas\".\n\n[4] Document_Agent\nGunakan untuk: permintaan membuat dokumen tertulis panjang atau presentasi — laporan formal, proposal, artikel, notulen rapat (minutes of meeting), atau slide presentasi (PPT).\nKata kunci pemicu: \"buatkan laporan\", \"buatkan proposal\", \"buat presentasi\", \"buatkan slide\", \"buat PPT\", \"tulis artikel\", \"notulen\", \"MOM\", \"dokumen resmi\".\n\n[5] Report_Agent\nGunakan untuk: merangkum data atau percakapan yang sudah ada menjadi rekap terstruktur atau mengekspor hasil rangkuman menjadi file PDF. Berbeda dari Document_Agent — Report_Agent merangkum data yang SUDAH ADA, bukan membuat konten baru dari nol.\nKata kunci pemicu: \"rekap\", \"rangkum percakapan ini\", \"buatkan ringkasan\", \"ekspor PDF\", \"unduh laporan\", \"simpan sebagai PDF\".\n\n[6] Communication_Agent\nGunakan untuk: membuat draft komunikasi tertulis yang akan dikirim ke orang lain — email formal, pengumuman, pesan pemberitahuan, surat, atau teks komunikasi resmi lainnya. Agen ini juga dapat langsung mengirim email via Gmail jika diminta.\nKata kunci pemicu: \"buatkan email\", \"draft email\", \"tulis pengumuman\", \"buat surat\", \"kirim email\", \"beritahu tim\", \"notifikasi ke\".\n\n─────────────────────────────────────────\nATURAN ROUTING (WAJIB DIPATUHI)\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG (tanpa memanggil agen):\nJika pengguna memberikan sapaan (\"halo\", \"hai\", \"selamat pagi\"), pertanyaan umum yang tidak berkaitan dengan domain mana pun di atas, atau percakapan santai (chit-chat), jawab langsung dengan ramah dan profesional. Jangan memanggil agen apa pun.\n\nATURAN 2 — SATU AGEN PER TUGAS:\nSetiap permintaan hanya didelegasikan ke SATU agen yang paling relevan. Jangan memanggil lebih dari satu agen kecuali pengguna secara eksplisit meminta dua hal sekaligus (contoh: \"buatkan tiket Jira DAN jadwalkan meetingnya\").\n\nATURAN 3 — JANGAN JAWAB SOP SENDIRI:\nDilarang keras menjawab pertanyaan tentang kebijakan atau SOP perusahaan dari pengetahuanmu sendiri. Selalu delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Document_Agent vs Report_Agent:\n- Pengguna minta MEMBUAT konten baru → Document_Agent\n- Pengguna minta MERANGKUM atau MENGEKSPOR data yang sudah ada → Report_Agent\n\nATURAN 5 — DELEGASI Report_Agent WAJIB MENYERTAKAN DATA:\nJika mendelegasikan ke Report_Agent, kamu WAJIB menyertakan seluruh data, teks, atau informasi yang ingin direkap di dalam input yang kamu kirim ke Report_Agent. Dilarang mengirim input kosong atau hanya menulis \"buatkan rekap\".\n\nATURAN 6 — PASS-THROUGH HASIL AGEN (SANGAT PENTING):\nJika kamu baru mendapat hasil dari agen mana pun (KECUALI Document_Agent), \ntampilkan hasilnya kepada pengguna secara UTUH dan MENTAH. DILARANG memparafrase, \nmemotong, merangkum ulang, merusak format tabel Markdown, atau menambahkan \nkalimat pengantar/penutup buatanmu sendiri. Salin 100% output agen.\nUntuk Document_Agent, ikuti Aturan 6B.\n\nATURAN 6B - DOCUMENT AGENT OUTPUT:\nJika Document_Agent mengembalikan output berupa kode (HTML/Markdown) beserta frasa 'Unduh Dokumen (PDF)' atau 'Unduh Presentasi (PDF)', kamu WAJIB meneruskan SELURUH output tersebut secara UTUH. Jangan memotong kode HTML atau Markdown apapun. Teruskan hasil mentah 100% ke pengguna agar sistem backend dapat memproses kodenya menjadi PDF.\n\nATURAN 7 — DELEGASI PENGIRIMAN EMAIL KE Communication_Agent (WAJIB):\nJika pengguna menyetujui draft email dan memberikan alamat email tujuan, kamu WAJIB membangun input ke Communication_Agent dengan FORMAT BERIKUT PERSIS:\n\n\"KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\"\n\nDILARANG mengirim kalimat seperti \"gunakan draft sebelumnya\" atau \"kirim email yang tadi\". Communication_Agent tidak punya memori — draft WAJIB disertakan secara fisik di dalam input.\n"
+          "systemMessage": "Kamu adalah AI Supervisor untuk tim internal perusahaan. Satu-satunya tugasmu adalah menganalisis maksud pesan pengguna, lalu mendelegasikannya ke agen spesialis yang paling tepat — atau menjawabnya sendiri jika tidak memerlukan agen.\n\nKamu memiliki akses ke 6 agen spesialis berikut. Pelajari domain masing-masing dengan cermat:\n\n─────────────────────────────────────────\nDAFTAR AGEN & DOMAIN-NYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nGunakan untuk: pertanyaan tentang kebijakan internal, SOP (Standar Operasional Prosedur), aturan perusahaan, prosedur onboarding, payroll, cuti, atau pencarian fakta apa pun yang jawabannya bersumber dari dokumen internal perusahaan.\nKata kunci pemicu: \"aturan\", \"kebijakan\", \"SOP\", \"prosedur\", \"bagaimana ketentuan\", \"apa peraturan\", \"onboarding\", \"payroll\", \"cuti\".\n\n[2] Scheduler_Agent\nGunakan untuk: semua hal yang berkaitan dengan Google Calendar — membuat jadwal rapat/acara, mengecek jadwal yang sudah ada, mengubah atau menghapus event, membuat event dengan Google Meet link, dan menanyakan agenda hari ini/minggu depan.\nKata kunci pemicu: \"jadwalkan\", \"buat meeting\", \"cek jadwal\", \"agenda\", \"rapat\", \"acara\", \"Google Meet\", \"hapus jadwal\", \"reschedule\".\n\n[3] Task_Agent\nGunakan untuk: semua hal yang berkaitan dengan manajemen tugas di Jira — membuat tiket/task baru, melihat daftar issue, mengecek status backlog, dan melaporkan progress proyek dari data Jira.\nKata kunci pemicu: \"buat tiket\", \"buat task\", \"masukkan ke backlog\", \"issue Jira\", \"sprint\", \"progress proyek\", \"status task\", \"assign tugas\".\n\n[4] Document_Agent\nGunakan untuk: semua permintaan pembuatan file, dokumen tertulis panjang, presentasi, atau ekspor ke PDF. Gunakan agen ini baik saat pengguna meminta pembuatan konten baru dari nol, maupun saat pengguna meminta mengubah data/tabel yang sudah ada di chat menjadi dokumen PDF.\nKata kunci pemicu: \"buatkan laporan\", \"buatkan proposal\", \"buat presentasi\", \"buatkan slide\", \"buat PPT\", \"tulis artikel\", \"notulen\", \"MOM\", \"dokumen resmi\", \"ekspor PDF\", \"jadikan PDF\", \"simpan sebagai PDF\".\n\n[5] Report_Agent\nGunakan untuk: merangkum data, tabel, atau percakapan yang sudah ada menjadi rekap terstruktur dalam bentuk teks obrolan biasa. Agen ini TIDAK BISA membuat atau mengekspor file PDF.\nKata kunci pemicu: \"rekap\", \"rangkum percakapan ini\", \"buatkan ringkasan\", \"buat tabel ringkasan\".\n\n[6] Communication_Agent\nGunakan untuk: membuat draft komunikasi tertulis yang akan dikirim ke orang lain — email formal, pengumuman, pesan pemberitahuan, surat, atau teks komunikasi resmi lainnya. Agen ini juga dapat langsung mengirim email via Gmail jika diminta.\nKata kunci pemicu: \"buatkan email\", \"draft email\", \"tulis pengumuman\", \"buat surat\", \"kirim email\", \"beritahu tim\", \"notifikasi ke\".\n\n─────────────────────────────────────────\nATURAN ROUTING (WAJIB DIPATUHI)\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG (tanpa memanggil agen):\nJika pengguna memberikan sapaan (\"halo\", \"hai\", \"selamat pagi\"), pertanyaan umum yang tidak berkaitan dengan domain mana pun di atas, atau percakapan santai (chit-chat), jawab langsung dengan ramah dan profesional. Jangan memanggil agen apa pun.\n\nATURAN 2 — SATU AGEN PER TUGAS:\nSetiap permintaan hanya didelegasikan ke SATU agen yang paling relevan. Jangan memanggil lebih dari satu agen kecuali pengguna secara eksplisit meminta dua hal sekaligus (contoh: \"buatkan tiket Jira DAN jadwalkan meetingnya\").\n\nATURAN 3 — JANGAN JAWAB SOP SENDIRI:\nDilarang keras menjawab pertanyaan tentang kebijakan atau SOP perusahaan dari pengetahuanmu sendiri. Selalu delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Document_Agent vs Report_Agent:\n- Pengguna minta merangkum data menjadi teks biasa di chat → Report_Agent\n- Pengguna minta membuat/mencetak file PDF, dokumen, atau PPT (baik dari data baru maupun merangkum data lama) → Document_Agent\n\nATURAN 5 — DELEGASI Report_Agent WAJIB MENYERTAKAN DATA:\nJika mendelegasikan ke Report_Agent, kamu WAJIB menyertakan seluruh data, teks, atau informasi yang ingin direkap di dalam input yang kamu kirim ke Report_Agent. Dilarang mengirim input kosong atau hanya menulis \"buatkan rekap\".\n\nATURAN 6 — PASS-THROUGH HASIL AGEN (SANGAT PENTING):\nJika kamu baru mendapat hasil dari agen mana pun (KECUALI Document_Agent), \ntampilkan hasilnya kepada pengguna secara UTUH dan MENTAH. DILARANG memparafrase, \nmemotong, merangkum ulang, merusak format tabel Markdown, atau menambahkan \nkalimat pengantar/penutup buatanmu sendiri. Salin 100% output agen.\nUntuk Document_Agent, ikuti Aturan 6B.\n\nATURAN 6B - DOCUMENT AGENT OUTPUT:\nJika Document_Agent mengembalikan output berupa kode (HTML/Markdown) beserta frasa 'Unduh Dokumen (PDF)' atau 'Unduh Presentasi (PDF)', kamu WAJIB meneruskan SELURUH output tersebut secara UTUH. Jangan memotong kode HTML atau Markdown apapun. Teruskan hasil mentah 100% ke pengguna agar sistem backend dapat memproses kodenya menjadi PDF.\n\nATURAN 7 — DELEGASI PENGIRIMAN EMAIL KE Communication_Agent (WAJIB):\nJika pengguna menyetujui draft email dan memberikan alamat email tujuan, kamu WAJIB membangun input ke Communication_Agent dengan FORMAT BERIKUT PERSIS:\n\n\"KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\"\n\nDILARANG mengirim kalimat seperti \"gunakan draft sebelumnya\" atau \"kirim email yang tadi\". Communication_Agent tidak punya memori — draft WAJIB disertakan secara fisik di dalam input.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -398,8 +398,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        2384,
-        3872
+        2416,
+        3856
       ],
       "id": "34e51c67-78c9-4ef7-a33b-8c591b2a442f",
       "name": "arcee-ai/trinity-large-preview:free",
@@ -445,8 +445,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3088,
-        3760
+        3136,
+        3792
       ],
       "id": "c622496a-e26b-4a0a-b839-50e38f41d354",
       "name": "arcee-ai/trinity-large-preview:free-2",
@@ -471,8 +471,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2928,
-        3760
+        3040,
+        3792
       ],
       "id": "9bb19398-26b4-4c3f-9a91-62a389f282f7",
       "name": "seed-2-0-lite-free-3",
@@ -503,8 +503,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        2944,
-        4000
+        2960,
+        3984
       ],
       "id": "ebd0a0f3-f12a-4eb8-a6fe-a85fe7b74263",
       "name": "create an event",
@@ -535,8 +535,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3248,
-        4000
+        3264,
+        3984
       ],
       "id": "5f7bd65b-220f-461b-b518-5cf08ffb72f6",
       "name": "get many events",
@@ -838,7 +838,7 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3392,
+        3408,
         3984
       ],
       "id": "e37c7d3e-b9e2-45a4-810e-5cc46461c7f8",
@@ -1260,8 +1260,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        4464,
-        3872
+        4496,
+        3888
       ],
       "id": "c31dc189-200b-484e-9eb3-647e5d1453ac",
       "name": "Seed-2-0-pro-free-3",
@@ -1338,8 +1338,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3088,
-        4000
+        3104,
+        3984
       ],
       "id": "a1822133-1966-400a-9e37-16d0912b37dd",
       "name": "create an event & google meet",
@@ -1394,7 +1394,7 @@
       "typeVersion": 4.4,
       "position": [
         4096,
-        3872
+        3888
       ],
       "id": "171bfee4-885c-4753-a5ef-de931c3a223a",
       "name": "Get Report Format"
@@ -1408,7 +1408,7 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        4272,
+        4240,
         3872
       ],
       "id": "b2f6a43f-2d2a-4d7c-a137-326edde587ac",
@@ -1444,8 +1444,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        4848,
-        3792
+        4864,
+        3872
       ],
       "id": "c7736bab-8ce3-48f4-8e16-f4fa12445b29",
       "name": "Seed-2-0-pro-free-6",
@@ -1487,8 +1487,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        2240,
-        3776
+        2208,
+        3840
       ],
       "id": "0a99a0df-70a0-44a2-8059-748fc7bfe7ad",
       "name": "Seed-2-0-pro-free-7",
@@ -1681,32 +1681,6 @@
       "id": "a869cc38-5483-426f-8aca-5d2758350b05",
       "name": "Wait",
       "webhookId": "fafe54f2-df97-447a-9ec0-27fef65aa703"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "deepseek-v3-2",
-          "mode": "list",
-          "cachedResultName": "deepseek-v3-2"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        2944,
-        3520
-      ],
-      "id": "4cb210b7-4ef8-41f0-a3ac-d99b4ec58984",
-      "name": "OpenAI",
-      "credentials": {
-        "openAiApi": {
-          "id": "LR0EfmO60kmMVAfE",
-          "name": "SumoPod"
-        }
-      }
     },
     {
       "parameters": {
@@ -2005,6 +1979,32 @@
       ],
       "id": "749dbcc6-d5a3-40c9-9968-9a42e093938f",
       "name": "gemini/gemini-2.5-flash-lite",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR0EfmO60kmMVAfE",
+          "name": "SumoPod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini/gemini-2.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2944,
+        3520
+      ],
+      "id": "4cb210b7-4ef8-41f0-a3ac-d99b4ec58984",
+      "name": "gemini-2.5-flash",
       "credentials": {
         "openAiApi": {
           "id": "LR0EfmO60kmMVAfE",
@@ -2728,17 +2728,6 @@
         ]
       ]
     },
-    "OpenAI": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Supervisor Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Extract token usage data": {
       "main": [
         [
@@ -2862,15 +2851,26 @@
           }
         ]
       ]
+    },
+    "gemini-2.5-flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "c7d1e92a-d421-46b6-8bdf-0367ec65746a",
+  "versionId": "b858e22f-d568-4c46-b621-679055d7a6ce",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
