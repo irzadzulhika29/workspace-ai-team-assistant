@@ -1,14 +1,5 @@
-const JIRA_BASE = 'https://n8n.karyatech.web.id'
-
-const getJiraWebhookUrl = () => {
-  const mode = localStorage.getItem('n8n_env_mode')
-  return mode === 'dev'
-    ? `${JIRA_BASE}/webhook-test/jira`
-    : `${JIRA_BASE}/webhook/jira`
-}
-
-/** @deprecated gunakan getJiraWebhookUrl() agar mengikuti env mode */
-const JIRA_WEBHOOK_URL = getJiraWebhookUrl()
+import axios from 'axios'
+import { urls } from './api'
 
 const pickIssuesArray = (payload) => {
   if (Array.isArray(payload)) return payload
@@ -24,17 +15,22 @@ const pickIssuesArray = (payload) => {
 
 export const jiraApi = {
   fetchIssues: async () => {
-    const response = await fetch(getJiraWebhookUrl(), {
-      method: 'POST',
-    })
-    const data = await response.json()
+    const res = await axios.post(
+      `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
+      {
+        method: 'POST',
+        path: '/rest/api/3/search/jql',
+        data: {
+          jql: 'updated >= -90d ORDER BY updated DESC',
+          maxResults: 50,
+          fields: ['summary', 'status', 'assignee', 'priority', 'updated'],
+        },
+      },
+      {
+        withCredentials: true,
+      }
+    )
 
-    if (!response.ok) {
-      throw new Error(data?.message || data?.error?.message || 'Gagal mengambil data Jira')
-    }
-
-    return pickIssuesArray(data)
+    return pickIssuesArray(res.data)
   },
 }
-
-export { JIRA_WEBHOOK_URL }

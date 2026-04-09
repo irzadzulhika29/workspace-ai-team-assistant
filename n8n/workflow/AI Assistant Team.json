@@ -445,8 +445,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        3136,
-        3792
+        3072,
+        3760
       ],
       "id": "c622496a-e26b-4a0a-b839-50e38f41d354",
       "name": "arcee-ai/trinity-large-preview:free-2",
@@ -471,8 +471,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        3040,
-        3792
+        2944,
+        3760
       ],
       "id": "9bb19398-26b4-4c3f-9a91-62a389f282f7",
       "name": "seed-2-0-lite-free-3",
@@ -503,8 +503,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        2960,
-        3984
+        2912,
+        4000
       ],
       "id": "ebd0a0f3-f12a-4eb8-a6fe-a85fe7b74263",
       "name": "create an event",
@@ -535,8 +535,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3264,
-        3984
+        3232,
+        4000
       ],
       "id": "5f7bd65b-220f-461b-b518-5cf08ffb72f6",
       "name": "get many events",
@@ -838,8 +838,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3408,
-        3984
+        3376,
+        4000
       ],
       "id": "e37c7d3e-b9e2-45a4-810e-5cc46461c7f8",
       "name": "delete events calendar",
@@ -1338,8 +1338,8 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        3104,
-        3984
+        3072,
+        4000
       ],
       "id": "a1822133-1966-400a-9e37-16d0912b37dd",
       "name": "create an event & google meet",
@@ -2864,13 +2864,13 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6c558e5e-5ab7-46dd-b6bd-839e21727550",
+  "versionId": "471150e3-af6f-42b0-b9ee-33e305e9f20a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

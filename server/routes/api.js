@@ -15,6 +15,49 @@ router.get('/protected', requireAuth, (req, res) => {
   });
 });
 
+// Return a fresh Google access token for the authenticated user.
+// Auto-refreshes if the stored token is expired.
+router.get('/google/token', requireAuth, async (req, res) => {
+  try {
+    const tokens = await prisma.googleToken.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (!tokens) {
+      return res.status(404).json({ error: 'No Google token found. Connect your Google account first.' });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+      expiry_date: tokens.expiresAt ? tokens.expiresAt.getTime() : undefined
+    });
+
+    const { token } = await oauth2Client.getAccessToken();
+
+    // Persist refreshed token if it changed
+    if (token && token !== tokens.accessToken) {
+      await prisma.googleToken.update({
+        where: { userId: req.user.id },
+        data: {
+          accessToken: token,
+          expiresAt: new Date(Date.now() + 3600 * 1000)
+        }
+      });
+    }
+
+    res.json({ access_token: token });
+  } catch (error) {
+    console.error('Error getting Google token:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Fetch documents from Supabase using service role key
 router.get('/dokumen', async (req, res) => {
   try {
@@ -267,6 +310,8 @@ router.get('/google/sheets', requireAuth, async (req, res) => {
 // Fetch Google Calendar events
 router.get('/google/calendar', requireAuth, async (req, res) => {
   try {
+    const { calendarId = 'primary', timeMin, timeMax, maxResults = 50 } = req.query;
+
     const tokens = await prisma.googleToken.findUnique({
       where: { userId: req.user.id }
     });
@@ -286,16 +331,17 @@ router.get('/google/calendar', requireAuth, async (req, res) => {
     });
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    
+
     const response = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: new Date().toISOString(),
-      maxResults: 50,
+      calendarId,
+      ...(timeMin ? { timeMin } : {}),
+      ...(timeMax ? { timeMax } : {}),
+      maxResults: parseInt(maxResults, 10),
       singleEvents: true,
       orderBy: 'startTime'
     });
 
-    res.json({ files: response.data.items });
+    res.json(response.data);
   } catch (error) {
     console.error('Error fetching Google Calendar:', error);
     res.status(500).json({ error: error.message });
