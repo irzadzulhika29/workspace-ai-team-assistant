@@ -6,6 +6,8 @@ import axios from "axios";
 export { chatApi } from "./chatService";
 export { sessionApi } from "./sessionService";
 export { fileApi } from "./fileService";
+export { tokenUsageApi } from "./tokenUsageService";
+export { integrationApi } from "./integrationService";
 export { SUPABASE_URL, SUPABASE_ANON_KEY, supabaseHeaders } from "./supabase";
 
 // ─── localStorage keys ───────────────────────────────────────────────────────

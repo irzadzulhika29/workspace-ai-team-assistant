@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
 import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
@@ -93,16 +93,16 @@ export default function SupervisorChat() {
   }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession])
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-surface-sunken/80">
       {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b ghost-divider bg-white/80 backdrop-blur-md flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-brand-100 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center shadow-[0_8px_18px_rgba(0,97,132,0.08)]">
             <MessageSquare size={16} className="text-brand-600" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-slate-800">Supervisor Agent</h1>
-            <p className="text-xs text-slate-400">Delegasi tugas · Jira · Google Calendar</p>
+            <h1 className="text-base font-bold font-headline text-slateui-900">Supervisor Agent</h1>
+            <p className="text-xs text-slate-500 uppercase tracking-[0.18em]">Delegasi tugas · Jira · Google Calendar</p>
           </div>
         </div>
         {supervisorMessages.length > 0 && (
@@ -117,7 +117,7 @@ export default function SupervisorChat() {
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
         {supervisorMessages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-3 text-slate-400">
             <MessageSquare size={36} className="opacity-20" />

@@ -8,6 +8,7 @@ import passport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
 import googleRoutes from './routes/google.js';
+import integrationRoutes from './routes/integrations.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -78,6 +79,7 @@ app.use(passport.session());
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/google', googleRoutes);
+app.use('/api/integrations', integrationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

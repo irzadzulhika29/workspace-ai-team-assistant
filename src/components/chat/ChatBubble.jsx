@@ -50,10 +50,10 @@ function ChatBubble({ message }) {
       <div className={`flex flex-col gap-1 max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Bubble */}
         <div className={`
-          px-4 py-2.5 text-sm leading-relaxed shadow-sm
+          px-4 py-3 text-sm leading-relaxed
           ${isUser
-            ? 'bg-brand-600 text-white rounded-l-xl rounded-tr-xl'
-            : 'bg-white border border-gray-200 text-gray-800 rounded-r-xl rounded-tl-xl'
+            ? 'bg-brand-600 text-white rounded-2xl rounded-tr-md shadow-[0_12px_24px_rgba(0,97,132,0.18)]'
+            : 'bg-surface-raised text-slateui-900 rounded-2xl rounded-tl-md shadow-[0_14px_30px_rgba(25,28,29,0.05)]'
           }
         `}>
           {isUser ? (

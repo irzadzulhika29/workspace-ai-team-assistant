@@ -7,25 +7,36 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        headline: ['Manrope', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+        label: ['Inter', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         brand: {
-          50:  '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+          50:  '#f5faff',
+          100: '#c4e7ff',
+          200: '#7cd0ff',
+          400: '#007ba7',
+          500: '#00658b',
+          600: '#006184',
+          700: '#004c69',
+          800: '#00384d',
+          900: '#001e2c',
         },
         surface: {
-          DEFAULT: '#f8fafc',
+          DEFAULT: '#f8f9fa',
           raised: '#ffffff',
-          sunken: '#f1f5f9',
+          sunken: '#f3f4f5',
+          high: '#e7e8e9',
+          highest: '#e1e3e4',
+          variant: '#e1e3e4',
+        },
+        slateui: {
+          500: '#545e76',
+          700: '#3f484e',
+          900: '#191c1d',
         },
       },
       animation: {

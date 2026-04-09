@@ -1,0 +1,43 @@
+{
+  "projectId": "17231156866974262526",
+  "projectTitle": "Professional UI Screens",
+  "designSystemAssetId": "assets/9dd5c45c3cd84ebf81636cb3a892ab7e",
+  "designSystemInstanceId": "assets-9dd5c45c3cd84ebf81636cb3a892ab7e-1775740112414",
+  "displayName": "Azure Meridian",
+  "theme": {
+    "colorMode": "LIGHT",
+    "headlineFont": "MANROPE",
+    "bodyFont": "INTER",
+    "labelFont": "INTER",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#007BA7",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#007BA7",
+    "overrideSecondaryColor": "#1B263B",
+    "overrideTertiaryColor": "#415A77",
+    "overrideNeutralColor": "#F8F9FA",
+    "spacingScale": 3,
+    "namedColors": {
+      "background": "#f8f9fa",
+      "on_background": "#191c1d",
+      "primary": "#006184",
+      "primary_container": "#007ba7",
+      "primary_fixed": "#c4e7ff",
+      "on_primary": "#ffffff",
+      "secondary": "#545e76",
+      "secondary_container": "#d7e2ff",
+      "tertiary": "#435c79",
+      "surface": "#f8f9fa",
+      "surface_container": "#edeeef",
+      "surface_container_low": "#f3f4f5",
+      "surface_container_lowest": "#ffffff",
+      "surface_container_high": "#e7e8e9",
+      "surface_container_highest": "#e1e3e4",
+      "surface_variant": "#e1e3e4",
+      "outline": "#6f787f",
+      "outline_variant": "#bfc8cf",
+      "error": "#ba1a1a",
+      "error_container": "#ffdad6"
+    }
+  }
+}

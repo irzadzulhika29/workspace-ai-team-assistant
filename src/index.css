@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,12 +8,15 @@
   :root {
     --sidebar-width: 240px;
     --header-height: 56px;
-    --app-bg: #f3f5f8;
+    --app-bg: #f8f9fa;
     --surface-0: #ffffff;
-    --surface-1: #f8fafc;
-    --line-soft: #e2e8f0;
-    --text-strong: #0f172a;
-    --text-muted: #64748b;
+    --surface-1: #f3f4f5;
+    --surface-2: #e7e8e9;
+    --line-soft: #bfc8cf;
+    --text-strong: #191c1d;
+    --text-muted: #545e76;
+    --primary: #006184;
+    --primary-soft: #c4e7ff;
   }
 
   @media (max-width: 768px) {
@@ -29,12 +34,22 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html, body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, .font-headline {
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
   body {
-    @apply text-slate-800 font-sans;
+    @apply font-sans;
     background:
-      radial-gradient(circle at 0% 0%, #dbeafe 0%, transparent 38%),
-      radial-gradient(circle at 100% 100%, #e2e8f0 0%, transparent 35%),
+      radial-gradient(circle at 0% 0%, rgba(196, 231, 255, 0.75) 0%, transparent 34%),
+      radial-gradient(circle at 100% 100%, rgba(225, 227, 228, 0.9) 0%, transparent 28%),
       var(--app-bg);
+    color: var(--text-strong);
     margin: 0;
     min-height: 100dvh;
   }
@@ -47,14 +62,21 @@
 
 @layer components {
   .panel {
-    @apply bg-white/85 border border-slate-200/80 rounded-2xl shadow-sm backdrop-blur;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(25, 28, 29, 0.05);
+    backdrop-filter: blur(12px);
   }
 
   .panel-muted {
-    @apply bg-slate-50/90 border border-slate-200 rounded-xl;
+    background: rgba(243, 244, 245, 0.95);
+    border-radius: 0.75rem;
   }
 
-  /* Scrollbar styling */
+  .ghost-divider {
+    border-color: rgba(191, 200, 207, 0.2);
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -62,13 +84,13 @@
     @apply bg-transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full;
+    background: #bfc8cf;
+    border-radius: 9999px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400;
+    background: #6f787f;
   }
 
-  /* Sidebar scrollbar - lighter for dark bg */
   .sidebar-scrollbar::-webkit-scrollbar {
     width: 3px;
   }
@@ -76,17 +98,17 @@
     @apply bg-transparent;
   }
   .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-600 rounded-full;
+    background: #bfc8cf;
+    border-radius: 9999px;
   }
 
-  /* Chat message animation */
   .message-enter {
     @apply animate-slide-up;
   }
 
-  /* Skeleton shimmer */
   .skeleton {
-    @apply bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%];
+    background: linear-gradient(90deg, #e7e8e9 0%, #f3f4f5 50%, #e7e8e9 100%);
+    background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 }

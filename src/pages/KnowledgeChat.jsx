@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Brain, Trash2, ChevronDown } from 'lucide-react'
 import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
@@ -85,18 +85,18 @@ export default function KnowledgeChat() {
   }, [activeKnowledgeSessionId, addKnowledgeMessage, contextFilter, setActiveKnowledgeSession])
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-surface-sunken/80">
       {/* Main chat area */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Page header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b ghost-divider bg-white/80 backdrop-blur-md flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
-              <Brain size={16} className="text-violet-600" />
+            <div className="w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center shadow-[0_8px_18px_rgba(0,97,132,0.08)]">
+              <Brain size={16} className="text-brand-600" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-slate-800">Knowledge Agent</h1>
-              <p className="text-xs text-slate-400">RAG · Sitasi dokumen · SOP internal</p>
+              <h1 className="text-base font-bold font-headline text-slateui-900">Knowledge Agent</h1>
+              <p className="text-xs text-slate-500 uppercase tracking-[0.18em]">RAG · Sitasi dokumen · SOP internal</p>
             </div>
           </div>
 
@@ -108,9 +108,10 @@ export default function KnowledgeChat() {
                 onChange={(e) => setContextFilter(e.target.value || null)}
                 className="
                   appearance-none pl-3 pr-8 py-1.5 text-xs font-medium
-                  border border-gray-200 rounded-lg bg-gray-50 text-slate-700
-                  focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500
-                  cursor-pointer hover:bg-gray-100 transition-colors
+                  border border-transparent rounded-xl bg-surface-raised text-slateui-700
+                  shadow-[inset_0_0_0_1px_rgba(191,200,207,0.35)]
+                  focus:outline-none focus:ring-0 focus:shadow-[inset_0_-2px_0_0_#006184]
+                  cursor-pointer hover:bg-white transition-colors
                 "
               >
                 {CONTEXT_OPTIONS.map(({ value, label }) => (
@@ -135,13 +136,13 @@ export default function KnowledgeChat() {
         </div>
 
         {/* Message list */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
           {knowledgeMessages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center gap-3 text-slate-400">
               <Brain size={36} className="opacity-20" />
               <p className="text-sm font-medium">Mulai bertanya tentang SOP</p>
               <p className="text-xs max-w-xs">
-                Contoh: <em>"Berapa hari cuti tahunan karyawan kontrak?"</em> atau <em>"Apa prosedur pengajuan reimbursement?"</em>
+                Contoh: <em>&ldquo;Berapa hari cuti tahunan karyawan kontrak?&rdquo;</em> atau <em>&ldquo;Apa prosedur pengajuan reimbursement?&rdquo;</em>
               </p>
             </div>
           )}

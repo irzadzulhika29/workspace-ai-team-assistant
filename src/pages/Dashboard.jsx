@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageSquare, Brain, FolderOpen, ArrowRight, Zap, Database, FileStack, CalendarDays, Clock3, MapPin, Bug, CheckCircle2 } from 'lucide-react'
+import { MessageSquare, Brain, FolderOpen, ArrowRight, Zap, Database, FileStack, CalendarDays, Clock3, MapPin, Bug, CheckCircle2, BarChart3, Cpu } from 'lucide-react'
 import { calendarApi } from '../services/calendarService'
 import { jiraApi } from '../services/jiraService'
 
@@ -28,6 +28,14 @@ const CARDS = [
     desc:    'Upload SOP, kelola laporan AI, dan atur folder dokumen referensi tim.',
     tone:    'text-emerald-700 bg-emerald-50 border-emerald-100',
     accent:  FileStack,
+  },
+  {
+    to:      '/monitoring/tokens',
+    icon:    BarChart3,
+    title:   'Token Monitor',
+    desc:    'Pantau konsumsi input dan completion token dari setiap eksekusi workflow AI.',
+    tone:    'text-violet-700 bg-violet-50 border-violet-100',
+    accent:  Cpu,
   },
 ]
 
@@ -114,19 +122,19 @@ export default function Dashboard() {
 
   return (
     <div className="p-5 md:p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-[0.24em]">
-            Team Assistant Workspace
-          </span>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[11px] font-mono text-brand-600 uppercase tracking-[0.24em]">
+              Team Assistant Workspace
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold font-headline text-slateui-900 leading-tight tracking-tight">
+            Selamat datang, <span className="text-cyan-700">Admin</span>
+          </h1>
+          <p className="text-slateui-500 mt-3 text-sm max-w-2xl leading-relaxed">
+            Satu platform terpadu untuk delegasi tugas operasional, akses knowledge base internal, dan manajemen dokumen SOP.
+          </p>
         </div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-tight">
-          Selamat datang, <span className="text-cyan-700">Admin</span>
-        </h1>
-        <p className="text-slate-500 mt-3 text-sm max-w-2xl leading-relaxed">
-          Satu platform terpadu untuk delegasi tugas operasional, akses knowledge base internal, dan manajemen dokumen SOP.
-        </p>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         {CARDS.map(({ to, icon: Icon, title, desc, tone, accent: Accent }) => (
@@ -134,8 +142,8 @@ export default function Dashboard() {
             key={to}
             to={to}
             className={`
-              group relative flex flex-col gap-4 p-5 rounded-2xl border border-slate-200 bg-white
-              hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-md
+              group relative flex flex-col gap-4 p-5 rounded-2xl bg-white/95
+              hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(25,28,29,0.05)]
               transition-all duration-200 overflow-hidden
             `}
           >

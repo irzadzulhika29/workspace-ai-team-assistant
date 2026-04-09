@@ -39,7 +39,7 @@ if (googleClientId && googleClientSecret) {
         'profile',
         'email',
         'https://www.googleapis.com/auth/drive.readonly',
-        'https://www.googleapis.com/auth/calendar.readonly'
+        'https://www.googleapis.com/auth/calendar.events'
       ]
     },
     async (accessToken, refreshToken, profile, done) => {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Send, Paperclip, X } from 'lucide-react'
 
 /**
@@ -57,11 +57,11 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
   return (
     <div className="
       flex flex-col gap-2 px-4 py-3
-      bg-white border-t border-gray-100
+      bg-white/75 backdrop-blur-md border-t ghost-divider
     ">
       {/* File Preview Area */}
       {selectedFile && (
-        <div className="flex items-center gap-2 p-2 w-fit bg-slate-100 rounded-lg border border-slate-200 animate-fade-in">
+        <div className="flex items-center gap-2 p-2 w-fit bg-surface-sunken rounded-lg animate-fade-in">
           <Paperclip size={14} className="text-slate-500" />
           <span className="text-xs font-medium text-slate-700 max-w-[200px] truncate">
             {selectedFile.name}
@@ -91,7 +91,7 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
               htmlFor="file-upload"
               className={`
                 w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer
-                text-slate-500 hover:bg-slate-100 hover:text-brand-600
+                 text-slateui-500 hover:bg-surface-sunken hover:text-brand-600
                 transition-colors duration-150
                 ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-slate-500' : ''}
               `}
@@ -110,10 +110,10 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
           placeholder={placeholder}
           rows={1}
           className="
-            flex-1 resize-none rounded-lg border border-gray-200 bg-gray-50
-            px-4 py-2.5 text-sm text-slate-800
+            flex-1 resize-none rounded-xl border border-transparent bg-surface-raised
+            px-4 py-2.5 text-sm text-slateui-900 shadow-[inset_0_0_0_1px_rgba(191,200,207,0.35)]
             placeholder:text-slate-400
-            focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500
+            focus:outline-none focus:ring-0 focus:shadow-[inset_0_-2px_0_0_#006184]
             disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-150 font-sans
             custom-scrollbar
@@ -124,7 +124,7 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
           onClick={handleSend}
           disabled={disabled || (!value.trim() && !selectedFile)}
           className="
-            w-10 h-10 flex items-center justify-center rounded-lg flex-shrink-0
+            w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0
             bg-brand-600 text-white
             hover:bg-brand-700
             disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed

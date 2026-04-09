@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
   { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
   { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
+  { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
   { to: '/integrations',     icon: Plug,            label: 'Integrations'      },
 ]
 
@@ -292,14 +293,14 @@ export default function Sidebar() {
     onSelectSession,
     onDeleteSession,
   }) => (
-    <div className="mt-1 ml-3 pl-3 border-l border-slate-200 space-y-1 animate-fade-in">
+    <div className="mt-2 ml-3 pl-3 border-l ghost-divider space-y-1 animate-fade-in">
       <button
         onClick={onNewChat}
         disabled={creating}
         className="
           w-full flex items-center gap-2
           px-2.5 py-1.5 rounded-md text-xs font-medium
-          bg-slate-900 hover:bg-slate-800 text-white
+          bg-brand-600 hover:bg-brand-700 text-white shadow-[0_12px_24px_rgba(0,97,132,0.18)]
           transition-all duration-200 active:scale-[0.98]
           disabled:opacity-50 disabled:cursor-not-allowed
         "
@@ -335,13 +336,13 @@ export default function Sidebar() {
                   w-full flex items-center gap-1 rounded-md
                   transition-all duration-150 group relative
                   ${isActive
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
-                  }
+                    ? 'bg-white text-slateui-900 shadow-sm'
+                    : 'text-slateui-500 hover:text-slateui-900 hover:bg-white/55'
+                   }
                 `}
               >
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-cyan-400 rounded-r-full" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-brand-600 rounded-r-full" />
                 )}
                 <button
                   onClick={() => onSelectSession(session.id)}
@@ -350,7 +351,7 @@ export default function Sidebar() {
                   <MessageSquare
                     size={11}
                     className={`mt-0.5 flex-shrink-0 ${
-                      isActive ? 'text-cyan-300' : 'text-slate-400 group-hover:text-slate-600'
+                      isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slateui-500'
                     }`}
                   />
                   <div className="min-w-0 flex-1">
@@ -369,10 +370,10 @@ export default function Sidebar() {
                     flex-shrink-0 p-1 mr-1 rounded opacity-0 group-hover:opacity-100
                     transition-opacity duration-150
                     ${isActive
-                      ? 'hover:bg-slate-700 text-slate-400 hover:text-red-400'
-                      : 'hover:bg-slate-200 text-slate-400 hover:text-red-500'
-                    }
-                  `}
+                     ? 'hover:bg-surface-high text-slate-400 hover:text-red-500'
+                      : 'hover:bg-surface text-slate-400 hover:text-red-500'
+                     }
+                   `}
                 >
                   <Trash2 size={11} />
                 </button>
@@ -395,23 +396,24 @@ export default function Sidebar() {
     <>
       <aside className={`
         fixed top-0 left-0 h-screen z-40
-        bg-white/95 backdrop-blur-xl flex flex-col
-        border-r border-slate-200
+        bg-surface-high/95 backdrop-blur-xl flex flex-col
+        border-r border-white/30
         select-none transition-transform duration-300
         w-[240px]
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:w-[var(--sidebar-width)]
       `} style={{ '--sidebar-width': '240px' }}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 justify-between">
+        <div className="flex items-center gap-3 px-4 py-5 border-b ghost-divider justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0 shadow-[0_12px_24px_rgba(0,97,132,0.18)]">
               <MessageSquare size={14} className="text-white" />
             </div>
             <div className="overflow-hidden">
-              <p className="text-slate-900 text-sm font-semibold leading-tight truncate">
+              <p className="text-slateui-900 text-base font-bold font-headline leading-tight truncate">
                 AI Team Assistant
               </p>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 mt-1">Executive Canvas</p>
             </div>
           </div>
           {/* Close button — mobile only */}
@@ -423,7 +425,7 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto sidebar-scrollbar">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto sidebar-scrollbar">
           <p className="text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2">
             Workspace
           </p>
@@ -437,17 +439,17 @@ export default function Sidebar() {
                   `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                    transition-all duration-150 relative
                    ${isActive
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                    }`
+                       ? 'bg-white text-brand-700 shadow-sm translate-x-1'
+                       : 'text-slateui-500 hover:text-slateui-900 hover:bg-white/55'
+                     }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-cyan-400 rounded-r-full" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-600 rounded-r-full" />
                     )}
-                    <Icon size={16} className={isActive ? 'text-cyan-300' : 'text-slate-500 group-hover:text-slate-700'} />
+                    <Icon size={16} className={isActive ? 'text-brand-600' : 'text-slateui-500 group-hover:text-slateui-700'} />
                     <span>{label}</span>
                   </>
                 )}
@@ -480,16 +482,16 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        <div className="px-3 pb-4 space-y-1 border-t border-slate-200 pt-3">
+        <div className="px-4 pb-4 space-y-1 border-t ghost-divider pt-3">
           <button
             onClick={() => setSettingsOpen(true)}
             className="
               w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-              text-slate-500 hover:text-slate-900 hover:bg-slate-100
+              text-slateui-500 hover:text-slateui-900 hover:bg-white/55
               transition-colors duration-150
             "
           >
-            <Settings size={16} className="text-slate-500" />
+            <Settings size={16} className="text-slateui-500" />
             <span>Settings</span>
           </button>
         </div>

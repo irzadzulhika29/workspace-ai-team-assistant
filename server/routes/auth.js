@@ -24,10 +24,11 @@ router.get('/google',
       'profile',
       'email',
       'https://www.googleapis.com/auth/drive.readonly',
-      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/calendar.events',
       'https://www.googleapis.com/auth/spreadsheets'
     ],
     accessType: 'offline',
+    includeGrantedScopes: true,
     prompt: 'consent'
   })
 );
@@ -60,10 +61,10 @@ router.get('/google/callback',
       console.log('ℹ️  Google tokens saved to database for API access');
 
       // Redirect to frontend with success
-      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?connected=true`);
+      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings/integrations?connected=true`);
     } catch (error) {
       console.error('Error in OAuth callback:', error);
-      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?error=auth_failed`);
+      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings/integrations?error=auth_failed`);
     }
   }
 );

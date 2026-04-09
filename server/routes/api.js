@@ -7,6 +7,16 @@ import crypto from 'crypto';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+const getSupabaseHeaders = (extraHeaders = {}) => ({
+  'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+  'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+  'Content-Type': 'application/json',
+  ...extraHeaders,
+});
+
+const isValidTokenCount = (value) =>
+  Number.isInteger(value) && value >= 0;
+
 // Protected route example
 router.get('/protected', requireAuth, (req, res) => {
   res.json({
@@ -64,11 +74,7 @@ router.get('/dokumen', async (req, res) => {
     const url = `${process.env.SUPABASE_URL}/rest/v1/dokumen?select=*&order=created_at.desc`;
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     if (!response.ok) {
@@ -79,6 +85,139 @@ router.get('/dokumen', async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Error fetching dokumen:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Insert token usage execution data from n8n
+router.post('/token-usage', async (req, res) => {
+  try {
+    const n8nApiKey = req.headers['x-n8n-api-key'];
+    if (!process.env.N8N_API_KEY || n8nApiKey !== process.env.N8N_API_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const {
+      execution_id,
+      timestamp,
+      workflow_id,
+      workflow_name,
+      llm_model,
+      input_tokens,
+      completion_tokens,
+    } = req.body;
+
+    if (
+      !execution_id ||
+      !workflow_id ||
+      !workflow_name ||
+      !llm_model ||
+      !isValidTokenCount(input_tokens) ||
+      !isValidTokenCount(completion_tokens)
+    ) {
+      return res.status(400).json({
+        error: 'execution_id, workflow_id, workflow_name, llm_model, input_tokens, and completion_tokens are required'
+      });
+    }
+
+    const payload = {
+      execution_id,
+      workflow_id,
+      workflow_name,
+      llm_model,
+      input_tokens,
+      completion_tokens,
+    };
+
+    if (timestamp) {
+      payload.timestamp = timestamp;
+    }
+
+    const url = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getSupabaseHeaders({
+        'Prefer': 'return=representation'
+      }),
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase error: ${response.status} ${response.statusText}`);
+    }
+
+    const rows = await response.json();
+    res.json(rows[0] || payload);
+  } catch (error) {
+    console.error('Error inserting token usage:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get token usage summary and recent execution logs
+router.get('/token-usage', async (req, res) => {
+  try {
+    const requestedLimit = Number.parseInt(req.query.limit, 10);
+    const limit = Number.isInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 500)
+      : 100;
+
+    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens&order=timestamp.desc&limit=${limit}`;
+    const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens`;
+
+    const [recentResponse, summaryResponse] = await Promise.all([
+      fetch(recentUrl, {
+        method: 'GET',
+        headers: getSupabaseHeaders()
+      }),
+      fetch(summaryUrl, {
+        method: 'GET',
+        headers: getSupabaseHeaders()
+      })
+    ]);
+
+    if (!recentResponse.ok) {
+      throw new Error(`Supabase error: ${recentResponse.status} ${recentResponse.statusText}`);
+    }
+
+    if (!summaryResponse.ok) {
+      throw new Error(`Supabase error: ${summaryResponse.status} ${summaryResponse.statusText}`);
+    }
+
+    const rows = await recentResponse.json();
+    const summaryRows = await summaryResponse.json();
+
+    const summary = summaryRows.reduce((acc, row) => {
+      acc.totalExecutions += 1;
+      acc.totalInputTokens += row.input_tokens || 0;
+      acc.totalCompletionTokens += row.completion_tokens || 0;
+
+      const workflowKey = row.workflow_id || row.workflow_name;
+      if (workflowKey) {
+        acc._workflowSet.add(workflowKey);
+      }
+
+      return acc;
+    }, {
+      totalExecutions: 0,
+      totalInputTokens: 0,
+      totalCompletionTokens: 0,
+      _workflowSet: new Set(),
+    });
+
+    res.json({
+      rows,
+      summary: {
+        totalExecutions: summary.totalExecutions,
+        totalInputTokens: summary.totalInputTokens,
+        totalCompletionTokens: summary.totalCompletionTokens,
+        totalTokens: summary.totalInputTokens + summary.totalCompletionTokens,
+        totalWorkflows: summary._workflowSet.size,
+        latestTimestamp: rows[0]?.timestamp || null,
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching token usage:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -98,9 +237,7 @@ router.post('/sessions', async (req, res) => {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json',
+        ...getSupabaseHeaders(),
         'Prefer': 'return=representation'
       },
       body: JSON.stringify(payload)
@@ -127,11 +264,7 @@ router.get('/sessions', async (req, res) => {
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     if (!response.ok) {
@@ -155,11 +288,7 @@ router.get('/sessions/:sessionId/history', async (req, res) => {
     const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}&order=id.asc`;
     const historyResponse = await fetch(historyUrl, {
       method: 'GET',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     if (!historyResponse.ok) {
@@ -172,11 +301,7 @@ router.get('/sessions/:sessionId/history', async (req, res) => {
     const dokumenUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?session_id=eq.${sessionId}&kategori=eq.output&order=created_at.asc&select=file_url,nama_file,created_at`;
     const dokumenResponse = await fetch(dokumenUrl, {
       method: 'GET',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     let dokumen = [];
@@ -200,11 +325,7 @@ router.delete('/sessions/:sessionId', async (req, res) => {
     const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}`;
     const messagesResponse = await fetch(messagesUrl, {
       method: 'DELETE',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     if (!messagesResponse.ok) {
@@ -215,11 +336,7 @@ router.delete('/sessions/:sessionId', async (req, res) => {
     const sessionUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${sessionId}`;
     const sessionResponse = await fetch(sessionUrl, {
       method: 'DELETE',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json'
-      }
+      headers: getSupabaseHeaders()
     });
 
     if (!sessionResponse.ok) {

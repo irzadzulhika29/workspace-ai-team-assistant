@@ -1,5 +1,6 @@
 import axios from "axios";
 import { urls, getSessionId } from "./api";
+import { integrationApi } from "./integrationService";
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
 const post = async (getUrl, payload) => {
@@ -36,6 +37,7 @@ export const chatApi = {
    */
   sendToSupervisor: async (message, action = "chat", sessionId = null, file = null) => {
     const googleAccessToken = await fetchGoogleToken();
+    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
 
     if (file) {
       // Create FormData if file is present
@@ -47,6 +49,7 @@ export const chatApi = {
       formData.append("timestamp", new Date().toISOString());
       formData.append("file", file); // Add the file
       if (googleAccessToken) formData.append("google_access_token", googleAccessToken);
+      if (jiraCredentials) formData.append("jira_credentials", JSON.stringify(jiraCredentials));
 
       const res = await axios.post(urls.getSupervisor(), formData, {
         timeout: 120_000,
@@ -63,6 +66,7 @@ export const chatApi = {
         chat_type: "general_chat",
         timestamp: new Date().toISOString(),
         ...(googleAccessToken && { google_access_token: googleAccessToken }),
+        ...(jiraCredentials && { jira_credentials: jiraCredentials }),
       });
     }
   },
@@ -75,6 +79,7 @@ export const chatApi = {
    */
   sendToKnowledge: async (message, contextFilter = null, sessionId = null) => {
     const googleAccessToken = await fetchGoogleToken();
+    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
     return post(urls.getKnowledge, {
       action: "chat",
       session_id: sessionId || getSessionId(),
@@ -83,6 +88,7 @@ export const chatApi = {
       chat_type: "rag_chat",
       timestamp: new Date().toISOString(),
       ...(googleAccessToken && { google_access_token: googleAccessToken }),
+      ...(jiraCredentials && { jira_credentials: jiraCredentials }),
     });
   },
 };

@@ -20,7 +20,7 @@ export default function MobileHeader() {
   return (
     <header className="
       md:hidden flex items-center gap-3 px-4 h-14
-      border-b border-slate-200 bg-white/80 backdrop-blur-md
+      border-b ghost-divider bg-white/80 backdrop-blur-md
       sticky top-0 z-20
     ">
       <button
@@ -32,10 +32,10 @@ export default function MobileHeader() {
       </button>
 
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center flex-shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
           <MessageSquare size={12} className="text-white" />
         </div>
-        <span className="text-sm font-semibold text-slate-900 truncate">{title}</span>
+        <span className="text-sm font-bold font-headline text-slateui-900 truncate">{title}</span>
       </div>
     </header>
   )

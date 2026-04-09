@@ -1,5 +1,4 @@
 import axios from "axios";
-import { SUPABASE_URL, supabaseHeaders } from "./supabase";
 import { urls, getSessionId } from "./api";
 
 // ─── File / Document API ──────────────────────────────────────────────────────
