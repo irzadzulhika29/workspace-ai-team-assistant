@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { shallow } from 'zustand/shallow'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
@@ -18,6 +19,9 @@ const AGENT_STATUS_LABELS = {
 }
 
 export default function SupervisorChat() {
+  const location = useLocation();
+  const autoSendProcessed = useRef(false);
+
   const {
     supervisorMessages,
     addSupervisorMessage,
@@ -91,6 +95,23 @@ export default function SupervisorChat() {
       setLoading(false)
     }
   }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession])
+
+  // Handle auto-send from navigation state (Magic Button from Email)
+  useEffect(() => {
+    const autoSendMessage = location.state?.autoSendMessage;
+
+    if (autoSendMessage && !autoSendProcessed.current) {
+      autoSendProcessed.current = true;
+      
+      // Small delay to ensure component is mounted
+      setTimeout(() => {
+        handleSend(autoSendMessage);
+      }, 500);
+
+      // Clear navigation state to prevent re-sending on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, handleSend]);
 
   return (
     <div className="flex flex-col h-screen bg-surface-sunken/80">

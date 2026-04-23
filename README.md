@@ -8,6 +8,7 @@ A comprehensive team collaboration platform that integrates AI-powered assistanc
 - 🤖 **AI-Powered Assistants** - Supervisor and Knowledge chat interfaces
 - 📁 **File Workspace** - Document management and collaboration tools
 - 📅 **Calendar Integration** - Google Calendar synchronization and management
+- 📧 **Email Management** - Gmail integration with inbox, read, search, and organize features
 - 🧩 **n8n Workflow Automation** - Integration with n8n for workflow automation
 - 🌐 **JIRA Integration** - Project management and issue tracking
 - 🛠 **Integration Hub** - Centralized platform for various workplace tools

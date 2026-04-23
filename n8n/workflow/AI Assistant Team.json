@@ -739,7 +739,6 @@
       "parameters": {
         "toolDescription": "Gunakan agen ini HANYA untuk mencari, mengekstrak, dan menjawab pertanyaan terkait informasi faktual, kebijakan internal, aturan perusahaan, atau Standar Operasional Prosedur (SOP) seperti proses onboarding dan payroll. Agen ini terhubung ke basis data vektor (Pinecone) untuk mengambil dokumen referensi internal.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
-        "needsFallback": true,
         "options": {
           "systemMessage": "Kamu adalah Knowledge Agent — Spesialis Pencarian Dokumen Internal perusahaan.\n\nTUGAS TUNGGALMU:\nMenjawab pertanyaan pengguna secara akurat dan objektif berdasarkan dokumen internal yang tersimpan di basis data (Pinecone vector store). Kamu adalah sumber kebenaran tunggal untuk semua informasi internal perusahaan.\n\nPROTOKOL KERJA:\n1. Terima pertanyaan dari pengguna.\n2. Gunakan tool pencarian Pinecone untuk mencari dokumen yang relevan.\n3. Susun jawaban HANYA berdasarkan informasi yang ditemukan di dokumen tersebut.\n4. Cantumkan nama dokumen atau sumber referensi jika tersedia di metadata, agar pengguna tahu dari mana informasi berasal.\n\nATURAN MUTLAK — ZERO HALLUCINATION:\n- DILARANG KERAS menggunakan pengetahuan umum, opini, atau spekulasi di luar dokumen yang ditemukan.\n- DILARANG menjawab pertanyaan jika dokumen yang relevan tidak ditemukan.\n- Jika hasil pencarian tidak memuat informasi yang relevan, jawab dengan kalimat berikut dan jangan menambahkan apa pun:\n  \"Maaf, informasi tersebut tidak ditemukan di dalam dokumen SOP atau kebijakan internal perusahaan. Silakan hubungi departemen terkait untuk konfirmasi lebih lanjut.\"\n\nFORMAT JAWABAN:\n- Gunakan bahasa yang jelas, formal, dan mudah dipahami oleh karyawan non-teknis.\n- Jika informasi mengandung langkah-langkah (prosedur), sajikan dalam format bernomor.\n- Jika ada beberapa poin penting, gunakan bullet points.\n- Selalu sebutkan sumber dokumen di bagian akhir jawaban.\n"
         }
@@ -997,7 +996,7 @@
                 "conditions": [
                   {
                     "id": "af7a3fbc-cf44-47c6-a8ef-4d7cdf5c3588",
-                    "leftValue": "={{ $json.output }}",
+                    "leftValue": "={{ ($json.output || '').replace(/\\s+/g, '') }}",
                     "rightValue": "Unduh Dokumen (PDF)",
                     "operator": {
                       "type": "string",
@@ -1021,7 +1020,7 @@
                 "conditions": [
                   {
                     "id": "657983e5-01b7-47f5-ba9f-a958ad8516a6",
-                    "leftValue": "={{ $json.output }}",
+                    "leftValue": "={{ ($json.output || '').replace(/\\s+/g, '') }}",
                     "rightValue": "Unduh Presentasi (PDF)",
                     "operator": {
                       "type": "string",
@@ -1045,7 +1044,7 @@
                 "conditions": [
                   {
                     "id": "c55bc308-18bd-4f2b-a4e7-8920724802df",
-                    "leftValue": "={{ $json.output }}",
+                    "leftValue": "={{ ($json.output || '').replace(/\\s+/g, '') }}",
                     "rightValue": "\"action\":\"send\"",
                     "operator": {
                       "type": "string",
@@ -1069,7 +1068,7 @@
                 "conditions": [
                   {
                     "id": "6f6aa741-e9f4-4cbb-83bc-353652737f5e",
-                    "leftValue": "={{ $json.output }}",
+                    "leftValue": "={{ ($json.output || '').replace(/\\s+/g, '') }}",
                     "rightValue": "\"action\":\"draft\"",
                     "operator": {
                       "type": "string",
@@ -1394,7 +1393,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        12128,
+        12112,
         8144
       ],
       "id": "09512ebb-655d-4fc1-966d-b08cf7416f7e",
@@ -1403,26 +1402,6 @@
         "pineconeApi": {
           "id": "qjoVsvnMKymAPQQw",
           "name": "PineconeApi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": "arcee-ai/trinity-large-preview:free",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        11936,
-        8080
-      ],
-      "id": "8e5885e5-1910-4bfa-851a-ce2357fbb521",
-      "name": "arcee-ai/trinity-large-preview:free",
-      "credentials": {
-        "openRouterApi": {
-          "id": "Bn1tGFgNk3U5Ux6Y",
-          "name": "OpenRouter account"
         }
       }
     },
@@ -2184,7 +2163,7 @@
             },
             {
               "fieldId": "output",
-              "fieldValue": "={{ $json.output }}"
+              "fieldValue": "={{ JSON.stringify({ display_message: $json.output, action_results: $json.action_results }) }}"
             },
             {
               "fieldId": "created_at",
@@ -2690,17 +2669,6 @@
         ]
       ]
     },
-    "arcee-ai/trinity-large-preview:free": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Knowledge Agent",
-            "type": "ai_languageModel",
-            "index": 1
-          }
-        ]
-      ]
-    },
     "user promt only": {
       "main": [
         [
@@ -3121,7 +3089,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "4f2ca314-75cd-40bc-8a22-fd7731f84716",
+  "versionId": "3f0d9023-24c6-496f-8fb7-2c2e951c80d4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

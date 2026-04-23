@@ -10,6 +10,8 @@ import CalendarPage from './pages/CalendarPage'
 import JiraPage from './pages/JiraPage'
 import IntegrationsPage from './pages/IntegrationsPage'
 import TokenMonitorPage from './pages/TokenMonitorPage'
+import EmailPage from './pages/EmailPage'
+import DebugAuthPage from './pages/DebugAuthPage'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
 
 function Layout() {
@@ -43,6 +45,8 @@ function Layout() {
               <Route path="/workspace/files"    element={<FileWorkspace />}    />
               <Route path="/workspace/calendar" element={<CalendarPage />}     />
               <Route path="/workspace/jira"     element={<JiraPage />}         />
+              <Route path="/workspace/email"    element={<EmailPage />}        />
+              <Route path="/debug/auth"         element={<DebugAuthPage />}    />
               <Route path="/monitoring/tokens"  element={<TokenMonitorPage />} />
               <Route path="/settings/integrations" element={<IntegrationsPage />} />
               <Route path="/integrations"       element={<IntegrationsPage />} />

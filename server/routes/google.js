@@ -201,4 +201,265 @@ router.get('/calendar/events', authenticateRequest, async (req, res) => {
   }
 });
 
+/**
+ * Get Gmail messages (inbox list)
+ * GET /api/google/gmail/messages
+ * Query params:
+ *   - q: Gmail search query (e.g., "is:unread", "from:example@gmail.com")
+ *   - maxResults: Number of messages (default: 50)
+ *   - pageToken: For pagination
+ *   - labelIds: Comma-separated label IDs (e.g., "INBOX,UNREAD")
+ */
+router.get('/gmail/messages', authenticateRequest, async (req, res) => {
+  try {
+    const { q, maxResults = 50, pageToken, labelIds } = req.query;
+
+    const auth = await getGoogleClient(req.userId);
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const params = {
+      userId: 'me',
+      maxResults: parseInt(maxResults),
+      pageToken
+    };
+
+    // Add labelIds if provided
+    if (labelIds) {
+      params.labelIds = labelIds.split(',');
+    } else {
+      params.labelIds = ['INBOX']; // Default to INBOX
+    }
+
+    // Add search query if provided
+    if (q) {
+      params.q = q;
+    }
+
+    const response = await gmail.users.messages.list(params);
+
+    // Get message details for each message (snippet, headers)
+    const messages = response.data.messages || [];
+    const detailedMessages = await Promise.all(
+      messages.map(async (msg) => {
+        const detail = await gmail.users.messages.get({
+          userId: 'me',
+          id: msg.id,
+          format: 'metadata',
+          metadataHeaders: ['From', 'To', 'Subject', 'Date']
+        });
+
+        const headers = detail.data.payload.headers;
+        const getHeader = (name) => headers.find(h => h.name === name)?.value || '';
+
+        return {
+          id: detail.data.id,
+          threadId: detail.data.threadId,
+          labelIds: detail.data.labelIds,
+          snippet: detail.data.snippet,
+          internalDate: detail.data.internalDate,
+          from: getHeader('From'),
+          to: getHeader('To'),
+          subject: getHeader('Subject'),
+          date: getHeader('Date')
+        };
+      })
+    );
+
+    res.json({
+      messages: detailedMessages,
+      nextPageToken: response.data.nextPageToken,
+      resultSizeEstimate: response.data.resultSizeEstimate
+    });
+  } catch (error) {
+    console.error('Error listing Gmail messages:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get single Gmail message detail
+ * GET /api/google/gmail/messages/:id
+ */
+router.get('/gmail/messages/:id', authenticateRequest, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const auth = await getGoogleClient(req.userId);
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const response = await gmail.users.messages.get({
+      userId: 'me',
+      id,
+      format: 'full'
+    });
+
+    const message = response.data;
+    const headers = message.payload.headers;
+    const getHeader = (name) => headers.find(h => h.name === name)?.value || '';
+
+    // Extract email body
+    let body = '';
+    let htmlBody = '';
+
+    const getBody = (payload) => {
+      if (payload.body.data) {
+        const decodedBody = Buffer.from(payload.body.data, 'base64').toString('utf-8');
+        if (payload.mimeType === 'text/html') {
+          htmlBody = decodedBody;
+        } else {
+          body = decodedBody;
+        }
+      }
+
+      if (payload.parts) {
+        payload.parts.forEach(part => {
+          if (part.mimeType === 'text/plain' && part.body.data) {
+            body = Buffer.from(part.body.data, 'base64').toString('utf-8');
+          } else if (part.mimeType === 'text/html' && part.body.data) {
+            htmlBody = Buffer.from(part.body.data, 'base64').toString('utf-8');
+          } else if (part.parts) {
+            getBody(part);
+          }
+        });
+      }
+    };
+
+    getBody(message.payload);
+
+    // Extract attachments info
+    const attachments = [];
+    const extractAttachments = (parts) => {
+      if (!parts) return;
+      parts.forEach(part => {
+        if (part.filename && part.body.attachmentId) {
+          attachments.push({
+            filename: part.filename,
+            mimeType: part.mimeType,
+            size: part.body.size,
+            attachmentId: part.body.attachmentId
+          });
+        }
+        if (part.parts) {
+          extractAttachments(part.parts);
+        }
+      });
+    };
+
+    extractAttachments(message.payload.parts);
+
+    res.json({
+      id: message.id,
+      threadId: message.threadId,
+      labelIds: message.labelIds,
+      snippet: message.snippet,
+      internalDate: message.internalDate,
+      from: getHeader('From'),
+      to: getHeader('To'),
+      cc: getHeader('Cc'),
+      bcc: getHeader('Bcc'),
+      subject: getHeader('Subject'),
+      date: getHeader('Date'),
+      body: body || htmlBody,
+      htmlBody,
+      attachments
+    });
+  } catch (error) {
+    console.error('Error getting Gmail message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Modify Gmail message (mark as read, star, etc)
+ * POST /api/google/gmail/messages/:id/modify
+ * Body: { addLabelIds: [], removeLabelIds: [] }
+ */
+router.post('/gmail/messages/:id/modify', authenticateRequest, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { addLabelIds = [], removeLabelIds = [] } = req.body;
+
+    const auth = await getGoogleClient(req.userId);
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const response = await gmail.users.messages.modify({
+      userId: 'me',
+      id,
+      requestBody: {
+        addLabelIds,
+        removeLabelIds
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error modifying Gmail message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Send Gmail message
+ * POST /api/google/gmail/messages/send
+ * Body: { to, subject, body, cc?, bcc? }
+ */
+router.post('/gmail/messages/send', authenticateRequest, async (req, res) => {
+  try {
+    const { to, subject, body, cc, bcc } = req.body;
+
+    const auth = await getGoogleClient(req.userId);
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    // Build email in RFC 2822 format
+    const emailLines = [
+      `To: ${to}`,
+      cc ? `Cc: ${cc}` : '',
+      bcc ? `Bcc: ${bcc}` : '',
+      `Subject: ${subject}`,
+      'Content-Type: text/html; charset=utf-8',
+      '',
+      body
+    ].filter(line => line !== '');
+
+    const email = emailLines.join('\r\n');
+    const encodedEmail = Buffer.from(email)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const response = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedEmail
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error sending Gmail message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get Gmail labels
+ * GET /api/google/gmail/labels
+ */
+router.get('/gmail/labels', authenticateRequest, async (req, res) => {
+  try {
+    const auth = await getGoogleClient(req.userId);
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const response = await gmail.users.labels.list({
+      userId: 'me'
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error listing Gmail labels:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
