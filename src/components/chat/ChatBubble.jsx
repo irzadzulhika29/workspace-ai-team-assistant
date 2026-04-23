@@ -7,6 +7,23 @@ import { Bot, User } from 'lucide-react'
 import AgentCard from '../ui/AgentCard'
 import SourceCitation from './SourceCitation'
 
+const MARKDOWN_SYNTAX_RE = /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>\s)|\|.*\||```|\*\*|__/
+
+const normalizeAiContent = (content) => {
+  if (typeof content !== 'string' || content.length === 0) {
+    return content
+  }
+
+  if (MARKDOWN_SYNTAX_RE.test(content)) {
+    return content
+  }
+
+  return content
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .join('  \n')
+}
+
 /**
  * ChatBubble — renders a single chat message (user or AI)
  * @param {import('../../store/chatStore').ChatMessage} props.message
@@ -16,6 +33,10 @@ function ChatBubble({ message }) {
 
   const safeContent = useMemo(
     () => (isUser ? DOMPurify.sanitize(message.content) : message.content),
+    [isUser, message.content],
+  )
+  const renderedAiContent = useMemo(
+    () => (isUser ? '' : normalizeAiContent(message.content)),
     [isUser, message.content],
   )
 
@@ -61,7 +82,7 @@ function ChatBubble({ message }) {
           {isUser ? (
             <p dangerouslySetInnerHTML={{ __html: safeContent }} />
           ) : (
-            <div className="prose prose-sm max-w-none whitespace-pre-wrap
+            <div className="prose prose-sm max-w-none
               prose-p:my-1.5 prose-p:leading-relaxed
               prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-5
               prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5
@@ -80,7 +101,7 @@ function ChatBubble({ message }) {
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
               >
-                {message.content}
+                {renderedAiContent}
               </ReactMarkdown>
             </div>
           )}
