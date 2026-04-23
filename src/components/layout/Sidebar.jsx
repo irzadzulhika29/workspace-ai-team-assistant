@@ -82,6 +82,7 @@ export default function Sidebar() {
           role:      type.includes('human') ? 'user' : 'ai',
           content,
           timestamp: row.created_at || new Date().toISOString(),
+          actionResults: msgData.actionResults ?? {},
         }
       })
       setKnowledgeMessages(messages)
@@ -163,6 +164,7 @@ export default function Sidebar() {
           role:      type.includes('human') ? 'user' : 'ai',
           content,
           timestamp: row.created_at || new Date().toISOString(),
+          actionResults: msgData.actionResults ?? {},
         }
       })
       setSupervisorMessages(messages)

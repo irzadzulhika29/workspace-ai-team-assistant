@@ -1,4 +1,6 @@
-import { ExternalLink, Calendar, Ticket } from 'lucide-react'
+import React from 'react'
+import DOMPurify from 'dompurify'
+import { ChevronDown, ExternalLink, Calendar, Mail, Ticket } from 'lucide-react'
 
 /**
  * AgentCard — displays structured results from PM Agent (Jira + Google Calendar)
@@ -6,9 +8,14 @@ import { ExternalLink, Calendar, Ticket } from 'lucide-react'
  * @param {string} props.jiraUrl
  * @param {string} props.calendarUrl
  * @param {string} props.agentUsed
+ * @param {Object} props.emailDraft
  */
-export default function AgentCard({ jiraUrl, calendarUrl, agentUsed }) {
-  if (!jiraUrl && !calendarUrl) return null
+export default function AgentCard({ jiraUrl, calendarUrl, emailDraft, agentUsed }) {
+  if (!jiraUrl && !calendarUrl && !emailDraft) return null
+
+  const safeEmailHtml = emailDraft?.message
+    ? DOMPurify.sanitize(emailDraft.message)
+    : ''
 
   return (
     <div className="
@@ -60,6 +67,37 @@ export default function AgentCard({ jiraUrl, calendarUrl, agentUsed }) {
           </div>
           <ExternalLink size={14} className="text-green-400 flex-shrink-0 group-hover:text-green-600" />
         </a>
+      )}
+
+      {emailDraft && (
+        <details className="rounded-md border border-amber-100 bg-amber-50">
+          <summary className="
+            flex cursor-pointer list-none items-center gap-3 p-3
+            text-left marker:content-none
+          ">
+            <Mail size={16} className="text-amber-600 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-800">Draft Email Siap Direview</p>
+              <p className="text-xs text-amber-700 truncate">
+                Subject: {emailDraft.subject || '(tanpa subjek)'}
+              </p>
+              <p className="text-xs text-amber-600 truncate">
+                To: {emailDraft.to || 'belum ditentukan'}
+              </p>
+            </div>
+            <ChevronDown size={14} className="text-amber-500 flex-shrink-0" />
+          </summary>
+
+          <div className="border-t border-amber-100 px-3 py-3">
+            <div
+              className="
+                max-h-80 overflow-auto rounded-md border border-amber-100 bg-white p-3
+                text-sm leading-relaxed
+              "
+              dangerouslySetInnerHTML={{ __html: safeEmailHtml }}
+            />
+          </div>
+        </details>
       )}
     </div>
   )

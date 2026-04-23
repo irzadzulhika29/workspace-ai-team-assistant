@@ -4,6 +4,34 @@ import { urls } from "./api";
 // ─── Chat Session API ─────────────────────────────────────────────────────────
 // CRUD operasi untuk tabel `chat_sessions` dan `chat_messages`.
 
+const parseStoredAiOutput = (rawOutput) => {
+  if (!rawOutput || typeof rawOutput !== 'string') {
+    return { content: rawOutput ?? '', actionResults: {} }
+  }
+
+  const trimmed = rawOutput.trim()
+
+  if (!trimmed.startsWith('{')) {
+    return { content: rawOutput, actionResults: {} }
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed)
+    const content =
+      parsed.display_message ??
+      parsed.myField ??
+      parsed.output ??
+      rawOutput
+
+    return {
+      content,
+      actionResults: parsed.action_results ?? parsed.actionResults ?? {},
+    }
+  } catch {
+    return { content: rawOutput, actionResults: {} }
+  }
+}
+
 export const sessionApi = {
   /**
    * Membuat sesi chat baru di tabel `chat_sessions`.
@@ -70,7 +98,8 @@ export const sessionApi = {
 
         // Tambahkan pesan AI (output)
         if (row.output && row.output.trim()) {
-          let content = row.output;
+          const parsedOutput = parseStoredAiOutput(row.output);
+          let content = parsedOutput.content;
 
           // Cek apakah ini trigger PDF dan inject URL jika ada
           const isPdfTrigger =
@@ -91,6 +120,7 @@ export const sessionApi = {
             message: {
               content,
               type: 'AIMessage',
+              actionResults: parsedOutput.actionResults,
             },
             created_at: row.created_at,
           });

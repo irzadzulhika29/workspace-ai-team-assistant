@@ -20,7 +20,9 @@ function ChatBubble({ message }) {
   )
 
   const hasActions = Boolean(
-    message.actionResults?.jira_ticket_url || message.actionResults?.calendar_event_url,
+    message.actionResults?.jira_ticket_url ||
+    message.actionResults?.calendar_event_url ||
+    message.actionResults?.email_draft,
   )
   const hasSources = (message.sources?.length ?? 0) > 0
   const timeLabel = useMemo(() => {
@@ -59,7 +61,7 @@ function ChatBubble({ message }) {
           {isUser ? (
             <p dangerouslySetInnerHTML={{ __html: safeContent }} />
           ) : (
-            <div className="prose prose-sm max-w-none
+            <div className="prose prose-sm max-w-none whitespace-pre-wrap
               prose-p:my-1.5 prose-p:leading-relaxed
               prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-5
               prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5
@@ -99,6 +101,7 @@ function ChatBubble({ message }) {
           <AgentCard
             jiraUrl={message.actionResults.jira_ticket_url}
             calendarUrl={message.actionResults.calendar_event_url}
+            emailDraft={message.actionResults.email_draft}
             agentUsed={message.agentUsed}
           />
         )}
