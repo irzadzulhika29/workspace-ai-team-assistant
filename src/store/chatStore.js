@@ -26,6 +26,9 @@ const initialState = {
   // ── Supervisor sessions ─────────────────────────────────────────────────
   supervisorSessions:         [],   // array sesi dari Supabase
   activeSupervisorSessionId:  null, // UUID sesi yang sedang aktif
+  
+  // ── Auto-send flag (for Magic Button) ──────────────────────────────────
+  isAutoSending:              false, // Prevent session reload during auto-send
 }
 
 export const useChatStore = create(
@@ -74,6 +77,9 @@ export const useChatStore = create(
         set({ activeSupervisorSessionId: id }),
 
       setSupervisorMessages: (messages) => set({ supervisorMessages: messages }),
+      
+      // ── Auto-send control ─────────────────────────────────────────────────
+      setAutoSending: (status) => set({ isAutoSending: status }),
     }),
     {
       name: 'team-workspace-chat',

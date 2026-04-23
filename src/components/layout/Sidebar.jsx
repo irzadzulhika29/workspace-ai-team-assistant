@@ -42,6 +42,7 @@ export default function Sidebar() {
     setActiveSupervisorSession,
     setSupervisorMessages,
     clearSupervisor,
+    isAutoSending,
   } = useChatStore(
     (state) => ({
       knowledgeSessions: state.knowledgeSessions,
@@ -56,6 +57,7 @@ export default function Sidebar() {
       setActiveSupervisorSession: state.setActiveSupervisorSession,
       setSupervisorMessages: state.setSupervisorMessages,
       clearSupervisor: state.clearSupervisor,
+      isAutoSending: state.isAutoSending,
     }),
     shallow,
   )
@@ -195,6 +197,12 @@ export default function Sidebar() {
   }, [clearSupervisor, setActiveSupervisorSession, setSupervisorSessions])
 
   const loadSupSessions = useCallback(async () => {
+    // Skip loading if auto-sending (Magic Button)
+    if (isAutoSending) {
+      console.log('Skipping session load - auto-send in progress');
+      return;
+    }
+    
     setLoadingSupSessions(true)
     try {
       const sessions = await sessionApi.ambilSemuaSesi('general_chat')
@@ -219,7 +227,7 @@ export default function Sidebar() {
     } finally {
       setLoadingSupSessions(false)
     }
-  }, [activeSupervisorSessionId, handleNewSupChat, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions])
+  }, [activeSupervisorSessionId, handleNewSupChat, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions, isAutoSending])
 
   useEffect(() => {
     if (isSupervisorPage) loadSupSessions()

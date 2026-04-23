@@ -28,6 +28,7 @@ export default function SupervisorChat() {
     clearSupervisor,
     activeSupervisorSessionId,
     setActiveSupervisorSession,
+    setAutoSending,
   } = useChatStore(
     (state) => ({
       supervisorMessages: state.supervisorMessages,
@@ -35,6 +36,7 @@ export default function SupervisorChat() {
       clearSupervisor: state.clearSupervisor,
       activeSupervisorSessionId: state.activeSupervisorSessionId,
       setActiveSupervisorSession: state.setActiveSupervisorSession,
+      setAutoSending: state.setAutoSending,
     }),
     shallow,
   )
@@ -103,15 +105,20 @@ export default function SupervisorChat() {
     if (autoSendMessage && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
       
-      // Small delay to ensure component is mounted
+      // Set flag to prevent session reload
+      setAutoSending(true);
+      
+      // Wait for session history to load, then send
       setTimeout(() => {
         handleSend(autoSendMessage);
-      }, 500);
+        // Clear flag after send completes
+        setTimeout(() => setAutoSending(false), 2000);
+      }, 1500);
 
       // Clear navigation state to prevent re-sending on refresh
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, handleSend]);
+  }, [location.state, handleSend, setAutoSending]);
 
   return (
     <div className="flex flex-col h-screen bg-surface-sunken/80">
