@@ -284,8 +284,8 @@ router.get('/sessions/:sessionId/history', async (req, res) => {
   try {
     const { sessionId } = req.params;
 
-    // Fetch chat history
-    const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}&order=id.asc`;
+    // Fetch chat history from chat_messages table
+    const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${sessionId}&order=created_at.asc&select=id,session_id,input,output,created_at`;
     const historyResponse = await fetch(historyUrl, {
       method: 'GET',
       headers: getSupabaseHeaders()
@@ -321,8 +321,8 @@ router.delete('/sessions/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
 
-    // Delete messages first
-    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${sessionId}`;
+    // Delete messages first from chat_messages table
+    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${sessionId}`;
     const messagesResponse = await fetch(messagesUrl, {
       method: 'DELETE',
       headers: getSupabaseHeaders()
