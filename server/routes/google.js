@@ -62,7 +62,7 @@ async function getGoogleClient(userId) {
         data: {
           accessToken: newTokens.access_token,
           refreshToken: newTokens.refresh_token,
-          expiresAt: new Date(Date.now() + (newTokens.expiry_date || 3600) * 1000)
+          expiresAt: newTokens.expiry_date ? new Date(newTokens.expiry_date) : new Date(Date.now() + 3600 * 1000)
         }
       });
     } else if (newTokens.access_token) {
@@ -70,7 +70,7 @@ async function getGoogleClient(userId) {
         where: { userId },
         data: {
           accessToken: newTokens.access_token,
-          expiresAt: new Date(Date.now() + (newTokens.expiry_date || 3600) * 1000)
+          expiresAt: newTokens.expiry_date ? new Date(newTokens.expiry_date) : new Date(Date.now() + 3600 * 1000)
         }
       });
     }
