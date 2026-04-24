@@ -4,6 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import { useEmailStore } from '../../store/emailStore';
 import DOMPurify from 'dompurify';
 
+const EMAIL_ADDRESS_RE = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i;
+
+const parseEmailHeader = (value) => {
+  const raw = value || '';
+  const emailMatch = raw.match(EMAIL_ADDRESS_RE);
+  const address = emailMatch?.[1] || '';
+  const name = raw
+    .replace(EMAIL_ADDRESS_RE, '')
+    .replace(/[<>"()]/g, '')
+    .trim();
+
+  return {
+    raw,
+    name: name || address || raw,
+    address,
+    label: address ? `${name || address} <${address}>` : raw,
+  };
+};
+
 /**
  * EmailDetail Component - Display full email content
  */
@@ -100,10 +119,13 @@ export default function EmailDetail() {
    * Handle Magic Button - Generate AI reply
    */
   const handleMagicReply = () => {
+    const sender = parseEmailHeader(email.from);
+    const recipient = parseEmailHeader(email.to);
+
     // Format email context for AI
     const emailContext = `
-Email dari: ${email.from}
-Kepada: ${email.to}
+Email dari: ${sender.label}
+Kepada: ${recipient.label}
 Subject: ${email.subject || '(No subject)'}
 Tanggal: ${email.date}
 
@@ -124,7 +146,11 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
         autoSendMessage: prompt,
         emailContext: {
           from: email.from,
+          fromName: sender.name,
+          fromEmail: sender.address,
           to: email.to,
+          toName: recipient.name,
+          toEmail: recipient.address,
           subject: email.subject,
           date: email.date,
           messageId: email.id

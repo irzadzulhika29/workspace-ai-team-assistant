@@ -98,6 +98,74 @@ export default function SupervisorChat() {
     }
   }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession])
 
+  // Handle send email
+  const handleSendEmail = useCallback(async (emailDraft) => {
+    setError(null)
+    
+    addSupervisorMessage({ 
+      role: 'user', 
+      content: `Kirim email ke ${emailDraft.to} dengan subject "${emailDraft.subject}"` 
+    })
+    setLoading(true)
+    setAgentLabel('Communication Agent')
+
+    try {
+      const data = await chatApi.sendEmail(emailDraft, activeSupervisorSessionId)
+      const normalizedData = normalizeResponsePayload(data)
+
+      addSupervisorMessage({
+        role:           'ai',
+        content:        getReplyContent(data, ['output', 'myField', 'reply']) || 'Email berhasil dikirim!',
+        agentUsed:      'communication',
+        processingTime: normalizedData?.processing_time_ms ?? normalizedData?.processingTime,
+        status:         normalizedData?.status,
+      })
+    } catch (err) {
+      setError(
+        err.message || 'Gagal mengirim email. Silakan coba lagi.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [addSupervisorMessage, activeSupervisorSessionId])
+
+  // Handle regenerate email
+  const handleRegenerateEmail = useCallback(async (emailDraft, improvementText) => {
+    setError(null)
+    
+    addSupervisorMessage({ 
+      role: 'user', 
+      content: `Buat ulang draft email dengan perbaikan: "${improvementText}"` 
+    })
+    setLoading(true)
+    setAgentLabel('Communication Agent')
+
+    try {
+      const data = await chatApi.regenerateEmail(emailDraft, improvementText, activeSupervisorSessionId)
+      const normalizedData = normalizeResponsePayload(data)
+
+      const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
+      if (usedAgent && AGENT_STATUS_LABELS[usedAgent]) {
+        setAgentLabel(AGENT_STATUS_LABELS[usedAgent])
+      }
+
+      addSupervisorMessage({
+        role:           'ai',
+        content:        getReplyContent(data, ['output', 'myField', 'reply']),
+        agentUsed:      usedAgent,
+        actionResults:  normalizedData?.action_results ?? normalizedData?.actionResults ?? {},
+        processingTime: normalizedData?.processing_time_ms ?? normalizedData?.processingTime,
+        status:         normalizedData?.status,
+      })
+    } catch (err) {
+      setError(
+        err.message || 'Gagal membuat ulang draft email. Silakan coba lagi.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [addSupervisorMessage, activeSupervisorSessionId])
+
   // Handle auto-send from navigation state (Magic Button from Email)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
@@ -157,7 +225,12 @@ export default function SupervisorChat() {
         )}
 
         {supervisorMessages.map((msg) => (
-          <ChatBubble key={msg.id} message={msg} />
+          <ChatBubble 
+            key={msg.id} 
+            message={msg}
+            onSendEmail={handleSendEmail}
+            onRegenerateEmail={handleRegenerateEmail}
+          />
         ))}
 
         {loading && (

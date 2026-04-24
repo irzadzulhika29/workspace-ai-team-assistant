@@ -17,11 +17,26 @@ const parseStoredAiOutput = (rawOutput) => {
 
   try {
     const parsed = JSON.parse(trimmed)
-    const content =
+    if (parsed.action === 'clarify' && typeof parsed.message === 'string') {
+      return { content: parsed.message, actionResults: {} }
+    }
+
+    let content =
       parsed.display_message ??
       parsed.myField ??
       parsed.output ??
       rawOutput
+
+    if (typeof content === 'string' && content.trim().startsWith('{')) {
+      try {
+        const nested = JSON.parse(content.trim())
+        if (nested.action === 'clarify' && typeof nested.message === 'string') {
+          content = nested.message
+        }
+      } catch {
+        // Keep original content if it is not a JSON control payload.
+      }
+    }
 
     return {
       content,
@@ -30,6 +45,30 @@ const parseStoredAiOutput = (rawOutput) => {
   } catch {
     return { content: rawOutput, actionResults: {} }
   }
+}
+
+const formatStoredUserInput = (rawInput) => {
+  if (!rawInput || typeof rawInput !== 'string') {
+    return rawInput ?? ''
+  }
+
+  const trimmed = rawInput.trim()
+  if (!trimmed.startsWith('Kirim email ini sekarang:')) {
+    return rawInput
+  }
+
+  const to = trimmed.match(/^To:\s*(.+)$/m)?.[1]?.trim()
+  const subject = trimmed.match(/^Subject:\s*(.+)$/m)?.[1]?.trim()
+
+  if (!to && !subject) {
+    return 'Kirim email sekarang'
+  }
+
+  return [
+    'Kirim email sekarang',
+    to ? `To: ${to}` : null,
+    subject ? `Subject: ${subject}` : null,
+  ].filter(Boolean).join('\n')
 }
 
 export const sessionApi = {
@@ -89,7 +128,7 @@ export const sessionApi = {
           messages.push({
             id: `${row.id}-input`,
             message: {
-              content: row.input,
+              content: formatStoredUserInput(row.input),
               type: 'HumanMessage',
             },
             created_at: row.created_at,

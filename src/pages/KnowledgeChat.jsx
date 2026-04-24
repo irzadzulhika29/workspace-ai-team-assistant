@@ -148,7 +148,12 @@ export default function KnowledgeChat() {
           )}
 
           {knowledgeMessages.map((msg) => (
-            <ChatBubble key={msg.id} message={msg} />
+            <ChatBubble 
+              key={msg.id} 
+              message={msg}
+              onSendEmail={() => {}}
+              onRegenerateEmail={() => {}}
+            />
           ))}
 
           {loading && (

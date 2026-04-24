@@ -91,4 +91,61 @@ export const chatApi = {
       ...(jiraCredentials && { jira_credentials: jiraCredentials }),
     });
   },
+
+  /**
+   * Send email draft (kirim email yang sudah dibuat)
+   * @param {Object} emailDraft - Draft email object with to, subject, message
+   * @param {string|null} sessionId - Optional explicit session ID
+   */
+  sendEmail: async (emailDraft, sessionId = null) => {
+    const googleAccessToken = await fetchGoogleToken();
+    
+    if (!googleAccessToken) {
+      throw new Error('Google access token tidak tersedia. Silakan login dengan Google terlebih dahulu.');
+    }
+
+    const message = `Kirim email ini sekarang:
+To: ${emailDraft.to}
+Subject: ${emailDraft.subject}
+Message: ${emailDraft.message}`;
+
+    return post(urls.getSupervisor, {
+      action: "send_email",
+      session_id: sessionId || getSessionId(),
+      message,
+      chat_type: "general_chat",
+      timestamp: new Date().toISOString(),
+      google_access_token: googleAccessToken,
+    });
+  },
+
+  /**
+   * Regenerate email draft with improvements
+   * @param {Object} emailDraft - Original draft email
+   * @param {string} improvementText - User's improvement instructions
+   * @param {string|null} sessionId - Optional explicit session ID
+   */
+  regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
+    const googleAccessToken = await fetchGoogleToken();
+    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
+
+    const message = `Buat ulang draft email ini dengan perbaikan berikut: "${improvementText}"
+
+Draft email saat ini:
+To: ${emailDraft.to}
+Subject: ${emailDraft.subject}
+Message: ${emailDraft.message}
+
+Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
+
+    return post(urls.getSupervisor, {
+      action: "chat",
+      session_id: sessionId || getSessionId(),
+      message,
+      chat_type: "general_chat",
+      timestamp: new Date().toISOString(),
+      ...(googleAccessToken && { google_access_token: googleAccessToken }),
+      ...(jiraCredentials && { jira_credentials: jiraCredentials }),
+    });
+  },
 };

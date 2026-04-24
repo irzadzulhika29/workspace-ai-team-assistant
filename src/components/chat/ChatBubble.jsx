@@ -2,7 +2,6 @@ import React, { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import DOMPurify from 'dompurify'
 import { Bot, User } from 'lucide-react'
 import AgentCard from '../ui/AgentCard'
 import SourceCitation from './SourceCitation'
@@ -27,14 +26,12 @@ const normalizeAiContent = (content) => {
 /**
  * ChatBubble — renders a single chat message (user or AI)
  * @param {import('../../store/chatStore').ChatMessage} props.message
+ * @param {Function} props.onSendEmail - callback untuk kirim email
+ * @param {Function} props.onRegenerateEmail - callback untuk buat ulang draft
  */
-function ChatBubble({ message }) {
+function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
   const isUser = message.role === 'user'
 
-  const safeContent = useMemo(
-    () => (isUser ? DOMPurify.sanitize(message.content) : message.content),
-    [isUser, message.content],
-  )
   const renderedAiContent = useMemo(
     () => (isUser ? '' : normalizeAiContent(message.content)),
     [isUser, message.content],
@@ -80,7 +77,7 @@ function ChatBubble({ message }) {
           }
         `}>
           {isUser ? (
-            <p dangerouslySetInnerHTML={{ __html: safeContent }} />
+            <p className="whitespace-pre-wrap break-words text-white">{message.content}</p>
           ) : (
             <div className="prose prose-sm max-w-none
               prose-p:my-1.5 prose-p:leading-relaxed
@@ -124,6 +121,8 @@ function ChatBubble({ message }) {
             calendarUrl={message.actionResults.calendar_event_url}
             emailDraft={message.actionResults.email_draft}
             agentUsed={message.agentUsed}
+            onSendEmail={onSendEmail}
+            onRegenerateEmail={onRegenerateEmail}
           />
         )}
       </div>
@@ -144,7 +143,11 @@ function SourceList({ sources }) {
 const MemoSourceList = memo(SourceList)
 
 function areMessagePropsEqual(prevProps, nextProps) {
-  return prevProps.message === nextProps.message
+  return (
+    prevProps.message === nextProps.message &&
+    prevProps.onSendEmail === nextProps.onSendEmail &&
+    prevProps.onRegenerateEmail === nextProps.onRegenerateEmail
+  )
 }
 
 export default memo(ChatBubble, areMessagePropsEqual)
