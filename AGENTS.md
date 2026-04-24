@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 ## Commands
 
@@ -12,7 +12,7 @@ npm run dev:server       # Backend only (nodemon)
 
 # Build & lint
 npm run build            # Vite production build
-npm run lint             # ESLint with zero warnings tolerance
+npm run lint             # ESLint with zero warnings tolerance (--max-warnings 0)
 
 # Database (Prisma)
 npm run prisma:generate  # Regenerate Prisma client after schema changes
@@ -20,7 +20,7 @@ npm run prisma:migrate   # Apply new migrations (dev)
 npm run prisma:studio    # Visual DB browser
 ```
 
-There are no automated tests in this project.
+**Important**: There are no automated tests in this project. Manual testing is required.
 
 ## Architecture Overview
 
@@ -46,7 +46,7 @@ Browser (React) → n8n webhooks (AI agents)
 - `api.js` — barrel module + webhook URL builder + session ID management
 - `chatService.js` — sends messages to Supervisor (supports file attachments) and Knowledge agents
 - `sessionService.js` — CRUD for chat sessions and history retrieval with filtering of n8n internal tool traces
-- `fileService.js`, `calendarService.js`, `jiraService.js` — feature-specific services
+- `fileService.js`, `calendarService.js`, `jiraService.js`, `emailService.js`, `integrationService.js`, `tokenUsageService.js` — feature-specific services
 
 **Chat history filtering**: `sessionService.ambilRiwayatChat()` strips n8n/LangChain internal messages (tool calls, empty messages, `[{"output"...}]` JSON blobs) before rendering. It also injects PDF document URLs into AI messages that contain download triggers.
 
@@ -67,8 +67,10 @@ Browser (React) → n8n webhooks (AI agents)
 ### Database (PostgreSQL via Prisma + Supabase)
 
 Two separate databases are in use:
-1. **PostgreSQL** (Prisma-managed): `User` and `GoogleToken` tables for OAuth
-2. **Supabase** (REST API, accessed via `VITE_SUPABASE_URL`): `chat_sessions`, `n8n_chat_histories`, `dokumen` tables for chat persistence
+1. **PostgreSQL** (Prisma-managed): `User`, `GoogleToken`, and `JiraIntegration` tables for OAuth and integrations
+2. **Supabase** (REST API, accessed via `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`): `chat_sessions`, `chat_messages`, `dokumen`, and `execution_token_usage` tables for chat persistence and analytics
+
+**Critical**: Backend uses `SUPABASE_SERVICE_ROLE_KEY` for server-side Supabase operations, not the anon key. Frontend uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` but calls Supabase indirectly through Express endpoints (`/api/sessions/*`).
 
 ### n8n workflow
 
@@ -89,4 +91,5 @@ Backend (`.env`):
 - `DATABASE_URL` — PostgreSQL connection string
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
 - `N8N_API_URL`, `N8N_API_KEY` — for n8n credential management and inbound requests
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — Supabase connection (service role key for backend)
 - `SESSION_SECRET`, `FRONTEND_URL`, `PORT` (default: 3001)
