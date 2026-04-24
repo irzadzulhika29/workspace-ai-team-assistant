@@ -121,13 +121,15 @@ export default function EmailDetail() {
   const handleMagicReply = () => {
     const sender = parseEmailHeader(email.from);
     const recipient = parseEmailHeader(email.to);
+    const subject = email.subject || '(No subject)';
+    const emailDate = email.date || email.internalDate;
 
     // Format email context for AI
     const emailContext = `
 Email dari: ${sender.label}
 Kepada: ${recipient.label}
-Subject: ${email.subject || '(No subject)'}
-Tanggal: ${email.date}
+Subject: ${subject}
+Tanggal: ${emailDate}
 
 Isi Email:
 ${email.body || email.htmlBody || '(No content)'}
@@ -151,8 +153,8 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
           to: email.to,
           toName: recipient.name,
           toEmail: recipient.address,
-          subject: email.subject,
-          date: email.date,
+          subject,
+          date: emailDate,
           messageId: email.id
         }
       }

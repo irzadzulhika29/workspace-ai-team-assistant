@@ -15,10 +15,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        20736,
-        14816
+        23360,
+        18272
       ],
-      "id": "c2fb73c8-9fa2-4f29-881b-529d6a1fa50d",
+      "id": "ba4f9653-6e5d-4550-9c94-a2680ef5d277",
       "name": "deepseek-3.2",
       "credentials": {
         "openAiApi": {
@@ -54,10 +54,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22304,
-        13344
+        25072,
+        16848
       ],
-      "id": "2c5ac093-09a4-4b1a-86e9-795568089510",
+      "id": "1a2f1223-9cb7-4ac5-955c-399ee5ac0da8",
       "name": "Upload Document to Table",
       "credentials": {
         "supabaseApi": {
@@ -75,10 +75,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        21408,
-        13696
+        24176,
+        17200
       ],
-      "id": "357eb429-1101-4bb6-8406-c3825506ece0",
+      "id": "34678039-6dd8-479c-a3d9-2a208ab6ed19",
       "name": "Respond to Webhook1"
     },
     {
@@ -106,10 +106,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21168,
-        13696
+        23936,
+        17200
       ],
-      "id": "32a57a1e-708a-43b3-8726-8c6dade4ab14",
+      "id": "e0b6a54d-b4cf-405e-9f06-ccb92896747d",
       "name": "Send Email"
     },
     {
@@ -119,10 +119,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20960,
-        13696
+        23728,
+        17200
       ],
-      "id": "e9b1f02a-a070-4e7a-b87f-8037c3cc42eb",
+      "id": "eb80d52f-2c20-4c97-a0c4-ec247a7a7e8d",
       "name": "Code in JavaScript1"
     },
     {
@@ -155,10 +155,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        21664,
-        14368
+        24432,
+        17872
       ],
-      "id": "f304045e-880e-4c12-87af-259f80fa1b34",
+      "id": "8a136ac1-a7b5-4380-ab00-fd315cd49c3f",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -200,10 +200,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        18816,
-        14256
+        21584,
+        17760
       ],
-      "id": "5f1209b9-35eb-42b4-99d4-22ea4721e53e",
+      "id": "e3daddf5-8834-448b-9a47-8a045e3e547e",
       "name": "Record token usage",
       "credentials": {
         "supabaseApi": {
@@ -241,16 +241,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "=={\n  \"summary\": \"{{ $fromAI('summary', 'Judul event', 'string') }}\",\n  \"description\": \"{{ $fromAI('description', 'Deskripsi event', 'string') }}\",\n  \"location\": \"{{ $fromAI('location', 'Lokasi event', 'string') }}\",\n  \"start\": {\n    \"dateTime\": \"{{ $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string') }}\",\n    \"timeZone\": \"Asia/Jakarta\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{ $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string') }}\",\n    \"timeZone\": \"Asia/Jakarta\"\n  }\n}",
+        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, conferenceData: { createRequest: { requestId: 'meet-' + $now.toMillis(), conferenceSolutionKey: { type: 'hangoutsMeet' } } } }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        20080,
-        14592
+        22848,
+        18096
       ],
-      "id": "d1d67699-9250-404d-9954-7017155abbb4",
+      "id": "de10aab3-3488-42c4-a24e-1eb6f543e64c",
       "name": "Create Event with Google Meet"
     },
     {
@@ -277,16 +277,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"summary\": \"{{ $fromAI('summary', 'Judul event', 'string') }}\",\n  \"description\": \"{{ $fromAI('description', 'Deskripsi event', 'string') }}\",\n  \"location\": \"{{ $fromAI('location', 'Lokasi event', 'string') }}\",\n  \"start\": {\n    \"dateTime\": \"{{ $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string') }}\",\n    \"timeZone\": \"Asia/Jakarta\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{ $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string') }}\",\n    \"timeZone\": \"Asia/Jakarta\"\n  }\n}",
+        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' } }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        19888,
-        14608
+        22656,
+        18112
       ],
-      "id": "c57f14e3-b5b6-45f1-ba02-3ecbf2589b12",
+      "id": "065073b3-8375-40cd-84b3-1112649ee84b",
       "name": "Create Event"
     },
     {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        20256,
-        14608
+        23024,
+        18112
       ],
-      "id": "32eae3a9-05b9-4abd-83b1-78a749bf3051",
+      "id": "25288365-9e2c-4241-9959-ecae4b2b42db",
       "name": "Get Calendar Events"
     },
     {
@@ -355,10 +355,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        21344,
-        13520
+        24112,
+        17024
       ],
-      "id": "9f6434a8-5670-4b4a-bc76-fc614cff8b70",
+      "id": "12ad208d-d81f-4082-a1d7-4175544b9175",
       "name": "Edit Fields PPT"
     },
     {
@@ -388,10 +388,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21152,
-        13520
+        23920,
+        17024
       ],
-      "id": "23b1100d-04f1-453c-9efe-ef3b1f8ab64a",
+      "id": "6e917b24-2765-44b1-a72d-f47ce5285fab",
       "name": "api2pdf PPT"
     },
     {
@@ -401,10 +401,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20976,
-        13520
+        23744,
+        17024
       ],
-      "id": "3110e98d-0266-471e-8ee4-978b5b59f150",
+      "id": "6da47866-1faf-45be-937b-73f58c24ab7b",
       "name": "Inject PPT CSS"
     },
     {
@@ -416,10 +416,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        22048,
-        14432
+        24816,
+        17936
       ],
-      "id": "ecadaebd-dfae-4131-8879-9464295dec8a",
+      "id": "2db9c0ae-fdf1-49ef-ac79-4e114e3cacc6",
       "name": "Get Email Skills"
     },
     {
@@ -439,12 +439,12 @@
         "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id",
         "options": {}
       },
-      "id": "c0446757-08fa-4bf9-922e-83f192964b03",
+      "id": "a115d70f-06ee-47a3-a7c1-ff83d56afc21",
       "name": "Sum Token Totals - aggregate by model1",
       "type": "n8n-nodes-base.summarize",
       "position": [
-        18640,
-        14256
+        21408,
+        17760
       ],
       "typeVersion": 1.1
     },
@@ -454,12 +454,12 @@
         "include": "allOtherFields",
         "options": {}
       },
-      "id": "346cf5cd-2c3e-45e0-973a-14dbfc8bd014",
+      "id": "ede1de91-8765-4967-95aa-4f9fd5813215",
       "name": "Split Out",
       "type": "n8n-nodes-base.splitOut",
       "position": [
-        18432,
-        14256
+        21200,
+        17760
       ],
       "typeVersion": 1
     },
@@ -486,12 +486,12 @@
         "includeFields": "workflowData.id, workflowData.name",
         "options": {}
       },
-      "id": "4ace930a-8cfa-4e34-95bd-f763db5b1209",
+      "id": "c4d47376-6209-482c-b2b3-95b7e633da12",
       "name": "Extract token usage data",
       "type": "n8n-nodes-base.set",
       "position": [
-        18240,
-        14256
+        21008,
+        17760
       ],
       "typeVersion": 3.4
     },
@@ -500,10 +500,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        17840,
-        14256
+        20608,
+        17760
       ],
-      "id": "eacff3b5-3b07-4909-9419-64a0f444d970",
+      "id": "b444afdf-42fc-4d9c-a1a3-86808b901927",
       "name": "Wait",
       "webhookId": "fafe54f2-df97-447a-9ec0-27fef65aa703"
     },
@@ -545,10 +545,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        22992,
-        13344
+        25760,
+        16848
       ],
-      "id": "f05fa879-7242-4a8d-84e7-519031116353",
+      "id": "63781367-99a1-4cd3-8f70-8dcbaa636041",
       "name": "Call 'AI Assistant Team'1"
     },
     {
@@ -561,12 +561,12 @@
           ]
         }
       },
-      "id": "31c51588-3002-4a23-8cdf-f557354e92c9",
+      "id": "f183e8f8-2245-4121-b6f6-a78e560fa388",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        17632,
-        14256
+        20400,
+        17760
       ],
       "typeVersion": 1.1
     },
@@ -580,12 +580,12 @@
         },
         "requestOptions": {}
       },
-      "id": "aa5fc226-3091-43df-9056-cd1069abd543",
+      "id": "a283117b-a556-40de-a858-77c5efb6c55b",
       "name": "Get execution data",
       "type": "n8n-nodes-base.n8n",
       "position": [
-        18032,
-        14256
+        20800,
+        17760
       ],
       "typeVersion": 1,
       "credentials": {
@@ -633,10 +633,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        21440,
-        13856
+        24208,
+        17360
       ],
-      "id": "0d4e0c13-f5a6-4531-ac2e-2172df855033",
+      "id": "ada4796d-07aa-4665-a564-36be8c843321",
       "name": "Call 'AI Assistant Team'"
     },
     {
@@ -649,10 +649,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        21136,
-        13344
+        23904,
+        16848
       ],
-      "id": "3bb88888-cb4c-4aab-9724-b2cf6e1a9c7a",
+      "id": "5226e3ae-5c83-487c-9514-7d8019ad9db9",
       "name": "Markdown"
     },
     {
@@ -666,10 +666,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        20640,
-        14192
+        23408,
+        17696
       ],
-      "id": "ea67b2a0-250e-4078-87e4-774221ba2ca2",
+      "id": "9674d42f-2db6-49fa-8f9e-254ff8940903",
       "name": "Report Agent"
     },
     {
@@ -677,16 +677,16 @@
         "toolDescription": "Gunakan agent ini untuk SEMUA tugas email atau komunikasi tertulis resmi. Panggil tool ini jika pengguna meminta membuat draft email, membalas email, forward email, atau mengirim email. Jika input pengguna sudah berbentuk instruksi final seperti `KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: ...` beserta SUBJECT dan body email lengkap, kamu WAJIB memanggil tool ini agar hasilnya menjadi JSON dengan `action: send`, bukan mengulang instruksi tersebut sebagai teks biasa.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- Field \"message\" SELALU dalam format HTML (gunakan <p>, <br>, dll)\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON"
+          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta dan membaca tool Get Email Skills sebagai format.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- Field \"message\" SELALU dalam format HTML (gunakan <p>, <br>, dll)\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        21888,
-        14160
+        24656,
+        17664
       ],
-      "id": "a6defdfa-8082-4fa5-a801-d3c4feb68b36",
+      "id": "57f9b8bf-2c67-4683-912d-07bbad5497f1",
       "name": "Communication Agent"
     },
     {
@@ -698,10 +698,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        21248,
-        14448
+        24016,
+        17952
       ],
-      "id": "79e04bf9-9701-4112-bc6d-36102923bfc2",
+      "id": "34b39fa6-838b-495d-88c4-a75856b70be2",
       "name": "Get PPT Format"
     },
     {
@@ -713,10 +713,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        21104,
-        14448
+        23872,
+        17952
       ],
-      "id": "9d08dc52-428f-4093-8fe7-5b8fe42baf2b",
+      "id": "3bd693ac-75cd-45a5-9f05-6b6af29c35b3",
       "name": "Get Report Format"
     },
     {
@@ -730,10 +730,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        21024,
-        14192
+        23792,
+        17696
       ],
-      "id": "d6ac9922-278e-4549-ab25-cd9c269d8c76",
+      "id": "c42af49d-1839-4f11-adc0-867a4f8c721e",
       "name": "Document Agent"
     },
     {
@@ -747,10 +747,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        19344,
-        14112
+        22112,
+        17616
       ],
-      "id": "2d0de3f7-b840-43fa-a306-8ca1b660fed3",
+      "id": "4a8940fa-b781-4b3d-8b38-dd3950236b2b",
       "name": "Knowledge Agent"
     },
     {
@@ -764,10 +764,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        20336,
-        14192
+        23104,
+        17696
       ],
-      "id": "5f50f699-6db3-4b34-93d4-f300d6eb9a28",
+      "id": "c928d05c-fe42-4b25-89b8-cf41f892bd87",
       "name": "Scheduler Agent"
     },
     {
@@ -780,10 +780,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        21504,
-        14176
+        24272,
+        17680
       ],
-      "id": "bb4476b5-1758-49f0-a529-53ba953bc66e",
+      "id": "9765a582-e52a-426e-8267-14f1be5798cc",
       "name": "Task Agent"
     },
     {
@@ -794,10 +794,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        19696,
-        13648
+        22464,
+        17152
       ],
-      "id": "33e01d16-a63d-41e6-85b4-d6780d3f12d6",
+      "id": "1a39592c-832f-4595-9873-501648e11bf3",
       "name": "Extract CSV File"
     },
     {
@@ -808,10 +808,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        19696,
-        13472
+        22464,
+        16976
       ],
-      "id": "d43f321a-2bce-4890-9d46-80d3f200dfc8",
+      "id": "6c2646a2-3dc0-4a33-94a8-355b5dd7ea1f",
       "name": "Extract text",
       "credentials": {
         "mistralCloudApi": {
@@ -827,10 +827,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20976,
-        13344
+        23744,
+        16848
       ],
-      "id": "8ec7d1d5-055f-4f14-8f85-301233a18133",
+      "id": "fc361a1f-d5de-41a2-a8c4-015a86b0f50a",
       "name": "Code in JavaScript"
     },
     {
@@ -847,10 +847,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        19744,
-        13168
+        22512,
+        16672
       ],
-      "id": "c7c9fd0b-6fd9-4b83-8716-cd8af16f6af0",
+      "id": "7a7e05c7-206a-4065-94e5-4738c67fadff",
       "name": "deepseek-v3.2",
       "credentials": {
         "openAiApi": {
@@ -868,10 +868,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        22544,
-        13344
+        25312,
+        16848
       ],
-      "id": "ae370df9-772e-4cab-8fda-1048e7672369",
+      "id": "0e0880d1-ee3c-48fd-9c1e-97dfde6703ed",
       "name": "Respond to Webhook2"
     },
     {
@@ -891,10 +891,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        21536,
-        13344
+        24304,
+        16848
       ],
-      "id": "f48c591e-8d6f-4cac-9c35-5003deffd4f4",
+      "id": "3b9ba797-e420-4e33-af56-5990ceacc41d",
       "name": "Edit Fields"
     },
     {
@@ -922,10 +922,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        22080,
-        13344
+        24848,
+        16848
       ],
-      "id": "fd0a0d64-1bcb-4d29-bf1a-4cc9ffe6f653",
+      "id": "50ad33b0-080d-49cb-a8d7-228f0d714f84",
       "name": "HTTP Request3"
     },
     {
@@ -943,10 +943,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21792,
-        13344
+        24560,
+        16848
       ],
-      "id": "c0c1fd15-d3f2-4003-b5e2-75948cca63a4",
+      "id": "725acf3b-d682-4d2f-96ed-fd21f0ebc381",
       "name": "HTTP Request2"
     },
     {
@@ -976,10 +976,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21376,
-        13344
+        24144,
+        16848
       ],
-      "id": "fcc658fd-f10c-45bf-8902-8bdd1168fa15",
+      "id": "4f429984-be8a-49c5-b810-eb4c41273f7b",
       "name": "HTTP Request1"
     },
     {
@@ -1091,10 +1091,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        20640,
-        13616
+        23408,
+        17120
       ],
-      "id": "f610656e-0336-43ed-a58a-f47fb7443183",
+      "id": "4ba7cdcb-8598-49cb-890e-7fed9e57cf3a",
       "name": "Route Output Type"
     },
     {
@@ -1114,10 +1114,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        20432,
-        14608
+        23200,
+        18112
       ],
-      "id": "190996c4-5da8-4c7d-b888-090480ad8f5a",
+      "id": "90a21497-8f86-48ea-bc43-63af527c5050",
       "name": "delete events calendar",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -1143,10 +1143,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        19920,
-        13648
+        22688,
+        17152
       ],
-      "id": "095ba947-c056-4304-ba37-163ed6d5627f",
+      "id": "fc3e84b9-4d9d-43ef-b0a1-897266a42504",
       "name": "combine promt + text csv"
     },
     {
@@ -1228,10 +1228,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        19456,
-        13456
+        22224,
+        16960
       ],
-      "id": "50b1be0a-b014-4bfa-9015-7cd755ac81cd",
+      "id": "3e6648ba-4a5f-420a-b2d8-cdbc77e033f1",
       "name": "Switch"
     },
     {
@@ -1251,10 +1251,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        19920,
-        13312
+        22688,
+        16816
       ],
-      "id": "b633553f-c84b-4efd-ad25-b3d318cf0574",
+      "id": "7b4a41f9-0acc-4bb7-8a41-10496df816ff",
       "name": "combine promt + text image"
     },
     {
@@ -1267,10 +1267,10 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        19696,
-        13312
+        22464,
+        16816
       ],
-      "id": "d6c0d8dc-7d47-486c-b4d6-9bbccf054433",
+      "id": "a4cc43b8-2fcd-4ecc-a665-1adb426c9db1",
       "name": "Tesseract"
     },
     {
@@ -1283,10 +1283,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        17600,
-        13568
+        20368,
+        17072
       ],
-      "id": "879a1513-7b17-4a2f-907b-fddf0d182ba7",
+      "id": "60ca6e9c-238c-41ea-99f4-e745457cffc8",
       "name": "Sticky Note"
     },
     {
@@ -1314,10 +1314,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        20144,
-        13008
+        22912,
+        16512
       ],
-      "id": "5ff5dd8e-beb4-411e-aa1e-f738ce889fa0",
+      "id": "05b26fe6-360a-4aee-8d1c-28c9b048090a",
       "name": "update chat title",
       "credentials": {
         "supabaseApi": {
@@ -1353,10 +1353,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        19600,
-        13024
+        22368,
+        16528
       ],
-      "id": "6cafdc30-7129-4c59-8123-78e328ba54bd",
+      "id": "f436ac86-67c9-484c-a068-6649445ce82f",
       "name": "is first chat?"
     },
     {
@@ -1367,10 +1367,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        20080,
-        14080
+        22848,
+        17584
       ],
-      "id": "3767a9f7-df5b-4b5d-a70f-a63370df9d23",
+      "id": "931de65b-0d35-4736-9ee1-47ea966b130e",
       "name": "arcee-ai/trinity-large-preview:free-",
       "credentials": {
         "openRouterApi": {
@@ -1394,10 +1394,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        19504,
-        14400
+        22272,
+        17904
       ],
-      "id": "b26702bc-342e-4c9d-8f46-0f8c28e024ca",
+      "id": "c4cc96e4-1d41-490a-8590-12831b9446bd",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -1423,10 +1423,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        19696,
-        13824
+        22464,
+        17328
       ],
-      "id": "529d4a9a-c0e8-4ac1-9724-8d3b1b46bdaa",
+      "id": "66413705-742e-4a7a-a459-2949561eca3c",
       "name": "user promt only"
     },
     {
@@ -1446,10 +1446,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        19920,
-        13472
+        22688,
+        16976
       ],
-      "id": "aefb80f8-0dbc-4904-b2f5-b8f55ce141ce",
+      "id": "c024c74c-b31d-4afe-baa4-82619fbe2463",
       "name": "combine promt + text file"
     },
     {
@@ -1479,10 +1479,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        19296,
-        13808
+        22064,
+        17312
       ],
-      "id": "151dbe5b-07b1-4848-9071-edbeac6a67af",
+      "id": "8d6d0727-acb6-4850-9875-b226c906931b",
       "name": "is file exist?"
     },
     {
@@ -1501,10 +1501,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        19344,
-        13024
+        22112,
+        16528
       ],
-      "id": "87471a1b-992a-4b84-a19d-ec47a751bdd4",
+      "id": "daabc631-0ee4-4e7b-9b35-1451df72e0eb",
       "name": "Get a row",
       "credentials": {
         "supabaseApi": {
@@ -1529,10 +1529,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        19840,
-        13008
+        22608,
+        16512
       ],
-      "id": "f519dc4b-7b35-4eb6-8e26-519f843eabda",
+      "id": "c66f6adb-df6a-4dde-ada8-2ffcb44bfb61",
       "name": "Generate Chat Tittle"
     },
     {
@@ -1544,10 +1544,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        20256,
-        14080
+        23024,
+        17584
       ],
-      "id": "bcfdf5b6-73ef-4452-886b-f440628833a7",
+      "id": "81e7f8f6-25f8-4e62-9ed0-876a94b52c6b",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1565,10 +1565,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        18320,
-        13808
+        21088,
+        17312
       ],
-      "id": "deb4d600-9b1a-4666-870c-c6af8f38c275",
+      "id": "544c91a3-5450-4de1-be75-9ecc281713dc",
       "name": "Merge"
     },
     {
@@ -1594,10 +1594,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        18096,
-        13680
+        20864,
+        17184
       ],
-      "id": "2da6c826-5fe7-43dc-9f18-679c492cb559",
+      "id": "7688432b-d308-4080-84e3-1cfcf9ae77cd",
       "name": "Create a row",
       "credentials": {
         "supabaseApi": {
@@ -1631,10 +1631,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        17888,
-        13680
+        20656,
+        17184
       ],
-      "id": "740bf6e7-c948-44a6-a11e-0159a67cb344",
+      "id": "a0a90d06-3cec-42a5-ab91-9f4b0ac99720",
       "name": "HTTP Request"
     },
     {
@@ -1647,10 +1647,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        17648,
-        13824
+        20416,
+        17328
       ],
-      "id": "13b4c7b4-4ebe-4dc5-a5a3-e896950ab5e6",
+      "id": "200c431e-b916-4322-a3c3-6de128883516",
       "name": "Upload Document",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1664,10 +1664,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        19088,
-        13808
+        21856,
+        17312
       ],
-      "id": "d8d72d01-4d5f-4cda-83b5-43063b8bd153",
+      "id": "75ff8e64-328e-42ce-b8ec-a7be91153c7a",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1684,10 +1684,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        20336,
-        13824
+        23104,
+        17328
       ],
-      "id": "e03b566d-d488-45a8-9510-553cfb5ce9fb",
+      "id": "c89c7fee-2cac-4d88-be4f-98bf0766a6bd",
       "name": "Supervisor Agent"
     },
     {
@@ -1699,10 +1699,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        20992,
-        13856
+        23760,
+        17360
       ],
-      "id": "21b71814-be73-45c8-b1d7-b9a2aa0df93a",
+      "id": "192d40ca-7475-41f4-828e-737621f5f2dc",
       "name": "Respond to Webhook"
     },
     {
@@ -1713,10 +1713,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        19456,
-        14608
+        22224,
+        18112
       ],
-      "id": "2804c501-88f4-4e09-97c8-7dfeab9b1e82",
+      "id": "4017d34d-b785-4f4f-9744-aaf1f3abe8da",
       "name": "Embeddings HuggingFace Inference2",
       "credentials": {
         "huggingFaceApi": {
@@ -1730,10 +1730,10 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
       "typeVersion": 1,
       "position": [
-        18880,
-        13968
+        21648,
+        17472
       ],
-      "id": "b34c168b-8279-40eb-b7a1-871d9fa3dbbd",
+      "id": "a4d069c7-2f5b-4c29-83de-e622f7abbf8b",
       "name": "Character Text Splitter"
     },
     {
@@ -1745,10 +1745,10 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        18672,
-        13824
+        21440,
+        17328
       ],
-      "id": "df0a9122-ebfd-4d45-b1d7-071bc450ecf7",
+      "id": "92868577-3095-4375-b051-c4885f269489",
       "name": "Default Data Loader"
     },
     {
@@ -1759,10 +1759,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        18528,
-        13808
+        21296,
+        17312
       ],
-      "id": "a1c0b351-2559-49f5-8472-85be5d0f184a",
+      "id": "0d9f5fe9-f77f-4d1e-b51a-c1190ded980d",
       "name": "Embeddings HuggingFace Inference",
       "credentials": {
         "huggingFaceApi": {
@@ -1785,10 +1785,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        18576,
-        13600
+        21344,
+        17104
       ],
-      "id": "5fe26221-8caf-464d-989a-98e2cdfec5ee",
+      "id": "d260609e-58e2-4a62-b8bb-e875cb37ffc1",
       "name": "Pinecone Vector Store",
       "credentials": {
         "pineconeApi": {
@@ -1824,10 +1824,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        21200,
-        13856
+        23968,
+        17360
       ],
-      "id": "5392303f-73ec-42ca-9894-2e7623da1677",
+      "id": "ab92cdce-54ba-4960-ba95-38558ee047aa",
       "name": "Write Chat",
       "credentials": {
         "supabaseApi": {
@@ -1851,10 +1851,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21568,
-        13520
+        24336,
+        17024
       ],
-      "id": "4b6a8359-63f8-4788-ae98-256cbc32c0af",
+      "id": "bcad9e37-b98f-496d-8d4c-fc39b2036e9d",
       "name": "HTTP Request4"
     },
     {
@@ -1895,10 +1895,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        21920,
-        13696
+        24688,
+        17200
       ],
-      "id": "347781e0-4b03-4c2e-b868-f888a80f0f8d",
+      "id": "1d4c5d48-53b2-4255-8f60-991327968e09",
       "name": "Call 'AI Assistant Team'2"
     },
     {
@@ -1928,10 +1928,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22048,
-        13520
+        24816,
+        17024
       ],
-      "id": "179aa758-ef30-4f91-98aa-0b8ac1b80d41",
+      "id": "34fd0db7-cd11-4057-a3ab-6c78316974d8",
       "name": "Upload Document to Table1",
       "credentials": {
         "supabaseApi": {
@@ -1978,10 +1978,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        22800,
-        13520
+        25568,
+        17024
       ],
-      "id": "a1024e39-30a0-4ab8-b42e-b82c8a6661ec",
+      "id": "1bce686b-ca83-4171-8d12-7cf213af9043",
       "name": "Call 'AI Assistant Team'3"
     },
     {
@@ -1993,10 +1993,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        22320,
-        13520
+        25088,
+        17024
       ],
-      "id": "642fb6a6-4f97-4296-95c4-5541eb801d28",
+      "id": "2763ec50-cc90-47b5-91a8-ca55a648da62",
       "name": "Respond to Webhook3"
     },
     {
@@ -2024,10 +2024,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        21824,
-        13520
+        24592,
+        17024
       ],
-      "id": "e640cc50-aea6-4be4-b840-14b714b50c41",
+      "id": "d5047ee1-4a47-4e83-8da5-5cd39902148c",
       "name": "HTTP Request5"
     },
     {
@@ -2057,10 +2057,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22576,
-        13520
+        25344,
+        17024
       ],
-      "id": "31d2b463-8a8c-43f5-8279-1517dd26b4f7",
+      "id": "5e0f8dc4-0261-4e48-84e2-a58c62eba647",
       "name": "Write Chat1",
       "credentials": {
         "supabaseApi": {
@@ -2076,10 +2076,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20704,
-        13824
+        23472,
+        17328
       ],
-      "id": "e793a24b-5b0d-4658-9912-52a90b32aece",
+      "id": "9aeb729a-ea59-4775-9a3b-5eaa9d975c8c",
       "name": "Extract Full Output"
     },
     {
@@ -2109,10 +2109,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22768,
-        13344
+        25536,
+        16848
       ],
-      "id": "45182d30-cd81-43e4-8921-95ff41b51fa4",
+      "id": "8a7f4b6d-cea3-4fc2-b491-d8b9e77f340a",
       "name": "Write Chat2",
       "credentials": {
         "supabaseApi": {
@@ -2128,10 +2128,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20960,
-        14032
+        23728,
+        17536
       ],
-      "id": "17da6f13-117d-4fd7-a802-3a3b3845e6c3",
+      "id": "9cbad06b-30af-445b-a84c-dbe44398b91f",
       "name": "Format Draft Email"
     },
     {
@@ -2143,10 +2143,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        21200,
-        14032
+        23968,
+        17536
       ],
-      "id": "6659c090-1288-4ad0-9a10-437d13d2d545",
+      "id": "8c5dc582-dd13-41a1-a6d8-1c687af5aa28",
       "name": "Respond Draft Email"
     },
     {
@@ -2176,10 +2176,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        21648,
-        13696
+        24416,
+        17200
       ],
-      "id": "5fcdbb17-0f9b-4ae9-92f0-5b64e202dbf3",
+      "id": "7351e6c3-71d3-4eb6-9b6d-b24bd8d73f69",
       "name": "Write Chat3",
       "credentials": {
         "supabaseApi": {
@@ -2215,15 +2215,35 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        21424,
-        14032
+        24192,
+        17536
       ],
-      "id": "2aa8570b-c313-4262-b1a5-3cacc01b9a53",
+      "id": "2d04407d-431f-440c-a1b2-e4e63336ba21",
       "name": "Write Chat4",
       "credentials": {
         "supabaseApi": {
           "id": "Wjp9D5ca2jChBcID",
           "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        23664,
+        18192
+      ],
+      "id": "3229b78f-423b-4d65-93c7-a830bfbe76b4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "68b7yPyfO0nmCOn6",
+          "name": "Groq account"
         }
       }
     }
@@ -2382,16 +2402,6 @@
             "index": 0
           },
           {
-            "node": "Communication Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Document Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
             "node": "Knowledge Agent",
             "type": "ai_languageModel",
             "index": 0
@@ -2403,11 +2413,6 @@
           },
           {
             "node": "Task Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Supervisor Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -3132,6 +3137,27 @@
           }
         ]
       ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Communication Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Document Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -3140,7 +3166,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "b242ee88-441b-412d-8a2f-79cb6ec6167f",
+  "versionId": "63797968-8260-46cf-8a7e-f1e26c0d25d7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

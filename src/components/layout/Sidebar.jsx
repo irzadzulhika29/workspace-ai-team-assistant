@@ -86,6 +86,7 @@ export default function Sidebar() {
           content,
           timestamp: row.created_at || new Date().toISOString(),
           actionResults: msgData.actionResults ?? {},
+          forwardedEmail: msgData.forwardedEmail ?? null,
         }
       })
       setKnowledgeMessages(messages)
@@ -168,6 +169,7 @@ export default function Sidebar() {
           content,
           timestamp: row.created_at || new Date().toISOString(),
           actionResults: msgData.actionResults ?? {},
+          forwardedEmail: msgData.forwardedEmail ?? null,
         }
       })
       setSupervisorMessages(messages)

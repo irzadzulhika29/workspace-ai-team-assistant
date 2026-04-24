@@ -46,13 +46,18 @@ export default function SupervisorChat() {
   const [error, setError] = useState(null)
   const bottomRef = useAutoScroll([supervisorMessages, loading])
 
-  const handleSend = useCallback(async (text, file) => {
+  const handleSend = useCallback(async (text, file, options = {}) => {
     setError(null)
     
     // Create UI message (show filename if no text, or both)
-    const displayContent = file && text ? `${text}\n\n*(Attachment: ${file.name})*` : file ? `*(Attachment: ${file.name})*` : text
+    const displayContent = options.displayContent
+      || (file && text ? `${text}\n\n*(Attachment: ${file.name})*` : file ? `*(Attachment: ${file.name})*` : text)
     
-    addSupervisorMessage({ role: 'user', content: displayContent })
+    addSupervisorMessage({
+      role: 'user',
+      content: displayContent,
+      forwardedEmail: options.forwardedEmail,
+    })
     setLoading(true)
     setAgentLabel('Supervisor Agent')
 
@@ -169,6 +174,7 @@ export default function SupervisorChat() {
   // Handle auto-send from navigation state (Magic Button from Email)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
+    const emailContext = location.state?.emailContext;
 
     if (autoSendMessage && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
@@ -178,7 +184,10 @@ export default function SupervisorChat() {
       
       // Wait for session history to load, then send
       setTimeout(() => {
-        handleSend(autoSendMessage);
+        handleSend(autoSendMessage, null, {
+          displayContent: 'Buatkan draft email balasan yang profesional dan sesuai konteks.',
+          forwardedEmail: emailContext,
+        });
         // Clear flag after send completes
         setTimeout(() => setAutoSending(false), 2000);
       }, 1500);

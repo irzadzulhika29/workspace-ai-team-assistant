@@ -47,28 +47,48 @@ const parseStoredAiOutput = (rawOutput) => {
   }
 }
 
-const formatStoredUserInput = (rawInput) => {
+const parseStoredUserInput = (rawInput) => {
   if (!rawInput || typeof rawInput !== 'string') {
-    return rawInput ?? ''
+    return { content: rawInput ?? '', forwardedEmail: null }
   }
 
   const trimmed = rawInput.trim()
+  if (trimmed.startsWith('Buatkan draft email balasan berdasarkan email berikut:')) {
+    const from = trimmed.match(/^Email dari:\s*(.+)$/m)?.[1]?.trim()
+    const to = trimmed.match(/^Kepada:\s*(.+)$/m)?.[1]?.trim()
+    const subject = trimmed.match(/^Subject:\s*(.+)$/m)?.[1]?.trim()
+    const date = trimmed.match(/^Tanggal:\s*(.+)$/m)?.[1]?.trim()
+
+    return {
+      content: 'Buatkan draft email balasan yang profesional dan sesuai konteks.',
+      forwardedEmail: {
+        from,
+        to,
+        subject: subject || '(tanpa subjek)',
+        date,
+      },
+    }
+  }
+
   if (!trimmed.startsWith('Kirim email ini sekarang:')) {
-    return rawInput
+    return { content: rawInput, forwardedEmail: null }
   }
 
   const to = trimmed.match(/^To:\s*(.+)$/m)?.[1]?.trim()
   const subject = trimmed.match(/^Subject:\s*(.+)$/m)?.[1]?.trim()
 
   if (!to && !subject) {
-    return 'Kirim email sekarang'
+    return { content: 'Kirim email sekarang', forwardedEmail: null }
   }
 
-  return [
-    'Kirim email sekarang',
-    to ? `To: ${to}` : null,
-    subject ? `Subject: ${subject}` : null,
-  ].filter(Boolean).join('\n')
+  return {
+    content: [
+      'Kirim email sekarang',
+      to ? `To: ${to}` : null,
+      subject ? `Subject: ${subject}` : null,
+    ].filter(Boolean).join('\n'),
+    forwardedEmail: null,
+  }
 }
 
 export const sessionApi = {
@@ -125,11 +145,13 @@ export const sessionApi = {
       for (const row of rows) {
         // Tambahkan pesan user (input)
         if (row.input && row.input.trim()) {
+          const parsedInput = parseStoredUserInput(row.input);
           messages.push({
             id: `${row.id}-input`,
             message: {
-              content: formatStoredUserInput(row.input),
+              content: parsedInput.content,
               type: 'HumanMessage',
+              forwardedEmail: parsedInput.forwardedEmail,
             },
             created_at: row.created_at,
           });

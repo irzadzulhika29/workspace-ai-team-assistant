@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import { Bot, User } from 'lucide-react'
+import { Bot, Mail, User } from 'lucide-react'
 import AgentCard from '../ui/AgentCard'
 import SourceCitation from './SourceCitation'
 
@@ -77,7 +77,33 @@ function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
           }
         `}>
           {isUser ? (
-            <p className="whitespace-pre-wrap break-words text-white">{message.content}</p>
+            <div className="space-y-3">
+              <p className="whitespace-pre-wrap break-words text-white">{message.content}</p>
+              {message.forwardedEmail && (
+                <div className="rounded-lg border border-white/20 bg-white/10 p-3 text-left text-white/95">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-white/80">
+                    <Mail size={13} />
+                    Email sumber
+                  </div>
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p className="break-words">
+                      <span className="text-white/65">Dari:</span>{' '}
+                      {message.forwardedEmail.fromName || message.forwardedEmail.from || '-'}
+                    </p>
+                    <p className="break-words">
+                      <span className="text-white/65">Subject:</span>{' '}
+                      {message.forwardedEmail.subject || '(tanpa subjek)'}
+                    </p>
+                    {message.forwardedEmail.date && (
+                      <p className="break-words">
+                        <span className="text-white/65">Tanggal:</span>{' '}
+                        {message.forwardedEmail.date}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="prose prose-sm max-w-none
               prose-p:my-1.5 prose-p:leading-relaxed
