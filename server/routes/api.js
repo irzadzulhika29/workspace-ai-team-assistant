@@ -105,6 +105,7 @@ router.post('/token-usage', async (req, res) => {
       llm_model,
       input_tokens,
       completion_tokens,
+      execution_time,
     } = req.body;
 
     if (
@@ -131,6 +132,10 @@ router.post('/token-usage', async (req, res) => {
 
     if (timestamp) {
       payload.timestamp = timestamp;
+    }
+
+    if (execution_time !== undefined && execution_time !== null) {
+      payload.execution_time = execution_time;
     }
 
     const url = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage`;
@@ -162,7 +167,7 @@ router.get('/token-usage', async (req, res) => {
       ? Math.min(Math.max(requestedLimit, 1), 500)
       : 100;
 
-    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens&order=timestamp.desc&limit=${limit}`;
+    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens,execution_time&order=timestamp.desc&limit=${limit}`;
     const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens`;
 
     const [recentResponse, summaryResponse] = await Promise.all([

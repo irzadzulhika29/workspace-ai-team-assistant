@@ -193,6 +193,10 @@
             {
               "fieldId": "completion_tokens",
               "fieldValue": "={{ $json.sum_tokenUsage_tokenUsage_completionTokens }}"
+            },
+            {
+              "fieldId": "execution_time",
+              "fieldValue": "={{ $json.execution_time }}"
             }
           ]
         }
@@ -436,7 +440,7 @@
             }
           ]
         },
-        "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id",
+        "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id, execution_time",
         "options": {}
       },
       "id": "a115d70f-06ee-47a3-a7c1-ff83d56afc21",
@@ -478,6 +482,12 @@
               "name": "tokenUsage",
               "type": "array",
               "value": "={{$jmespath(\n  $json,\n  \"data.resultData.runData.*[] | [?data.ai_languageModel] | [].{model: data.ai_languageModel[0][0].json.response.generations[0][0].generationInfo.model_name || inputOverride.ai_languageModel[0][0].json.options.model_name || inputOverride.ai_languageModel[0][0].json.options.model, tokenUsage: data.ai_languageModel[0][0].json.tokenUsage || data.ai_languageModel[0][0].json.tokenUsageEstimate}\"\n)}}"
+            },
+            {
+              "id": "3e5b5756-43a0-4f36-9770-c2f8c92d71c5",
+              "name": "execution_time",
+              "type": "number",
+              "value": "={{ $json.execution_time }}"
             }
           ]
         },
@@ -594,6 +604,19 @@
           "name": "n8n account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const executionData = $input.first().json;\n\nconst startedAt = executionData.startedAt ? new Date(executionData.startedAt).getTime() : null;\nconst stoppedAt = executionData.stoppedAt ? new Date(executionData.stoppedAt).getTime() : null;\nconst executionTime = Number.isFinite(startedAt) && Number.isFinite(stoppedAt) && stoppedAt >= startedAt\n  ? stoppedAt - startedAt\n  : null;\n\nreturn [{\n  json: {\n    ...executionData,\n    execution_time: executionTime,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20904,
+        17760
+      ],
+      "id": "0ee59829-09c9-467c-a9b6-932a5c55d8f8",
+      "name": "Calculate Execution Time"
     },
     {
       "parameters": {
@@ -2372,6 +2395,17 @@
       ]
     },
     "Get execution data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Execution Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Execution Time": {
       "main": [
         [
           {

@@ -19,6 +19,12 @@ const formatDateTime = (value) => {
 
 const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value || 0)
 
+const formatExecutionTime = (ms) => {
+  if (!ms || ms <= 0) return '-'
+  if (ms < 1000) return `${ms}ms`
+  return `${(ms / 1000).toFixed(2)}s`
+}
+
 const summaryCards = (summary) => [
   {
     key: 'executions',
@@ -188,6 +194,11 @@ export default function TokenMonitorPage() {
                           <span className="rounded-full bg-violet-50 px-2.5 py-1 border border-violet-100 text-violet-700">
                             {row.llm_model}
                           </span>
+                          {row.execution_time && (
+                            <span className="rounded-full bg-emerald-50 px-2.5 py-1 border border-emerald-100 text-emerald-700 font-mono">
+                              ⏱ {formatExecutionTime(row.execution_time)}
+                            </span>
+                          )}
                           <span>{formatDateTime(row.timestamp)}</span>
                         </div>
                       </div>
