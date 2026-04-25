@@ -1,0 +1,13 @@
+.git
+.github
+.vscode
+.claude
+.agents
+node_modules
+dist
+npm-debug.log
+.env
+.env.*
+!.env.production.example
+docker-compose*.yml
+deploy/Caddyfile

@@ -4,6 +4,8 @@ import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import pg from 'pg';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import passport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
@@ -18,6 +20,9 @@ const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === 'production';
 const PgStore = connectPgSimple(session);
 const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.resolve(__dirname, '..', 'dist');
 
 if (isProduction) {
   app.set('trust proxy', 1);
@@ -88,6 +93,18 @@ app.use('/api/dashboard', dashboardRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+if (isProduction) {
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+
+    return res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 // Error handler (must be last)
 app.use(errorHandler);

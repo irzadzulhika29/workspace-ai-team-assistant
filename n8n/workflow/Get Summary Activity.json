@@ -11,25 +11,25 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        816,
-        2000
+        496,
+        2592
       ],
-      "id": "24d15fe7-9ff9-4df1-917f-31d25dcd0b71",
+      "id": "322963cc-4fc1-4493-a65e-3f4f65df4670",
       "name": "Webhook",
       "webhookId": "78bcae28-9ec4-4e8c-acc1-cbf84e842956",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst subdomainRaw = String(jiraCredentials.subdomain || '').trim().replace(/^https?:\\/\\//i, '').replace(/\\/$/, '');\nconst jakartaParts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Asia/Jakarta',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).formatToParts(new Date());\nconst getPart = (type) => jakartaParts.find((part) => part.type === type)?.value;\nconst dateKey = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;\nconst jiraAuthBase64 = jiraCredentials.email && jiraCredentials.api_token\n  ? Buffer.from(`${jiraCredentials.email}:${jiraCredentials.api_token}`).toString('base64')\n  : '';\n\nreturn [\n  {\n    json: {\n      requested_at: body.timestamp || new Date().toISOString(),\n      google_access_token: body.google_access_token || '',\n      jira_subdomain: subdomainRaw,\n      jira_email: jiraCredentials.email || '',\n      jira_api_token: jiraCredentials.api_token || '',\n      jira_auth_base64: jiraAuthBase64,\n      today_start: `${dateKey}T00:00:00+07:00`,\n      today_end: `${dateKey}T23:59:59+07:00`,\n      gmail_query: 'is:unread newer_than:7d',\n      gmail_max_results: 5,\n      jira_jql: 'statusCategory != Done ORDER BY updated DESC',\n      jira_max_results: 25\n    }\n  }\n];"
+        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst subdomainRaw = String(jiraCredentials.subdomain || '').trim().replace(/^https?:\\/\\//i, '').replace(/\\/$/, '');\nconst jakartaParts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Asia/Jakarta',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).formatToParts(new Date());\nconst getPart = (type) => jakartaParts.find((part) => part.type === type)?.value;\nconst dateKey = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;\nconst jiraAuthBase64 = jiraCredentials.email && jiraCredentials.api_token\n  ? Buffer.from(`${jiraCredentials.email}:${jiraCredentials.api_token}`).toString('base64')\n  : '';\n\nreturn [\n  {\n    json: {\n      user_id: String(body.user_id || body.userId || '').trim(),\n      requested_at: body.timestamp || new Date().toISOString(),\n      google_access_token: body.google_access_token || '',\n      jira_subdomain: subdomainRaw,\n      jira_email: jiraCredentials.email || '',\n      jira_api_token: jiraCredentials.api_token || '',\n      jira_auth_base64: jiraAuthBase64,\n      today_start: `${dateKey}T00:00:00+07:00`,\n      today_end: `${dateKey}T23:59:59+07:00`,\n      gmail_query: 'is:unread newer_than:7d',\n      gmail_max_results: 5,\n      jira_jql: 'statusCategory != Done ORDER BY updated DESC',\n      jira_max_results: 25\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1024,
-        2000
+        704,
+        2592
       ],
-      "id": "6761aef5-ed48-461e-8ca6-897004c9dd87",
+      "id": "37cce434-bafc-45b5-b5b0-6063c906ff8d",
       "name": "Prepare Request Data"
     },
     {
@@ -78,10 +78,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1264,
-        1792
+        944,
+        2384
       ],
-      "id": "2d25d767-8b84-4a03-9292-e75fa5d8663b",
+      "id": "184028b9-df34-4d46-9c86-caba69d5dbf4",
       "name": "Get Today Calendar",
       "continueOnFail": true
     },
@@ -114,10 +114,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1264,
-        2000
+        944,
+        2592
       ],
-      "id": "8ffe1539-7fb0-45c8-bca4-787453955e14",
+      "id": "66281404-9c4d-4293-9ca1-f541ebd30889",
       "name": "Get Jira Issues",
       "continueOnFail": true
     },
@@ -151,10 +151,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1264,
-        2192
+        944,
+        2784
       ],
-      "id": "8c202049-69c7-4e5e-be10-82b2ddb8c4c0",
+      "id": "da7ae868-6736-4fa9-814a-051f83a7a5ad",
       "name": "Get Unread Email",
       "continueOnFail": true
     },
@@ -185,10 +185,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1424,
-        2192
+        1104,
+        2784
       ],
-      "id": "bee124ea-871f-4a6b-b20e-ab78705b48e0",
+      "id": "e0e28f12-5b87-43e2-8cc5-6fb4eb748482",
       "name": "Has Unread Emails?"
     },
     {
@@ -200,10 +200,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1696,
-        2128
+        1376,
+        2720
       ],
-      "id": "6400ce9a-f8c0-42d8-bfe3-60ff021b7f75",
+      "id": "86d63e00-44e3-47b9-b113-f0f580a2a483",
       "name": "Split Out Email Messages"
     },
     {
@@ -213,10 +213,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2320,
-        2176
+        2000,
+        2768
       ],
-      "id": "ee1bac7b-a705-4293-8c90-e25a63cbae32",
+      "id": "3a11d4ab-98a2-408c-937f-e0371048046c",
       "name": "Aggregate Email Details"
     },
     {
@@ -226,10 +226,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2144,
-        2624
+        1824,
+        3216
       ],
-      "id": "d887d54e-4626-4adf-9203-28a70ce05a0e",
+      "id": "02e66917-6a84-48d9-b4bf-8e4ce52494c7",
       "name": "Build Empty Email Payload"
     },
     {
@@ -248,10 +248,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1488,
-        1792
+        1168,
+        2384
       ],
-      "id": "7007ce75-8f71-40b1-80f1-7d25258780c3",
+      "id": "f0328a9e-0844-4f99-95ae-e3640a6a45af",
       "name": "Build Calendar Prompt"
     },
     {
@@ -270,10 +270,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1488,
-        2000
+        1168,
+        2592
       ],
-      "id": "1fb2686f-daa9-4441-9f6b-bc0016e76134",
+      "id": "39e5522c-5bdd-465f-9c7b-56dff1d371bf",
       "name": "Build Jira Prompt"
     },
     {
@@ -292,10 +292,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2576,
-        2176
+        2256,
+        2768
       ],
-      "id": "adfe5fcd-cbaa-4972-904e-75b93dad98da",
+      "id": "e6bc1377-3696-4398-be50-81445ac3949a",
       "name": "Build Email Prompt"
     },
     {
@@ -309,10 +309,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1744,
-        1792
+        1424,
+        2384
       ],
-      "id": "6941db0d-102a-417d-8006-6be70dc16f2e",
+      "id": "f4741fcd-49f8-4e68-a681-e0764e371cb3",
       "name": "Calendar Briefing Agent"
     },
     {
@@ -326,10 +326,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1744,
-        2000
+        1424,
+        2592
       ],
-      "id": "fb84e0f6-73ab-4349-8568-85ff3bd5e039",
+      "id": "f8fcd690-09b1-4fca-92a8-d4656d6d8e9d",
       "name": "Jira Briefing Agent"
     },
     {
@@ -343,10 +343,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2784,
-        2176
+        2464,
+        2768
       ],
-      "id": "e9e5934e-561e-4afe-aaeb-3946d8643805",
+      "id": "7fc204bb-9a89-4027-8157-8b238159979c",
       "name": "Email Briefing Agent"
     },
     {
@@ -357,10 +357,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1712,
-        2688
+        1280,
+        3168
       ],
-      "id": "266c6e5a-473c-4a47-94cd-dd0853b6fca7",
+      "id": "35dbafb4-10ea-4b3e-99a8-1e3e19c4b1da",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -376,10 +376,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2032,
-        1792
+        1712,
+        2384
       ],
-      "id": "fb7d4bab-9e9e-4558-964c-c6d3bb4a8253",
+      "id": "44827cb0-d9bd-48d1-90a5-eb0aecd58a56",
       "name": "Parse Calendar Briefing"
     },
     {
@@ -389,10 +389,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2032,
-        2000
+        1712,
+        2592
       ],
-      "id": "18d75b59-dc15-4abf-b12f-8d57e43f5cb2",
+      "id": "014ca019-d0b7-44b6-8911-1fa9ccf0f797",
       "name": "Parse Jira Briefing"
     },
     {
@@ -402,10 +402,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3152,
-        2176
+        2832,
+        2768
       ],
-      "id": "ab512206-520d-476e-a065-409b9fa7b14f",
+      "id": "ea27ba46-3c70-4a0e-b70b-70fbceed4122",
       "name": "Parse Email Briefing"
     },
     {
@@ -417,10 +417,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2256,
-        1904
+        1936,
+        2496
       ],
-      "id": "67e65024-ac21-4095-8a07-01b2002a27fc",
+      "id": "2323d8ab-558b-4735-84cf-b45b4db10fba",
       "name": "Merge Jira + Calendar"
     },
     {
@@ -432,23 +432,23 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2544,
-        1936
+        2224,
+        2528
       ],
-      "id": "402053e8-281c-4d9d-a0a2-323e94416491",
+      "id": "082f65bb-ad46-4b57-882a-10d12ca4baa9",
       "name": "Merge All Briefings"
     },
     {
       "parameters": {
-        "jsCode": "return [\n  {\n    json: {\n      success: true,\n      generated_at: new Date().toISOString(),\n      briefings: {\n        jira: $json.jira_briefing || null,\n        calendar: $json.calendar_briefing || null,\n        email: $json.email_briefing || null\n      }\n    }\n  }\n];"
+        "jsCode": "return [\n  {\n    json: {\n      success: true,\n      user_id: $('Prepare Request Data').item.json.user_id || '',\n      generated_at: new Date().toISOString(),\n      briefings: {\n        jira: $json.jira_briefing || null,\n        calendar: $json.calendar_briefing || null,\n        email: $json.email_briefing || null\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2704,
-        2000
+        2576,
+        2592
       ],
-      "id": "c1ba06e9-63c9-4403-84e8-257c82d47b2d",
+      "id": "845b8bcf-d9e4-4ffe-98fa-003477810a35",
       "name": "Build Dashboard Response"
     },
     {
@@ -460,11 +460,134 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2928,
-        2000
+        3968,
+        2448
       ],
-      "id": "803a0085-3f06-4925-bb8a-55057b93e07f",
+      "id": "8d460f57-ba6a-421e-bf03-e9cd4ea7d5f8",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json || {};\nconst userId = String(payload.user_id || '').trim();\nconst generatedAt = payload.generated_at || new Date().toISOString();\nconst briefings = payload.briefings && typeof payload.briefings === 'object' ? payload.briefings : {};\nconst allowedPriorities = new Set(['high', 'medium', 'low']);\nconst allowedStatuses = new Set(['success', 'partial', 'failed']);\nconst rows = [];\n\nfor (const domain of ['jira', 'calendar', 'email']) {\n  const briefing = briefings[domain];\n  if (!briefing || !userId) continue;\n\n  rows.push({\n    user_id: userId,\n    domain,\n    priority: allowedPriorities.has(briefing.priority) ? briefing.priority : 'medium',\n    headline: String(briefing.headline || '').trim() || 'Briefing belum tersedia',\n    summary_points: Array.isArray(briefing.summary_points) ? briefing.summary_points.slice(0, 4) : [],\n    source_metrics: briefing.source_metrics && typeof briefing.source_metrics === 'object' ? briefing.source_metrics : {},\n    generated_at: generatedAt,\n    status: allowedStatuses.has(briefing.status) ? briefing.status : 'success',\n    error_message: briefing.error_message ? String(briefing.error_message) : null,\n  });\n}\n\nreturn [{\n  json: {\n    response_payload: payload,\n    supabase_rows: rows,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        2448
+      ],
+      "id": "13a41264-853f-4777-95ef-ae69f1f56899",
+      "name": "Prepare Supabase Upsert Rows"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0afc7b7d-3ea6-494c-81de-2ac7d2b8270d",
+              "leftValue": "={{ Array.isArray($json.supabase_rows) ? $json.supabase_rows.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3056,
+        2448
+      ],
+      "id": "c6011f94-6916-49db-bb1a-9a5cc0ab2c06",
+      "name": "Has Supabase Rows?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://tynmnezmkrjuygdkdsfe.supabase.co/rest/v1/dashboard_summary_snapshots",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "on_conflict",
+              "value": "user_id,domain"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5bm1uZXpta3JqdXlnZGtkc2ZlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQ3MjY4NiwiZXhwIjoyMDg5MDQ4Njg2fQ.hY5_h4s1hcCF0KdfV2YQGHS07246V9H3VnVqsSPkbo0"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5bm1uZXpta3JqdXlnZGtkc2ZlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQ3MjY4NiwiZXhwIjoyMDg5MDQ4Njg2fQ.hY5_h4s1hcCF0KdfV2YQGHS07246V9H3VnVqsSPkbo0"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.supabase_rows || []) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3328,
+        2224
+      ],
+      "id": "c0706e4c-fefe-4407-8eb3-a3014a1d3a06",
+      "name": "Upsert Briefings To Supabase",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3552,
+        2368
+      ],
+      "id": "63ea12cd-e430-4564-aa3b-63f551a03d61",
+      "name": "Merge Supabase Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prepared = $('Prepare Supabase Upsert Rows').item.json || {};\nreturn [{\n  json: prepared.response_payload || {\n    success: false,\n    generated_at: new Date().toISOString(),\n    briefings: {},\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3760,
+        2480
+      ],
+      "id": "257fc270-b223-41ba-89c0-f2cba4277eae",
+      "name": "Build Final Webhook Response"
     },
     {
       "parameters": {
@@ -473,10 +596,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1920,
-        2192
+        1600,
+        2784
       ],
-      "id": "861da3c5-29fa-41f0-9bc8-cdfdadbb9f84",
+      "id": "504cf95d-1f32-410d-b49f-b95659795a78",
       "name": "Loop Over Items"
     },
     {
@@ -509,10 +632,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2144,
-        2288
+        1824,
+        2880
       ],
-      "id": "3e04867b-a0ca-47a7-a340-199ce33e5820",
+      "id": "cdb47e31-1ecd-4172-89eb-60166d9080e8",
       "name": "Get Email Detail",
       "continueOnFail": true
     }
@@ -781,6 +904,73 @@
       "main": [
         [
           {
+            "node": "Prepare Supabase Upsert Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Supabase Upsert Rows": {
+      "main": [
+        [
+          {
+            "node": "Has Supabase Rows?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Supabase Result",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Has Supabase Rows?": {
+      "main": [
+        [
+          {
+            "node": "Upsert Briefings To Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Final Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Briefings To Supabase": {
+      "main": [
+        [
+          {
+            "node": "Merge Supabase Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Supabase Result": {
+      "main": [
+        [
+          {
+            "node": "Build Final Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Webhook Response": {
+      "main": [
+        [
+          {
             "node": "Respond to Webhook",
             "type": "main",
             "index": 0
@@ -823,8 +1013,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "07016419-21c4-4764-b90e-6c2a589f2f10",
+  "versionId": "8c93811e-e1eb-46dc-9ba3-0df519709d99",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
   },
   "id": "Cirp46y6kR8xksmj",

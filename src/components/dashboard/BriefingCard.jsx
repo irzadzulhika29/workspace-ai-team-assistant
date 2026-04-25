@@ -5,8 +5,7 @@ import {
   getDomainIcon,
   getDomainLabel,
   getDomainRoute,
-  formatLastUpdated,
-  formatNextUpdate
+  formatLastUpdated
 } from '../../services/briefingService';
 
 /**
@@ -120,7 +119,6 @@ const BriefingCard = ({ briefing, domain }) => {
       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
         <div className="text-xs text-gray-500">
           <p>Update: {formatLastUpdated(briefing.generated_at)}</p>
-          <p>Berikutnya: {formatNextUpdate(briefing.next_run_at)}</p>
         </div>
         
         <button

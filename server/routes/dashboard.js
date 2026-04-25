@@ -298,7 +298,6 @@ router.post('/briefings/upsert', requireN8nApiKey, async (req, res) => {
       summary_points: summaryPoints,
       source_metrics: sourceMetrics,
       generated_at: req.body.generated_at || new Date().toISOString(),
-      next_run_at: req.body.next_run_at || null,
       status: ['success', 'partial', 'failed'].includes(req.body.status) ? req.body.status : 'success',
       error_message: req.body.error_message ? String(req.body.error_message) : null,
     };

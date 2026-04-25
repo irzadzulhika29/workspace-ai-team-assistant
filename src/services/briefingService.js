@@ -49,7 +49,7 @@ const ambilCurrentUser = async () => {
 };
 
 const normalizeBriefingsResponse = (payload) => {
-  const generatedAt = payload?.generated_at || new Date().toISOString();
+  const generatedAt = payload?.generated_at || payload?.timestamp || new Date().toISOString();
   const domains = ['jira', 'calendar', 'email'];
   const normalizedBriefings = {};
 
@@ -60,7 +60,6 @@ const normalizeBriefingsResponse = (payload) => {
     normalizedBriefings[domain] = {
       ...briefing,
       generated_at: briefing.generated_at || generatedAt,
-      next_run_at: briefing.next_run_at || null,
     };
   }
 
@@ -71,14 +70,14 @@ const normalizeBriefingsResponse = (payload) => {
   };
 };
 
-/**
- * Sementara briefing langsung diambil dari webhook n8n,
- * belum dari endpoint backend lokal / database.
- * @returns {Promise<Object>} Object dengan key domain (jira, calendar, email)
- */
 export const ambilSemuaBriefing = async () => {
-  const data = await refreshBriefingViaWebhook();
-  return normalizeBriefingsResponse(data);
+  try {
+    const response = await api.get('/api/dashboard/briefings');
+    return normalizeBriefingsResponse(response.data);
+  } catch (error) {
+    console.error('Error fetching dashboard briefings:', error);
+    throw error;
+  }
 };
 
 /**
@@ -97,8 +96,8 @@ export const ambilBriefingDomain = async (domain) => {
 };
 
 /**
- * Trigger generate briefing via n8n webhook.
- * Tetap mengandalkan snapshot read dari backend setelah generate selesai.
+ * Trigger generate briefing via n8n webhook,
+ * lalu baca snapshot terbaru dari backend.
  * @returns {Promise<Object>} Response dari webhook n8n
  */
 export const refreshBriefingViaWebhook = async () => {
@@ -116,27 +115,13 @@ export const refreshBriefingViaWebhook = async () => {
   };
 
   try {
-    const response = await webhookApi.post(urls.getBriefings(), payload);
+    await webhookApi.post(urls.getBriefings(), payload);
+    const response = await api.get('/api/dashboard/briefings');
     return normalizeBriefingsResponse(response.data);
   } catch (error) {
     console.error('Error refreshing briefings via webhook:', error);
     throw error;
   }
-};
-
-/**
- * Helper untuk format waktu next update
- * @param {string} nextRunAt - ISO timestamp
- * @returns {string} Formatted time string
- */
-export const formatNextUpdate = (nextRunAt) => {
-  if (!nextRunAt) return 'Realtime';
-  
-  const date = new Date(nextRunAt);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  
-  return `${hours}:${minutes} WIB`;
 };
 
 /**
