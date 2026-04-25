@@ -1,6 +1,17 @@
 services:
   app:
-    image: ${APP_IMAGE}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+        VITE_N8N_ENV: ${VITE_N8N_ENV}
+        VITE_N8N_MODE: ${VITE_N8N_MODE}
+        VITE_N8N_PROD_URL: ${VITE_N8N_PROD_URL}
+        VITE_N8N_DEV_URL: ${VITE_N8N_DEV_URL}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    image: team-assistant-workspace:latest
     restart: unless-stopped
     env_file:
       - .env.production
