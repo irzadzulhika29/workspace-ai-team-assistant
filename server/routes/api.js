@@ -1,11 +1,10 @@
 import express from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { google } from 'googleapis';
-import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import prisma from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const getSupabaseHeaders = (extraHeaders = {}) => ({
   'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,

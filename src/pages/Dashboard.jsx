@@ -1,43 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageSquare, Brain, FolderOpen, ArrowRight, Zap, Database, FileStack, CalendarDays, Clock3, MapPin, Bug, CheckCircle2, BarChart3, Cpu } from 'lucide-react'
+import { CalendarDays, Clock3, MapPin, Bug, CheckCircle2, Mail, Circle, RefreshCw } from 'lucide-react'
 import { calendarApi } from '../services/calendarService'
 import { jiraApi } from '../services/jiraService'
-
-const CARDS = [
-  {
-    to:      '/chat/supervisor',
-    icon:    MessageSquare,
-    title:   'Supervisor Agent',
-    desc:    'Delegasikan tugas Jira, Google Calendar, dan operasional ke AI secara otomatis.',
-    tone:    'text-cyan-700 bg-cyan-50 border-cyan-100',
-    accent:  Zap,
-  },
-  {
-    to:      '/chat/knowledge',
-    icon:    Brain,
-    title:   'Knowledge Agent',
-    desc:    'Tanya jawab berbasis dokumen SOP internal dengan sitasi halaman yang bisa diverifikasi.',
-    tone:    'text-slate-700 bg-slate-100 border-slate-200',
-    accent:  Database,
-  },
-  {
-    to:      '/workspace/files',
-    icon:    FolderOpen,
-    title:   'Document Workspace',
-    desc:    'Upload SOP, kelola laporan AI, dan atur folder dokumen referensi tim.',
-    tone:    'text-emerald-700 bg-emerald-50 border-emerald-100',
-    accent:  FileStack,
-  },
-  {
-    to:      '/monitoring/tokens',
-    icon:    BarChart3,
-    title:   'Token Monitor',
-    desc:    'Pantau konsumsi input dan completion token dari setiap eksekusi workflow AI.',
-    tone:    'text-violet-700 bg-violet-50 border-violet-100',
-    accent:  Cpu,
-  },
-]
+import { emailApi } from '../services/emailService'
+import { ambilSemuaBriefing, refreshBriefingViaWebhook } from '../services/briefingService'
+import BriefingCard from '../components/dashboard/BriefingCard'
 
 const DONE_STATUS_KEYWORDS = ['done', 'closed', 'resolved', 'complete', 'completed']
 
@@ -82,6 +50,41 @@ export default function Dashboard() {
   const [jiraSummary, setJiraSummary] = useState({ total: 0, done: 0, percent: 0, byStatus: [] })
   const [loadingJira, setLoadingJira] = useState(true)
   const [jiraError, setJiraError] = useState('')
+  const [briefings, setBriefings] = useState({})
+  const [loadingBriefings, setLoadingBriefings] = useState(true)
+  const [briefingError, setBriefingError] = useState('')
+  const [refreshingBriefings, setRefreshingBriefings] = useState(false)
+  const [briefingRefreshError, setBriefingRefreshError] = useState('')
+  const [unreadEmails, setUnreadEmails] = useState([])
+  const [loadingEmails, setLoadingEmails] = useState(true)
+  const [emailError, setEmailError] = useState('')
+
+  const loadBriefings = async () => {
+    const response = await ambilSemuaBriefing()
+    setBriefings(response.briefings || {})
+    setBriefingError('')
+    return response
+  }
+
+  const refreshBriefings = async ({ background = false } = {}) => {
+    setRefreshingBriefings(true)
+    setBriefingRefreshError('')
+
+    try {
+      const response = await refreshBriefingViaWebhook()
+      setBriefings(response.briefings || {})
+      setBriefingError('')
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.error || err.message || 'Tidak dapat memperbarui briefing.'
+      setBriefingRefreshError(message)
+
+      if (!background && !Object.keys(briefings).length) {
+        setBriefingError(message)
+      }
+    } finally {
+      setRefreshingBriefings(false)
+    }
+  }
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -102,6 +105,24 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    const loadInitialBriefings = async () => {
+      setLoadingBriefings(true)
+      setBriefingError('')
+
+      try {
+        await loadBriefings()
+      } catch (err) {
+        setBriefingError(err.message || 'Tidak dapat mengambil briefing.')
+      } finally {
+        setLoadingBriefings(false)
+      }
+    }
+
+    loadInitialBriefings()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
     const loadJiraProgress = async () => {
       setLoadingJira(true)
       setJiraError('')
@@ -111,13 +132,69 @@ export default function Dashboard() {
         const safeItems = Array.isArray(items) ? items : []
         setJiraSummary(buildJiraSummary(safeItems))
       } catch (err) {
+        console.error('Dashboard Jira error:', err)
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        })
         setJiraError(err.message || 'Tidak dapat mengambil progres Jira.')
       } finally {
         setLoadingJira(false)
       }
     }
 
-    loadJiraProgress()
+    // Add small delay to ensure session is ready
+    const timer = setTimeout(() => {
+      loadJiraProgress()
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const loadUnreadEmails = async () => {
+      setLoadingEmails(true)
+      setEmailError('')
+
+      try {
+        const response = await emailApi.listEmails({ 
+          q: 'is:unread',
+          maxResults: 5
+        })
+        
+        // Fetch details for each email
+        const emailDetails = await Promise.all(
+          (response.messages || []).slice(0, 5).map(async (msg) => {
+            try {
+              return await emailApi.getEmail(msg.id)
+            } catch (err) {
+              console.error('Error fetching email detail:', err)
+              return null
+            }
+          })
+        )
+        
+        setUnreadEmails(emailDetails.filter(Boolean))
+      } catch (err) {
+        console.error('Dashboard Email error:', err)
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        })
+        setEmailError(err.message || 'Tidak dapat mengambil email.')
+      } finally {
+        setLoadingEmails(false)
+      }
+    }
+
+    // Add small delay to ensure session is ready
+    const timer = setTimeout(() => {
+      loadUnreadEmails()
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [])
 
   return (
@@ -136,35 +213,54 @@ export default function Dashboard() {
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-        {CARDS.map(({ to, icon: Icon, title, desc, tone, accent: Accent }) => (
-          <Link
-            key={to}
-            to={to}
-            className={`
-              group relative flex flex-col gap-4 p-5 rounded-2xl bg-white/95
-              hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgba(25,28,29,0.05)]
-              transition-all duration-200 overflow-hidden
-            `}
+      {/* AI Briefing Section */}
+      <div className="mt-8">
+        <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI Briefing</p>
+            <h2 className="text-lg md:text-xl font-semibold text-slate-900 mt-1">Ringkasan Realtime untuk Leader</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Briefing diambil langsung dari workflow saat halaman dimuat atau saat Anda klik refresh.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => refreshBriefings()}
+            disabled={refreshingBriefings}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition-colors hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${tone}`}>
-              <Icon size={18} />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 mb-1.5">{title}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mt-auto">
-              <span>Buka workspace</span>
-              <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-            </div>
+            <RefreshCw size={14} className={refreshingBriefings ? 'animate-spin' : ''} />
+            {refreshingBriefings ? 'Memperbarui briefing...' : 'Refresh Briefing'}
+          </button>
+        </div>
 
-            <Accent
-              size={44}
-              className="absolute -bottom-2 -right-2 opacity-[0.08] text-slate-700"
-            />
-          </Link>
-        ))}
+        {refreshingBriefings && (
+          <p className="mb-4 text-xs text-cyan-700">Memperbarui briefing terbaru di background...</p>
+        )}
+
+        {briefingRefreshError && !loadingBriefings && (
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-sm text-amber-800">{briefingRefreshError}</p>
+          </div>
+        )}
+
+        {loadingBriefings ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="skeleton h-64 rounded-lg" />
+            ))}
+          </div>
+        ) : briefingError ? (
+          <div className="panel p-5 text-center">
+            <p className="text-sm text-rose-600">{briefingError}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            <BriefingCard briefing={briefings.jira} domain="jira" />
+            <BriefingCard briefing={briefings.calendar} domain="calendar" />
+            <BriefingCard briefing={briefings.email} domain="email" />
+          </div>
+        )}
       </div>
 
       <div className="mt-8 panel p-4 md:p-5">
@@ -219,6 +315,74 @@ export default function Dashboard() {
                           <MapPin size={12} className="text-slate-400 shrink-0" />
                           <span className="truncate">{event.location || 'Lokasi tidak dicantumkan'}</span>
                         </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8 panel p-4 md:p-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ringkasan Email</p>
+            <h2 className="text-sm md:text-base font-semibold text-slate-900 mt-1">5 Email Belum Dibaca</h2>
+          </div>
+          <Link to="/workspace/email" className="text-xs font-semibold text-cyan-700 hover:text-cyan-800">
+            Lihat semua
+          </Link>
+        </div>
+
+        {loadingEmails ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="skeleton h-16 rounded-xl" />
+            ))}
+          </div>
+        ) : emailError ? (
+          <p className="text-sm text-rose-600">{emailError}</p>
+        ) : unreadEmails.length === 0 ? (
+          <p className="text-sm text-slate-500">Tidak ada email yang belum dibaca.</p>
+        ) : (
+          <div className="space-y-2.5">
+            {unreadEmails.map((email) => {
+              const getHeader = (name) => {
+                const header = email.payload?.headers?.find(h => h.name.toLowerCase() === name.toLowerCase())
+                return header?.value || ''
+              }
+
+              const from = getHeader('From')
+              const subject = getHeader('Subject')
+              const date = email.internalDate ? new Date(parseInt(email.internalDate)) : null
+              const dateText = date
+                ? date.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : '-'
+
+              // Extract sender name from "Name <email@domain.com>" format
+              const senderName = from.match(/^([^<]+)/) ? from.match(/^([^<]+)/)[1].trim() : from
+
+              return (
+                <div key={email.id} className="rounded-xl border border-slate-200 bg-white px-3.5 py-3">
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1 shrink-0">
+                      <Circle size={8} className="text-cyan-600 fill-cyan-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{subject || '(Tanpa subjek)'}</p>
+                        <span className="text-xs text-slate-400 shrink-0">{dateText}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <Mail size={12} className="text-slate-400" />
+                        <span className="truncate">{senderName}</span>
                       </div>
                     </div>
                   </div>

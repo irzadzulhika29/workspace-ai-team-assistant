@@ -15,22 +15,36 @@ const pickIssuesArray = (payload) => {
 
 export const jiraApi = {
   fetchIssues: async () => {
-    const res = await axios.post(
-      `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
-      {
-        method: 'POST',
-        path: '/rest/api/3/search/jql',
-        data: {
-          jql: 'updated >= -90d ORDER BY updated DESC',
-          maxResults: 50,
-          fields: ['summary', 'status', 'assignee', 'priority', 'updated'],
+    try {
+      const res = await axios.post(
+        `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
+        {
+          method: 'POST',
+          path: '/rest/api/3/search/jql',
+          data: {
+            jql: 'updated >= -90d ORDER BY updated DESC',
+            maxResults: 50,
+            fields: ['summary', 'status', 'assignee', 'priority', 'updated'],
+          },
         },
-      },
-      {
-        withCredentials: true,
-      }
-    )
+        {
+          withCredentials: true,
+        }
+      )
 
-    return pickIssuesArray(res.data)
+      return pickIssuesArray(res.data)
+    } catch (error) {
+      // Better error handling
+      if (error.response?.status === 401) {
+        throw new Error('Sesi login telah berakhir. Silakan login kembali.')
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Jira belum terhubung. Silakan hubungkan Jira di halaman Integrasi.')
+      }
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error)
+      }
+      throw new Error(error.message || 'Tidak dapat mengambil issue Jira.')
+    }
   },
 }

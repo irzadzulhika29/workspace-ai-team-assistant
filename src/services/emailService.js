@@ -34,7 +34,14 @@ export const emailApi = {
       return response.data;
     } catch (error) {
       console.error('Error listing emails:', error);
-      throw error;
+      // Better error handling
+      if (error.response?.status === 401) {
+        throw new Error('Sesi login telah berakhir. Silakan login kembali.');
+      }
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      throw new Error(error.message || 'Tidak dapat mengambil email.');
     }
   },
 

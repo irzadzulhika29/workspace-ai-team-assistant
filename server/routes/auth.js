@@ -1,10 +1,9 @@
 import express from 'express';
-import passport from 'passport';
-import { PrismaClient } from '@prisma/client';
+import passport from '../config/passport.js';
+import prisma from '../lib/prisma.js';
 import { deleteN8nCredential } from '../services/n8nService.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const isGoogleOAuthConfigured = () => Boolean(
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
 );

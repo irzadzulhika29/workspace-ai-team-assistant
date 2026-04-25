@@ -1,10 +1,9 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { requireAuth } from '../middleware/auth.js';
 import { decrypt, encrypt } from '../utils/encryption.js';
+import prisma from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const ALLOWED_PROXY_METHODS = new Set(['GET', 'POST', 'PUT', 'DELETE']);
 const JIRA_PATH_PREFIX = '/rest/api/3/';
@@ -189,6 +188,11 @@ router.post('/jira/proxy', requireAuth, async (req, res) => {
     }
 
     if (!response.ok) {
+      console.error('Jira API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        payload
+      });
       return res.status(response.status).json({
         error: payload?.errorMessages?.join(', ') || payload?.message || 'Jira request gagal',
         details: payload,
@@ -197,6 +201,7 @@ router.post('/jira/proxy', requireAuth, async (req, res) => {
 
     res.json(payload);
   } catch (error) {
+    console.error('Jira proxy error:', error);
     res.status(500).json({ error: error.message });
   }
 });

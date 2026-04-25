@@ -9,7 +9,9 @@ import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
 import googleRoutes from './routes/google.js';
 import integrationRoutes from './routes/integrations.js';
+import dashboardRoutes from './routes/dashboard.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import prisma from './lib/prisma.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -80,6 +82,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/google', googleRoutes);
 app.use('/api/integrations', integrationRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -92,3 +95,20 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+// Graceful shutdown
+const gracefulShutdown = async (signal) => {
+  console.log(`\n${signal} received. Closing server gracefully...`);
+  
+  try {
+    await prisma.$disconnect();
+    console.log('✅ Database connections closed');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error during shutdown:', error);
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

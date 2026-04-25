@@ -1,0 +1,832 @@
+{
+  "name": "Get Summary Activity",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "briefings",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        816,
+        2000
+      ],
+      "id": "24d15fe7-9ff9-4df1-917f-31d25dcd0b71",
+      "name": "Webhook",
+      "webhookId": "78bcae28-9ec4-4e8c-acc1-cbf84e842956",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst subdomainRaw = String(jiraCredentials.subdomain || '').trim().replace(/^https?:\\/\\//i, '').replace(/\\/$/, '');\nconst jakartaParts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Asia/Jakarta',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).formatToParts(new Date());\nconst getPart = (type) => jakartaParts.find((part) => part.type === type)?.value;\nconst dateKey = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;\nconst jiraAuthBase64 = jiraCredentials.email && jiraCredentials.api_token\n  ? Buffer.from(`${jiraCredentials.email}:${jiraCredentials.api_token}`).toString('base64')\n  : '';\n\nreturn [\n  {\n    json: {\n      requested_at: body.timestamp || new Date().toISOString(),\n      google_access_token: body.google_access_token || '',\n      jira_subdomain: subdomainRaw,\n      jira_email: jiraCredentials.email || '',\n      jira_api_token: jiraCredentials.api_token || '',\n      jira_auth_base64: jiraAuthBase64,\n      today_start: `${dateKey}T00:00:00+07:00`,\n      today_end: `${dateKey}T23:59:59+07:00`,\n      gmail_query: 'is:unread newer_than:7d',\n      gmail_max_results: 5,\n      jira_jql: 'statusCategory != Done ORDER BY updated DESC',\n      jira_max_results: 25\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        2000
+      ],
+      "id": "6761aef5-ed48-461e-8ca6-897004c9dd87",
+      "name": "Prepare Request Data"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ $('Prepare Request Data').item.json.today_start }}"
+            },
+            {
+              "name": "timeMax",
+              "value": "={{ $('Prepare Request Data').item.json.today_end }}"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "orderBy",
+              "value": "startTime"
+            },
+            {
+              "name": "maxResults",
+              "value": "20"
+            },
+            {
+              "name": "fields",
+              "value": "items(id,summary,start,end,location,description,hangoutLink,status,organizer),timeZone"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Prepare Request Data').item.json.google_access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        1792
+      ],
+      "id": "2d25d767-8b84-4a03-9292-e75fa5d8663b",
+      "name": "Get Today Calendar",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Prepare Request Data').item.json.jira_subdomain }}/rest/api/3/search/jql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Basic {{ $('Prepare Request Data').item.json.jira_auth_base64 }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jql: $('Prepare Request Data').item.json.jira_jql, maxResults: $('Prepare Request Data').item.json.jira_max_results, fields: ['summary', 'status', 'assignee', 'priority', 'updated', 'created', 'project'] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        2000
+      ],
+      "id": "8ffe1539-7fb0-45c8-bca4-787453955e14",
+      "name": "Get Jira Issues",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $('Prepare Request Data').item.json.gmail_query }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "={{ $('Prepare Request Data').item.json.gmail_max_results }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Prepare Request Data').item.json.google_access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        2192
+      ],
+      "id": "8c202049-69c7-4e5e-be10-82b2ddb8c4c0",
+      "name": "Get Unread Email",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b1f6fcb4-2b8d-4d14-996d-bcbef7d94253",
+              "leftValue": "={{ Array.isArray($json.messages) ? $json.messages.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1424,
+        2192
+      ],
+      "id": "bee124ea-871f-4a6b-b20e-ab78705b48e0",
+      "name": "Has Unread Emails?"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "messages",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        2128
+      ],
+      "id": "6400ce9a-f8c0-42d8-bfe3-60ff021b7f75",
+      "name": "Split Out Email Messages"
+    },
+    {
+      "parameters": {
+        "jsCode": "const listPayload = $node['Get Unread Email'].json || {};\nconst decodeBase64Url = (value) => {\n  if (!value) return '';\n  try {\n    const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');\n    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);\n    return Buffer.from(padded, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n};\n\nconst stripHtml = (value) => String(value || '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst collectParts = (node, bucket = []) => {\n  if (!node || typeof node !== 'object') return bucket;\n  bucket.push(node);\n  if (Array.isArray(node.parts)) {\n    for (const part of node.parts) {\n      collectParts(part, bucket);\n    }\n  }\n  return bucket;\n};\n\nconst extractBody = (payload) => {\n  const nodes = collectParts(payload, []);\n  const plainPart = nodes.find((part) => part?.mimeType === 'text/plain' && part?.body?.data);\n  if (plainPart?.body?.data) {\n    return decodeBase64Url(plainPart.body.data).replace(/\\s+/g, ' ').trim();\n  }\n  const htmlPart = nodes.find((part) => part?.mimeType === 'text/html' && part?.body?.data);\n  if (htmlPart?.body?.data) {\n    return stripHtml(decodeBase64Url(htmlPart.body.data));\n  }\n  const fallbackPart = nodes.find((part) => part?.body?.data);\n  if (fallbackPart?.body?.data) {\n    return stripHtml(decodeBase64Url(fallbackPart.body.data));\n  }\n  return '';\n};\n\nconst inputItems = $input.all();\nconst detailedEmails = [];\nconst fetchErrors = [];\n\nfor (const item of inputItems) {\n  const detail = item.json || {};\n  if (!detail.payload) {\n    fetchErrors.push({\n      id: detail.id || detail.messageId || 'unknown',\n      error: detail.message || detail.error || 'Failed to fetch email detail',\n    });\n    continue;\n  }\n\n  const headers = Array.isArray(detail.payload.headers) ? detail.payload.headers : [];\n  const getHeader = (name) => headers.find((header) => String(header.name || '').toLowerCase() === name.toLowerCase())?.value || '';\n  const bodyText = extractBody(detail.payload);\n  const normalizedBody = (bodyText || detail.snippet || '').slice(0, 1200);\n\n  detailedEmails.push({\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: getHeader('From'),\n    subject: getHeader('Subject'),\n    date: getHeader('Date'),\n    snippet: detail.snippet || '',\n    body: normalizedBody,\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n  });\n}\n\nreturn [{\n  json: {\n    emails: detailedEmails,\n    source_metrics: {\n      total_unread: listPayload.resultSizeEstimate || detailedEmails.length,\n      fetched_email_count: detailedEmails.length,\n      fetched_message_ids: (Array.isArray(listPayload.messages) ? listPayload.messages : []).map((message) => message.id),\n      failed_message_ids: fetchErrors.map((item) => item.id),\n    },\n    fetch_error: fetchErrors.length ? `Gagal mengambil detail ${fetchErrors.length} email unread` : null,\n    fetch_error_details: fetchErrors.slice(0, 5),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        2176
+      ],
+      "id": "ee1bac7b-a705-4293-8c90-e25a63cbae32",
+      "name": "Aggregate Email Details"
+    },
+    {
+      "parameters": {
+        "jsCode": "const listPayload = $json || {};\nconst messages = Array.isArray(listPayload.messages) ? listPayload.messages : [];\n\nreturn [{\n  json: {\n    emails: [],\n    source_metrics: {\n      total_unread: listPayload.resultSizeEstimate || 0,\n      fetched_email_count: 0,\n      fetched_message_ids: messages.map((message) => message.id),\n      failed_message_ids: [],\n    },\n    fetch_error: null,\n    fetch_error_details: [],\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        2624
+      ],
+      "id": "d887d54e-4626-4adf-9203-28a70ce05a0e",
+      "name": "Build Empty Email Payload"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "prompt",
+              "value": "=Kamu adalah Calendar Briefing Agent.\n\nTugas:\n1. Analisis data kalender hari ini.\n2. Buat ringkasan yang singkat, relevan, dan operasional.\n3. Berikan rekomendasi prioritas untuk leader.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"calendar\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_events\": number,\n    \"events_with_meet\": number,\n    \"events_without_description\": number\n  }\n}\n\nATURAN:\n- Jangan halusinasi meeting atau agenda yang tidak ada.\n- Jika data kosong atau request gagal, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n- Fokus pada meeting penting hari ini, bentrok waktu, event tanpa deskripsi, dan event dengan Google Meet.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1488,
+        1792
+      ],
+      "id": "7007ce75-8f71-40b1-80f1-7d25258780c3",
+      "name": "Build Calendar Prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "prompt",
+              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis daftar issue Jira yang masih aktif atau belum selesai.\n2. Buat ringkasan progres, bottleneck, dan prioritas.\n3. Berikan rekomendasi tindak lanjut singkat.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"high_priority_count\": number\n  }\n}\n\nATURAN:\n- Jangan mengarang sprint, blocker, atau progres bila tidak muncul di data.\n- Jika request gagal atau data kosong, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n- Fokus pada issue prioritas tinggi, issue yang masih To Do, dan issue yang sedang In Progress.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1488,
+        2000
+      ],
+      "id": "1fb2686f-daa9-4441-9f6b-bc0016e76134",
+      "name": "Build Jira Prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "prompt",
+              "value": "=Kamu adalah Email Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 unread email teratas.\n2. Buat ringkasan email itu tentang apa agar user tidak perlu membuka semua email yang tidak penting.\n3. Bedakan email yang tampak penting dengan email yang tampak seperti promosi, newsletter, atau notifikasi biasa.\n4. Berikan rekomendasi follow-up singkat.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"email\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_unread\": number,\n    \"fetched_email_count\": number\n  }\n}\n\nATURAN:\n- Gunakan subject, from, snippet, dan body ringkas untuk menilai isi email.\n- Jangan menyalin body email panjang apa adanya.\n- Jika email tampak seperti iklan, promo, newsletter, atau notifikasi massal, sebutkan sebagai low-value update.\n- Jika email tampak butuh tindakan, follow-up, atau perhatian cepat, naikkan prioritas.\n- Jangan mengarang isi yang tidak ada di data.\n- Jika request gagal atau email kosong, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2576,
+        2176
+      ],
+      "id": "adfe5fcd-cbaa-4972-904e-75b93dad98da",
+      "name": "Build Email Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=Kamu adalah Calendar Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1744,
+        1792
+      ],
+      "id": "6941db0d-102a-417d-8006-6be70dc16f2e",
+      "name": "Calendar Briefing Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=Kamu adalah Jira Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1744,
+        2000
+      ],
+      "id": "fb84e0f6-73ab-4349-8568-85ff3bd5e039",
+      "name": "Jira Briefing Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=Kamu adalah Email Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2784,
+        2176
+      ],
+      "id": "e9e5934e-561e-4afe-aaeb-3946d8643805",
+      "name": "Email Briefing Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        2688
+      ],
+      "id": "266c6e5a-473c-4a47-94cd-dd0853b6fca7",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "68b7yPyfO0nmCOn6",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      calendar_briefing: {\n        domain: 'calendar',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan kalender belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        1792
+      ],
+      "id": "fb7d4bab-9e9e-4558-964c-c6d3bb4a8253",
+      "name": "Parse Calendar Briefing"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      jira_briefing: {\n        domain: 'jira',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan Jira belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        2000
+      ],
+      "id": "18d75b59-dc15-4abf-b12f-8d57e43f5cb2",
+      "name": "Parse Jira Briefing"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      email_briefing: {\n        domain: 'email',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan email belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3152,
+        2176
+      ],
+      "id": "ab512206-520d-476e-a065-409b9fa7b14f",
+      "name": "Parse Email Briefing"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2256,
+        1904
+      ],
+      "id": "67e65024-ac21-4095-8a07-01b2002a27fc",
+      "name": "Merge Jira + Calendar"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2544,
+        1936
+      ],
+      "id": "402053e8-281c-4d9d-a0a2-323e94416491",
+      "name": "Merge All Briefings"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      success: true,\n      generated_at: new Date().toISOString(),\n      briefings: {\n        jira: $json.jira_briefing || null,\n        calendar: $json.calendar_briefing || null,\n        email: $json.email_briefing || null\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        2000
+      ],
+      "id": "c1ba06e9-63c9-4403-84e8-257c82d47b2d",
+      "name": "Build Dashboard Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2928,
+        2000
+      ],
+      "id": "803a0085-3f06-4925-bb8a-55057b93e07f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1920,
+        2192
+      ],
+      "id": "861da3c5-29fa-41f0-9bc8-cdfdadbb9f84",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $('Split Out Email Messages').item.json.messages.threadId }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "format",
+              "value": "full"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Prepare Request Data').item.json.google_access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2144,
+        2288
+      ],
+      "id": "3e04867b-a0ca-47a7-a340-199ce33e5820",
+      "name": "Get Email Detail",
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Request Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Request Data": {
+      "main": [
+        [
+          {
+            "node": "Get Today Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Jira Issues",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Unread Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Today Calendar": {
+      "main": [
+        [
+          {
+            "node": "Build Calendar Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Jira Issues": {
+      "main": [
+        [
+          {
+            "node": "Build Jira Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unread Email": {
+      "main": [
+        [
+          {
+            "node": "Has Unread Emails?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Unread Emails?": {
+      "main": [
+        [
+          {
+            "node": "Split Out Email Messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Empty Email Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Email Messages": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Email Details": {
+      "main": [
+        [
+          {
+            "node": "Build Email Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Empty Email Payload": {
+      "main": [
+        [
+          {
+            "node": "Build Email Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Calendar Prompt": {
+      "main": [
+        [
+          {
+            "node": "Calendar Briefing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Jira Prompt": {
+      "main": [
+        [
+          {
+            "node": "Jira Briefing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Prompt": {
+      "main": [
+        [
+          {
+            "node": "Email Briefing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Jira Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Email Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Briefing Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Calendar Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira Briefing Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Jira Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Briefing Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Email Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Calendar Briefing": {
+      "main": [
+        [
+          {
+            "node": "Merge Jira + Calendar",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Parse Jira Briefing": {
+      "main": [
+        [
+          {
+            "node": "Merge Jira + Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Jira + Calendar": {
+      "main": [
+        [
+          {
+            "node": "Merge All Briefings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Email Briefing": {
+      "main": [
+        [
+          {
+            "node": "Merge All Briefings",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge All Briefings": {
+      "main": [
+        [
+          {
+            "node": "Build Dashboard Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Dashboard Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Email Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Email Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email Detail": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "07016419-21c4-4764-b90e-6c2a589f2f10",
+  "meta": {
+    "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
+  },
+  "id": "Cirp46y6kR8xksmj",
+  "tags": []
+}

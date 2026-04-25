@@ -1,5 +1,40 @@
 import axios from "axios";
 
+// ─── Axios interceptors for debugging ─────────────────────────────────────────
+if (import.meta.env.DEV) {
+  axios.interceptors.request.use(
+    (config) => {
+      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+        withCredentials: config.withCredentials,
+        headers: config.headers
+      });
+      return config;
+    },
+    (error) => {
+      console.error('[API Request Error]', error);
+      return Promise.reject(error);
+    }
+  );
+
+  axios.interceptors.response.use(
+    (response) => {
+      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+        status: response.status,
+        data: response.data
+      });
+      return response;
+    },
+    (error) => {
+      console.error(`[API Response Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      return Promise.reject(error);
+    }
+  );
+}
+
 // ─── Re-exports ───────────────────────────────────────────────────────────────
 // Barrel module: import dari sini untuk backward-compatibility,
 // atau langsung dari masing-masing service module.
@@ -42,6 +77,7 @@ const ENDPOINTS = {
   REPORT: "report",
   STATUS: "status",
   UPLOAD: "upload-file",
+  BRIEFINGS: "briefings",
 };
 
 // ─── Helper functions ─────────────────────────────────────────────────────────
@@ -145,6 +181,13 @@ export const urls = {
     return buildWebhookUrl(ENDPOINTS.UPLOAD, env, mode, devUrl);
   },
 
+  getBriefings: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.BRIEFINGS, env, mode, devUrl);
+  },
+
   // Get all webhook URLs
   getAll: () => ({
     supervisor: urls.getSupervisor(),
@@ -153,6 +196,7 @@ export const urls = {
     report: urls.getReport(),
     status: urls.getStatus(),
     upload: urls.getUpload(),
+    briefings: urls.getBriefings(),
   }),
 
   // Get current config
