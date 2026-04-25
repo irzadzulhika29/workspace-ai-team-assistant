@@ -59,6 +59,10 @@ export default function KnowledgeChat() {
         }
       }
 
+      if (!sessionId) {
+        throw new Error('Gagal membuat sesi chat. Pastikan Anda sudah login terlebih dahulu.')
+      }
+
       const data = await chatApi.sendToKnowledge(
         message,
         contextFilter,
@@ -77,7 +81,7 @@ export default function KnowledgeChat() {
       setError(
         err.code === 'ECONNABORTED'
           ? 'Request timeout setelah 120 detik. Coba lagi atau periksa koneksi ke n8n.'
-          : 'Tidak dapat terhubung ke Knowledge Agent. Periksa URL webhook di Settings.'
+          : err.message || 'Tidak dapat terhubung ke Knowledge Agent. Periksa URL webhook di Settings.'
       )
     } finally {
       setLoading(false)

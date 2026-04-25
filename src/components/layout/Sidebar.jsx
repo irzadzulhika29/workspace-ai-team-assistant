@@ -121,7 +121,9 @@ export default function Sidebar() {
       const sessions = await sessionApi.ambilSemuaSesi('rag_chat')
       setKnowledgeSessions(sessions)
 
-      if (!activeKnowledgeSessionId && sessions.length === 0) {
+      if (sessions.length === 0) {
+        setActiveKnowledgeSession(null)
+        clearKnowledge()
         await handleNewChat()
       } else if (sessions.length > 0) {
         const hasActiveSession =
@@ -140,7 +142,7 @@ export default function Sidebar() {
     } finally {
       setLoadingSessions(false)
     }
-  }, [activeKnowledgeSessionId, handleNewChat, loadSessionHistory, setActiveKnowledgeSession, setKnowledgeSessions])
+  }, [activeKnowledgeSessionId, clearKnowledge, handleNewChat, loadSessionHistory, setActiveKnowledgeSession, setKnowledgeSessions])
 
   useEffect(() => {
     if (isKnowledgePage) loadSessions()
@@ -210,7 +212,9 @@ export default function Sidebar() {
       const sessions = await sessionApi.ambilSemuaSesi('general_chat')
       setSupervisorSessions(sessions)
 
-      if (!activeSupervisorSessionId && sessions.length === 0) {
+      if (sessions.length === 0) {
+        setActiveSupervisorSession(null)
+        clearSupervisor()
         await handleNewSupChat()
       } else if (sessions.length > 0) {
         const hasActiveSession =
@@ -229,7 +233,7 @@ export default function Sidebar() {
     } finally {
       setLoadingSupSessions(false)
     }
-  }, [activeSupervisorSessionId, handleNewSupChat, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions, isAutoSending])
+  }, [activeSupervisorSessionId, clearSupervisor, handleNewSupChat, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions, isAutoSending])
 
   useEffect(() => {
     if (isSupervisorPage) loadSupSessions()

@@ -11,12 +11,13 @@ const post = async (getUrl, payload) => {
   return res.data;
 };
 
+const getBackendUrl = () => import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+
 // Fetch a fresh Google access token from the backend.
 // Returns null silently if the user hasn't connected Google or if the request fails.
 const fetchGoogleToken = async () => {
   try {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
-    const res = await axios.get(`${backendUrl}/api/google/token`, {
+    const res = await axios.get(`${getBackendUrl()}/api/google/token`, {
       withCredentials: true,
       timeout: 8_000,
     });
@@ -24,6 +25,36 @@ const fetchGoogleToken = async () => {
   } catch {
     return null;
   }
+};
+
+const fetchCurrentUser = async () => {
+  try {
+    const res = await axios.get(`${getBackendUrl()}/api/auth/me`, {
+      withCredentials: true,
+      timeout: 8_000,
+    });
+    return res.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const getUserScopedContext = async () => {
+  const [currentUser, googleAccessToken, jiraCredentials] = await Promise.all([
+    fetchCurrentUser(),
+    fetchGoogleToken(),
+    integrationApi.ambilJiraCredentialsUntukN8n(),
+  ]);
+
+  if (!currentUser?.id) {
+    throw new Error('Silakan login terlebih dahulu agar sesi chat tersimpan di akun Anda.');
+  }
+
+  return {
+    userId: currentUser.id,
+    googleAccessToken,
+    jiraCredentials,
+  };
 };
 
 // ─── Chat API ─────────────────────────────────────────────────────────────────
@@ -36,14 +67,14 @@ export const chatApi = {
    * @param {File|null} file - Optional file attachment
    */
   sendToSupervisor: async (message, action = "chat", sessionId = null, file = null) => {
-    const googleAccessToken = await fetchGoogleToken();
-    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
+    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     if (file) {
       // Create FormData if file is present
       const formData = new FormData();
       formData.append("action", action);
       formData.append("session_id", sessionId || getSessionId());
+      formData.append("user_id", userId);
       formData.append("message", message || ""); // Message can be empty if sending only a file
       formData.append("chat_type", "general_chat");
       formData.append("timestamp", new Date().toISOString());
@@ -61,6 +92,7 @@ export const chatApi = {
       return post(urls.getSupervisor, {
         action,
         session_id: sessionId || getSessionId(),
+        user_id: userId,
         message,
         context_filter: null,
         chat_type: "general_chat",
@@ -78,11 +110,11 @@ export const chatApi = {
    * @param {string|null} sessionId - Optional explicit session ID
    */
   sendToKnowledge: async (message, contextFilter = null, sessionId = null) => {
-    const googleAccessToken = await fetchGoogleToken();
-    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
+    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
     return post(urls.getKnowledge, {
       action: "chat",
       session_id: sessionId || getSessionId(),
+      user_id: userId,
       message,
       context_filter: contextFilter,
       chat_type: "rag_chat",
@@ -98,7 +130,7 @@ export const chatApi = {
    * @param {string|null} sessionId - Optional explicit session ID
    */
   sendEmail: async (emailDraft, sessionId = null) => {
-    const googleAccessToken = await fetchGoogleToken();
+    const { userId, googleAccessToken } = await getUserScopedContext();
     
     if (!googleAccessToken) {
       throw new Error('Google access token tidak tersedia. Silakan login dengan Google terlebih dahulu.');
@@ -112,6 +144,7 @@ Message: ${emailDraft.message}`;
     return post(urls.getSupervisor, {
       action: "send_email",
       session_id: sessionId || getSessionId(),
+      user_id: userId,
       message,
       chat_type: "general_chat",
       timestamp: new Date().toISOString(),
@@ -126,8 +159,7 @@ Message: ${emailDraft.message}`;
    * @param {string|null} sessionId - Optional explicit session ID
    */
   regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
-    const googleAccessToken = await fetchGoogleToken();
-    const jiraCredentials = await integrationApi.ambilJiraCredentialsUntukN8n();
+    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     const message = `Buat ulang draft email ini dengan perbaikan berikut: "${improvementText}"
 
@@ -141,6 +173,7 @@ Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
     return post(urls.getSupervisor, {
       action: "chat",
       session_id: sessionId || getSessionId(),
+      user_id: userId,
       message,
       chat_type: "general_chat",
       timestamp: new Date().toISOString(),

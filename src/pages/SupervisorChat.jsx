@@ -73,6 +73,10 @@ export default function SupervisorChat() {
         }
       }
 
+      if (!sessionId) {
+        throw new Error('Gagal membuat sesi chat. Pastikan Anda sudah login terlebih dahulu.')
+      }
+
       const data = await chatApi.sendToSupervisor(text, 'chat', sessionId, file)
       const normalizedData = normalizeResponsePayload(data)
 
@@ -96,7 +100,7 @@ export default function SupervisorChat() {
           ? 'Request timeout. Backend n8n tidak merespons dalam 120 detik.'
           : err.response?.status
             ? `Error ${err.response.status}: ${err.response.data?.message ?? 'Terjadi kesalahan.'}`
-            : 'Tidak dapat terhubung ke n8n. Periksa URL webhook di Settings.'
+            : err.message || 'Tidak dapat terhubung ke n8n. Periksa URL webhook di Settings.'
       )
     } finally {
       setLoading(false)

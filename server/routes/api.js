@@ -13,6 +13,25 @@ const getSupabaseHeaders = (extraHeaders = {}) => ({
   ...extraHeaders,
 });
 
+const encodeFilterValue = (value) => encodeURIComponent(String(value));
+
+const buildMemorySessionKey = (userId, sessionId) => `${userId}:${sessionId}`;
+
+const fetchOwnedChatSession = async (sessionId, userId) => {
+  const url = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}&select=id&limit=1`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getSupabaseHeaders()
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase error: ${response.status} ${response.statusText}`);
+  }
+
+  const rows = await response.json();
+  return rows[0] || null;
+};
+
 const isValidTokenCount = (value) =>
   Number.isInteger(value) && value >= 0;
 
@@ -68,9 +87,10 @@ router.get('/google/token', requireAuth, async (req, res) => {
 });
 
 // Fetch documents from Supabase using service role key
-router.get('/dokumen', async (req, res) => {
+router.get('/dokumen', requireAuth, async (req, res) => {
   try {
-    const url = `${process.env.SUPABASE_URL}/rest/v1/dokumen?select=*&order=created_at.desc`;
+    const userId = req.user.id;
+    const url = `${process.env.SUPABASE_URL}/rest/v1/dokumen?user_id=eq.${encodeFilterValue(userId)}&select=*&order=created_at.desc`;
     const response = await fetch(url, {
       method: 'GET',
       headers: getSupabaseHeaders()
@@ -227,12 +247,14 @@ router.get('/token-usage', async (req, res) => {
 });
 
 // Create new chat session
-router.post('/sessions', async (req, res) => {
+router.post('/sessions', requireAuth, async (req, res) => {
   try {
     const { judul = "Obrolan Baru", chat_type = "general_chat" } = req.body;
     const newSessionId = crypto.randomUUID();
+    const userId = req.user.id;
     const payload = {
       id: newSessionId,
+      user_id: userId,
       judul,
       chat_type,
     };
@@ -260,11 +282,17 @@ router.post('/sessions', async (req, res) => {
 });
 
 // Get all chat sessions
-router.get('/sessions', async (req, res) => {
+router.get('/sessions', requireAuth, async (req, res) => {
   try {
     const { chat_type } = req.query;
-    const filter = chat_type ? `&chat_type=eq.${chat_type}` : "";
-    const url = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?select=id,judul,chat_type,created_at&order=created_at.desc${filter}`;
+    const userId = req.user.id;
+    const filters = [`user_id=eq.${encodeFilterValue(userId)}`];
+
+    if (chat_type) {
+      filters.push(`chat_type=eq.${encodeFilterValue(chat_type)}`);
+    }
+
+    const url = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?select=id,judul,chat_type,created_at&${filters.join('&')}&order=created_at.desc`;
     
     const response = await fetch(url, {
       method: 'GET',
@@ -284,12 +312,18 @@ router.get('/sessions', async (req, res) => {
 });
 
 // Get chat history for a session
-router.get('/sessions/:sessionId/history', async (req, res) => {
+router.get('/sessions/:sessionId/history', requireAuth, async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user.id;
+    const ownedSession = await fetchOwnedChatSession(sessionId, userId);
+
+    if (!ownedSession) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
 
     // Fetch chat history from chat_messages table
-    const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${sessionId}&order=created_at.asc&select=id,session_id,input,output,created_at`;
+    const historyUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}&order=created_at.asc&select=id,session_id,input,output,created_at`;
     const historyResponse = await fetch(historyUrl, {
       method: 'GET',
       headers: getSupabaseHeaders()
@@ -302,7 +336,7 @@ router.get('/sessions/:sessionId/history', async (req, res) => {
     const rows = await historyResponse.json();
 
     // Fetch dokumen output for this session
-    const dokumenUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?session_id=eq.${sessionId}&kategori=eq.output&order=created_at.asc&select=file_url,nama_file,created_at`;
+    const dokumenUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?session_id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}&kategori=eq.output&order=created_at.asc&select=file_url,nama_file,created_at`;
     const dokumenResponse = await fetch(dokumenUrl, {
       method: 'GET',
       headers: getSupabaseHeaders()
@@ -321,12 +355,18 @@ router.get('/sessions/:sessionId/history', async (req, res) => {
 });
 
 // Delete chat session
-router.delete('/sessions/:sessionId', async (req, res) => {
+router.delete('/sessions/:sessionId', requireAuth, async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user.id;
+    const ownedSession = await fetchOwnedChatSession(sessionId, userId);
+
+    if (!ownedSession) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
 
     // Delete messages first from chat_messages table
-    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${sessionId}`;
+    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?session_id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}`;
     const messagesResponse = await fetch(messagesUrl, {
       method: 'DELETE',
       headers: getSupabaseHeaders()
@@ -336,8 +376,40 @@ router.delete('/sessions/:sessionId', async (req, res) => {
       throw new Error(`Failed to delete messages: ${messagesResponse.status}`);
     }
 
+    const dokumenUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?session_id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}`;
+    const dokumenResponse = await fetch(dokumenUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!dokumenResponse.ok) {
+      throw new Error(`Failed to delete documents: ${dokumenResponse.status}`);
+    }
+
+    const memorySessionKey = buildMemorySessionKey(userId, sessionId);
+
+    const memoriesUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_memories?session_id=eq.${encodeFilterValue(memorySessionKey)}`;
+    const memoriesResponse = await fetch(memoriesUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!memoriesResponse.ok) {
+      throw new Error(`Failed to delete memories: ${memoriesResponse.status}`);
+    }
+
+    const historyMemoriesUrl = `${process.env.SUPABASE_URL}/rest/v1/n8n_chat_histories?session_id=eq.${encodeFilterValue(memorySessionKey)}`;
+    const historyMemoriesResponse = await fetch(historyMemoriesUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!historyMemoriesResponse.ok) {
+      throw new Error(`Failed to delete legacy memories: ${historyMemoriesResponse.status}`);
+    }
+
     // Delete session
-    const sessionUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${sessionId}`;
+    const sessionUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_sessions?id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}`;
     const sessionResponse = await fetch(sessionUrl, {
       method: 'DELETE',
       headers: getSupabaseHeaders()

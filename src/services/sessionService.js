@@ -103,6 +103,8 @@ export const sessionApi = {
       const res = await axios.post(`${urls.getBackendUrl()}/api/sessions`, {
         judul: judulChat,
         chat_type: chatType,
+      }, {
+        withCredentials: true,
       });
       return res.data;
     } catch (error) {
@@ -119,7 +121,10 @@ export const sessionApi = {
   ambilSemuaSesi: async (chatType = null) => {
     try {
       const params = chatType ? { chat_type: chatType } : {};
-      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions`, { params });
+      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions`, {
+        params,
+        withCredentials: true,
+      });
       return res.data;
     } catch (error) {
       console.error("Gagal mengambil daftar sesi:", error);
@@ -135,7 +140,9 @@ export const sessionApi = {
    */
   ambilRiwayatChat: async (sessionId) => {
     try {
-      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions/${sessionId}/history`);
+      const res = await axios.get(`${urls.getBackendUrl()}/api/sessions/${sessionId}/history`, {
+        withCredentials: true,
+      });
       const { history: rows, dokumen } = res.data;
 
       let docIndex = 0;
@@ -203,7 +210,9 @@ export const sessionApi = {
    */
   hapusSesiChat: async (sessionId) => {
     try {
-      await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}`);
+      await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}`, {
+        withCredentials: true,
+      });
       console.log(`Riwayat chat untuk sesi ${sessionId} berhasil dihapus.`);
       return true;
     } catch (error) {

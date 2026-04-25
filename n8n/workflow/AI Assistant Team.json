@@ -47,6 +47,10 @@
             {
               "fieldId": "session_id",
               "fieldValue": "={{ $('Main Webhook').item.json.body.session_id }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -1322,6 +1326,11 @@
               "keyName": "id",
               "condition": "eq",
               "keyValue": "={{ $('Main Webhook').item.json.body.session_id }}"
+            },
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+            "keyValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         },
@@ -1517,6 +1526,11 @@
             {
               "keyName": "id",
               "keyValue": "={{ $json.body.session_id }}"
+            },
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+            "keyValue": "={{ $json.body.user_id }}"
             }
           ]
         }
@@ -1561,7 +1575,7 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Main Webhook').item.json.body.session_id }}",
+        "sessionKey": "={{ (($('Main Webhook').item.json.body.user_id || 'anonymous') + ':' + $('Main Webhook').item.json.body.session_id) }}",
         "tableName": "n8n_memories"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
@@ -1610,6 +1624,14 @@
             {
               "fieldId": "file_url",
               "fieldValue": "=\"http://localhost:8000/storage/v1/object/public/dokumen_sop/{{ $('Upload Document').item.json.body.file_name }}\""
+            },
+            {
+              "fieldId": "session_id",
+              "fieldValue": "={{ $('Upload Document').item.json.body.session_id }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Upload Document').item.json.body.user_id }}"
             }
           ]
         }
@@ -1840,6 +1862,10 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -1944,6 +1970,10 @@
             {
               "fieldId": "session_id",
               "fieldValue": "={{ $('Main Webhook').item.json.body.session_id }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -2073,6 +2103,10 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -2125,6 +2159,10 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -2192,6 +2230,10 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
@@ -2231,6 +2273,10 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         }
