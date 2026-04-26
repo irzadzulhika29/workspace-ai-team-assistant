@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { emailApi } from '../services/emailService';
+import * as emailDraftService from '../services/emailDraftService';
 
 /**
  * Email Store - Zustand state management for email feature
@@ -12,6 +13,9 @@ export const useEmailStore = create((set, get) => ({
   
   // Selected email for detail view
   selectedEmail: null,
+  
+  // Drafts state
+  drafts: [],
   
   // Filters
   filters: {
@@ -283,5 +287,129 @@ export const useEmailStore = create((set, get) => ({
    */
   refreshEmails: async () => {
     await get().fetchEmails();
+  },
+
+  /**
+   * Fetch drafts from Supabase
+   */
+  fetchDrafts: async () => {
+    set({ loading: true, error: null });
+
+    try {
+      const drafts = await emailDraftService.listDrafts({ status: 'draft' });
+      set({ drafts, loading: false });
+    } catch (error) {
+      console.error('Error fetching drafts:', error);
+      set({
+        error: error.response?.data?.error || error.message || 'Failed to fetch drafts',
+        loading: false
+      });
+    }
+  },
+
+  /**
+   * Create draft from email reply
+   * @param {Object} draftData - Draft data
+   */
+  createDraft: async (draftData) => {
+    try {
+      const draft = await emailDraftService.createDraft(draftData);
+      
+      // Add to local state
+      set(state => ({
+        drafts: [draft, ...state.drafts]
+      }));
+
+      return draft;
+    } catch (error) {
+      console.error('Error creating draft:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send draft email
+   * @param {string} draftId - Draft ID
+   */
+  sendDraft: async (draftId) => {
+    set({ loading: true, error: null });
+
+    try {
+      const sentDraft = await emailDraftService.sendDraft(draftId);
+
+      // Remove draft from list
+      set(state => ({
+        drafts: state.drafts.filter(d => d.id !== draftId),
+        loading: false
+      }));
+
+      // Refresh email list
+      await get().fetchEmails();
+
+      return { success: true, draft: sentDraft };
+    } catch (error) {
+      console.error('Error sending draft:', error);
+      set({
+        error: error.response?.data?.error || error.message || 'Failed to send email',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  /**
+   * Revise draft with AI
+   * @param {string} draftId - Draft ID
+   * @param {string} instructions - Revision instructions
+   */
+  reviseDraft: async (draftId, instructions) => {
+    set({ loading: true, error: null });
+
+    try {
+      const revisedDraft = await emailDraftService.reviseDraft(draftId, instructions);
+
+      // Update draft in list
+      set(state => ({
+        drafts: state.drafts.map(d =>
+          d.id === draftId ? revisedDraft : d
+        ),
+        loading: false
+      }));
+
+      return { success: true, draft: revisedDraft };
+    } catch (error) {
+      console.error('Error revising draft:', error);
+      set({
+        error: error.response?.data?.error || error.message || 'Failed to revise draft',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
+  /**
+   * Delete draft
+   * @param {string} draftId - Draft ID
+   */
+  deleteDraft: async (draftId) => {
+    try {
+      await emailDraftService.deleteDraft(draftId);
+      
+      set(state => ({
+        drafts: state.drafts.filter(d => d.id !== draftId)
+      }));
+    } catch (error) {
+      console.error('Error deleting draft:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get draft by ID
+   * @param {string} draftId - Draft ID
+   */
+  getDraft: (draftId) => {
+    const { drafts } = get();
+    return drafts.find(d => d.id === draftId);
   }
 }));

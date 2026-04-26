@@ -4,9 +4,22 @@ import { useEmailStore } from '../../store/emailStore';
 
 /**
  * EmailList Component - Display list of emails
+ * @param {number} maxItems - Maximum number of items to display
+ * @param {boolean} unreadOnly - Show only unread emails
  */
-export default function EmailList() {
+export default function EmailList({ maxItems, unreadOnly = false }) {
   const { emails, loading, selectedEmail, selectEmail, toggleStar } = useEmailStore();
+
+  // Filter emails based on props
+  let displayEmails = emails;
+  
+  if (unreadOnly) {
+    displayEmails = emails.filter(email => email.labelIds?.includes('UNREAD'));
+  }
+  
+  if (maxItems) {
+    displayEmails = displayEmails.slice(0, maxItems);
+  }
 
   /**
    * Format date to relative time (e.g., "2 hours ago")
@@ -61,7 +74,7 @@ export default function EmailList() {
   if (loading && emails.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto">
-        {[...Array(10)].map((_, i) => (
+        {[...Array(maxItems || 10)].map((_, i) => (
           <div key={i} className="border-b border-gray-200 p-4 animate-pulse">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
@@ -77,13 +90,15 @@ export default function EmailList() {
     );
   }
 
-  if (emails.length === 0) {
+  if (displayEmails.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500">
         <div className="text-center">
           <Mail className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium">No emails found</p>
-          <p className="text-sm">Your inbox is empty</p>
+          <p className="text-sm">
+            {unreadOnly ? 'No unread emails' : 'Your inbox is empty'}
+          </p>
         </div>
       </div>
     );
@@ -91,7 +106,7 @@ export default function EmailList() {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      {emails.map((email) => (
+      {displayEmails.map((email) => (
         <div
           key={email.id}
           onClick={() => selectEmail(email.id)}

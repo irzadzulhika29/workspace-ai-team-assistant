@@ -138,6 +138,14 @@ export const urls = {
   setDevBaseUrl: (url) =>
     localStorage.setItem(KEYS.DEV_BASE_URL, url),
 
+  // Get n8n base URL (for custom webhooks)
+  getN8nBaseUrl: () => {
+    const env = urls.getEnvironment();
+    const devUrl = urls.getDevBaseUrl();
+    const baseUrl = env === ENVIRONMENTS.PROD ? PROD_BASE_URL : devUrl;
+    return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  },
+
   // Get specific webhook URLs
   getSupervisor: () => {
     const env = urls.getEnvironment();

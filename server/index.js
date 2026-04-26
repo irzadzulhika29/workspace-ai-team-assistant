@@ -12,6 +12,7 @@ import apiRoutes from './routes/api.js';
 import googleRoutes from './routes/google.js';
 import integrationRoutes from './routes/integrations.js';
 import dashboardRoutes from './routes/dashboard.js';
+import emailDraftsRoutes from './routes/emailDrafts.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import prisma from './lib/prisma.js';
 
@@ -88,6 +89,7 @@ app.use('/api', apiRoutes);
 app.use('/api/google', googleRoutes);
 app.use('/api/integrations', integrationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/email', emailDraftsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

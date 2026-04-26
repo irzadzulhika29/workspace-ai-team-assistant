@@ -1,7 +1,8 @@
-import React from 'react';
-import { ArrowLeft, Star, Mail, MailOpen, Download, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Star, Mail, MailOpen, Download, Sparkles, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEmailStore } from '../../store/emailStore';
+import { generateDraftFromWebhook } from '../../services/emailWebhookService';
 import DOMPurify from 'dompurify';
 
 const EMAIL_ADDRESS_RE = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i;
@@ -26,9 +27,10 @@ const parseEmailHeader = (value) => {
 /**
  * EmailDetail Component - Display full email content
  */
-export default function EmailDetail() {
-  const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar } = useEmailStore();
+export default function EmailDetail({ onDraftCreated }) {
+  const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar, createDraft } = useEmailStore();
   const navigate = useNavigate();
+  const [generatingDraft, setGeneratingDraft] = useState(false);
 
   if (!selectedEmail && !loadingDetail) {
     return (
@@ -116,6 +118,32 @@ export default function EmailDetail() {
   };
 
   /**
+   * Handle Draft Reply - Create draft by sending email to webhook
+   */
+  const handleDraftReply = async () => {
+    setGeneratingDraft(true);
+
+    try {
+      // Send email to webhook and generate draft
+      const result = await generateDraftFromWebhook(email, createDraft);
+
+      if (result.success) {
+        // Notify parent to switch to drafts tab
+        if (onDraftCreated) {
+          onDraftCreated();
+        }
+      } else {
+        alert('Failed to create draft. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating draft:', error);
+      alert(`Error creating draft: ${error.message}`);
+    } finally {
+      setGeneratingDraft(false);
+    }
+  };
+
+  /**
    * Handle Magic Button - Generate AI reply
    */
   const handleMagicReply = () => {
@@ -142,10 +170,11 @@ ${emailContext}
 
 Tolong buatkan balasan yang profesional dan sesuai konteks.`;
 
-    // Navigate to Supervisor Chat with auto-send
+    // Navigate to Supervisor Chat with auto-send and draft creation flag
     navigate('/chat/supervisor', {
       state: {
         autoSendMessage: prompt,
+        createDraft: true,
         emailContext: {
           from: email.from,
           fromName: sender.name,
@@ -155,7 +184,10 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
           toEmail: recipient.address,
           subject,
           date: emailDate,
-          messageId: email.id
+          messageId: email.id,
+          originalSubject: subject,
+          replyTo: sender.address,
+          snippet: email.snippet
         }
       }
     });
@@ -175,6 +207,19 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
           </button>
 
           <div className="flex items-center gap-2">
+            {/* Draft Reply Button */}
+            <button
+              onClick={handleDraftReply}
+              disabled={generatingDraft}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Create draft reply via AI"
+            >
+              <FileText className={`w-4 h-4 ${generatingDraft ? 'animate-pulse' : ''}`} />
+              <span className="text-sm font-medium">
+                {generatingDraft ? 'Generating...' : 'Draft Reply'}
+              </span>
+            </button>
+
             {/* Magic Button - AI Reply */}
             <button
               onClick={handleMagicReply}

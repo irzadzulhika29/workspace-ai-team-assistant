@@ -175,11 +175,47 @@ export default function SupervisorChat() {
     }
   }, [addSupervisorMessage, activeSupervisorSessionId])
 
-  // Handle auto-send from navigation state (Magic Button from Email)
+  // Handle auto-send from navigation state (Magic Button from Email or Draft Revision)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
     const emailContext = location.state?.emailContext;
+    const draftRevision = location.state?.draftRevision;
+    const draft = location.state?.draft;
 
+    // Handle draft revision
+    if (draftRevision && draft && !autoSendProcessed.current) {
+      autoSendProcessed.current = true;
+      
+      // Set flag to prevent session reload
+      setAutoSending(true);
+      
+      // Show draft context in chat
+      const draftContext = `Draft yang akan direvisi:
+
+To: ${draft.to}
+Subject: ${draft.subject}
+
+Content:
+${draft.body_text || draft.body_html || '(No content)'}
+
+---
+
+Silakan berikan instruksi revisi untuk draft ini.`;
+
+      addSupervisorMessage({
+        role: 'ai',
+        content: draftContext,
+      });
+
+      // Clear flag
+      setTimeout(() => setAutoSending(false), 1000);
+
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+      return;
+    }
+
+    // Handle auto-send message (Magic Reply)
     if (autoSendMessage && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
       
@@ -199,7 +235,7 @@ export default function SupervisorChat() {
       // Clear navigation state to prevent re-sending on refresh
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, handleSend, setAutoSending]);
+  }, [location.state, handleSend, setAutoSending, addSupervisorMessage]);
 
   return (
     <div className="flex flex-col h-screen bg-surface-sunken/80">

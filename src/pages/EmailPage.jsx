@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { Search, RefreshCw, Inbox, Star, Mail, Send } from 'lucide-react';
+import { Search, RefreshCw, Inbox, Mail, FileText, Send } from 'lucide-react';
 import { useEmailStore } from '../store/emailStore';
 import EmailList from '../components/email/EmailList';
 import EmailDetail from '../components/email/EmailDetail';
+import Top5EmailSummary from '../components/email/Top5EmailSummary';
+import DraftsList from '../components/email/DraftsList';
+import DraftRevisionChat from '../components/email/DraftRevisionChat';
 
 /**
- * EmailPage Component - Main email interface
+ * EmailPage Component - Main email workspace
+ * Structure: Inbox | Unread | Drafts | Sent/Follow-up
  */
 export default function EmailPage() {
   const {
     fetchEmails,
-    loadMoreEmails,
     searchEmails,
     setFilter,
-    filters,
     loading,
-    error,
-    nextPageToken,
-    resultSizeEstimate
+    error
   } = useEmailStore();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('unread'); // Default to Unread tab
+  const [revisingDraft, setRevisingDraft] = useState(null);
 
   // Fetch emails on mount
   useEffect(() => {
@@ -36,27 +38,27 @@ export default function EmailPage() {
   };
 
   /**
-   * Handle filter change
+   * Handle tab change
    */
-  const handleFilterChange = (filterType) => {
-    switch (filterType) {
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    
+    switch (tab) {
       case 'inbox':
         setFilter('labelIds', 'INBOX');
         setFilter('unreadOnly', false);
-        setFilter('starredOnly', false);
         break;
       case 'unread':
+        setFilter('labelIds', 'INBOX');
         setFilter('unreadOnly', true);
-        setFilter('starredOnly', false);
         break;
-      case 'starred':
-        setFilter('starredOnly', true);
-        setFilter('unreadOnly', false);
+      case 'drafts':
+        // Fetch drafts from Supabase
+        useEmailStore.getState().fetchDrafts();
         break;
       case 'sent':
         setFilter('labelIds', 'SENT');
         setFilter('unreadOnly', false);
-        setFilter('starredOnly', false);
         break;
       default:
         break;
@@ -71,16 +73,27 @@ export default function EmailPage() {
   };
 
   /**
-   * Get active filter
+   * Handle revise draft
    */
-  const getActiveFilter = () => {
-    if (filters.starredOnly) return 'starred';
-    if (filters.unreadOnly) return 'unread';
-    if (filters.labelIds === 'SENT') return 'sent';
-    return 'inbox';
+  const handleReviseDraft = (draft) => {
+    setRevisingDraft(draft);
   };
 
-  const activeFilter = getActiveFilter();
+  /**
+   * Handle draft updated from chat
+   */
+  const handleDraftUpdated = async () => {
+    // Refresh drafts list
+    await useEmailStore.getState().fetchDrafts();
+  };
+
+  /**
+   * Handle draft created - switch to drafts tab
+   */
+  const handleDraftCreated = () => {
+    setActiveTab('drafts');
+    useEmailStore.getState().fetchDrafts();
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -127,84 +140,125 @@ export default function EmailPage() {
         )}
       </div>
 
+      {/* Tabs Navigation */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex gap-1">
+          <button
+            onClick={() => handleTabChange('inbox')}
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              activeTab === 'inbox'
+                ? 'border-blue-600 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            <Inbox className="w-4 h-4" />
+            <span>Inbox</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('unread')}
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              activeTab === 'unread'
+                ? 'border-blue-600 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            <Mail className="w-4 h-4" />
+            <span>Unread</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('drafts')}
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              activeTab === 'drafts'
+                ? 'border-blue-600 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Drafts</span>
+          </button>
+
+          <button
+            onClick={() => handleTabChange('sent')}
+            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              activeTab === 'sent'
+                ? 'border-blue-600 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            <Send className="w-4 h-4" />
+            <span>Sent / Follow-up</span>
+          </button>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Filters */}
-        <div className="w-64 bg-white border-r border-gray-200 p-4">
-          <nav className="space-y-1">
-            <button
-              onClick={() => handleFilterChange('inbox')}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                activeFilter === 'inbox'
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Inbox className="w-5 h-5" />
-              <span>Inbox</span>
-              {activeFilter === 'inbox' && (
-                <span className="ml-auto text-sm">{resultSizeEstimate}</span>
-              )}
-            </button>
-
-            <button
-              onClick={() => handleFilterChange('starred')}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                activeFilter === 'starred'
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Star className="w-5 h-5" />
-              <span>Starred</span>
-            </button>
-
-            <button
-              onClick={() => handleFilterChange('unread')}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                activeFilter === 'unread'
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Mail className="w-5 h-5" />
-              <span>Unread</span>
-            </button>
-
-            <button
-              onClick={() => handleFilterChange('sent')}
-              className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                activeFilter === 'sent'
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Send className="w-5 h-5" />
-              <span>Sent</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Email List */}
-        <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
-          <EmailList />
-          
-          {/* Load More Button */}
-          {nextPageToken && (
-            <div className="border-t border-gray-200 p-4">
-              <button
-                onClick={loadMoreEmails}
-                disabled={loading}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Loading...' : 'Load More'}
-              </button>
+        {/* Tab Content */}
+        {activeTab === 'unread' && (
+          <>
+            {/* Left Panel: Top 5 Summary + Email List */}
+            <div className="w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+              {/* Top 5 Email Summary Card */}
+              <div className="border-b border-gray-200">
+                <Top5EmailSummary />
+              </div>
+              
+              {/* Email List */}
+              <div className="flex-1 overflow-y-auto">
+                <EmailList maxItems={5} unreadOnly={true} />
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Email Detail */}
-        <EmailDetail />
+            {/* Right Panel: Email Detail */}
+            <EmailDetail onDraftCreated={handleDraftCreated} />
+          </>
+        )}
+
+        {activeTab === 'inbox' && (
+          <>
+            {/* Email List */}
+            <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+              <EmailList />
+            </div>
+
+            {/* Email Detail */}
+            <EmailDetail onDraftCreated={handleDraftCreated} />
+          </>
+        )}
+
+        {activeTab === 'drafts' && (
+          <>
+            {/* Drafts List */}
+            <div className={revisingDraft ? 'w-1/2 bg-white overflow-hidden' : 'flex-1 bg-white'}>
+              <DraftsList onRevise={handleReviseDraft} />
+            </div>
+
+            {/* Draft Revision Chat */}
+            {revisingDraft && (
+              <div className="w-1/2 overflow-hidden">
+                <DraftRevisionChat
+                  draft={revisingDraft}
+                  onClose={() => setRevisingDraft(null)}
+                  onDraftUpdated={handleDraftUpdated}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'sent' && (
+          <>
+            {/* Sent Email List */}
+            <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+              <EmailList />
+            </div>
+
+            {/* Email Detail */}
+            <EmailDetail onDraftCreated={handleDraftCreated} />
+          </>
+        )}
       </div>
     </div>
   );

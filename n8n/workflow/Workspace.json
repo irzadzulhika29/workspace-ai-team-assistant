@@ -1,0 +1,673 @@
+{
+  "name": "Workspace",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1744,
+        1360
+      ],
+      "id": "289d51d0-5dce-4f1f-ab8a-a508095c5bad",
+      "name": "Webhook",
+      "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        1600
+      ],
+      "id": "4dc7d507-13f4-41f7-b6c9-dfddd27a2b09",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "68b7yPyfO0nmCOn6",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "WAJIB dipanggil sebelum membuat draft email, membalas email, forward email, atau mengirim email. Tool ini berisi aturan format HTML Gmail, struktur subject/body, inline CSS, dan checklist final. Jangan membuat isi email final sebelum membaca hasil tool ini.",
+        "url": "https://raw.githubusercontent.com/irzadzulhika29/workspace-ai-team-assistant/refs/heads/main/n8n/workflow/skills/create_email.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -1072,
+        1600
+      ],
+      "id": "c8b31bf7-5375-456e-97bd-a7a76d5b205a",
+      "name": "Get Email Format"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ (() => {\n  const body = $json.body ?? {};\n  if (body.prompt) return body.prompt;\n\n  const isRevision = body.action === 'revise' || !!body.draft_id;\n  const sourceEmail = body.source_email ?? {};\n  const currentDraft = body.current_draft ?? {};\n\n  if (isRevision) {\n    return `Revisi draft email berikut.\n\nDRAFT ID: ${body.draft_id || ''}\nINSTRUKSI REVISI:\n${body.revision_instructions || 'Tidak ada instruksi revisi tambahan.'}\n\nDRAFT SAAT INI:\nTo: ${currentDraft.to || ''}\nCC: ${currentDraft.cc || ''}\nBCC: ${currentDraft.bcc || ''}\nSubject: ${currentDraft.subject || ''}\nBody Text:\n${currentDraft.body_text || ''}\n\nBody HTML:\n${currentDraft.body_html || ''}\n\nKONTEKS EMAIL SUMBER:\nEmail ID: ${sourceEmail.id || body.id || ''}\nThread ID: ${sourceEmail.threadId || body.threadId || ''}\nDari: ${sourceEmail.from || body.from || ''}\nKepada: ${sourceEmail.to || body.to || ''}\nCC: ${sourceEmail.cc || body.cc || ''}\nBCC: ${sourceEmail.bcc || body.bcc || ''}\nSubjek: ${sourceEmail.subject || body.subject || ''}\nTanggal: ${sourceEmail.date || sourceEmail.internalDate || body.date || body.internalDate || ''}\n\nIsi email asli:\n${sourceEmail.body || body.body || ''}\n\nHTML email asli:\n${sourceEmail.htmlBody || body.htmlBody || ''}\n\nPertahankan konteks thread, subject yang relevan, dan penerima kecuali instruksi revisi meminta perubahan eksplisit.`;\n  }\n\n  return `Buatkan draft email berdasarkan konteks berikut:\nEmail ID: ${body.id || body.messageId || ''}\nThread ID: ${body.threadId || ''}\nDari: ${body.from || ''}\nKepada: ${body.to || ''}\nCC: ${body.cc || ''}\nBCC: ${body.bcc || ''}\nSubjek: ${body.subject || ''}\nTanggal: ${body.date || body.internalDate || ''}\n\nIsi email asli:\n${body.body || ''}\n\nHTML email asli:\n${body.htmlBody || ''}`;\n})() }}\n",
+        "options": {
+          "systemMessage": "=Kamu adalah agen Draft & Send Email untuk workspace email.\n\nTUGAS UTAMA:\n1. Membuat draft email baru atau balasan dari payload webhook.\n2. Merevisi draft email yang sudah ada berdasarkan draft lama dan instruksi revisi user.\n3. Menghasilkan output JSON valid tunggal untuk disimpan ke tabel email_drafts.\n\nATURAN WAJIB:\n- WAJIB panggil tool Get Email Format tepat satu kali sebelum menulis isi email final.\n- Gunakan hasil tool itu sebagai aturan utama format subject dan body HTML.\n- Jangan pernah mengembalikan markdown, code block, atau penjelasan tambahan.\n- Output HARUS hanya JSON valid tunggal.\n\nATURAN REVISI:\n- Jika ada draft_id atau action=revise, anggap ini revisi draft yang sudah ada.\n- Gunakan current_draft sebagai draft dasar yang harus diperbaiki.\n- Gunakan revision_instructions sebagai instruksi utama revisi.\n- Gunakan source_email sebagai konteks thread email asli.\n- Jangan ubah penerima, subject, atau arah balasan kecuali diminta eksplisit dalam revision_instructions.\n- Revisi berkali-kali harus tetap mempertahankan konteks thread yang sama.\n\nFORMAT OUTPUT WAJIB:\n{\n  \"action\": \"draft\",\n  \"draft_type\": \"reply\",\n  \"to\": \"email@tujuan.com\",\n  \"cc\": \"\",\n  \"bcc\": \"\",\n  \"subject\": \"Subjek email\",\n  \"body_text\": \"versi plain text\",\n  \"body_html\": \"isi email dalam format HTML\",\n  \"attachments\": []\n}\n\nATURAN TAMBAHAN:\n- Untuk balasan email, alamat tujuan default adalah pengirim email asli pada source_email.from, kecuali instruksi revisi meminta penerima lain.\n- Jika ini revisi, subject default mengikuti current_draft.subject kecuali diminta berubah.\n- body_html wajib terisi.\n- body_text wajib terisi.\n- attachments selalu array JSON, default [].\n- field action selalu \"draft\".\n- draft_type default \"reply\" kecuali konteks jelas menunjukkan follow_up, reminder, atau new_email.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1328,
+        1360
+      ],
+      "id": "54e5a7cf-e0ae-452c-a25c-29f55d772b1c",
+      "name": "Draft & Send Email"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item.json;\nconst body = $('Webhook').first().json.body ?? {};\n\nconst stripCodeFence = (value) =>\n  String(value || '')\n    .replace(/^```(?:json)?\\s*/i, '')\n    .replace(/\\s*```$/i, '')\n    .trim();\n\nconst parseJson = (raw) => {\n  const cleaned = stripCodeFence(raw);\n  try {\n    return JSON.parse(cleaned);\n  } catch (error) {\n    throw new Error(`Draft agent output is not valid JSON: ${cleaned}`);\n  }\n};\n\nconst extractEmail = (value) => {\n  const raw = String(value || '').trim();\n  const match = raw.match(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})/i);\n  return match?.[1] || raw || null;\n};\n\nconst sourceEmail = body.source_email ?? {};\nconst currentDraft = body.current_draft ?? {};\n\nif (!body.user_id) {\n  throw new Error('Webhook body.user_id is required to save draft email');\n}\n\nconst result = parseJson(item.output);\nconst now = new Date().toISOString();\nconst draftType = body.draft_type || result.draft_type || 'reply';\nconst fallbackTo = draftType === 'reply'\n  ? extractEmail(sourceEmail.from || body.from)\n  : extractEmail(sourceEmail.to || body.to);\n\nreturn {\n  json: {\n    draft_id: body.draft_id || null,\n    user_id: body.user_id,\n    session_id: body.session_id || null,\n    source_thread_id: sourceEmail.threadId || body.threadId || null,\n    source_message_id: sourceEmail.id || body.id || body.messageId || null,\n    draft_type: draftType,\n    status: 'draft',\n    to_email: result.to || currentDraft.to || fallbackTo,\n    cc: result.cc ?? currentDraft.cc ?? sourceEmail.cc ?? body.cc ?? '',\n    bcc: result.bcc ?? currentDraft.bcc ?? sourceEmail.bcc ?? body.bcc ?? '',\n    subject: result.subject || currentDraft.subject || sourceEmail.subject || body.subject || '',\n    body_text: result.body_text || result.message || currentDraft.body_text || sourceEmail.body || body.body || '',\n    body_html: result.body_html || result.message || currentDraft.body_html || sourceEmail.htmlBody || body.htmlBody || '',\n    attachments: Array.isArray(result.attachments)\n      ? result.attachments\n      : Array.isArray(currentDraft.attachments)\n        ? currentDraft.attachments\n        : Array.isArray(sourceEmail.attachments)\n          ? sourceEmail.attachments\n          : Array.isArray(body.attachments)\n            ? body.attachments\n            : [],\n    source_email_payload: body,\n    revision_note: body.revision_note || body.revision_instructions || null,\n    sent_message_id: null,\n    sent_at: null,\n    created_at: now,\n    updated_at: now,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -992,
+        1360
+      ],
+      "id": "94e5960f-963c-4ed3-b100-ffaef3ef9aa0",
+      "name": "Prepare Draft Payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b8bc28f7-55f3-4c46-b660-e67bb48dbd67",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ !!$json.draft_id }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -736,
+        1360
+      ],
+      "id": "58ee23f0-b6ac-4a5a-9b2c-5fca27714826",
+      "name": "Is Revision?"
+    },
+    {
+      "parameters": {
+        "tableId": "email_drafts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json.user_id }}"
+            },
+            {
+              "fieldId": "session_id",
+              "fieldValue": "={{ $json.session_id }}"
+            },
+            {
+              "fieldId": "source_thread_id",
+              "fieldValue": "={{ $json.source_thread_id }}"
+            },
+            {
+              "fieldId": "source_message_id",
+              "fieldValue": "={{ $json.source_message_id }}"
+            },
+            {
+              "fieldId": "draft_type",
+              "fieldValue": "={{ $json.draft_type }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.to_email }}"
+            },
+            {
+              "fieldId": "cc",
+              "fieldValue": "={{ $json.cc }}"
+            },
+            {
+              "fieldId": "bcc",
+              "fieldValue": "={{ $json.bcc }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "body_text",
+              "fieldValue": "={{ $json.body_text }}"
+            },
+            {
+              "fieldId": "body_html",
+              "fieldValue": "={{ $json.body_html }}"
+            },
+            {
+              "fieldId": "attachments",
+              "fieldValue": "={{ $json.attachments }}"
+            },
+            {
+              "fieldId": "source_email_payload",
+              "fieldValue": "={{ $json.source_email_payload }}"
+            },
+            {
+              "fieldId": "revision_note",
+              "fieldValue": "={{ $json.revision_note }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        1472
+      ],
+      "id": "f2460929-6b8f-410f-9308-c6671483e944",
+      "name": "Create Draft Row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "email_drafts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.draft_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "draft_type",
+              "fieldValue": "={{ $json.draft_type }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.to_email }}"
+            },
+            {
+              "fieldId": "cc",
+              "fieldValue": "={{ $json.cc }}"
+            },
+            {
+              "fieldId": "bcc",
+              "fieldValue": "={{ $json.bcc }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "body_text",
+              "fieldValue": "={{ $json.body_text }}"
+            },
+            {
+              "fieldId": "body_html",
+              "fieldValue": "={{ $json.body_html }}"
+            },
+            {
+              "fieldId": "attachments",
+              "fieldValue": "={{ $json.attachments }}"
+            },
+            {
+              "fieldId": "source_email_payload",
+              "fieldValue": "={{ $json.source_email_payload }}"
+            },
+            {
+              "fieldId": "revision_note",
+              "fieldValue": "={{ $json.revision_note }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updated_at }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        1296
+      ],
+      "id": "d47d7904-8fa9-44cf-b340-a150ebe1d95b",
+      "name": "Update Draft Row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const drafts = $input.all().map((item) => item.json);\n\nreturn {\n  json: {\n    drafts,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        1312
+      ],
+      "id": "b729126f-6254-4363-97a3-0921b7eea298",
+      "name": "Format Draft Response"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        96,
+        1312
+      ],
+      "id": "977354f0-ddb5-46b9-9d9f-eec413a102e1",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b639653a-470d-4a77-bca8-b9af68ea4ee3",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body?.action === 'send' }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1536,
+        1360
+      ],
+      "id": "f478dcac-fe96-4b2b-ac09-d1aca3a00fe7",
+      "name": "Is Send Action?"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const body = $json.body ?? {};\nconst currentDraft = body.current_draft ?? {};\nconst sourceEmail = body.source_email ?? {};\nconst now = new Date().toISOString();\n\nconst extractEmail = (value) => {\n  const raw = String(value || '').trim();\n  const match = raw.match(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})/i);\n  return match?.[1] || raw || null;\n};\n\nconst normalizeUserId = (...values) => {\n  for (const value of values) {\n    if (typeof value !== 'string') continue;\n    const trimmed = value.trim();\n    if (!trimmed) continue;\n    if (trimmed.toLowerCase() === 'unknown') continue;\n    return trimmed;\n  }\n  return null;\n};\n\nconst googleAccessToken =\n  body.google_access_token ||\n  body.google_token?.access_token ||\n  null;\nconst resolvedUserId = normalizeUserId(body.user_id, sourceEmail.user_id, currentDraft.user_id);\n\nif (!resolvedUserId) {\n  throw new Error('Valid user_id is required to send email');\n}\n\nif (!body.draft_id) {\n  throw new Error('Webhook body.draft_id is required to send draft email');\n}\n\nif (!googleAccessToken) {\n  throw new Error('Google access token is required to send email');\n}\n\nconst toEmail = extractEmail(\n  currentDraft.to ||\n  currentDraft.to_email ||\n  sourceEmail.from ||\n  body.to\n);\n\nif (!toEmail) {\n  throw new Error('Draft recipient is required before sending email');\n}\n\nconst cc = currentDraft.cc || sourceEmail.cc || body.cc || '';\nconst bcc = currentDraft.bcc || sourceEmail.bcc || body.bcc || '';\nconst subject = currentDraft.subject || sourceEmail.subject || body.subject || '';\nconst bodyHtml = currentDraft.body_html || currentDraft.htmlBody || sourceEmail.htmlBody || body.htmlBody || '';\nconst bodyText = currentDraft.body_text || sourceEmail.body || body.body || '';\nconst messageBody = bodyHtml || bodyText;\nconst inReplyTo = sourceEmail.messageId || sourceEmail.id || body.messageId || body.id || '';\n\nconst headerLines = [\n  `To: ${toEmail}`,\n  cc ? `Cc: ${cc}` : null,\n  bcc ? `Bcc: ${bcc}` : null,\n  `Subject: ${subject}`,\n  inReplyTo ? `In-Reply-To: <${inReplyTo}>` : null,\n  inReplyTo ? `References: <${inReplyTo}>` : null,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=utf-8',\n].filter((line) => line !== null);\n\nconst rawEmail = `${headerLines.join('\\r\\n')}\\r\\n\\r\\n${messageBody}`;\nconst raw = Buffer.from(rawEmail)\n  .toString('base64')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn {\n  json: {\n    draft_id: body.draft_id,\n    user_id: resolvedUserId,\n    session_id: body.session_id || null,\n    source_thread_id: sourceEmail.threadId || body.threadId || null,\n    source_message_id: sourceEmail.id || body.id || body.messageId || null,\n    draft_type: body.draft_type || currentDraft.draft_type || 'reply',\n    status: 'sent',\n    to_email: toEmail,\n    cc,\n    bcc,\n    subject,\n    body_text: bodyText,\n    body_html: messageBody,\n    attachments: Array.isArray(currentDraft.attachments)\n      ? currentDraft.attachments\n      : Array.isArray(sourceEmail.attachments)\n        ? sourceEmail.attachments\n        : [],\n    source_email_payload: body,\n    revision_note: body.revision_note || body.revision_instructions || null,\n    sent_message_id: null,\n    sent_at: now,\n    updated_at: now,\n    google_access_token: googleAccessToken,\n    gmail_raw: raw,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        1152
+      ],
+      "id": "19705933-55a8-4e9b-86fc-ffbe59090b68",
+      "name": "Prepare Send Payload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.google_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"raw\": \"{{ $json.gmail_raw }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1088,
+        1152
+      ],
+      "id": "879ad6e0-c03b-49e3-bbdf-624818218262",
+      "name": "Send Email via Gmail API"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sendResponse = $json;\nconst draft = $('Prepare Send Payload').first().json;\n\nreturn {\n  json: {\n    ...draft,\n    sent_message_id: sendResponse.id || sendResponse.messageId || null,\n    provider_response: sendResponse,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        1152
+      ],
+      "id": "fd864a2c-309e-4af6-8689-a36d192fa6f5",
+      "name": "Prepare Sent Draft Update"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "email_drafts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.draft_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.to_email }}"
+            },
+            {
+              "fieldId": "cc",
+              "fieldValue": "={{ $json.cc }}"
+            },
+            {
+              "fieldId": "bcc",
+              "fieldValue": "={{ $json.bcc }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "body_text",
+              "fieldValue": "={{ $json.body_text }}"
+            },
+            {
+              "fieldId": "body_html",
+              "fieldValue": "={{ $json.body_html }}"
+            },
+            {
+              "fieldId": "attachments",
+              "fieldValue": "={{ $json.attachments }}"
+            },
+            {
+              "fieldId": "source_email_payload",
+              "fieldValue": "={{ $json.source_email_payload }}"
+            },
+            {
+              "fieldId": "revision_note",
+              "fieldValue": "={{ $json.revision_note }}"
+            },
+            {
+              "fieldId": "sent_message_id",
+              "fieldValue": "={{ $json.sent_message_id }}"
+            },
+            {
+              "fieldId": "sent_at",
+              "fieldValue": "={{ $json.sent_at }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updated_at }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        1152
+      ],
+      "id": "3b361d7b-e721-471c-8331-a0231e4c9694",
+      "name": "Mark Draft As Sent",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Wjp9D5ca2jChBcID",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Send Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft & Send Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email Format": {
+      "ai_tool": [
+        [
+          {
+            "node": "Draft & Send Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft & Send Email": {
+      "main": [
+        [
+          {
+            "node": "Prepare Draft Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Draft Payload": {
+      "main": [
+        [
+          {
+            "node": "Is Revision?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Revision?": {
+      "main": [
+        [
+          {
+            "node": "Update Draft Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Draft Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft Row": {
+      "main": [
+        [
+          {
+            "node": "Format Draft Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Draft Row": {
+      "main": [
+        [
+          {
+            "node": "Format Draft Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Draft Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Send Action?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Send Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Draft & Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Send Payload": {
+      "main": [
+        [
+          {
+            "node": "Send Email via Gmail API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email via Gmail API": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sent Draft Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sent Draft Update": {
+      "main": [
+        [
+          {
+            "node": "Mark Draft As Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Draft As Sent": {
+      "main": [
+        [
+          {
+            "node": "Format Draft Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c54e9d65-0a32-4e64-973b-492e5500e3c2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
+  },
+  "id": "PsKJ7zivUqrP5Aap",
+  "tags": []
+}
