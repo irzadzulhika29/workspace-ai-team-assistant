@@ -7,11 +7,13 @@ Dokumen ini merangkum screen, fitur, user flow, integrasi, dan orkestrasi n8n pa
 `AI Team Assistant` adalah aplikasi full-stack monorepo:
 
 - Frontend: React SPA dengan Vite, Tailwind, Zustand, dan React Router.
-- Backend: Express untuk auth/session, Google API proxy, Jira proxy, Supabase REST proxy, dan token usage endpoint.
-- AI orchestration: n8n workflow `AI Assistant Team` sebagai pintu utama chat agent, upload dokumen, document generation, email draft/send, calendar scheduling, Jira read, RAG, dan logging token usage.
+- Backend: Express untuk auth/session, Google API proxy, Jira proxy, Supabase REST proxy, dashboard briefing endpoints, dan token usage endpoint.
+- AI orchestration: n8n workflows:
+  - `AI Assistant Team` — chat agent, upload dokumen, document generation, email draft/send, calendar scheduling, Jira read, RAG, dan logging token usage
+  - `Get Summary Activity` (Fitur Baru) — AI briefing generation untuk Dashboard (Jira, Calendar, Email)
 - Database/storage:
   - PostgreSQL via Prisma untuk user, Google token, dan Jira integration.
-  - Supabase REST untuk `chat_sessions`, `chat_messages`, `dokumen`, dan `execution_token_usage`.
+  - Supabase REST untuk `chat_sessions`, `chat_messages`, `dokumen`, `execution_token_usage`, dan `dashboard_summary_snapshots`.
   - Pinecone untuk vector store dokumen SOP.
 
 ## 2. Navigasi dan Screen
@@ -20,7 +22,7 @@ Routing utama ada di `src/App.jsx`, dengan layout global berupa sidebar + mobile
 
 | Route | Screen | Fungsi utama |
 | --- | --- | --- |
-| `/` | Dashboard | Landing workspace, shortcut fitur, ringkasan Calendar, ringkasan Jira |
+| `/` | Dashboard | Landing workspace, AI Briefing cards (Jira/Calendar/Email), shortcut fitur, ringkasan Calendar, ringkasan Jira |
 | `/chat/supervisor` | Supervisor Chat | Chat umum multi-agent untuk delegasi tugas, file attachment, email draft/send, PDF/PPT output |
 | `/chat/knowledge` | Knowledge Chat | Chat RAG khusus SOP/dokumen internal dengan filter konteks |
 | `/workspace/files` | Document Workspace | Upload, list, preview dokumen input/output |
@@ -43,6 +45,17 @@ File: `src/pages/Dashboard.jsx`
 
 Fungsi:
 
+- **AI Briefing Section** (Fitur Baru):
+  - Menampilkan 3 briefing cards untuk domain: Jira, Calendar, Email
+  - Setiap card menampilkan:
+    - Priority badge (high/medium/low)
+    - Headline summary
+    - Summary points (bullet list)
+    - Last updated timestamp
+    - Status (success/partial/failed)
+  - Tombol "Refresh Briefing" untuk trigger n8n workflow `Get Summary Activity`
+  - Data diambil dari Supabase table `dashboard_summary_snapshots`
+  - Komponen: `BriefingCard.jsx`
 - Menampilkan kartu shortcut ke:
   - Supervisor Agent
   - Knowledge Agent
@@ -62,12 +75,16 @@ Fungsi:
 User flow:
 
 1. User membuka `/`.
-2. Dashboard fetch Calendar dan Jira.
-3. User bisa klik card workspace atau link "Lihat semua"/"Lihat detail".
+2. Dashboard fetch AI Briefings dari backend `/api/dashboard/briefings`.
+3. Dashboard fetch Calendar dan Jira.
+4. User bisa klik "Refresh Briefing" untuk trigger n8n workflow.
+5. User bisa klik "Lihat detail" pada briefing card untuk navigasi ke workspace terkait.
+6. User bisa klik card workspace atau link "Lihat semua"/"Lihat detail".
 
 Design note:
 
-- Dashboard saat ini lebih seperti overview + shortcut.
+- Dashboard sekarang menjadi "command center" dengan AI-powered briefings untuk leader/manager.
+- Briefing cards memberikan snapshot realtime dari Jira progress, Calendar events, dan Email inbox.
 - Untuk redesign, ini cocok dijadikan "workspace home" dengan KPI ringkas, status integrasi, dan recent activity.
 
 ### 3.2 Supervisor Chat
@@ -429,6 +446,7 @@ Supabase REST tables yang dipakai langsung:
 - `chat_messages`
 - `dokumen`
 - `execution_token_usage`
+- `dashboard_summary_snapshots` (Fitur Baru) — stores AI briefing snapshots per user per domain
 
 ## 5. Backend API Inventory
 
@@ -460,7 +478,7 @@ Mounted at `/api`.
 - `GET /api/google/sheets`: list Google Sheets.
 - `GET /api/google/calendar`: list Calendar events for logged-in user.
 
-### Google API Proxy
+### Backend API Proxy
 
 Mounted at `/api/google`.
 
@@ -486,6 +504,26 @@ Endpoints:
   - `POST /gmail/messages/send`
   - `GET /gmail/labels`
 
+### Dashboard & Briefing API
+
+Mounted at `/api/dashboard`.
+
+Authentication:
+- User endpoints: requires `requireAuth` middleware
+- n8n endpoints: requires `x-n8n-api-key` header
+
+Endpoints:
+
+- `GET /briefings` — Get all latest briefings for logged-in user (Jira, Calendar, Email)
+- `GET /briefings/:domain` — Get specific domain briefing (domain: jira|calendar|email)
+- `GET /briefing-targets` — (n8n only) Get list of users with active integrations for briefing generation
+- `GET /briefing-data/jira` — (n8n only) Proxy Jira API for briefing data collection
+- `POST /briefings/upsert` — (n8n only) Upsert briefing snapshot to Supabase
+
+Data source:
+- Supabase table: `dashboard_summary_snapshots`
+- Columns: `user_id`, `domain`, `priority`, `headline`, `summary_points`, `source_metrics`, `generated_at`, `status`, `error_message`
+
 ### Jira Integration
 
 Mounted at `/api/integrations`.
@@ -497,6 +535,8 @@ Mounted at `/api/integrations`.
 - `POST /jira/proxy`: proxy allowed Jira REST calls for logged-in user.
 
 ## 6. n8n Workflow Inventory
+
+### 6.1 AI Assistant Team Workflow
 
 Workflow file: `n8n/workflow/AI Assistant Team.json`
 
@@ -517,7 +557,54 @@ Current inventory:
 - Execute Workflow nodes: 4
 - Vector store nodes: 2
 
-### 6.1 Main entry points
+### 6.2 Get Summary Activity Workflow (Fitur Baru)
+
+Workflow file: `n8n/workflow/Get Summary Activity.json`
+
+Workflow name: `Get Summary Activity`
+
+Purpose:
+- Generate AI-powered briefings untuk Dashboard
+- Mengumpulkan data dari Google Calendar, Gmail, dan Jira
+- Menganalisis dan merangkum data menggunakan AI
+- Menyimpan hasil briefing ke Supabase `dashboard_summary_snapshots`
+
+Main entry point:
+- Node: `Webhook`
+- Path: `briefings`
+- Method: POST
+- Receives: `user_id`, `google_access_token`, `jira_credentials`, `timestamp`
+
+High-level flow:
+
+1. `Webhook` receives briefing request
+2. `Prepare Request Data` normalizes input and sets query parameters:
+   - Gmail query: `is:unread newer_than:7d` (max 5 results)
+   - Jira JQL: `statusCategory != Done ORDER BY updated DESC` (max 25 results)
+   - Calendar: today's events (Asia/Jakarta timezone)
+3. Parallel data collection:
+   - **Calendar Branch**: Fetch today's events from Google Calendar API
+   - **Email Branch**: Fetch unread emails from Gmail API
+   - **Jira Branch**: Fetch active issues via backend `/api/dashboard/briefing-data/jira`
+4. AI Analysis per domain:
+   - Each domain data is sent to AI agent for summarization
+   - AI generates: `priority`, `headline`, `summary_points`, `source_metrics`
+5. `Upsert Briefing Snapshot` writes results to backend `/api/dashboard/briefings/upsert`
+6. Response sent back to frontend
+
+Key features:
+- Multi-domain parallel processing (Jira, Calendar, Email)
+- AI-powered summarization with priority detection
+- Timezone-aware (Asia/Jakarta)
+- Error handling per domain (partial success support)
+- Upsert pattern for latest snapshot per user per domain
+
+Integration points:
+- Frontend: `briefingService.refreshBriefingViaWebhook()`
+- Backend: `/api/dashboard/briefing-targets`, `/api/dashboard/briefing-data/jira`, `/api/dashboard/briefings/upsert`
+- Supabase: `dashboard_summary_snapshots` table
+
+### 6.3 Main entry points (AI Assistant Team)
 
 #### Main Webhook
 
@@ -934,6 +1021,29 @@ Purpose:
 4. Logger writes row to `execution_token_usage`.
 5. Token Monitor reads and displays latest usage.
 
+### Flow J: AI Briefing Dashboard (Fitur Baru)
+
+1. User membuka Dashboard (`/`).
+2. Frontend calls `ambilSemuaBriefing()` from `briefingService.js`.
+3. Backend `/api/dashboard/briefings` queries Supabase `dashboard_summary_snapshots` for latest briefings per domain.
+4. Dashboard displays 3 briefing cards (Jira, Calendar, Email) with:
+   - Priority badge
+   - Headline summary
+   - Summary points
+   - Last updated timestamp
+5. User clicks "Refresh Briefing" button.
+6. Frontend calls `refreshBriefingViaWebhook()`:
+   - Fetches current user, Google token, Jira credentials
+   - Posts to n8n webhook `briefings`
+7. n8n `Get Summary Activity` workflow executes:
+   - Collects data from Calendar, Gmail, Jira APIs
+   - AI analyzes each domain data
+   - Generates priority, headline, summary points
+   - Upserts to Supabase via backend `/api/dashboard/briefings/upsert`
+8. Frontend re-fetches briefings from backend.
+9. Dashboard updates with fresh briefing data.
+10. User can click "Lihat detail" on any card to navigate to respective workspace.
+
 ## 8. Redesign-Relevant Observations
 
 ### Current strengths
@@ -944,6 +1054,12 @@ Purpose:
 - Email Magic Reply is an important cross-screen flow.
 - Calendar/Jira summaries already make Dashboard useful.
 - Token Monitor provides operational/admin visibility.
+- **AI Briefing Dashboard** (Fitur Baru):
+  - Provides executive-level summary for leaders/managers
+  - Real-time insights from Jira, Calendar, and Email
+  - Priority-based briefing cards with actionable summaries
+  - One-click refresh via n8n workflow integration
+  - Seamless navigation to detailed workspace views
 
 ### Current UX inconsistencies
 
@@ -959,12 +1075,14 @@ Purpose:
   - Google connected/not connected
   - Jira connected/not connected
   - n8n env/mode
-- Convert Dashboard into command center:
-  - recent chats
-  - latest generated docs
-  - upcoming meetings
-  - Jira status
-  - token usage health
+- Dashboard is now a true command center with AI Briefings:
+  - ✅ AI-powered briefings for Jira, Calendar, Email (IMPLEMENTED)
+  - ✅ Real-time refresh capability (IMPLEMENTED)
+  - Recent chats (could be added)
+  - Latest generated docs (could be added)
+  - Upcoming meetings (partially implemented via Calendar widget)
+  - Jira status (partially implemented via Jira widget)
+  - Token usage health (could be added)
 - Make generated outputs first-class:
   - output document library
   - download/history actions

@@ -46,6 +46,7 @@ Browser (React) → n8n webhooks (AI agents)
 - `api.js` — barrel module + webhook URL builder + session ID management
 - `chatService.js` — sends messages to Supervisor (supports file attachments) and Knowledge agents
 - `sessionService.js` — CRUD for chat sessions and history retrieval with filtering of n8n internal tool traces
+- `briefingService.js` — AI briefing dashboard service for fetching and refreshing domain-specific briefings (Jira, Calendar, Email)
 - `fileService.js`, `calendarService.js`, `jiraService.js`, `emailService.js`, `integrationService.js`, `tokenUsageService.js` — feature-specific services
 
 **Chat history filtering**: `sessionService.ambilRiwayatChat()` strips n8n/LangChain internal messages (tool calls, empty messages, `[{"output"...}]` JSON blobs) before rendering. It also injects PDF document URLs into AI messages that contain download triggers.
@@ -68,7 +69,7 @@ Browser (React) → n8n webhooks (AI agents)
 
 Two separate databases are in use:
 1. **PostgreSQL** (Prisma-managed): `User`, `GoogleToken`, and `JiraIntegration` tables for OAuth and integrations
-2. **Supabase** (REST API, accessed via `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`): `chat_sessions`, `chat_messages`, `dokumen`, and `execution_token_usage` tables for chat persistence and analytics
+2. **Supabase** (REST API, accessed via `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`): `chat_sessions`, `chat_messages`, `dokumen`, `execution_token_usage`, and `dashboard_summary_snapshots` tables for chat persistence, analytics, and AI briefings
 
 **Critical**: Backend uses `SUPABASE_SERVICE_ROLE_KEY` for server-side Supabase operations, not the anon key. Frontend uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` but calls Supabase indirectly through Express endpoints (`/api/sessions/*`).
 
