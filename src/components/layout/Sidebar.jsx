@@ -1,12 +1,13 @@
 import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
 import { useChatStore } from '../../store/chatStore'
 import { sessionApi } from '../../services/sessionService'
 import { useSidebar } from '../../context/SidebarContext'
+import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/',                 icon: LayoutDashboard, label: 'Dashboard'         },
@@ -21,9 +22,12 @@ const navItems = [
 
 export default function Sidebar() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
   const isSupervisorPage = location.pathname === '/chat/supervisor'
   const { open: mobileOpen, collapsed, close: closeMobile, toggleCollapse } = useSidebar()
+  const { user, logout } = useAuth()
 
   // ── Supervisor session state ───────────────────────────────────────────
   const {
@@ -158,6 +162,21 @@ export default function Sidebar() {
       } else {
         await handleNewSupChat()
       }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Logout handler
+  // ─────────────────────────────────────────────────────────────────────
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setLoggingOut(false)
     }
   }
 
@@ -379,7 +398,60 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        <div className="px-4 pb-4 space-y-1 border-t ghost-divider pt-3">
+        <div className="px-4 pb-4 space-y-2 border-t ghost-divider pt-3">
+          {/* User Info & Logout */}
+          {user && (
+            <div className={`mb-3 ${collapsed ? 'md:px-0' : 'px-2'}`}>
+              {!collapsed ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                    {user.picture && (
+                      <img 
+                        src={user.picture} 
+                        alt={user.name} 
+                        className="w-9 h-9 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-900 truncate">{user.name}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 border border-rose-200 hover:border-rose-300 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {loggingOut ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>Logging out...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut size={14} />
+                        <span>Logout</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  title="Logout"
+                  className="w-full flex items-center justify-center p-2.5 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 hover:border-rose-300 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loggingOut ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <LogOut size={16} />
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+
           <button
             onClick={() => setSettingsOpen(true)}
             title={collapsed ? 'Settings' : ''}
