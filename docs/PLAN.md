@@ -140,42 +140,81 @@
 ### Calendar Workspace
 
 - Calendar diposisikan sebagai workspace untuk melihat agenda, memahami event penting, dan menghasilkan output dari event tersebut.
-- Struktur layout final memakai pola `master-detail`:
-  - panel kiri: `AI Summary` + daftar event
-  - panel kanan: `Event Detail + Action Panel`
-- Detail layout:
-  - panel kiri bagian atas: `AI Summary`, yaitu card ringkasan agenda penting dan sinyal AI
-  - panel kiri bagian bawah: daftar event yang dibagi menjadi `Today` dan `Upcoming`
-  - panel kanan: detail event yang dipilih, summary event, quick actions, custom request input, dan generated outputs/draft preview
-- P0: tampilkan agenda user, ringkasan AI untuk event penting, event detail, action input, create meeting via AI setelah user approval, dan draft follow-up/reminder berbasis attendee.
-- Detail konten:
-  - `AI Summary`: ringkasan event penting, event terdekat, event dengan Google Meet link, dan event yang tampak butuh output seperti agenda, slides, laporan, atau follow-up.
-  - `Today`: event hari ini dengan judul, waktu, lokasi/Meet link, attendees singkat, dan label kecil seperti `Has Meet`, `Needs Prep`, atau `AI Suggested`.
-  - `Upcoming`: event yang akan datang dengan pola tampilan yang sama.
-  - `Event Detail + Action Panel`: detail event, attendees, Meet link, AI summary untuk event itu, quick actions, input bebas `mau bikin apa untuk meeting ini?`, serta area hasil draft/output.
-- Perilaku layout:
-  - saat belum ada event yang dipilih, panel kanan menampilkan empty state seperti `Pilih event dari daftar untuk melihat detail`
-  - saat event dipilih, panel kanan berubah menjadi workspace aksi untuk event tersebut
-- Gambaran UI:
-  - kiri: `AI Summary`, `Today`, `Upcoming`
-  - kanan: `Event Detail`, `AI Summary untuk event`, `Quick Actions`, `Custom Request`, `Generated Outputs / Draft Preview`
+- Struktur layout final memakai pola `master-detail`, agar user bisa scanning agenda di kiri dan bekerja pada event terpilih di kanan tanpa berpindah halaman:
+  - panel kiri: `Agenda Overview`
+  - panel kanan: `Event Workspace`
+- Panel kiri `Agenda Overview` berisi:
+  - `AI Summary Card` di bagian atas;
+  - `Today Events` di bagian tengah;
+  - `Upcoming Events` di bagian bawah.
+- Panel kanan `Event Workspace` berisi:
+  - `Event Detail Header`;
+  - `Event Summary`;
+  - `Quick Actions`;
+  - `Custom Request Input`;
+  - `Supervisor Handoff / Draft Preview`.
+- P0: tampilkan agenda user, ringkasan AI untuk event penting, event detail, action input, handoff context event ke Supervisor, create meeting via AI setelah user approval, dan draft follow-up/reminder berbasis attendee.
+- `AI Summary Card` di panel kiri:
+  - tampil sebagai card compact, bukan hero besar;
+  - menampilkan jumlah event hari ini;
+  - menampilkan event paling dekat atau paling penting;
+  - menandai konflik jadwal jika ada;
+  - menandai event yang tampak butuh persiapan;
+  - memberi rekomendasi singkat seperti `meeting client pukul 14.00 butuh brief` atau `tidak ada konflik jadwal`.
+- `Today Events`:
+  - menampilkan event hari ini dengan judul, jam mulai-selesai, lokasi/Meet link, attendees singkat, dan calendar source;
+  - event `ongoing` diberi highlight paling kuat;
+  - event berikutnya diberi highlight ringan;
+  - event yang sudah lewat dibuat lebih muted;
+  - event bermasalah diberi indikator seperti `Conflict`, `Needs Prep`, `Has Meet`, atau `AI Suggested`.
+- `Upcoming Events`:
+  - menampilkan agenda setelah hari ini;
+  - grouping bisa memakai `Tomorrow`, `This Week`, dan `Next Week`;
+  - item tetap compact dengan judul, tanggal/waktu, lokasi/Meet link, dan indikator penting.
+- `Event Detail Header` di panel kanan:
+  - menampilkan judul event, tanggal, waktu, status, calendar source, lokasi, Meet link, dan peserta ringkas;
+  - action kecil di header bisa berupa `open calendar`, `copy meeting link`, `join meeting`, dan `refresh event`.
+- `Event Summary`:
+  - berisi pemahaman AI terhadap event terpilih;
+  - dapat mencakup tujuan meeting, konteks penting, peserta kunci, hal yang perlu disiapkan, risiko, dan kemungkinan follow-up;
+  - jika description kosong, tampilkan empty state yang tetap berguna, misalnya `Belum ada deskripsi detail. AI bisa bantu membuat agenda atau preparation brief berdasarkan judul dan peserta.`
+- `Quick Actions`:
+  - berupa action chips atau button compact, bukan card besar;
+  - action dipakai untuk membuat prompt terstruktur ke Supervisor dengan context event otomatis;
+  - tidak menjalankan output langsung di panel Calendar.
 - Action utama per event:
   - `Prepare Agenda`
   - `Generate Slides`
   - `Generate Report`
   - `Draft Follow-up`
   - `Draft Reminder`
-- Input bebas di action panel dipakai untuk kebutuhan fleksibel seperti:
+- `Custom Request Input`:
+  - dipakai ketika user ingin memberi instruksi bebas terkait event;
+  - placeholder dapat berupa `Minta AI membuat output dari event ini...`;
+  - input otomatis membawa context event, sehingga user tidak perlu menulis ulang judul, waktu, peserta, lokasi, link, atau description.
+- Input bebas dipakai untuk kebutuhan fleksibel seperti:
   - `buat slides sprint review`
   - `buat laporan blocker`
   - `buat notes template`
+- `Supervisor Handoff / Draft Preview`:
+  - setelah user klik quick action atau submit custom request, sistem mengarahkan user ke Supervisor Chat;
+  - handoff membawa `source: calendar`, `intent`, `displayLabel`, `prompt`, dan `context` event terpilih;
+  - Supervisor menjadi execution layer untuk membuat agenda, slides, report, follow-up email, reminder, atau output lain;
+  - hasil dari Supervisor tetap memakai pola draft/preview dulu sebelum send/export/create;
+  - jika user kembali dari Supervisor atau output tersimpan sebagai generated object, Calendar boleh menampilkan preview ringkas output terakhir, tetapi sumber eksekusinya tetap Supervisor.
 - Jika event memiliki `attendees`, context itu dipakai untuk:
   - draft follow-up ke peserta;
   - draft reminder ke peserta;
   - kemungkinan undangan/update event jika capability create event ditingkatkan.
 - Semua output dari Calendar sebaiknya menjadi draft dulu, lalu user review sebelum kirim atau ekspor.
+- Perilaku layout:
+  - saat belum ada event yang dipilih, panel kanan menampilkan empty state seperti `Pilih event dari daftar untuk melihat detail`;
+  - saat event dipilih, panel kanan berubah menjadi workspace aksi untuk event tersebut;
+  - desktop memakai 2 kolom, sekitar 35% kiri dan 65% kanan;
+  - panel kiri dan kanan bisa scroll terpisah;
+  - mobile menampilkan daftar event lebih dulu, lalu pindah ke detail event setelah item dipilih, dengan back button untuk kembali.
 - Flow:
-  - `AI Summary -> pilih event di Today/Upcoming -> buka Event Detail -> pilih quick action atau isi input -> Supervisor generate output -> user review -> send/export/create`.
+  - `AI Summary -> pilih event di Today/Upcoming -> buka Event Detail -> pilih quick action atau isi input -> kirim context ke Supervisor -> Supervisor generate output -> user review -> send/export/create`.
 
 ### Documents Workspace
 
