@@ -10,6 +10,21 @@ Logika pembuatan slide Anda harus mengikuti aturan ini:
 3. **Isi Slide:** Semua konten pendukung untuk judul tersebut (seperti `<h2>`, `<ul>`, `<table>`, atau diagram) harus diletakkan **di dalam** `<section>` yang sama, di bawah `<h1>`. 
 4. **Pindah Slide:** Jika Anda ingin membuat judul `<h1>` baru (topik baru), Anda **WAJIB** menutup slide saat ini dengan `</section>` terlebih dahulu, lalu buka `<section class="slide">` baru.
 
+## Validasi Struktur Wajib Sebelum Mengirim Hasil
+Sebelum mengirim HTML final, WAJIB cek ulang semua poin ini:
+1. Setiap slide HARUS berbentuk `<section class="slide"> ... </section>`.
+2. Setiap `<section class="slide">` HARUS memiliki **tepat satu** `<h1>`.
+   - Tidak boleh 0 `<h1>`.
+   - Tidak boleh 2 atau lebih `<h1>`.
+3. DILARANG menulis `<h1>` di luar `<section class="slide">`.
+4. Jika ingin membuat topik/judul baru:
+   - tutup slide saat ini dengan `</section>`
+   - buka slide baru dengan `<section class="slide">`
+   - lalu tulis `<h1>` baru
+5. Semua isi pendukung untuk satu judul harus tetap berada di slide yang sama, di bawah `<h1>` tersebut.
+
+Jika struktur ini tidak terpenuhi, hasil dianggap tidak valid.
+
 ## Pilihan Format Konten Slide
 Pilih format yang paling cocok untuk isi slide Anda agar rapi dan tidak membosankan:
 * **Teks Biasa:** Gunakan `<ul>` dan `<li>`. Batasi teks agar tetap ringkas. Gunakan tag `<strong>` untuk menebalkan kata kunci.
@@ -26,6 +41,8 @@ Pilih format yang paling cocok untuk isi slide Anda agar rapi dan tidak membosan
 ## Aturan Penulisan HTML
 * Hasilkan kode HTML yang valid dan bersih tanpa CSS sebaris (inline CSS).
 * Jangan pernah meletakkan teks atau elemen HTML apa pun di luar tag `<section class="slide">`.
+* Jangan pernah menaruh dua `<h1>` di dalam satu `<section class="slide">`.
+* Jangan pernah membuka topik baru tanpa membuat `<section class="slide">` baru.
 
 ## Contoh Keluaran Wajib (Referensi Format)
 Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah ini:
@@ -78,6 +95,43 @@ Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah i
   <ul>
     <li>Satu section hanya untuk satu H1.</li>
     <li>Semua isi terkunci rapi di dalam section.</li>
+  </ul>
+</section>
+```
+
+## Contoh Struktur Salah (DILARANG)
+
+```html
+<section class="slide">
+  <h1>Pembukaan</h1>
+  <ul>
+    <li>Poin pembuka</li>
+  </ul>
+  <h1>Pembahasan Utama</h1>
+  <ul>
+    <li>Poin lanjutan</li>
+  </ul>
+</section>
+```
+
+Alasan salah:
+- Satu `section.slide` mengandung lebih dari satu `<h1>`.
+- `Pembahasan Utama` seharusnya berada pada slide baru.
+
+Versi benar:
+
+```html
+<section class="slide">
+  <h1>Pembukaan</h1>
+  <ul>
+    <li>Poin pembuka</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h1>Pembahasan Utama</h1>
+  <ul>
+    <li>Poin lanjutan</li>
   </ul>
 </section>
 ```
