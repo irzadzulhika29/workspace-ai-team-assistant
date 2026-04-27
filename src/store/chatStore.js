@@ -16,12 +16,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 
 const initialState = {
   supervisorMessages: [],
-  knowledgeMessages:  [],
   isConnected:        null,  // null = unknown, true/false after first check
-
-  // ── Knowledge sessions ──────────────────────────────────────────────────
-  knowledgeSessions:          [],   // array sesi dari Supabase
-  activeKnowledgeSessionId:   null, // UUID sesi yang sedang aktif
 
   // ── Supervisor sessions ─────────────────────────────────────────────────
   supervisorSessions:         [],   // array sesi dari Supabase
@@ -50,26 +45,6 @@ export const useChatStore = create(
 
       clearSupervisor: () => set({ supervisorMessages: [] }),
 
-      // ── Knowledge ─────────────────────────────────────────────────────────
-      addKnowledgeMessage: (msg) =>
-        set((s) => ({
-          knowledgeMessages: [
-            ...s.knowledgeMessages,
-            { id: crypto.randomUUID(), timestamp: new Date().toISOString(), ...msg },
-          ],
-        })),
-
-      clearKnowledge: () => set({ knowledgeMessages: [] }),
-
-      // Ganti seluruh array pesan (untuk load riwayat dari Supabase)
-      setKnowledgeMessages: (messages) => set({ knowledgeMessages: messages }),
-
-      // ── Knowledge sessions ────────────────────────────────────────────────
-      setKnowledgeSessions: (sessions) => set({ knowledgeSessions: sessions }),
-
-      setActiveKnowledgeSession: (id) =>
-        set({ activeKnowledgeSessionId: id }),
-
       // ── Supervisor sessions ───────────────────────────────────────────────
       setSupervisorSessions: (sessions) => set({ supervisorSessions: sessions }),
 
@@ -86,8 +61,6 @@ export const useChatStore = create(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         supervisorMessages:        state.supervisorMessages,
-        knowledgeMessages:         state.knowledgeMessages,
-        activeKnowledgeSessionId:  state.activeKnowledgeSessionId,
         activeSupervisorSessionId: state.activeSupervisorSessionId,
       }),
     }

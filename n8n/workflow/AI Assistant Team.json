@@ -3,32 +3,6 @@
   "nodes": [
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "deepseek-v3-2",
-          "mode": "list",
-          "cachedResultName": "deepseek-v3-2"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        23360,
-        18272
-      ],
-      "id": "ba4f9653-6e5d-4550-9c94-a2680ef5d277",
-      "name": "deepseek-3.2",
-      "credentials": {
-        "openAiApi": {
-          "id": "nyGSK5OS0XdRuo7w",
-          "name": "OpenAI account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "tableId": "dokumen",
         "fieldsUi": {
           "fieldValues": [
@@ -58,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        25072,
-        16848
+        29648,
+        26752
       ],
-      "id": "1a2f1223-9cb7-4ac5-955c-399ee5ac0da8",
+      "id": "548a272e-d7d6-482c-bd6d-23294b4497a6",
       "name": "Upload Document to Table",
       "credentials": {
         "supabaseApi": {
@@ -79,10 +53,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        24176,
-        17200
+        28752,
+        27104
       ],
-      "id": "34678039-6dd8-479c-a3d9-2a208ab6ed19",
+      "id": "a8fcb54f-ca93-4178-84c6-2371296f59af",
       "name": "Respond to Webhook1"
     },
     {
@@ -110,10 +84,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        23936,
-        17200
+        28512,
+        27104
       ],
-      "id": "e0b6a54d-b4cf-405e-9f06-ccb92896747d",
+      "id": "2821f62b-c9d9-4a6b-be72-aa364e5e0146",
       "name": "Send Email"
     },
     {
@@ -123,10 +97,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        23728,
-        17200
+        28304,
+        27104
       ],
-      "id": "eb80d52f-2c20-4c97-a0c4-ec247a7a7e8d",
+      "id": "a9999788-8972-4ec2-a43e-7c6bcd3f74ad",
       "name": "Code in JavaScript1"
     },
     {
@@ -159,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        24432,
-        17872
+        29008,
+        27776
       ],
-      "id": "8a136ac1-a7b5-4380-ab00-fd315cd49c3f",
+      "id": "6a1009c0-e759-4129-9b2c-27c00a99e21e",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -208,10 +182,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        21584,
-        17760
+        26400,
+        28224
       ],
-      "id": "e3daddf5-8834-448b-9a47-8a045e3e547e",
+      "id": "a44c8895-f72b-4177-bcf1-9fe5da247c48",
       "name": "Record token usage",
       "credentials": {
         "supabaseApi": {
@@ -255,10 +229,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        22848,
-        18096
+        27424,
+        28000
       ],
-      "id": "de10aab3-3488-42c4-a24e-1eb6f543e64c",
+      "id": "c049dcce-df59-4f2a-8548-b8d98cc741c7",
       "name": "Create Event with Google Meet"
     },
     {
@@ -291,10 +265,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        22656,
-        18112
+        27232,
+        28016
       ],
-      "id": "065073b3-8375-40cd-84b3-1112649ee84b",
+      "id": "fbfcc7d8-18c2-41f2-8c73-ef3cf1d8cecc",
       "name": "Create Event"
     },
     {
@@ -340,10 +314,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        23024,
-        18112
+        27600,
+        28016
       ],
-      "id": "25288365-9e2c-4241-9959-ecae4b2b42db",
+      "id": "1c54457e-876b-417f-829b-24e3d1816550",
       "name": "Get Calendar Events"
     },
     {
@@ -353,7 +327,7 @@
             {
               "id": "ppt-filename-001",
               "name": "nama_file_laporan",
-              "value": "=Presentasi_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf",
+              "value": "={{ $json.nama_file_laporan || $('Inject PPT CSS').item.json.nama_file_laporan || ('Presentasi_' + $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') + '.pdf') }}",
               "type": "string"
             }
           ]
@@ -363,10 +337,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        24112,
-        17024
+        28688,
+        26928
       ],
-      "id": "12ad208d-d81f-4082-a1d7-4175544b9175",
+      "id": "a18736dc-e7f3-45ff-914d-c1402d3bd754",
       "name": "Edit Fields PPT"
     },
     {
@@ -387,7 +361,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ \"<html><head><meta charset='UTF-8'><title>\" + ($json.nama_file_laporan || \"Presentasi\") + \"</title><style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style></head><body>\" + $json.output.replace(/```html/gi, \"\").replace(/```/g, \"\").replace(/Slide presentasi Anda sudah siap.*/g, \"\") + \"</body></html>\" }}"
+              "value": "={{ \"<html><head><meta charset='UTF-8'><title>\" + ($json.nama_file_laporan || \"Presentasi\") + \"</title><style>@page { size: 16in 9in; margin: 0; } html, body { margin: 0; padding: 0; background: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .pdf-page { width: 16in; height: 9in; min-height: 9in; max-height: 9in; overflow: hidden; box-sizing: border-box; break-after: page; page-break-after: always; break-inside: avoid; page-break-inside: avoid; } .pdf-page:last-child { break-after: auto; page-break-after: auto; } .slide { width: 16in; height: 9in; min-height: 9in; max-height: 9in; box-sizing: border-box; padding: 80px 120px; background-color: #ffffff; border-bottom: 24px solid #2b6cb0; overflow: hidden; display: block; } h1 { font-size: 72px; color: #1e3a8a; margin: 0 0 24px 0; font-weight: 700; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: 400; margin: 0 0 42px 42px; } ul { padding-left: 40px; margin: 0; } li { margin-bottom: 20px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: 700; text-align: center; flex: 1; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: 700; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: 700; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; } img { max-width: 100%; max-height: 5.8in; object-fit: contain; display: block; margin-top: 24px; }</style></head><body>\" + $json.output + \"</body></html>\" }}"
             }
           ]
         },
@@ -396,23 +370,23 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        23920,
-        17024
+        28496,
+        26928
       ],
-      "id": "6e917b24-2765-44b1-a72d-f47ce5285fab",
+      "id": "61b42dff-9ab7-4fdf-8489-a5bbbe0381f8",
       "name": "api2pdf PPT"
     },
     {
       "parameters": {
-        "jsCode": "const output = $input.first().json.output;\nconst cleaned = output\n  .replace(/^[\\s\\S]*?(?=<section)/i, '')\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap.*/gs, '')\n  .replace(/\\\\n/g, ' ')\n  .trim();\n\nconst css = `<style>@page { size: 16in 9in; margin: 0; } body { margin: 0; background-color: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; } .slide { width: 16in; height: 9in; padding: 80px 120px; box-sizing: border-box; background-color: #ffffff; page-break-after: always; page-break-inside: avoid; display: flex; flex-direction: column; justify-content: center; border-bottom: 24px solid #2b6cb0; overflow: hidden; } h1 { font-size: 72px; color: #1e3a8a; margin-bottom: 20px; font-weight: bold; border-left: 12px solid #3b82f6; padding-left: 30px; } h2 { font-size: 48px; color: #64748b; font-weight: normal; margin-top: 0; margin-bottom: 50px; padding-left: 42px; } ul { padding-left: 40px; } p, li { font-size: 40px; color: #334155; line-height: 1.6; margin-bottom: 20px; } .flow-container { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 50px; width: 100%; } .flow-box { background: #eff6ff; border: 4px solid #3b82f6; color: #1e3a8a; padding: 40px 20px; border-radius: 20px; font-size: 36px; font-weight: bold; text-align: center; flex: 1; } .flow-arrow { font-size: 60px; color: #3b82f6; font-weight: bold; } table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 32px; color: #334155; } th { background-color: #3b82f6; color: white; padding: 20px; text-align: left; border: 2px solid #cbd5e1; font-weight: bold; } td { padding: 20px; border: 2px solid #cbd5e1; background-color: #f8fafc; }</style>`;\nconst fullHtml = css + cleaned;\n\nreturn [{ json: { output: fullHtml } }];"
+        "jsCode": "const rawOutput = $input.first().json.output;\n\nconst unwrapAgentOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 3; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\"output\"')) {\n        try {\n          current = JSON.parse(trimmed);\n          continue;\n        } catch (error) {}\n      }\n    }\n\n    break;\n  }\n\n  return String(current || '');\n};\n\nconst output = unwrapAgentOutput(rawOutput);\nconst cleaned = output\n  .replace(/^[\\s\\S]*?(?=<section)/i, '')\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap.*/gs, '')\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\n/g, ' ')\n  .trim();\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst stripTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\b[nN]\\b/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst normalizeTitle = (value) => String(value || '')\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\b[nN]\\b/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst splitSectionByH1 = (body) => {\n  const h1Regex = /<h1\\b[^>]*>[\\s\\S]*?<\\/h1>/gi;\n  const h1Matches = [...body.matchAll(h1Regex)];\n  if (h1Matches.length <= 1) return [`<section class=\"slide\">${body.trim()}</section>`];\n  const slides = [];\n  for (let i = 0; i < h1Matches.length; i += 1) {\n    const start = h1Matches[i].index ?? 0;\n    const end = i + 1 < h1Matches.length ? (h1Matches[i + 1].index ?? body.length) : body.length;\n    const chunk = body.slice(start, end).trim();\n    if (chunk) slides.push(`<section class=\"slide\">${chunk}</section>`);\n  }\n  return slides.length ? slides : [`<section class=\"slide\">${body.trim()}</section>`];\n};\n\nconst sectionRegex = /<section[^>]*class=[\"'][^\"']*slide[^\"']*[\"'][^>]*>([\\s\\S]*?)<\\/section>/gi;\nconst normalizedSections = [];\nlet match;\nwhile ((match = sectionRegex.exec(cleaned)) !== null) {\n  const body = match[1] || '';\n  normalizedSections.push(...splitSectionByH1(body));\n}\n\nconst slideMarkup = normalizedSections.length ? normalizedSections : ['<section class=\"slide\">' + cleaned + '</section>'];\nconst wrappedPages = slideMarkup.map((section) => `<div class=\"pdf-page\">${section}</div>`).join('\\n');\n\nconst pickTitle = (html) => {\n  const h1 = html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1];\n  if (h1) return stripTags(h1);\n  const h2 = html.match(/<h2[^>]*>([\\s\\S]*?)<\\/h2>/i)?.[1];\n  if (h2) return stripTags(h2);\n  const section = html.match(/<section[^>]*>([\\s\\S]*?)<\\/section>/i)?.[1] || html;\n  const plain = stripTags(section);\n  return plain.split(/(?<=[.!?])\\s+/)[0] || plain;\n};\n\nconst titleSource = normalizeTitle(pickTitle(wrappedPages) || $('Main Webhook').first().json.body.message || 'Presentasi');\nconst compactTitle = titleSource.split(/\\s+/).slice(0, 8).join(' ').trim() || 'Presentasi';\nconst slug = compactTitle.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');\nconst timestamp = $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm');\nconst nama_file_laporan = (slug || 'Presentasi') + '_' + timestamp + '.pdf';\n\nreturn [{ json: { output: wrappedPages, nama_file_laporan, presentation_title: compactTitle } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        23744,
-        17024
+        28320,
+        26928
       ],
-      "id": "6da47866-1faf-45be-937b-73f58c24ab7b",
+      "id": "e3f96943-90f5-43e9-b0e3-19928651ecef",
       "name": "Inject PPT CSS"
     },
     {
@@ -424,10 +398,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        24816,
-        17936
+        29392,
+        27840
       ],
-      "id": "2db9c0ae-fdf1-49ef-ac79-4e114e3cacc6",
+      "id": "e06e8f9e-db62-4e28-8300-e9667f445ae8",
       "name": "Get Email Skills"
     },
     {
@@ -447,12 +421,12 @@
         "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id, execution_time",
         "options": {}
       },
-      "id": "a115d70f-06ee-47a3-a7c1-ff83d56afc21",
+      "id": "28d6b454-26f8-479c-910e-bcdeabff4d08",
       "name": "Sum Token Totals - aggregate by model1",
       "type": "n8n-nodes-base.summarize",
       "position": [
-        21408,
-        17760
+        26208,
+        28224
       ],
       "typeVersion": 1.1
     },
@@ -462,12 +436,12 @@
         "include": "allOtherFields",
         "options": {}
       },
-      "id": "ede1de91-8765-4967-95aa-4f9fd5813215",
+      "id": "064d9158-8e28-4ca1-9a14-2dda9a83f263",
       "name": "Split Out",
       "type": "n8n-nodes-base.splitOut",
       "position": [
-        21200,
-        17760
+        25984,
+        28224
       ],
       "typeVersion": 1
     },
@@ -500,12 +474,12 @@
         "includeFields": "workflowData.id, workflowData.name",
         "options": {}
       },
-      "id": "c4d47376-6209-482c-b2b3-95b7e633da12",
+      "id": "739d1184-40fc-49b7-b1b2-32fcceb80bde",
       "name": "Extract token usage data",
       "type": "n8n-nodes-base.set",
       "position": [
-        21008,
-        17760
+        25744,
+        28224
       ],
       "typeVersion": 3.4
     },
@@ -514,10 +488,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        20608,
-        17760
+        25040,
+        28224
       ],
-      "id": "b444afdf-42fc-4d9c-a1a3-86808b901927",
+      "id": "153534a2-2994-40ce-a49f-2dd5777e3607",
       "name": "Wait",
       "webhookId": "fafe54f2-df97-447a-9ec0-27fef65aa703"
     },
@@ -559,10 +533,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        25760,
-        16848
+        30336,
+        26752
       ],
-      "id": "63781367-99a1-4cd3-8f70-8dcbaa636041",
+      "id": "caf6eb3b-a9a7-4fb0-b578-181af8183103",
       "name": "Call 'AI Assistant Team'1"
     },
     {
@@ -575,12 +549,12 @@
           ]
         }
       },
-      "id": "f183e8f8-2245-4121-b6f6-a78e560fa388",
+      "id": "bf295ee4-b986-47d5-a18d-0496c813c16c",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        20400,
-        17760
+        24848,
+        28224
       ],
       "typeVersion": 1.1
     },
@@ -594,12 +568,12 @@
         },
         "requestOptions": {}
       },
-      "id": "a283117b-a556-40de-a858-77c5efb6c55b",
+      "id": "49652510-139a-4acd-a7dc-685f63d27d52",
       "name": "Get execution data",
       "type": "n8n-nodes-base.n8n",
       "position": [
-        20800,
-        17760
+        25296,
+        28224
       ],
       "typeVersion": 1,
       "credentials": {
@@ -616,10 +590,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20904,
-        17760
+        25488,
+        28224
       ],
-      "id": "0ee59829-09c9-467c-a9b6-932a5c55d8f8",
+      "id": "626215d0-c74f-41d7-ab8a-47d29c415e8e",
       "name": "Calculate Execution Time"
     },
     {
@@ -660,10 +634,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        24208,
-        17360
+        28784,
+        27264
       ],
-      "id": "ada4796d-07aa-4665-a564-36be8c843321",
+      "id": "9dd0e79f-69ee-47b2-b6a8-87f3257d4e1e",
       "name": "Call 'AI Assistant Team'"
     },
     {
@@ -676,10 +650,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        23904,
-        16848
+        28480,
+        26752
       ],
-      "id": "5226e3ae-5c83-487c-9514-7d8019ad9db9",
+      "id": "c031fe89-bab4-4b68-92ff-3a1379823bfb",
       "name": "Markdown"
     },
     {
@@ -693,10 +667,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        23408,
-        17696
+        27984,
+        27600
       ],
-      "id": "9674d42f-2db6-49fa-8f9e-254ff8940903",
+      "id": "42d189c5-48d2-4882-afb6-30d761d142de",
       "name": "Report Agent"
     },
     {
@@ -710,10 +684,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        24656,
-        17664
+        29232,
+        27568
       ],
-      "id": "57f9b8bf-2c67-4683-912d-07bbad5497f1",
+      "id": "760a4f60-3804-435d-a3a4-06d46afdd592",
       "name": "Communication Agent"
     },
     {
@@ -725,10 +699,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        24016,
-        17952
+        28592,
+        27856
       ],
-      "id": "34b39fa6-838b-495d-88c4-a75856b70be2",
+      "id": "488a64fd-5635-4125-bed7-58fc7cbc6475",
       "name": "Get PPT Format"
     },
     {
@@ -740,10 +714,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        23872,
-        17952
+        28448,
+        27856
       ],
-      "id": "3bd693ac-75cd-45a5-9f05-6b6af29c35b3",
+      "id": "bd36e91d-fff8-45b6-ac81-975378a1c979",
       "name": "Get Report Format"
     },
     {
@@ -757,10 +731,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        23792,
-        17696
+        28368,
+        27600
       ],
-      "id": "c42af49d-1839-4f11-adc0-867a4f8c721e",
+      "id": "ca3a4bb8-a71c-45a4-b9f7-72b8c88c1838",
       "name": "Document Agent"
     },
     {
@@ -774,10 +748,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        22112,
-        17616
+        26688,
+        27520
       ],
-      "id": "4a8940fa-b781-4b3d-8b38-dd3950236b2b",
+      "id": "b6e9765c-baf2-4edb-b07e-26790c3d7e96",
       "name": "Knowledge Agent"
     },
     {
@@ -791,10 +765,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        23104,
-        17696
+        27680,
+        27600
       ],
-      "id": "c928d05c-fe42-4b25-89b8-cf41f892bd87",
+      "id": "187a6de4-f892-4e59-ac7c-fdf4b2571f9d",
       "name": "Scheduler Agent"
     },
     {
@@ -807,10 +781,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        24272,
-        17680
+        28848,
+        27584
       ],
-      "id": "9765a582-e52a-426e-8267-14f1be5798cc",
+      "id": "5d60d4d5-b45b-4aab-a5f7-c4efa951813f",
       "name": "Task Agent"
     },
     {
@@ -821,10 +795,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        22464,
-        17152
+        27040,
+        27056
       ],
-      "id": "1a39592c-832f-4595-9873-501648e11bf3",
+      "id": "82b088dd-403f-40ce-82bb-b43e4404ca78",
       "name": "Extract CSV File"
     },
     {
@@ -835,10 +809,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        22464,
-        16976
+        27040,
+        26880
       ],
-      "id": "6c2646a2-3dc0-4a33-94a8-355b5dd7ea1f",
+      "id": "894943c2-3b8d-406e-8edd-c8f2e7042493",
       "name": "Extract text",
       "credentials": {
         "mistralCloudApi": {
@@ -854,37 +828,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        23744,
-        16848
+        28320,
+        26752
       ],
-      "id": "fc361a1f-d5de-41a2-a8c4-015a86b0f50a",
+      "id": "9a3dca63-ad6b-4ae8-a661-a37facdc7b36",
       "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "deepseek-v3-2",
-          "mode": "list",
-          "cachedResultName": "deepseek-v3-2"
-        },
-        "builtInTools": {},
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        22512,
-        16672
-      ],
-      "id": "7a7e05c7-206a-4065-94e5-4738c67fadff",
-      "name": "deepseek-v3.2",
-      "credentials": {
-        "openAiApi": {
-          "id": "nyGSK5OS0XdRuo7w",
-          "name": "OpenAI account"
-        }
-      }
     },
     {
       "parameters": {
@@ -895,10 +843,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        25312,
-        16848
+        29888,
+        26752
       ],
-      "id": "0e0880d1-ee3c-48fd-9c1e-97dfde6703ed",
+      "id": "3235dc19-e684-49c3-addf-abf0ba05679c",
       "name": "Respond to Webhook2"
     },
     {
@@ -918,10 +866,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        24304,
-        16848
+        28928,
+        26752
       ],
-      "id": "3b9ba797-e420-4e33-af56-5990ceacc41d",
+      "id": "9c83ebae-c9ab-46c2-9eb6-898ef6e0d3d5",
       "name": "Edit Fields"
     },
     {
@@ -949,10 +897,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24848,
-        16848
+        29344,
+        26752
       ],
-      "id": "50ad33b0-080d-49cb-a8d7-228f0d714f84",
+      "id": "ce132538-d626-4cee-a76e-573e0a8dbf7a",
       "name": "HTTP Request3"
     },
     {
@@ -970,10 +918,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24560,
-        16848
+        29136,
+        26752
       ],
-      "id": "725acf3b-d682-4d2f-96ed-fd21f0ebc381",
+      "id": "1b9fd606-80f7-4c53-98d5-af7f38f80ed9",
       "name": "HTTP Request2"
     },
     {
@@ -1003,10 +951,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24144,
-        16848
+        28720,
+        26752
       ],
-      "id": "4f429984-be8a-49c5-b810-eb4c41273f7b",
+      "id": "4bdadb2a-035e-4820-b032-f0bafcd11be9",
       "name": "HTTP Request1"
     },
     {
@@ -1118,10 +1066,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        23408,
-        17120
+        28112,
+        27168
       ],
-      "id": "4ba7cdcb-8598-49cb-890e-7fed9e57cf3a",
+      "id": "6970f4da-2f53-4c66-bcac-adddbfcd03fc",
       "name": "Route Output Type"
     },
     {
@@ -1141,10 +1089,10 @@
       "type": "n8n-nodes-base.googleCalendarTool",
       "typeVersion": 1.3,
       "position": [
-        23200,
-        18112
+        27776,
+        28016
       ],
-      "id": "90a21497-8f86-48ea-bc43-63af527c5050",
+      "id": "d041b6c2-da03-4113-acfa-1b7e03094366",
       "name": "delete events calendar",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -1170,10 +1118,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        22688,
-        17152
+        27264,
+        27056
       ],
-      "id": "fc3e84b9-4d9d-43ef-b0a1-897266a42504",
+      "id": "c3cd88bc-42ed-434f-b386-7251d8e5a6d4",
       "name": "combine promt + text csv"
     },
     {
@@ -1255,10 +1203,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        22224,
-        16960
+        26800,
+        26864
       ],
-      "id": "3e6648ba-4a5f-420a-b2d8-cdbc77e033f1",
+      "id": "31979ed1-978a-4847-bde6-58b7050f0558",
       "name": "Switch"
     },
     {
@@ -1278,10 +1226,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        22688,
-        16816
+        27264,
+        26720
       ],
-      "id": "7b4a41f9-0acc-4bb7-8a41-10496df816ff",
+      "id": "15ff534d-03ed-4b0c-b501-1a27f8d875f2",
       "name": "combine promt + text image"
     },
     {
@@ -1294,26 +1242,26 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        22464,
-        16816
+        27040,
+        26720
       ],
-      "id": "a4cc43b8-2fcd-4ecc-a665-1adb426c9db1",
+      "id": "b301936a-75dd-4ab8-adfd-98d86bb52f50",
       "name": "Tesseract"
     },
     {
       "parameters": {
         "content": "## Upload an document \n",
-        "height": 544,
-        "width": 1424,
+        "height": 864,
+        "width": 1872,
         "color": 3
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        20368,
-        17072
+        24496,
+        26768
       ],
-      "id": "60ca6e9c-238c-41ea-99f4-e745457cffc8",
+      "id": "2cadae10-e013-4b82-bf82-6860857da4ee",
       "name": "Sticky Note"
     },
     {
@@ -1330,7 +1278,7 @@
             {
               "keyName": "user_id",
               "condition": "eq",
-            "keyValue": "={{ $('Main Webhook').item.json.body.user_id }}"
+              "keyValue": "={{ $('Main Webhook').item.json.body.user_id }}"
             }
           ]
         },
@@ -1346,10 +1294,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22912,
-        16512
+        27488,
+        26416
       ],
-      "id": "05b26fe6-360a-4aee-8d1c-28c9b048090a",
+      "id": "7c17147a-6c2b-464f-b02c-97a08ff66527",
       "name": "update chat title",
       "credentials": {
         "supabaseApi": {
@@ -1385,10 +1333,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        22368,
-        16528
+        26944,
+        26432
       ],
-      "id": "f436ac86-67c9-484c-a068-6649445ce82f",
+      "id": "72f2b6c7-4192-461f-9cf3-2d7327a9094a",
       "name": "is first chat?"
     },
     {
@@ -1399,10 +1347,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        22848,
-        17584
+        27424,
+        27488
       ],
-      "id": "931de65b-0d35-4736-9ee1-47ea966b130e",
+      "id": "94ede5f6-e665-4fb2-ab25-3f61b04cefb4",
       "name": "arcee-ai/trinity-large-preview:free-",
       "credentials": {
         "openRouterApi": {
@@ -1421,15 +1369,24 @@
           "mode": "list",
           "cachedResultName": "rag-ai-agent"
         },
-        "options": {}
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "document_id",
+                "value": "={{ $('Main Webhook').item.json.body.document_id || $('Main Webhook').item.json.body.selected_document_id || '' }}"
+              }
+            ]
+          }
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        22272,
-        17904
+        26896,
+        27792
       ],
-      "id": "c4cc96e4-1d41-490a-8590-12831b9446bd",
+      "id": "48fcf059-c391-4b58-945f-15b7ceecd72e",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -1455,10 +1412,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        22464,
-        17328
+        27040,
+        27232
       ],
-      "id": "66413705-742e-4a7a-a459-2949561eca3c",
+      "id": "1991e743-e10a-42cd-9b91-53c6f0fb3321",
       "name": "user promt only"
     },
     {
@@ -1478,10 +1435,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        22688,
-        16976
+        27264,
+        26880
       ],
-      "id": "c024c74c-b31d-4afe-baa4-82619fbe2463",
+      "id": "cc31f79d-07f4-4951-ad15-cbc1915ab8bb",
       "name": "combine promt + text file"
     },
     {
@@ -1511,10 +1468,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        22064,
-        17312
+        26640,
+        27216
       ],
-      "id": "8d6d0727-acb6-4850-9875-b226c906931b",
+      "id": "5b198557-b790-42ab-b16f-86ab27c20881",
       "name": "is file exist?"
     },
     {
@@ -1529,8 +1486,7 @@
             },
             {
               "keyName": "user_id",
-              "condition": "eq",
-            "keyValue": "={{ $json.body.user_id }}"
+              "keyValue": "={{ $json.body.user_id }}"
             }
           ]
         }
@@ -1538,10 +1494,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        22112,
-        16528
+        26688,
+        26432
       ],
-      "id": "daabc631-0ee4-4e7b-9b35-1451df72e0eb",
+      "id": "a9bf9a2f-8b7a-4346-9d3f-2b3ba4f2faf5",
       "name": "Get a row",
       "credentials": {
         "supabaseApi": {
@@ -1566,10 +1522,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        22608,
-        16512
+        27184,
+        26416
       ],
-      "id": "c66f6adb-df6a-4dde-ada8-2ffcb44bfb61",
+      "id": "01eb0e76-a350-412e-865b-c7a18e39e79d",
       "name": "Generate Chat Tittle"
     },
     {
@@ -1581,10 +1537,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        23024,
-        17584
+        27600,
+        27488
       ],
-      "id": "81e7f8f6-25f8-4e62-9ed0-876a94b52c6b",
+      "id": "d82aef5b-c42d-413d-8f3c-75dd870bae65",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1602,11 +1558,24 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        21088,
-        17312
+        25488,
+        27184
       ],
-      "id": "544c91a3-5450-4de1-be75-9ecc281713dc",
+      "id": "6bfbde5e-99c8-4908-8173-f90a9f15d4c2",
       "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst mergedJson = item.json || {};\nconst row = $('Create a row').first().json || {};\nconst upload = $('Upload Document').first().json.body || {};\n\nreturn [{\n  json: {\n    ...mergedJson,\n    document_id: row.id || row.document_id || null,\n    user_id: row.user_id || upload.user_id || null,\n    session_id: row.session_id || upload.session_id || null,\n    nama_file: row.nama_file || upload.file_name || null,\n    kategori: row.kategori || upload.kategori || null,\n    file_url: row.file_url || null,\n    document_type: row.document_type || mergedJson.document_type || 'other',\n  },\n  binary: item.binary,\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        25696,
+        27184
+      ],
+      "id": "4677cbba-8fb9-46b5-9e9a-99c62811c45c",
+      "name": "Prepare Document Metadata"
     },
     {
       "parameters": {
@@ -1632,6 +1601,10 @@
             {
               "fieldId": "user_id",
               "fieldValue": "={{ $('Upload Document').item.json.body.user_id }}"
+            },
+            {
+              "fieldId": "document_type",
+              "fieldValue": "={{ $json.document_type || 'other' }}"
             }
           ]
         }
@@ -1639,10 +1612,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        20864,
-        17184
+        25312,
+        26960
       ],
-      "id": "7688432b-d308-4080-84e3-1cfcf9ae77cd",
+      "id": "982c368a-7895-4aa0-94ba-212c80de0e2a",
       "name": "Create a row",
       "credentials": {
         "supabaseApi": {
@@ -1676,10 +1649,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        20656,
-        17184
+        24848,
+        26944
       ],
-      "id": "a0a90d06-3cec-42a5-ab91-9f4b0ac99720",
+      "id": "0da5c804-dd98-43bc-895d-b18fa2e2856f",
       "name": "HTTP Request"
     },
     {
@@ -1692,10 +1665,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        20416,
-        17328
+        24592,
+        27200
       ],
-      "id": "200c431e-b916-4322-a3c3-6de128883516",
+      "id": "66b4de0a-c7c9-4d60-83a0-a268ea6d7367",
       "name": "Upload Document",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1709,10 +1682,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        21856,
-        17312
+        26432,
+        27216
       ],
-      "id": "75ff8e64-328e-42ce-b8ec-a7be91153c7a",
+      "id": "31b051c9-20c0-4019-8c8f-484439bfcaac",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1729,10 +1702,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        23104,
-        17328
+        27632,
+        27216
       ],
-      "id": "c89c7fee-2cac-4d88-be4f-98bf0766a6bd",
+      "id": "c086441b-1bac-4487-87bd-471abb7334d4",
       "name": "Supervisor Agent"
     },
     {
@@ -1744,10 +1717,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        23760,
-        17360
+        28336,
+        27264
       ],
-      "id": "192d40ca-7475-41f4-828e-737621f5f2dc",
+      "id": "4fc2dee7-4927-45c1-800f-95903c751570",
       "name": "Respond to Webhook"
     },
     {
@@ -1758,10 +1731,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        22224,
-        18112
+        26800,
+        28016
       ],
-      "id": "4017d34d-b785-4f4f-9744-aaf1f3abe8da",
+      "id": "b70ce8ab-0e09-4b1d-a44d-192487f941b8",
       "name": "Embeddings HuggingFace Inference2",
       "credentials": {
         "huggingFaceApi": {
@@ -1775,25 +1748,58 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
       "typeVersion": 1,
       "position": [
-        21648,
-        17472
+        26208,
+        27296
       ],
-      "id": "a4d069c7-2f5b-4c29-83de-e622f7abbf8b",
+      "id": "5d3ab32d-6e94-44ae-be9f-269b90580fb5",
       "name": "Character Text Splitter"
     },
     {
       "parameters": {
         "dataType": "binary",
         "textSplittingMode": "custom",
-        "options": {}
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "document_id",
+                "value": "={{ $json.document_id }}"
+              },
+              {
+                "name": "user_id",
+                "value": "={{ $json.user_id }}"
+              },
+              {
+                "name": "session_id",
+                "value": "={{ $json.session_id }}"
+              },
+              {
+                "name": "nama_file",
+                "value": "={{ $json.nama_file }}"
+              },
+              {
+                "name": "kategori",
+                "value": "={{ $json.kategori }}"
+              },
+              {
+                "name": "file_url",
+                "value": "={{ $json.file_url }}"
+              },
+              {
+                "name": "document_type",
+                "value": "={{ $json.document_type }}"
+              }
+            ]
+          }
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        21440,
-        17328
+        26032,
+        27088
       ],
-      "id": "92868577-3095-4375-b051-c4885f269489",
+      "id": "5fb4c8c4-6961-4060-b014-5ec01c97e320",
       "name": "Default Data Loader"
     },
     {
@@ -1804,10 +1810,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        21296,
-        17312
+        25872,
+        27104
       ],
-      "id": "0d9f5fe9-f77f-4d1e-b51a-c1190ded980d",
+      "id": "39a35aed-b615-46e4-aecb-8d9813212447",
       "name": "Embeddings HuggingFace Inference",
       "credentials": {
         "huggingFaceApi": {
@@ -1830,10 +1836,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        21344,
-        17104
+        25856,
+        26832
       ],
-      "id": "d260609e-58e2-4a62-b8bb-e875cb37ffc1",
+      "id": "d2540941-420c-4dba-aab9-f6a36f894822",
       "name": "Pinecone Vector Store",
       "credentials": {
         "pineconeApi": {
@@ -1873,10 +1879,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        23968,
-        17360
+        28544,
+        27264
       ],
-      "id": "ab92cdce-54ba-4960-ba95-38558ee047aa",
+      "id": "9a20bcb7-d64e-4355-b5a4-b9ebc97fe73c",
       "name": "Write Chat",
       "credentials": {
         "supabaseApi": {
@@ -1900,10 +1906,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24336,
-        17024
+        28912,
+        26928
       ],
-      "id": "bcad9e37-b98f-496d-8d4c-fc39b2036e9d",
+      "id": "f326cb73-bb53-4a41-b8af-c099dc67b4ce",
       "name": "HTTP Request4"
     },
     {
@@ -1944,10 +1950,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        24688,
-        17200
+        29264,
+        27104
       ],
-      "id": "1d4c5d48-53b2-4255-8f60-991327968e09",
+      "id": "be7e6500-4b92-4fbd-a66e-27744b91d44f",
       "name": "Call 'AI Assistant Team'2"
     },
     {
@@ -1957,11 +1963,11 @@
           "fieldValues": [
             {
               "fieldId": "nama_file",
-              "fieldValue": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf"
+              "fieldValue": "={{ $('HTTP Request4').item.json.nama_file_laporan || $('Edit Fields PPT').item.json.nama_file_laporan }}"
             },
             {
               "fieldId": "kategori",
-              "fieldValue": "output"
+              "fieldValue": "generated"
             },
             {
               "fieldId": "file_url",
@@ -1981,10 +1987,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        24816,
-        17024
+        29392,
+        26928
       ],
-      "id": "34fd0db7-cd11-4057-a3ab-6c78316974d8",
+      "id": "c057ca7e-312e-43b2-a120-48c9213a4d9e",
       "name": "Upload Document to Table1",
       "credentials": {
         "supabaseApi": {
@@ -2031,10 +2037,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        25568,
-        17024
+        30144,
+        26928
       ],
-      "id": "1bce686b-ca83-4171-8d12-7cf213af9043",
+      "id": "44fc1869-2cf8-46ee-90fb-585858b57b21",
       "name": "Call 'AI Assistant Team'3"
     },
     {
@@ -2046,10 +2052,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        25088,
-        17024
+        29664,
+        26928
       ],
-      "id": "2763ec50-cc90-47b5-91a8-ca55a648da62",
+      "id": "5d25db5d-c7bf-4402-aeff-2ed3c4e87cce",
       "name": "Respond to Webhook3"
     },
     {
@@ -2077,10 +2083,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24592,
-        17024
+        29168,
+        26928
       ],
-      "id": "d5047ee1-4a47-4e83-8da5-5cd39902148c",
+      "id": "7119701a-e5b7-4ded-b899-c6ca613fc9e4",
       "name": "HTTP Request5"
     },
     {
@@ -2114,10 +2120,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        25344,
-        17024
+        29920,
+        26928
       ],
-      "id": "5e0f8dc4-0261-4e48-84e2-a58c62eba647",
+      "id": "59609e40-e262-45a1-92f8-007b3becc0bf",
       "name": "Write Chat1",
       "credentials": {
         "supabaseApi": {
@@ -2133,10 +2139,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        23472,
-        17328
+        27936,
+        27216
       ],
-      "id": "9aeb729a-ea59-4775-9a3b-5eaa9d975c8c",
+      "id": "e39aeb9b-f090-4d24-94be-17fca1d2bb71",
       "name": "Extract Full Output"
     },
     {
@@ -2170,10 +2176,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        25536,
-        16848
+        30112,
+        26752
       ],
-      "id": "8a7f4b6d-cea3-4fc2-b491-d8b9e77f340a",
+      "id": "a7a540cb-5fd0-4ccf-a1e7-e84c290f25f1",
       "name": "Write Chat2",
       "credentials": {
         "supabaseApi": {
@@ -2189,10 +2195,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        23728,
-        17536
+        28304,
+        27440
       ],
-      "id": "9cbad06b-30af-445b-a84c-dbe44398b91f",
+      "id": "c30febcf-246b-491b-989c-732838c61f02",
       "name": "Format Draft Email"
     },
     {
@@ -2204,10 +2210,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        23968,
-        17536
+        28544,
+        27440
       ],
-      "id": "8c5dc582-dd13-41a1-a6d8-1c687af5aa28",
+      "id": "82e17ee9-7b7f-4024-a844-9b874c8daa3d",
       "name": "Respond Draft Email"
     },
     {
@@ -2241,10 +2247,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        24416,
-        17200
+        28992,
+        27104
       ],
-      "id": "7351e6c3-71d3-4eb6-9b6d-b24bd8d73f69",
+      "id": "8455dc3f-d750-463d-b5ad-353bc3a5d564",
       "name": "Write Chat3",
       "credentials": {
         "supabaseApi": {
@@ -2284,10 +2290,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        24192,
-        17536
+        28768,
+        27440
       ],
-      "id": "2d04407d-431f-440c-a1b2-e4e63336ba21",
+      "id": "063e68fb-fc0e-468c-9d58-0360d4e2c8d6",
       "name": "Write Chat4",
       "credentials": {
         "supabaseApi": {
@@ -2304,10 +2310,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        23664,
-        18192
+        26704,
+        28688
       ],
-      "id": "3229b78f-423b-4d65-93c7-a830bfbe76b4",
+      "id": "e4471bb8-9188-4cdd-ad16-ca2d213f677d",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -2315,6 +2321,91 @@
           "name": "Groq account"
         }
       }
+    },
+    {
+      "parameters": {
+        "binaryProperty": "file",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        24832,
+        27424
+      ],
+      "id": "451fc5d0-eb53-47d3-91c8-e7a63671fd67",
+      "name": "Extract text for document classification",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "w8uzdoMNkfX3gHSw",
+          "name": "Mistral Cloud account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const upload = $('Upload Document').first().json.body || {};\nconst pages = Array.isArray($json.pages) ? $json.pages : [];\nconst rawText = pages\n  .map((page) => page?.markdown || page?.text || '')\n  .filter(Boolean)\n  .join('\\n\\n');\n\nconst normalizedText = String(rawText || '')\n  .replace(/```[\\s\\S]*?```/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst excerpt = normalizedText.slice(0, 6000);\n\nreturn [{\n  json: {\n    file_name: upload.file_name || '',\n    kategori: upload.kategori || '',\n    classification_excerpt: excerpt,\n    classification_prompt: `Anda adalah pengklasifikasi jenis dokumen internal perusahaan.\\n\\nTugas Anda: pilih tepat satu label dari daftar berikut untuk dokumen ini:\\n- sop\\n- policy\\n- report\\n- notulen\\n- proposal\\n- kontrak\\n- panduan\\n- other\\n\\nAturan mutlak:\\n1. Balas hanya satu kata label dari daftar di atas.\\n2. Jangan beri penjelasan tambahan.\\n3. Jika isi dokumen tidak cukup jelas atau campuran, balas other.\\n\\nNama file: ${upload.file_name || '-'}\\nKategori sumber: ${upload.kategori || '-'}\\n\\nCuplikan awal dokumen:\\n${excerpt || '[kosong]'}`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        25120,
+        27424
+      ],
+      "id": "44462882-43cf-4b7f-832e-2cfa83d22184",
+      "name": "Build Document Classification Excerpt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.classification_prompt }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Anda adalah classifier dokumen. Output wajib hanya satu label lowercase dari daftar ini: sop, policy, report, notulen, proposal, kontrak, panduan, other."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        25408,
+        27424
+      ],
+      "id": "64b14512-ac91-407f-a0b2-20fc096375ff",
+      "name": "Classify Document Type",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allowed = new Set(['sop', 'policy', 'report', 'notulen', 'proposal', 'kontrak', 'panduan', 'other']);\nconst raw = String($json.text || $json.response || $json.output || '')\n  .trim()\n  .toLowerCase();\nconst firstToken = raw.split(/[^a-z_]+/).find(Boolean) || '';\nconst documentType = allowed.has(firstToken) ? firstToken : 'other';\n\nreturn [{\n  json: {\n    document_type: documentType\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        25712,
+        27424
+      ],
+      "id": "28e870a1-9114-4280-b1da-6fad229f98b9",
+      "name": "Normalize Document Type"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        25120,
+        26960
+      ],
+      "id": "ae87f3cf-1c84-4fd6-90fd-b0be639bace5",
+      "name": "Merge Upload Success + Document Type"
     }
   ],
   "pinData": {},
@@ -2468,32 +2559,6 @@
           {
             "node": "HTTP Request1",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "deepseek-3.2": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Report Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Knowledge Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Scheduler Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Task Agent",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -2845,17 +2910,6 @@
         ]
       ]
     },
-    "deepseek-v3.2": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Generate Chat Tittle",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Generate Chat Tittle": {
       "main": [
         [
@@ -2882,7 +2936,7 @@
       "main": [
         [
           {
-            "node": "Create a row",
+            "node": "Merge Upload Success + Document Type",
             "type": "main",
             "index": 0
           }
@@ -2899,6 +2953,11 @@
           },
           {
             "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract text for document classification",
             "type": "main",
             "index": 0
           }
@@ -3057,7 +3116,7 @@
       "main": [
         [
           {
-            "node": "Pinecone Vector Store",
+            "node": "Prepare Document Metadata",
             "type": "main",
             "index": 0
           }
@@ -3235,6 +3294,102 @@
             "node": "Document Agent",
             "type": "ai_languageModel",
             "index": 0
+          },
+          {
+            "node": "Generate Chat Tittle",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Knowledge Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Scheduler Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Report Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Task Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Classify Document Type",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Document Metadata": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract text for document classification": {
+      "main": [
+        [
+          {
+            "node": "Build Document Classification Excerpt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Document Classification Excerpt": {
+      "main": [
+        [
+          {
+            "node": "Classify Document Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Document Type": {
+      "main": [
+        [
+          {
+            "node": "Normalize Document Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Document Type": {
+      "main": [
+        [
+          {
+            "node": "Merge Upload Success + Document Type",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Upload Success + Document Type": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -3246,7 +3401,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "63797968-8260-46cf-8a7e-f1e26c0d25d7",
+  "versionId": "6fdfb453-af4d-4829-825e-9083c45e0c32",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

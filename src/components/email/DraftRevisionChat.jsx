@@ -3,6 +3,7 @@ import { X, Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { urls } from '../../services/api';
+import { useEmailStore } from '../../store/emailStore';
 
 /**
  * DraftRevisionChat Component
@@ -35,7 +36,7 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         role: 'ai',
         content: `Draft yang akan direvisi:
 
-**To:** ${draft.to}
+**To:** ${draft.to_email || draft.to}
 **Subject:** ${draft.subject}
 
 **Content:**`,
@@ -77,7 +78,7 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         action: 'revise',
         revision_instructions: userMessage,
         current_draft: {
-          to: draft.to,
+          to: draft.to_email || draft.to,
           subject: draft.subject,
           body_text: draft.body_text,
           body_html: draft.body_html
@@ -99,9 +100,16 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         content: 'Draft email telah diperbarui, periksa kembali draft'
       }]);
 
-      // Notify parent to refresh draft list
+      // Notify parent to refresh draft list and get updated draft
       if (onDraftUpdated) {
-        const updatedDraft = response.data?.drafts?.[0];
+        // First refresh the drafts list
+        await useEmailStore.getState().fetchDrafts();
+        
+        // Then get the updated draft from the store
+        const updatedDrafts = useEmailStore.getState().drafts;
+        const updatedDraft = updatedDrafts.find(d => d.id === draft.id);
+        
+        // Pass the updated draft to parent
         await onDraftUpdated(updatedDraft || draft);
       }
 

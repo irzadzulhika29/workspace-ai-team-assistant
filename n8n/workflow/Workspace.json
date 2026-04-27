@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        128,
-        1344
+        6208,
+        9248
       ],
-      "id": "95873824-2399-4df4-b37a-3a81c8e0d316",
+      "id": "d5197a4b-6994-4a07-9860-dc11ac8e3932",
       "name": "Webhook",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -26,10 +26,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        1440
+        6960,
+        9344
       ],
-      "id": "df9d5d3f-797f-4153-87e6-6ee9a987542f",
+      "id": "d5c09750-2daa-48a6-b8a0-2f7c93b7f1df",
       "name": "Prepare Draft Payload"
     },
     {
@@ -103,10 +103,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1456
+        7744,
+        9360
       ],
-      "id": "13485668-724e-4ed7-a354-bfe2035f008f",
+      "id": "811c2b6c-ed51-4a59-b9d7-f6b1033062e5",
       "name": "Create Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -184,10 +184,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1280
+        7744,
+        9184
       ],
-      "id": "8d30103c-8f4c-48d9-afad-26cc31fe5f60",
+      "id": "726d3da2-b697-4f69-9de5-f16aea2195af",
       "name": "Update Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -203,10 +203,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        1296
+        8016,
+        9200
       ],
-      "id": "72923a98-5b7c-48d8-9d18-67e6658d268d",
+      "id": "98458af8-6c22-4925-8185-08134ac97e78",
       "name": "Format Draft Response"
     },
     {
@@ -216,10 +216,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2192,
-        1296
+        8272,
+        9200
       ],
-      "id": "f46199c6-08aa-4fdd-94dc-9a05d49e5e1f",
+      "id": "1c1c61df-3685-4437-ac27-74e76a29ffc0",
       "name": "Respond to Webhook"
     },
     {
@@ -230,10 +230,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        1136
+        6800,
+        9040
       ],
-      "id": "dbd7755d-2c6e-4566-99cb-c556205048e8",
+      "id": "f42a6cbd-f35d-42c0-8aec-37c5295db91d",
       "name": "Prepare Send Payload"
     },
     {
@@ -244,10 +244,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1184,
-        1136
+        7264,
+        9040
       ],
-      "id": "53d8605a-743e-4f7b-9046-4cff2d9e0347",
+      "id": "68e2322b-a07b-405e-bb58-7fab3aa999c2",
       "name": "Prepare Sent Draft Update"
     },
     {
@@ -323,10 +323,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1136
+        7744,
+        9040
       ],
-      "id": "9990c9c7-a664-4fc7-aac9-8470e2d3966a",
+      "id": "b86823d5-6d5c-4994-9321-e436d1f1d45c",
       "name": "Mark Draft As Sent",
       "credentials": {
         "supabaseApi": {
@@ -363,10 +363,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        336,
-        1344
+        6416,
+        9248
       ],
-      "id": "2048091b-dbee-438a-8f0c-2d73354cb573",
+      "id": "6eefbd7b-764f-4e40-b5eb-c21a5fd128e3",
       "name": "If"
     },
     {
@@ -377,10 +377,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1280,
-        2720
+        7360,
+        10624
       ],
-      "id": "0d4fb95c-fabb-4081-8f06-9c0ff30d8cf4",
+      "id": "6dcdf8b4-c8eb-4e90-a6ec-19c370a85835",
       "name": "Groq Chat Model1",
       "credentials": {
         "groqApi": {
@@ -400,10 +400,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        544,
-        1440
+        6624,
+        9344
       ],
-      "id": "6bfbd174-a65e-4ad9-a3eb-743c15071c76",
+      "id": "81378ca7-370f-4e41-835d-e417e88e5e01",
       "name": "Draft & Send Email"
     },
     {
@@ -415,10 +415,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        704,
-        1648
+        6784,
+        9552
       ],
-      "id": "f54d8027-edb3-4fa8-ba5b-2fbf1901a940",
+      "id": "a0f48d13-a829-44b1-9c48-4757d7e976a5",
       "name": "Get Email Format"
     },
     {
@@ -449,10 +449,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1088,
-        1440
+        7168,
+        9344
       ],
-      "id": "b10bcfea-edd5-4ac3-b47e-e9cefbcfe59b",
+      "id": "562ba775-9e2f-4370-8e06-ff285b00cdb9",
       "name": "Is Revision?"
     },
     {
@@ -480,10 +480,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        944,
-        1136
+        7024,
+        9040
       ],
-      "id": "cf937b27-1c5f-4bd7-a788-180767d2c63b",
+      "id": "2281c0fd-7020-44e1-bd05-d5043f0b00e0",
       "name": "Send Email via Gmail API"
     },
     {
@@ -496,10 +496,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -288,
-        1840
+        5792,
+        9744
       ],
-      "id": "e173d2b6-c4b7-4714-a058-845c1675fc9c",
+      "id": "3cf3c392-1c25-4e0e-9079-b2ad2b4b720f",
       "name": "Get Email Summary",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -510,15 +510,15 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1040,
-        1840
+        7120,
+        9744
       ],
-      "id": "c8c45d36-cec7-40f3-90f5-4dcc25a1b7c3",
+      "id": "3cd328f2-8b6d-4a3d-95d2-9c81528cb59b",
       "name": "Loop Over Items"
     },
     {
       "parameters": {
-        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $('Split Out Email Messages').item.json.messages.id }}",
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $json.messages.id }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -546,12 +546,25 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1232,
-        2032
+        7312,
+        9936
       ],
-      "id": "169e4701-e337-41c1-9f9d-a32c440829b1",
+      "id": "bcfbf2b8-3f1a-4b8f-a57c-51169344ad4d",
       "name": "Get Email Detail",
       "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const detail = $json || {};\n\nconst decodeBase64Url = (value) => {\n  if (!value) return '';\n  try {\n    const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');\n    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);\n    return Buffer.from(padded, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n};\n\nconst stripHtml = (value) => String(value || '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst collectParts = (node, bucket = []) => {\n  if (!node || typeof node !== 'object') return bucket;\n  bucket.push(node);\n  if (Array.isArray(node.parts)) {\n    for (const part of node.parts) {\n      collectParts(part, bucket);\n    }\n  }\n  return bucket;\n};\n\nconst extractBody = (payload) => {\n  const nodes = collectParts(payload, []);\n  const plainPart = nodes.find((part) => part?.mimeType === 'text/plain' && part?.body?.data);\n  if (plainPart?.body?.data) {\n    return decodeBase64Url(plainPart.body.data).replace(/\\s+/g, ' ').trim();\n  }\n  const htmlPart = nodes.find((part) => part?.mimeType === 'text/html' && part?.body?.data);\n  if (htmlPart?.body?.data) {\n    return stripHtml(decodeBase64Url(htmlPart.body.data));\n  }\n  const fallbackPart = nodes.find((part) => part?.body?.data);\n  if (fallbackPart?.body?.data) {\n    return stripHtml(decodeBase64Url(fallbackPart.body.data));\n  }\n  return '';\n};\n\nif (!detail.payload) {\n  return [{\n    json: {\n      id: detail.id || detail.messageId || 'unknown',\n      error: detail.message || detail.error || 'Failed to fetch email detail',\n      failed: true,\n    }\n  }];\n}\n\nconst headers = Array.isArray(detail.payload.headers) ? detail.payload.headers : [];\nconst getHeader = (name) => headers.find((header) => String(header.name || '').toLowerCase() === name.toLowerCase())?.value || '';\nconst bodyText = extractBody(detail.payload);\nconst normalizedBody = (bodyText || detail.snippet || '').slice(0, 1200);\n\nreturn [{\n  json: {\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: getHeader('From'),\n    subject: getHeader('Subject'),\n    date: getHeader('Date'),\n    snippet: detail.snippet || '',\n    body: normalizedBody,\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n    failed: false,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7536,
+        9936
+      ],
+      "id": "a19a6af4-b4d9-4baf-9a95-efeb18f41c12",
+      "name": "Normalize Email Detail"
     },
     {
       "parameters": {
@@ -583,10 +596,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        144,
-        1824
+        6224,
+        9744
       ],
-      "id": "87feee43-a9ec-4eb7-a638-f9ab6a36a9b2",
+      "id": "f654dc52-8802-4b3e-99ae-be4e42641925",
       "name": "Get Unread Email"
     },
     {
@@ -616,10 +629,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        336,
-        1840
+        6416,
+        9744
       ],
-      "id": "56339d33-3a2f-4092-b414-95fdd0483325",
+      "id": "ba76bda4-8240-4269-a19e-ee1f4cac1300",
       "name": "Has Unread Emails?"
     },
     {
@@ -631,10 +644,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        704,
-        1824
+        6784,
+        9728
       ],
-      "id": "8daa40b2-6e5c-46df-b4c2-702bd3d87248",
+      "id": "1383fe4a-0bc2-42a3-ae53-fda45f0b4b33",
       "name": "Split Out Email Messages"
     },
     {
@@ -645,23 +658,23 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -64,
-        1840
+        6016,
+        9744
       ],
-      "id": "d7ef5d6b-e0b0-4e42-8c1c-62efda0d71f9"
+      "id": "d116ccbb-ac85-4f44-9ecf-108720f05b29"
     },
     {
       "parameters": {
-        "jsCode": "const listPayload = $node['Get Unread Email'].json || {};\nconst decodeBase64Url = (value) => {\n  if (!value) return '';\n  try {\n    const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');\n    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);\n    return Buffer.from(padded, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n};\n\nconst stripHtml = (value) => String(value || '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst collectParts = (node, bucket = []) => {\n  if (!node || typeof node !== 'object') return bucket;\n  bucket.push(node);\n  if (Array.isArray(node.parts)) {\n    for (const part of node.parts) collectParts(part, bucket);\n  }\n  return bucket;\n};\n\nconst extractBody = (payload) => {\n  const parts = collectParts(payload, []);\n  const plainPart = parts.find((part) => part?.mimeType === 'text/plain' && part?.body?.data);\n  if (plainPart?.body?.data) return decodeBase64Url(plainPart.body.data).replace(/\\s+/g, ' ').trim();\n  const htmlPart = parts.find((part) => part?.mimeType === 'text/html' && part?.body?.data);\n  if (htmlPart?.body?.data) return stripHtml(decodeBase64Url(htmlPart.body.data));\n  const fallbackPart = parts.find((part) => part?.body?.data);\n  if (fallbackPart?.body?.data) return stripHtml(decodeBase64Url(fallbackPart.body.data));\n  return '';\n};\n\nconst inputItems = $input.all();\nconst detailedEmails = [];\nconst fetchErrors = [];\n\nfor (const item of inputItems) {\n  const detail = item.json || {};\n  if (!detail.payload) {\n    fetchErrors.push({\n      id: detail.id || detail.messageId || 'unknown',\n      error: detail.message || detail.error || 'Failed to fetch email detail',\n    });\n    continue;\n  }\n\n  const headers = Array.isArray(detail.payload.headers) ? detail.payload.headers : [];\n  const getHeader = (name) => headers.find((header) => String(header.name || '').toLowerCase() === name.toLowerCase())?.value || '';\n  const bodyText = extractBody(detail.payload);\n  const normalizedBody = (bodyText || detail.snippet || '').slice(0, 1200);\n\n  detailedEmails.push({\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: getHeader('From'),\n    to: getHeader('To'),\n    subject: getHeader('Subject'),\n    date: getHeader('Date'),\n    snippet: detail.snippet || '',\n    body: normalizedBody,\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n  });\n}\n\nreturn [{\n  json: {\n    emails: detailedEmails,\n    source_metrics: {\n      total_unread: listPayload.resultSizeEstimate || detailedEmails.length,\n      fetched_email_count: detailedEmails.length,\n      fetched_message_ids: (Array.isArray(listPayload.messages) ? listPayload.messages : []).map((message) => message.id),\n      failed_message_ids: fetchErrors.map((item) => item.id),\n    },\n    fetch_error: fetchErrors.length ?                                                                                                       'Gagal mengambil detail ' + fetchErrors.length + ' email unread' : null,\n    fetch_error_details: fetchErrors.slice(0, 5),\n  }\n}];"
+        "jsCode": "const inputItems = $input.all();\nconst detailedEmails = [];\nconst fetchErrors = [];\n\nfor (const item of inputItems) {\n  const detail = item.json || {};\n\n  if (detail.failed) {\n    fetchErrors.push({\n      id: detail.id || 'unknown',\n      error: detail.error || 'Failed to fetch email detail',\n    });\n    continue;\n  }\n\n  detailedEmails.push({\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: detail.from || '',\n    subject: detail.subject || '',\n    date: detail.date || '',\n    snippet: detail.snippet || '',\n    body: detail.body || '',\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n  });\n}\n\nreturn [{\n  json: {\n    emails: detailedEmails,\n    source_metrics: {\n      total_unread: detailedEmails.length + fetchErrors.length,\n      fetched_email_count: detailedEmails.length,\n      fetched_message_ids: detailedEmails.map((e) => e.id),\n      failed_message_ids: fetchErrors.map((item) => item.id),\n    },\n    fetch_error: fetchErrors.length ? `Gagal mengambil detail ${fetchErrors.length} email unread` : null,\n    fetch_error_details: fetchErrors.slice(0, 5),\n  }\n}];"
       },
       "name": "Aggregate Email Details",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1392,
-        1888
+        7472,
+        9792
       ],
-      "id": "8aaf87e6-01e8-46ba-a026-8c8019f4b5a1"
+      "id": "31fd416f-00f4-4e37-b2dd-f44a58b79e44"
     },
     {
       "parameters": {
@@ -671,10 +684,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
-        2224
+        7456,
+        10128
       ],
-      "id": "a946cb7b-98b6-44d3-bd8d-3301a3c5bfc8"
+      "id": "06932b19-8a56-4ebf-9f9a-2ca72f90b0ea"
     },
     {
       "parameters": {
@@ -693,10 +706,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1680,
-        2016
+        7760,
+        9920
       ],
-      "id": "802fadcd-5367-42a7-997f-812ef52a0bcc"
+      "id": "7a10b40a-51c5-4316-a067-1b7a6bd2d84b"
     },
     {
       "parameters": {
@@ -710,23 +723,23 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1856,
-        1936
+        7936,
+        9840
       ],
-      "id": "ee9eab81-24c8-48f9-ac28-b9ca59be03b6"
+      "id": "4a29ee73-e236-48ea-8fe4-7bda76262673"
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Email Summary Request Data').item.json.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    user_id: parsed.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
       },
       "name": "Parse Email Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2176,
-        2048
+        8256,
+        9952
       ],
-      "id": "ba27136a-86b0-4d9f-bc76-8e583af39029"
+      "id": "67d4008e-4892-439d-a6c8-4437aadfd154"
     },
     {
       "parameters": {
@@ -736,10 +749,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2400,
-        2048
+        8480,
+        9952
       ],
-      "id": "7c1f5d1a-d074-4a8e-987b-74ba83e1fa53"
+      "id": "2277a93d-dc87-40dd-8570-edcf5ff15343"
     },
     {
       "parameters": {
@@ -751,10 +764,152 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2624,
-        2048
+        8704,
+        9952
       ],
-      "id": "710eb2eb-5856-441b-814b-cdbbaa121266"
+      "id": "b0d0c7ba-8ea6-48f1-ac5c-5075af5d7356"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question }}",
+        "options": {
+          "systemMessage": "Kamu adalah agen tanya jawab untuk SATU dokumen yang dipilih pengguna.\n\nATURAN UTAMA:\n1. Jawab HANYA berdasarkan hasil tool `retrieve vector data`.\n2. Tool retrieval sudah difilter ke document_id milik dokumen yang dipilih pengguna. Jangan gunakan pengetahuan umum atau asumsi di luar hasil retrieval.\n3. Jika hasil retrieval tidak cukup untuk menjawab, jawab tepat dengan: `Maaf, informasi tersebut tidak ditemukan di dokumen yang dipilih.`\n4. Jangan mencampur jawaban dari dokumen lain.\n5. Jika jawaban ditemukan, berikan jawaban yang ringkas, langsung, dan sertakan bagian penutup `Sumber:` yang menyebut `nama_file` jika metadata tersedia, jika tidak pakai `document_id`.\n6. Jika pertanyaan meminta kutipan atau prosedur, ambil hanya dari konteks retrieval.\n\nFORMAT JAWABAN:\n- Gunakan bahasa Indonesia yang jelas dan profesional.\n- Jika berisi langkah/prosedur, gunakan daftar bernomor.\n- Akhiri dengan satu baris sumber, contoh: `Sumber: SOP Cuti Tahunan`."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        6144,
+        10544
+      ],
+      "id": "dca90c68-b775-4020-ab64-65d2f1a77401",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        10752
+      ],
+      "id": "b397b51a-b022-4a9d-ac1f-a7278ce258c0",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "68b7yPyfO0nmCOn6",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Gunakan tool ini untuk mengambil konteks dari dokumen yang SUDAH dipilih pengguna. Tool ini hanya boleh dipakai untuk menjawab pertanyaan berdasarkan dokumen terpilih, bukan pencarian global ke semua dokumen.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-ai-agent",
+          "mode": "list",
+          "cachedResultName": "rag-ai-agent"
+        },
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "document_id",
+                "value": "={{ $json.body.document_id }}"
+              },
+              {
+                "name": "user_id",
+                "value": "={{ $json.body.user_id }}"
+              }
+            ]
+          }
+        },
+        "topK": 6,
+        "includeDocumentMetadata": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        6208,
+        10784
+      ],
+      "id": "aaf4bfab-1cdf-48bd-acb9-c01d57d9f1a8",
+      "name": "retrieve vector data",
+      "credentials": {
+        "pineconeApi": {
+          "id": "qjoVsvnMKymAPQQw",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "BAAI/bge-m3",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        6096,
+        10960
+      ],
+      "id": "cd7efb18-bf3b-43e9-a096-c6cc1f9d90d1",
+      "name": "Embeddings HuggingFace Inference2",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "133wsOINxPjAEron",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        6560,
+        10544
+      ],
+      "id": "ff8e9b60-1987-473c-8df4-373a3876ea85",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-document",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        5776,
+        10544
+      ],
+      "id": "f8d4a353-4c3f-41dc-804e-1b0d5ab62eda",
+      "name": "Chat Document",
+      "webhookId": "1e9639af-7d9f-4d7a-9f67-fef0b9eeef64"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? {};\nconst documentId = body.document_id || body.selected_document_id || null;\nconst userId = body.user_id || null;\nconst question = String(body.message || '').trim();\n\nif (!question) {\n  throw new Error('message is required for document chat');\n}\n\nif (!documentId) {\n  throw new Error('document_id is required for document chat');\n}\n\nif (!userId) {\n  throw new Error('user_id is required for document chat');\n}\n\nreturn [{\n  json: {\n    ...$json,\n    body: {\n      ...body,\n      message: question,\n      question,\n      document_id: documentId,\n      user_id: userId,\n      document_name: body.document_name || 'Dokumen terpilih',\n    },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5952,
+        10544
+      ],
+      "id": "bf7d55cc-2748-4c66-bd97-2f174b68f11b",
+      "name": "Prepare Document Query"
     }
   ],
   "pinData": {},
@@ -965,6 +1120,17 @@
       "main": [
         [
           {
+            "node": "Normalize Email Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email Detail": {
+      "main": [
+        [
+          {
             "node": "Loop Over Items",
             "type": "main",
             "index": 0
@@ -1088,6 +1254,72 @@
           }
         ]
       ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retrieve vector data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "retrieve vector data",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Document": {
+      "main": [
+        [
+          {
+            "node": "Prepare Document Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Document Query": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1095,7 +1327,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "04ace92a-75e6-4749-b394-93a042309a17",
+  "versionId": "08f641c5-8097-4c29-adbe-47e7000d52a3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

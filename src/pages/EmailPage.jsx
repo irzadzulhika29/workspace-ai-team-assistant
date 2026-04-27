@@ -83,7 +83,11 @@ export default function EmailPage() {
   /**
    * Handle draft updated from chat
    */
-  const handleDraftUpdated = async () => {
+  const handleDraftUpdated = async (updatedDraft) => {
+    // Update the draft being revised with the latest version
+    if (updatedDraft) {
+      setRevisingDraft(updatedDraft);
+    }
     // Refresh drafts list
     await useEmailStore.getState().fetchDrafts();
   };

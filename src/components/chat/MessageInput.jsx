@@ -7,12 +7,20 @@ import { Send, Paperclip, X } from 'lucide-react'
  * @param {boolean}  props.disabled
  * @param {string}   props.placeholder
  * @param {boolean}  props.allowFile - whether to show file upload button
+ * @param {string}   props.initialValue - initial text value
  */
-export default function MessageInput({ onSend, disabled = false, placeholder = 'Ketik pesan...', allowFile = false }) {
-  const [value, setValue] = useState('')
+export default function MessageInput({ onSend, disabled = false, placeholder = 'Ketik pesan...', allowFile = false, initialValue = '' }) {
+  const [value, setValue] = useState(initialValue)
   const [selectedFile, setSelectedFile] = useState(null)
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  // Update value when initialValue changes
+  useEffect(() => {
+    if (initialValue) {
+      setValue(initialValue)
+    }
+  }, [initialValue])
 
   // Auto-resize textarea
   useEffect(() => {

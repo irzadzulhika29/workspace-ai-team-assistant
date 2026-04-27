@@ -44,6 +44,7 @@ export default function SupervisorChat() {
   const [loading, setLoading] = useState(false)
   const [agentLabel, setAgentLabel] = useState('Supervisor Agent')
   const [error, setError] = useState(null)
+  const [prefilledMessage, setPrefilledMessage] = useState('')
   const bottomRef = useAutoScroll([supervisorMessages, loading])
 
   const handleSend = useCallback(async (text, file, options = {}) => {
@@ -182,6 +183,16 @@ export default function SupervisorChat() {
     const draftRevision = location.state?.draftRevision;
     const draft = location.state?.draft;
 
+    // Handle pre-filled message (from FileWorkspace magic button)
+    if (autoSendMessage && !emailContext && !draftRevision && !autoSendProcessed.current) {
+      autoSendProcessed.current = true;
+      setPrefilledMessage(autoSendMessage);
+      
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+      return;
+    }
+
     // Handle draft revision
     if (draftRevision && draft && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
@@ -305,6 +316,7 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         disabled={loading}
         placeholder="Delegasikan tugas ke Supervisor Agent…"
         allowFile={true}
+        initialValue={prefilledMessage}
       />
     </div>
   )

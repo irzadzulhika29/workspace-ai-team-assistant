@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, Brain, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
@@ -11,7 +11,6 @@ import { useSidebar } from '../../context/SidebarContext'
 const navItems = [
   { to: '/',                 icon: LayoutDashboard, label: 'Dashboard'         },
   { to: '/chat/supervisor',  icon: MessageSquare,   label: 'Supervisor Agent'  },
-  { to: '/chat/knowledge',   icon: Brain,           label: 'Knowledge Agent'   },
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
   { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
   { to: '/workspace/email',  icon: Mail,            label: 'Email'             },
@@ -23,19 +22,11 @@ const navItems = [
 export default function Sidebar() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const location = useLocation()
-  const isKnowledgePage  = location.pathname === '/chat/knowledge'
   const isSupervisorPage = location.pathname === '/chat/supervisor'
-  const { open: mobileOpen, close: closeMobile } = useSidebar()
+  const { open: mobileOpen, collapsed, close: closeMobile, toggleCollapse } = useSidebar()
 
-  // ── Knowledge session state ───────────────────────────────────────────
+  // ── Supervisor session state ───────────────────────────────────────────
   const {
-    knowledgeSessions,
-    activeKnowledgeSessionId,
-    setKnowledgeSessions,
-    setActiveKnowledgeSession,
-    setKnowledgeMessages,
-    clearKnowledge,
-    // supervisor
     supervisorSessions,
     activeSupervisorSessionId,
     setSupervisorSessions,
@@ -45,12 +36,6 @@ export default function Sidebar() {
     isAutoSending,
   } = useChatStore(
     (state) => ({
-      knowledgeSessions: state.knowledgeSessions,
-      activeKnowledgeSessionId: state.activeKnowledgeSessionId,
-      setKnowledgeSessions: state.setKnowledgeSessions,
-      setActiveKnowledgeSession: state.setActiveKnowledgeSession,
-      setKnowledgeMessages: state.setKnowledgeMessages,
-      clearKnowledge: state.clearKnowledge,
       supervisorSessions: state.supervisorSessions,
       activeSupervisorSessionId: state.activeSupervisorSessionId,
       setSupervisorSessions: state.setSupervisorSessions,
@@ -62,97 +47,9 @@ export default function Sidebar() {
     shallow,
   )
 
-  const [loadingSessions,      setLoadingSessions]      = useState(false)
-  const [loadingHistory,       setLoadingHistory]       = useState(false)
-  const [creatingSession,      setCreatingSession]      = useState(false)
   const [loadingSupSessions,   setLoadingSupSessions]   = useState(false)
   const [loadingSupHistory,    setLoadingSupHistory]    = useState(false)
   const [creatingSupSession,   setCreatingSupSession]   = useState(false)
-
-  // ─────────────────────────────────────────────────────────────────────
-  // KNOWLEDGE helpers
-  // ─────────────────────────────────────────────────────────────────────
-  const loadSessionHistory = useCallback(async (sessionId) => {
-    setLoadingHistory(true)
-    try {
-      const riwayat = await sessionApi.ambilRiwayatChat(sessionId)
-      const messages = riwayat.map((row) => {
-        const msgData = row.message || {}
-        const content = msgData.kwargs?.content ?? msgData.data?.content ?? msgData.content ?? ''
-        const type    = (msgData.id?.[msgData.id.length - 1] || msgData.type || '').toLowerCase()
-        return {
-          id:        row.id?.toString() || crypto.randomUUID(),
-          role:      type.includes('human') ? 'user' : 'ai',
-          content,
-          timestamp: row.created_at || new Date().toISOString(),
-          actionResults: msgData.actionResults ?? {},
-          forwardedEmail: msgData.forwardedEmail ?? null,
-        }
-      })
-      setKnowledgeMessages(messages)
-    } catch (err) {
-      console.error('Gagal memuat riwayat knowledge:', err)
-      setKnowledgeMessages([])
-    } finally {
-      setLoadingHistory(false)
-    }
-  }, [setKnowledgeMessages])
-
-  const handleNewChat = useCallback(async () => {
-    setCreatingSession(true)
-    try {
-      const sesi = await sessionApi.buatSesiBaru('Obrolan Baru', 'rag_chat')
-      if (sesi) {
-        setActiveKnowledgeSession(sesi.id)
-        clearKnowledge()
-        const sessions = await sessionApi.ambilSemuaSesi('rag_chat')
-        setKnowledgeSessions(sessions)
-      }
-    } catch (err) {
-      console.error('Gagal membuat sesi knowledge baru:', err)
-    } finally {
-      setCreatingSession(false)
-    }
-  }, [clearKnowledge, setActiveKnowledgeSession, setKnowledgeSessions])
-
-  const loadSessions = useCallback(async () => {
-    setLoadingSessions(true)
-    try {
-      const sessions = await sessionApi.ambilSemuaSesi('rag_chat')
-      setKnowledgeSessions(sessions)
-
-      if (sessions.length === 0) {
-        setActiveKnowledgeSession(null)
-        clearKnowledge()
-        await handleNewChat()
-      } else if (sessions.length > 0) {
-        const hasActiveSession =
-          activeKnowledgeSessionId &&
-          sessions.some((s) => s.id === activeKnowledgeSessionId)
-
-        const targetSessionId = hasActiveSession
-          ? activeKnowledgeSessionId
-          : sessions[0].id
-
-        if (!hasActiveSession) setActiveKnowledgeSession(targetSessionId)
-        await loadSessionHistory(targetSessionId)
-      }
-    } catch (err) {
-      console.error('Gagal memuat sesi knowledge:', err)
-    } finally {
-      setLoadingSessions(false)
-    }
-  }, [activeKnowledgeSessionId, clearKnowledge, handleNewChat, loadSessionHistory, setActiveKnowledgeSession, setKnowledgeSessions])
-
-  useEffect(() => {
-    if (isKnowledgePage) loadSessions()
-  }, [isKnowledgePage, loadSessions])
-
-  const handleSelectKnowledgeSession = async (sessionId) => {
-    if (sessionId === activeKnowledgeSessionId) return
-    setActiveKnowledgeSession(sessionId)
-    await loadSessionHistory(sessionId)
-  }
 
   // ─────────────────────────────────────────────────────────────────────
   // SUPERVISOR helpers
@@ -248,22 +145,6 @@ export default function Sidebar() {
   // ─────────────────────────────────────────────────────────────────────
   // DELETE handlers
   // ─────────────────────────────────────────────────────────────────────
-  const hapusSesi = async (e, sessionId) => {
-    e.stopPropagation()
-    const berhasil = await sessionApi.hapusSesiChat(sessionId)
-    if (!berhasil) return
-    const sessions = await sessionApi.ambilSemuaSesi('rag_chat')
-    setKnowledgeSessions(sessions)
-    if (sessionId === activeKnowledgeSessionId) {
-      if (sessions.length > 0) {
-        setActiveKnowledgeSession(sessions[0].id)
-        await loadSessionHistory(sessions[0].id)
-      } else {
-        await handleNewChat()
-      }
-    }
-  }
-
   const hapusSupSesi = async (e, sessionId) => {
     e.stopPropagation()
     const berhasil = await sessionApi.hapusSesiChat(sessionId)
@@ -415,14 +296,15 @@ export default function Sidebar() {
         fixed top-0 left-0 h-screen z-40
         bg-surface-high/95 backdrop-blur-xl flex flex-col
         border-r border-white/30
-        select-none transition-transform duration-300
-        w-[240px]
+        select-none transition-all duration-300
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 md:w-[var(--sidebar-width)]
-      `} style={{ '--sidebar-width': '240px' }}>
+        md:translate-x-0
+        ${collapsed ? 'md:w-[72px]' : 'md:w-[240px]'}
+        w-[240px]
+      `}>
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-5 border-b ghost-divider justify-between">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${collapsed ? 'md:opacity-0 md:w-0' : 'opacity-100'}`}>
             <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0 shadow-[0_12px_24px_rgba(0,97,132,0.18)]">
               <MessageSquare size={14} className="text-white" />
             </div>
@@ -433,6 +315,14 @@ export default function Sidebar() {
               <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 mt-1">Executive Canvas</p>
             </div>
           </div>
+          
+          {/* Logo only when collapsed (desktop) */}
+          <div className={`hidden md:flex items-center justify-center transition-all duration-300 ${collapsed ? 'opacity-100 w-full' : 'opacity-0 w-0'}`}>
+            <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center shadow-[0_12px_24px_rgba(0,97,132,0.18)]">
+              <MessageSquare size={14} className="text-white" />
+            </div>
+          </div>
+          
           {/* Close button — mobile only */}
           <button
             onClick={closeMobile}
@@ -443,7 +333,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto sidebar-scrollbar">
-          <p className="text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2">
+          <p className={`text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2 transition-all duration-300 ${collapsed ? 'md:opacity-0 md:h-0 md:pb-0' : 'opacity-100'}`}>
             Workspace
           </p>
           {navItems.map(({ to, icon: Icon, label }) => (
@@ -452,9 +342,11 @@ export default function Sidebar() {
                 to={to}
                 end={to === '/'}
                 onClick={closeMobile}
+                title={collapsed ? label : ''}
                 className={({ isActive }) =>
                   `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                    transition-all duration-150 relative
+                   ${collapsed ? 'md:justify-center' : ''}
                    ${isActive
                        ? 'bg-white text-brand-700 shadow-sm translate-x-1'
                        : 'text-slateui-500 hover:text-slateui-900 hover:bg-white/55'
@@ -463,29 +355,17 @@ export default function Sidebar() {
               >
                 {({ isActive }) => (
                   <>
-                    {isActive && (
+                    {isActive && !collapsed && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-600 rounded-r-full" />
                     )}
                     <Icon size={16} className={isActive ? 'text-brand-600' : 'text-slateui-500 group-hover:text-slateui-700'} />
-                    <span>{label}</span>
+                    <span className={`transition-all duration-300 ${collapsed ? 'md:hidden' : ''}`}>{label}</span>
                   </>
                 )}
               </NavLink>
 
-              {/* Knowledge session sub-menu */}
-              {to === '/chat/knowledge' && isKnowledgePage && renderSessionList({
-                sessions: knowledgeSessions,
-                activeSessionId: activeKnowledgeSessionId,
-                loading: loadingSessions,
-                loadingHistory,
-                creating: creatingSession,
-                onNewChat: handleNewChat,
-                onSelectSession: handleSelectKnowledgeSession,
-                onDeleteSession: hapusSesi,
-              })}
-
-              {/* Supervisor session sub-menu */}
-              {to === '/chat/supervisor' && isSupervisorPage && renderSessionList({
+              {/* Supervisor session sub-menu - hide when collapsed */}
+              {!collapsed && to === '/chat/supervisor' && isSupervisorPage && renderSessionList({
                 sessions: supervisorSessions,
                 activeSessionId: activeSupervisorSessionId,
                 loading: loadingSupSessions,
@@ -502,16 +382,41 @@ export default function Sidebar() {
         <div className="px-4 pb-4 space-y-1 border-t ghost-divider pt-3">
           <button
             onClick={() => setSettingsOpen(true)}
-            className="
+            title={collapsed ? 'Settings' : ''}
+            className={`
               w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
               text-slateui-500 hover:text-slateui-900 hover:bg-white/55
-              transition-colors duration-150
-            "
+              transition-all duration-150
+              ${collapsed ? 'md:justify-center' : ''}
+            `}
           >
             <Settings size={16} className="text-slateui-500" />
-            <span>Settings</span>
+            <span className={`transition-all duration-300 ${collapsed ? 'md:hidden' : ''}`}>Settings</span>
           </button>
         </div>
+
+        {/* Collapse toggle button - positioned at sidebar border center */}
+        <button
+          onClick={toggleCollapse}
+          className={`
+            hidden md:flex items-center justify-center
+            absolute top-1/2 -translate-y-1/2 -right-4
+            w-8 h-8 rounded-full
+            bg-white border-2 border-gray-200
+            shadow-md hover:shadow-lg
+            text-slate-600 hover:text-brand-600
+            transition-all duration-200
+            z-50
+            ${collapsed ? '' : ''}
+          `}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? (
+            <ChevronRight size={16} />
+          ) : (
+            <ChevronLeft size={16} />
+          )}
+        </button>
       </aside>
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />

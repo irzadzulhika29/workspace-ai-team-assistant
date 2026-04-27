@@ -72,11 +72,11 @@ const DEFAULT_MODE = import.meta.env.VITE_N8N_MODE || "publish";
 // Webhook endpoints
 const ENDPOINTS = {
   SUPERVISOR: "chat",
-  KNOWLEDGE: "chat",
+  CHAT_DOCUMENT: "chat-document",
   PM: "pm",
   REPORT: "report",
   STATUS: "status",
-  UPLOAD: "upload-file",
+  UPLOAD: "upload-document",
   BRIEFINGS: "briefings",
 };
 
@@ -154,13 +154,6 @@ export const urls = {
     return buildWebhookUrl(ENDPOINTS.SUPERVISOR, env, mode, devUrl);
   },
 
-  getKnowledge: () => {
-    const env = urls.getEnvironment();
-    const mode = urls.getMode();
-    const devUrl = urls.getDevBaseUrl();
-    return buildWebhookUrl(ENDPOINTS.KNOWLEDGE, env, mode, devUrl);
-  },
-
   getPM: () => {
     const env = urls.getEnvironment();
     const mode = urls.getMode();
@@ -196,10 +189,17 @@ export const urls = {
     return buildWebhookUrl(ENDPOINTS.BRIEFINGS, env, mode, devUrl);
   },
 
+  getChatDocument: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.CHAT_DOCUMENT, env, mode, devUrl);
+  },
+
   // Get all webhook URLs
   getAll: () => ({
     supervisor: urls.getSupervisor(),
-    knowledge: urls.getKnowledge(),
+    chatDocument: urls.getChatDocument(),
     pm: urls.getPM(),
     report: urls.getReport(),
     status: urls.getStatus(),

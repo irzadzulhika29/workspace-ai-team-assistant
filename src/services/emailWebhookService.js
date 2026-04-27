@@ -48,6 +48,7 @@ const getCurrentUser = async () => {
 export const formatEmailPayload = (email, user = null) => {
   return {
     user_id: user?.id || user?.email || 'unknown',
+    user_name: user?.name || 'Unknown User',
     id: email.id,
     threadId: email.threadId,
     labelIds: email.labelIds || [],

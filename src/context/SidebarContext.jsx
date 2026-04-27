@@ -1,13 +1,23 @@
 import React, { createContext, useContext, useState } from 'react'
 
-const SidebarContext = createContext({ open: false, toggle: () => {}, close: () => {} })
+const SidebarContext = createContext({ 
+  open: false, 
+  collapsed: false,
+  toggle: () => {}, 
+  toggleCollapse: () => {},
+  close: () => {} 
+})
 
 export function SidebarProvider({ children }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false) // Mobile overlay
+  const [collapsed, setCollapsed] = useState(false) // Desktop collapsed state
+  
   const toggle = () => setOpen((v) => !v)
+  const toggleCollapse = () => setCollapsed((v) => !v)
   const close = () => setOpen(false)
+  
   return (
-    <SidebarContext.Provider value={{ open, toggle, close }}>
+    <SidebarContext.Provider value={{ open, collapsed, toggle, toggleCollapse, close }}>
       {children}
     </SidebarContext.Provider>
   )

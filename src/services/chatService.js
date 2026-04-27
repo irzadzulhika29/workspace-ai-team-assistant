@@ -104,27 +104,6 @@ export const chatApi = {
   },
 
   /**
-   * Send a message to the Knowledge Agent (RAG).
-   * @param {string} message
-   * @param {string|null} contextFilter
-   * @param {string|null} sessionId - Optional explicit session ID
-   */
-  sendToKnowledge: async (message, contextFilter = null, sessionId = null) => {
-    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
-    return post(urls.getKnowledge, {
-      action: "chat",
-      session_id: sessionId || getSessionId(),
-      user_id: userId,
-      message,
-      context_filter: contextFilter,
-      chat_type: "rag_chat",
-      timestamp: new Date().toISOString(),
-      ...(googleAccessToken && { google_access_token: googleAccessToken }),
-      ...(jiraCredentials && { jira_credentials: jiraCredentials }),
-    });
-  },
-
-  /**
    * Send email draft (kirim email yang sudah dibuat)
    * @param {Object} emailDraft - Draft email object with to, subject, message
    * @param {string|null} sessionId - Optional explicit session ID
@@ -176,6 +155,54 @@ Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
       user_id: userId,
       message,
       chat_type: "general_chat",
+      timestamp: new Date().toISOString(),
+      ...(googleAccessToken && { google_access_token: googleAccessToken }),
+      ...(jiraCredentials && { jira_credentials: jiraCredentials }),
+    });
+  },
+
+  /**
+   * Send a message with document context (for Document Q&A)
+   * @param {string} message - User's question
+   * @param {Object} documentContext - Document metadata (id, name, url)
+   * @param {string|null} sessionId - Optional explicit session ID
+   */
+  sendMessage: async (message, documentContext = {}, sessionId = null) => {
+    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+
+    return post(urls.getSupervisor, {
+      action: "chat",
+      session_id: sessionId || getSessionId(),
+      user_id: userId,
+      message,
+      document_id: documentContext.document_id || null,
+      document_name: documentContext.document_name || null,
+      document_url: documentContext.document_url || null,
+      chat_type: documentContext.document_id ? "document_qa" : "general_chat",
+      timestamp: new Date().toISOString(),
+      ...(googleAccessToken && { google_access_token: googleAccessToken }),
+      ...(jiraCredentials && { jira_credentials: jiraCredentials }),
+    });
+  },
+
+  /**
+   * Send a message to Document Chat endpoint (dedicated RAG for documents)
+   * @param {string} message - User's question
+   * @param {Object} documentContext - Document metadata (id, name, url)
+   * @param {string|null} sessionId - Optional explicit session ID
+   */
+  sendToDocumentChat: async (message, documentContext = {}, sessionId = null) => {
+    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+
+    return post(urls.getChatDocument, {
+      action: "chat",
+      session_id: sessionId || getSessionId(),
+      user_id: userId,
+      message,
+      document_id: documentContext.document_id || null,
+      document_name: documentContext.document_name || null,
+      document_url: documentContext.document_url || null,
+      chat_type: "document_qa",
       timestamp: new Date().toISOString(),
       ...(googleAccessToken && { google_access_token: googleAccessToken }),
       ...(jiraCredentials && { jira_credentials: jiraCredentials }),

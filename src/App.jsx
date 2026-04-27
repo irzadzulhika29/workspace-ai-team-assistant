@@ -4,7 +4,6 @@ import Sidebar from './components/layout/Sidebar'
 import MobileHeader from './components/layout/MobileHeader'
 import Dashboard from './pages/Dashboard'
 import SupervisorChat from './pages/SupervisorChat'
-import KnowledgeChat from './pages/KnowledgeChat'
 import FileWorkspace from './pages/FileWorkspace'
 import CalendarPage from './pages/CalendarPage'
 import JiraPage from './pages/JiraPage'
@@ -15,7 +14,7 @@ import DebugAuthPage from './pages/DebugAuthPage'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
 
 function Layout() {
-  const { open, close } = useSidebar()
+  const { open, collapsed, close } = useSidebar()
 
   return (
     <div className="flex min-h-screen w-full">
@@ -30,8 +29,8 @@ function Layout() {
       <Sidebar />
 
       <main
-        className="flex-1 min-h-screen overflow-hidden flex flex-col"
-        style={{ marginLeft: 'var(--sidebar-width)' }}
+        className={`flex-1 min-h-screen overflow-hidden flex flex-col transition-all duration-300`}
+        style={{ marginLeft: collapsed ? '72px' : '240px' }}
       >
         {/* Mobile top header */}
         <MobileHeader />
@@ -41,7 +40,6 @@ function Layout() {
             <Routes>
               <Route path="/"                   element={<Dashboard />}        />
               <Route path="/chat/supervisor"    element={<SupervisorChat />}   />
-              <Route path="/chat/knowledge"     element={<KnowledgeChat />}    />
               <Route path="/workspace/files"    element={<FileWorkspace />}    />
               <Route path="/workspace/calendar" element={<CalendarPage />}     />
               <Route path="/workspace/jira"     element={<JiraPage />}         />
