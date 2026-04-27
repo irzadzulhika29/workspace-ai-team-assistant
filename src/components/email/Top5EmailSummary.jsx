@@ -1,34 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, Clock, CheckCircle, Sparkles, RefreshCw, FileText, ExternalLink } from 'lucide-react';
-import { useEmailStore } from '../../store/emailStore';
-import { generateDraftFromWebhook } from '../../services/emailWebhookService';
+import { AlertCircle, Clock, CheckCircle, Sparkles, RefreshCw, Mail, TrendingUp } from 'lucide-react';
+import axios from 'axios';
+import { urls } from '../../services/api';
 
 /**
  * Priority badge component
  */
 const PriorityBadge = ({ priority }) => {
   const config = {
-    urgent: {
+    high: {
       bg: 'bg-red-100',
       text: 'text-red-700',
       icon: AlertCircle,
-      label: 'Urgent'
+      label: 'High Priority'
     },
     medium: {
       bg: 'bg-yellow-100',
       text: 'text-yellow-700',
       icon: Clock,
-      label: 'Medium'
+      label: 'Medium Priority'
     },
     low: {
       bg: 'bg-green-100',
       text: 'text-green-700',
       icon: CheckCircle,
-      label: 'Low'
+      label: 'Low Priority'
     }
   };
 
-  const { bg, text, icon: Icon, label } = config[priority] || config.low;
+  const { bg, text, icon: Icon, label } = config[priority] || config.medium;
 
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
@@ -39,151 +39,191 @@ const PriorityBadge = ({ priority }) => {
 };
 
 /**
+ * Get current user info from backend
+ */
+const getCurrentUser = async () => {
+  try {
+    const backendUrl = urls.getBackendUrl();
+    const response = await axios.get(`${backendUrl}/api/auth/google/status`, {
+      withCredentials: true
+    });
+
+    if (response.data.connected) {
+      return {
+        id: response.data.userId || response.data.email,
+        name: response.data.name,
+        email: response.data.email,
+        picture: response.data.picture
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+};
+
+/**
+ * Get Google access token from backend
+ */
+const getGoogleAccessToken = async () => {
+  try {
+    const backendUrl = urls.getBackendUrl();
+    const response = await axios.get(`${backendUrl}/api/google/token`, {
+      withCredentials: true,
+      timeout: 8000
+    });
+
+    return response.data?.access_token || null;
+  } catch (error) {
+    console.error('Error getting Google access token:', error);
+    return null;
+  }
+};
+
+/**
  * Top5EmailSummary Component
- * Displays AI-powered summary of top 5 unread emails with priority labeling
+ * Displays AI-powered summary of unread emails from n8n webhook
+ * Summary is cached in localStorage to persist across page refreshes
  */
 export default function Top5EmailSummary() {
-  const { emails, loading, selectEmail, selectedEmail, createDraft } = useEmailStore();
   const [summaryData, setSummaryData] = useState(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [generatingDraftId, setGeneratingDraftId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const STORAGE_KEY = 'email_summary_cache';
 
   /**
-   * Handle email click - select and show detail
+   * Load cached summary from localStorage
    */
-  const handleEmailClick = (emailId) => {
-    selectEmail(emailId);
-  };
-
-  /**
-   * Handle draft reply - create draft from summary card via webhook
-   */
-  const handleDraftReply = async (e, email) => {
-    e.stopPropagation(); // Prevent email selection
-
-    // Find full email object
-    const fullEmail = emails.find(em => em.id === email.id);
-    if (!fullEmail) {
-      alert('Email not found');
-      return;
-    }
-
-    setGeneratingDraftId(email.id);
-
+  const loadCachedSummary = () => {
     try {
-      // Send email to webhook and generate draft
-      const result = await generateDraftFromWebhook(fullEmail, createDraft);
-
-      if (result.success) {
-        alert('Draft created successfully! Check the Drafts tab to review and send.');
-      } else {
-        alert('Failed to create draft. Please try again.');
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Check if cache is less than 1 hour old
+        const cacheAge = Date.now() - parsed.timestamp;
+        const oneHour = 60 * 60 * 1000;
+        
+        if (cacheAge < oneHour) {
+          console.log('Loading cached email summary');
+          return parsed.data;
+        } else {
+          console.log('Cache expired, will fetch fresh data');
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
-    } catch (error) {
-      console.error('Error creating draft:', error);
-      alert(`Error creating draft: ${error.message}`);
+    } catch (err) {
+      console.error('Error loading cached summary:', err);
+    }
+    return null;
+  };
+
+  /**
+   * Save summary to localStorage
+   */
+  const saveSummaryToCache = (data) => {
+    try {
+      const cacheData = {
+        data,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+      console.log('Email summary saved to cache');
+    } catch (err) {
+      console.error('Error saving summary to cache:', err);
+    }
+  };
+
+  /**
+   * Fetch email summary from n8n webhook
+   */
+  const fetchEmailSummary = async (forceRefresh = false) => {
+    try {
+      // If not forcing refresh, try to load from cache first
+      if (!forceRefresh) {
+        const cached = loadCachedSummary();
+        if (cached) {
+          setSummaryData(cached);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Get current user
+      const user = await getCurrentUser();
+      
+      if (!user) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      // Get Google access token
+      const googleAccessToken = await getGoogleAccessToken();
+
+      if (!googleAccessToken) {
+        setError('Google account not connected');
+        setLoading(false);
+        return;
+      }
+
+      // Get n8n webhook URL
+      const baseUrl = urls.getN8nBaseUrl();
+      const webhookUrl = `${baseUrl}/webhook-test/email/summary`;
+
+      console.log('Fetching email summary from:', webhookUrl);
+
+      const payload = {
+        user_id: user.id,
+        google_access_token: googleAccessToken
+      };
+
+      console.log('Sending payload:', { user_id: payload.user_id, has_token: !!payload.google_access_token });
+
+      const response = await axios.post(webhookUrl, payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 seconds
+      });
+
+      console.log('Email summary response:', response.data);
+
+      if (response.data.success && response.data.summary) {
+        setSummaryData(response.data.summary);
+        saveSummaryToCache(response.data.summary);
+        setError(null);
+      } else {
+        setError('Failed to fetch email summary');
+      }
+    } catch (err) {
+      console.error('Error fetching email summary:', err);
+      setError(err.response?.data?.error || err.message || 'Failed to fetch email summary');
     } finally {
-      setGeneratingDraftId(null);
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
   /**
-   * Determine email priority based on rule-based detection
-   * TODO: Integrate with AI summary for better priority detection
+   * Handle refresh summary - force fetch from webhook
    */
-  const determineEmailPriority = (email) => {
-    const subject = (email.subject || '').toLowerCase();
-    const snippet = (email.snippet || '').toLowerCase();
-    const from = (email.from || '').toLowerCase();
-
-    // Urgent keywords
-    const urgentKeywords = ['urgent', 'asap', 'critical', 'important', 'deadline', 'emergency'];
-    const hasUrgentKeyword = urgentKeywords.some(keyword => 
-      subject.includes(keyword) || snippet.includes(keyword)
-    );
-
-    // Check if from important sender (e.g., boss, client)
-    // TODO: Make this configurable per user
-    const importantDomains = ['ceo', 'director', 'manager', 'client'];
-    const isImportantSender = importantDomains.some(domain => from.includes(domain));
-
-    // Check if needs reply
-    const needsReplyKeywords = ['please reply', 'waiting for', 'need your', 'can you', 'could you'];
-    const needsReply = needsReplyKeywords.some(keyword => 
-      subject.includes(keyword) || snippet.includes(keyword)
-    );
-
-    if (hasUrgentKeyword || isImportantSender) {
-      return 'urgent';
-    } else if (needsReply) {
-      return 'medium';
-    } else {
-      return 'low';
-    }
+  const handleRefreshSummary = async () => {
+    setRefreshing(true);
+    await fetchEmailSummary(true); // Force refresh
   };
 
-  /**
-   * Get top 5 unread emails
-   */
-  const getTop5Unread = () => {
-    const unreadEmails = emails.filter(email => 
-      email.labelIds?.includes('UNREAD')
-    );
-    return unreadEmails.slice(0, 5);
-  };
-
-  /**
-   * Generate summary for top 5 emails
-   */
-  const generateSummary = () => {
-    const top5 = getTop5Unread();
-    
-    if (top5.length === 0) {
-      return null;
-    }
-
-    const summaries = top5.map(email => ({
-      id: email.id,
-      subject: email.subject || '(No subject)',
-      from: email.from,
-      snippet: email.snippet,
-      priority: determineEmailPriority(email),
-      timestamp: email.date || email.internalDate
-    }));
-
-    // Count by priority
-    const priorityCounts = summaries.reduce((acc, item) => {
-      acc[item.priority] = (acc[item.priority] || 0) + 1;
-      return acc;
-    }, {});
-
-    return {
-      emails: summaries,
-      counts: priorityCounts,
-      total: summaries.length
-    };
-  };
-
-  /**
-   * Refresh summary
-   */
-  const handleRefreshSummary = () => {
-    setLoadingSummary(true);
-    setTimeout(() => {
-      const summary = generateSummary();
-      setSummaryData(summary);
-      setLoadingSummary(false);
-    }, 500);
-  };
-
-  // Generate summary when emails change
+  // Load summary on mount (from cache or fetch)
   useEffect(() => {
-    const summary = generateSummary();
-    setSummaryData(summary);
+    fetchEmailSummary(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [emails]);
+  }, []);
 
-  if (loading && !summaryData) {
+  // Loading state
+  if (loading) {
     return (
       <div className="p-4 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
@@ -196,7 +236,45 @@ export default function Top5EmailSummary() {
     );
   }
 
-  if (!summaryData || summaryData.total === 0) {
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border-b border-red-200">
+        <div className="flex items-center gap-2 mb-2">
+          <AlertCircle className="w-5 h-5 text-red-600" />
+          <h3 className="text-sm font-semibold text-red-900">Error Loading Summary</h3>
+        </div>
+        <p className="text-xs text-red-700">{error}</p>
+        <button
+          onClick={handleRefreshSummary}
+          disabled={refreshing}
+          className="mt-2 text-xs text-red-700 hover:text-red-800 font-medium"
+        >
+          {refreshing ? 'Retrying...' : 'Try again'}
+        </button>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!summaryData || summaryData.status === 'failed') {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        <Mail className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+        <p className="text-sm font-medium">{summaryData?.headline || 'No email summary available'}</p>
+        <button
+          onClick={handleRefreshSummary}
+          disabled={refreshing}
+          className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+        >
+          {refreshing ? 'Refreshing...' : 'Refresh Summary'}
+        </button>
+      </div>
+    );
+  }
+
+  // Success state - no unread emails
+  if (summaryData.source_metrics?.total_unread === 0) {
     return (
       <div className="p-4 text-center text-gray-500">
         <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
@@ -212,99 +290,86 @@ export default function Top5EmailSummary() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-blue-600" />
-          <h3 className="text-sm font-semibold text-gray-900">Top 5 Email Summary</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Email Summary</h3>
         </div>
         <button
           onClick={handleRefreshSummary}
-          disabled={loadingSummary}
-          className="p-1 rounded hover:bg-white/50 transition-colors"
+          disabled={refreshing}
+          className="p-1 rounded hover:bg-white/50 transition-colors flex-shrink-0"
           title="Refresh summary"
         >
-          <RefreshCw className={`w-4 h-4 text-gray-600 ${loadingSummary ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* Priority Overview */}
-      <div className="flex gap-2 mb-3">
-        {summaryData.counts.urgent > 0 && (
-          <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
-            {summaryData.counts.urgent} Urgent
-          </span>
-        )}
-        {summaryData.counts.medium > 0 && (
-          <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full font-medium">
-            {summaryData.counts.medium} Medium
-          </span>
-        )}
-        {summaryData.counts.low > 0 && (
-          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-            {summaryData.counts.low} Low
-          </span>
-        )}
+      {/* Priority Badge */}
+      <div className="mb-3">
+        <PriorityBadge priority={summaryData.priority} />
       </div>
 
-      {/* Email Summaries */}
-      <div className="space-y-2">
-        {summaryData.emails.map((email, index) => (
-          <div
-            key={email.id}
-            className={`p-3 bg-white rounded-lg border transition-all ${
-              selectedEmail?.id === email.id
-                ? 'border-blue-500 shadow-md ring-2 ring-blue-200'
-                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <span className="text-xs font-medium text-gray-500">#{index + 1}</span>
-              <PriorityBadge priority={email.priority} />
-            </div>
-            
-            <div 
-              onClick={() => handleEmailClick(email.id)}
-              className="cursor-pointer"
-            >
-              <p className="text-sm font-medium text-gray-900 mb-1 line-clamp-1">
-                {email.subject}
-              </p>
-              <p className="text-xs text-gray-600 mb-1 line-clamp-1">
-                From: {email.from}
-              </p>
-              <p className="text-xs text-gray-500 line-clamp-2 mb-2">
-                {email.snippet}
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-              <button
-                onClick={(e) => handleDraftReply(e, email)}
-                disabled={generatingDraftId === email.id}
-                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FileText className={`w-3 h-3 ${generatingDraftId === email.id ? 'animate-pulse' : ''}`} />
-                {generatingDraftId === email.id ? 'Generating...' : 'Draft Reply'}
-              </button>
-              <button
-                onClick={() => handleEmailClick(email.id)}
-                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Open Detail
-              </button>
-            </div>
+      {/* Metrics */}
+      <div className="flex gap-3 mb-3">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+          <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
+          <div className="text-left">
+            <p className="text-xs text-gray-500">Unread</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {summaryData.source_metrics?.total_unread || 0}
+            </p>
           </div>
-        ))}
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+          <TrendingUp className="w-4 h-4 text-green-600 flex-shrink-0" />
+          <div className="text-left">
+            <p className="text-xs text-gray-500">Analyzed</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {summaryData.source_metrics?.fetched_email_count || 0}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* AI Insight */}
-      <div className="mt-3 p-2 bg-blue-100 rounded-lg">
-        <p className="text-xs text-blue-800">
-          <span className="font-semibold">AI Insight:</span>{' '}
-          {summaryData.counts.urgent > 0 
-            ? `${summaryData.counts.urgent} email${summaryData.counts.urgent > 1 ? 's' : ''} need immediate attention.`
-            : 'No urgent emails. You can review these at your convenience.'}
+      {/* Headline */}
+      <div className="mb-3 p-3 bg-white rounded-lg border border-gray-200">
+        <p className="text-sm font-medium text-gray-900 leading-relaxed">
+          {summaryData.headline}
         </p>
       </div>
+
+      {/* Summary Points */}
+      {summaryData.summary_points && summaryData.summary_points.length > 0 && (
+        <div className="mb-3 space-y-2">
+          {summaryData.summary_points.map((point, index) => (
+            <div key={index} className="flex items-start gap-2 p-2 bg-white rounded-lg border border-gray-200">
+              <span className="text-blue-600 font-bold text-xs mt-0.5 flex-shrink-0">•</span>
+              <p className="text-xs text-gray-700 flex-1">{point}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Recommendations */}
+      {summaryData.recommendations && summaryData.recommendations.length > 0 && (
+        <div className="p-3 bg-blue-100 rounded-lg">
+          <p className="text-xs font-semibold text-blue-900 mb-2">💡 Recommendations:</p>
+          <ul className="space-y-1">
+            {summaryData.recommendations.map((rec, index) => (
+              <li key={index} className="text-xs text-blue-800">
+                • {rec}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Status indicator */}
+      {summaryData.status === 'partial' && (
+        <div className="mt-3 p-2 bg-yellow-100 rounded-lg">
+          <p className="text-xs text-yellow-800">
+            ⚠️ Some data may be incomplete
+          </p>
+        </div>
+      )}
     </div>
   );
 }

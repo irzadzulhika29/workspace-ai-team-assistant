@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, RefreshCw, Inbox, Mail, FileText, Send } from 'lucide-react';
+import { Search, RefreshCw, Inbox, Mail, FileText, Send, Sparkles } from 'lucide-react';
 import { useEmailStore } from '../store/emailStore';
 import EmailList from '../components/email/EmailList';
 import EmailDetail from '../components/email/EmailDetail';
@@ -23,6 +23,7 @@ export default function EmailPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('unread'); // Default to Unread tab
   const [revisingDraft, setRevisingDraft] = useState(null);
+  const [showSummary, setShowSummary] = useState(true); // Toggle for email summary panel
 
   // Fetch emails on mount
   useEffect(() => {
@@ -198,16 +199,32 @@ export default function EmailPage() {
         {/* Tab Content */}
         {activeTab === 'unread' && (
           <>
-            {/* Left Panel: Top 5 Summary + Email List */}
-            <div className="w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
-              {/* Top 5 Email Summary Card */}
-              <div className="border-b border-gray-200">
+            {/* Left Panel: Email Summary (Recommendations) - Collapsible */}
+            {showSummary && (
+              <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
                 <Top5EmailSummary />
               </div>
-              
-              {/* Email List */}
+            )}
+
+            {/* Toggle Button for Summary Panel */}
+            <div className="relative">
+              <button
+                onClick={() => setShowSummary(!showSummary)}
+                className={`absolute top-4 -left-3 z-10 p-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
+                  showSummary 
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
+                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                }`}
+                title={showSummary ? 'Hide AI Summary' : 'Show AI Summary'}
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Middle Panel: Email List */}
+            <div className="w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto">
-                <EmailList maxItems={5} unreadOnly={true} />
+                <EmailList maxItems={10} unreadOnly={true} />
               </div>
             </div>
 

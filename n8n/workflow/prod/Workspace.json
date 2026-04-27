@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        128,
-        1344
+        -480,
+        1584
       ],
-      "id": "95873824-2399-4df4-b37a-3a81c8e0d316",
+      "id": "0d0775ee-d7b1-49d9-8b5a-692e58110cce",
       "name": "Webhook",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -26,10 +26,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        1440
+        272,
+        1680
       ],
-      "id": "df9d5d3f-797f-4153-87e6-6ee9a987542f",
+      "id": "930fc205-37bd-4f5d-99fb-f855b43af78a",
       "name": "Prepare Draft Payload"
     },
     {
@@ -103,10 +103,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1456
+        1056,
+        1696
       ],
-      "id": "13485668-724e-4ed7-a354-bfe2035f008f",
+      "id": "3454141d-1035-4b62-9ad8-61e6fbdfd7ef",
       "name": "Create Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -184,10 +184,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1280
+        1056,
+        1520
       ],
-      "id": "8d30103c-8f4c-48d9-afad-26cc31fe5f60",
+      "id": "35173e97-a470-4a63-8593-2c4abe88682e",
       "name": "Update Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -203,10 +203,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
-        1296
+        1328,
+        1536
       ],
-      "id": "72923a98-5b7c-48d8-9d18-67e6658d268d",
+      "id": "a13d01e0-6bae-47b4-b7ce-d4749b8fe328",
       "name": "Format Draft Response"
     },
     {
@@ -216,10 +216,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2192,
-        1296
+        1584,
+        1536
       ],
-      "id": "f46199c6-08aa-4fdd-94dc-9a05d49e5e1f",
+      "id": "71925b82-29ed-4871-8960-90c4fa455ca5",
       "name": "Respond to Webhook"
     },
     {
@@ -230,10 +230,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        1136
+        112,
+        1376
       ],
-      "id": "dbd7755d-2c6e-4566-99cb-c556205048e8",
+      "id": "670c1b9b-a49c-464d-9657-d58b6c55a45e",
       "name": "Prepare Send Payload"
     },
     {
@@ -244,10 +244,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1184,
-        1136
+        576,
+        1376
       ],
-      "id": "53d8605a-743e-4f7b-9046-4cff2d9e0347",
+      "id": "bc06c481-4133-4cf6-bb50-a1f749205de8",
       "name": "Prepare Sent Draft Update"
     },
     {
@@ -323,10 +323,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1664,
-        1136
+        1056,
+        1376
       ],
-      "id": "9990c9c7-a664-4fc7-aac9-8470e2d3966a",
+      "id": "dba916cb-fbe1-47b2-ad6f-858348172e7e",
       "name": "Mark Draft As Sent",
       "credentials": {
         "supabaseApi": {
@@ -363,10 +363,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        336,
-        1344
+        -272,
+        1584
       ],
-      "id": "2048091b-dbee-438a-8f0c-2d73354cb573",
+      "id": "7d00cb5b-f8a6-4826-ba2b-244356be2f67",
       "name": "If"
     },
     {
@@ -377,10 +377,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1280,
-        2720
+        672,
+        2960
       ],
-      "id": "0d4fb95c-fabb-4081-8f06-9c0ff30d8cf4",
+      "id": "4f24aafc-2394-435c-8840-f0b942d999ad",
       "name": "Groq Chat Model1",
       "credentials": {
         "groqApi": {
@@ -400,10 +400,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        544,
-        1440
+        -64,
+        1680
       ],
-      "id": "6bfbd174-a65e-4ad9-a3eb-743c15071c76",
+      "id": "a6b7811f-8f0b-4848-bb82-fc7990eb54e5",
       "name": "Draft & Send Email"
     },
     {
@@ -415,10 +415,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        704,
-        1648
+        96,
+        1888
       ],
-      "id": "f54d8027-edb3-4fa8-ba5b-2fbf1901a940",
+      "id": "2a94fcc2-8180-4f3a-8646-65369eae6943",
       "name": "Get Email Format"
     },
     {
@@ -449,10 +449,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1088,
-        1440
+        480,
+        1680
       ],
-      "id": "b10bcfea-edd5-4ac3-b47e-e9cefbcfe59b",
+      "id": "f29bf2e8-03ad-4802-8b0a-f0697a8077b2",
       "name": "Is Revision?"
     },
     {
@@ -480,10 +480,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        944,
-        1136
+        336,
+        1376
       ],
-      "id": "cf937b27-1c5f-4bd7-a788-180767d2c63b",
+      "id": "189f8cc0-3ff4-4467-b98a-4cd1e98e4504",
       "name": "Send Email via Gmail API"
     },
     {
@@ -496,10 +496,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -288,
-        1840
+        -896,
+        2080
       ],
-      "id": "e173d2b6-c4b7-4714-a058-845c1675fc9c",
+      "id": "636d8c3d-ad7a-4e3b-8f5f-a03f19fa06ae",
       "name": "Get Email Summary",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -510,15 +510,15 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1040,
-        1840
+        432,
+        2080
       ],
-      "id": "c8c45d36-cec7-40f3-90f5-4dcc25a1b7c3",
+      "id": "f296cd77-a02f-4558-a1bd-0a56e72f0652",
       "name": "Loop Over Items"
     },
     {
       "parameters": {
-        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $('Split Out Email Messages').item.json.messages.id }}",
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $json.messages.id }}",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -546,12 +546,25 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1232,
-        2032
+        624,
+        2272
       ],
-      "id": "169e4701-e337-41c1-9f9d-a32c440829b1",
+      "id": "f101d687-04b8-4a52-b999-fb815edb9eeb",
       "name": "Get Email Detail",
       "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const detail = $json || {};\n\nconst decodeBase64Url = (value) => {\n  if (!value) return '';\n  try {\n    const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');\n    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);\n    return Buffer.from(padded, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n};\n\nconst stripHtml = (value) => String(value || '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst collectParts = (node, bucket = []) => {\n  if (!node || typeof node !== 'object') return bucket;\n  bucket.push(node);\n  if (Array.isArray(node.parts)) {\n    for (const part of node.parts) {\n      collectParts(part, bucket);\n    }\n  }\n  return bucket;\n};\n\nconst extractBody = (payload) => {\n  const nodes = collectParts(payload, []);\n  const plainPart = nodes.find((part) => part?.mimeType === 'text/plain' && part?.body?.data);\n  if (plainPart?.body?.data) {\n    return decodeBase64Url(plainPart.body.data).replace(/\\s+/g, ' ').trim();\n  }\n  const htmlPart = nodes.find((part) => part?.mimeType === 'text/html' && part?.body?.data);\n  if (htmlPart?.body?.data) {\n    return stripHtml(decodeBase64Url(htmlPart.body.data));\n  }\n  const fallbackPart = nodes.find((part) => part?.body?.data);\n  if (fallbackPart?.body?.data) {\n    return stripHtml(decodeBase64Url(fallbackPart.body.data));\n  }\n  return '';\n};\n\nif (!detail.payload) {\n  return [{\n    json: {\n      id: detail.id || detail.messageId || 'unknown',\n      error: detail.message || detail.error || 'Failed to fetch email detail',\n      failed: true,\n    }\n  }];\n}\n\nconst headers = Array.isArray(detail.payload.headers) ? detail.payload.headers : [];\nconst getHeader = (name) => headers.find((header) => String(header.name || '').toLowerCase() === name.toLowerCase())?.value || '';\nconst bodyText = extractBody(detail.payload);\nconst normalizedBody = (bodyText || detail.snippet || '').slice(0, 1200);\n\nreturn [{\n  json: {\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: getHeader('From'),\n    subject: getHeader('Subject'),\n    date: getHeader('Date'),\n    snippet: detail.snippet || '',\n    body: normalizedBody,\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n    failed: false,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        2272
+      ],
+      "id": "6db8237f-480f-48eb-9555-c0047ad1f4fa",
+      "name": "Normalize Email Detail"
     },
     {
       "parameters": {
@@ -583,10 +596,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        144,
-        1824
+        -464,
+        2064
       ],
-      "id": "87feee43-a9ec-4eb7-a638-f9ab6a36a9b2",
+      "id": "336e1a81-2900-4b52-9517-198feb566d5d",
       "name": "Get Unread Email"
     },
     {
@@ -616,10 +629,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        336,
-        1840
+        -272,
+        2080
       ],
-      "id": "56339d33-3a2f-4092-b414-95fdd0483325",
+      "id": "88bcd934-b9e3-47e2-9fbd-e2f66520a9dd",
       "name": "Has Unread Emails?"
     },
     {
@@ -631,10 +644,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        704,
-        1824
+        96,
+        2064
       ],
-      "id": "8daa40b2-6e5c-46df-b4c2-702bd3d87248",
+      "id": "f4dd05a3-5726-4c93-afab-c9e73f54929b",
       "name": "Split Out Email Messages"
     },
     {
@@ -645,23 +658,23 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -64,
-        1840
+        -672,
+        2080
       ],
-      "id": "d7ef5d6b-e0b0-4e42-8c1c-62efda0d71f9"
+      "id": "41cdd30d-3cde-4f2d-8f8d-97c7bcbdb4ba"
     },
     {
       "parameters": {
-        "jsCode": "const listPayload = $node['Get Unread Email'].json || {};\nconst decodeBase64Url = (value) => {\n  if (!value) return '';\n  try {\n    const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');\n    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);\n    return Buffer.from(padded, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n};\n\nconst stripHtml = (value) => String(value || '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst collectParts = (node, bucket = []) => {\n  if (!node || typeof node !== 'object') return bucket;\n  bucket.push(node);\n  if (Array.isArray(node.parts)) {\n    for (const part of node.parts) collectParts(part, bucket);\n  }\n  return bucket;\n};\n\nconst extractBody = (payload) => {\n  const parts = collectParts(payload, []);\n  const plainPart = parts.find((part) => part?.mimeType === 'text/plain' && part?.body?.data);\n  if (plainPart?.body?.data) return decodeBase64Url(plainPart.body.data).replace(/\\s+/g, ' ').trim();\n  const htmlPart = parts.find((part) => part?.mimeType === 'text/html' && part?.body?.data);\n  if (htmlPart?.body?.data) return stripHtml(decodeBase64Url(htmlPart.body.data));\n  const fallbackPart = parts.find((part) => part?.body?.data);\n  if (fallbackPart?.body?.data) return stripHtml(decodeBase64Url(fallbackPart.body.data));\n  return '';\n};\n\nconst inputItems = $input.all();\nconst detailedEmails = [];\nconst fetchErrors = [];\n\nfor (const item of inputItems) {\n  const detail = item.json || {};\n  if (!detail.payload) {\n    fetchErrors.push({\n      id: detail.id || detail.messageId || 'unknown',\n      error: detail.message || detail.error || 'Failed to fetch email detail',\n    });\n    continue;\n  }\n\n  const headers = Array.isArray(detail.payload.headers) ? detail.payload.headers : [];\n  const getHeader = (name) => headers.find((header) => String(header.name || '').toLowerCase() === name.toLowerCase())?.value || '';\n  const bodyText = extractBody(detail.payload);\n  const normalizedBody = (bodyText || detail.snippet || '').slice(0, 1200);\n\n  detailedEmails.push({\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: getHeader('From'),\n    to: getHeader('To'),\n    subject: getHeader('Subject'),\n    date: getHeader('Date'),\n    snippet: detail.snippet || '',\n    body: normalizedBody,\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n  });\n}\n\nreturn [{\n  json: {\n    emails: detailedEmails,\n    source_metrics: {\n      total_unread: listPayload.resultSizeEstimate || detailedEmails.length,\n      fetched_email_count: detailedEmails.length,\n      fetched_message_ids: (Array.isArray(listPayload.messages) ? listPayload.messages : []).map((message) => message.id),\n      failed_message_ids: fetchErrors.map((item) => item.id),\n    },\n    fetch_error: fetchErrors.length ?                                                                                                       'Gagal mengambil detail ' + fetchErrors.length + ' email unread' : null,\n    fetch_error_details: fetchErrors.slice(0, 5),\n  }\n}];"
+        "jsCode": "const inputItems = $input.all();\nconst detailedEmails = [];\nconst fetchErrors = [];\n\nfor (const item of inputItems) {\n  const detail = item.json || {};\n\n  if (detail.failed) {\n    fetchErrors.push({\n      id: detail.id || 'unknown',\n      error: detail.error || 'Failed to fetch email detail',\n    });\n    continue;\n  }\n\n  detailedEmails.push({\n    id: detail.id || '',\n    threadId: detail.threadId || '',\n    from: detail.from || '',\n    subject: detail.subject || '',\n    date: detail.date || '',\n    snippet: detail.snippet || '',\n    body: detail.body || '',\n    labelIds: Array.isArray(detail.labelIds) ? detail.labelIds : [],\n  });\n}\n\nreturn [{\n  json: {\n    emails: detailedEmails,\n    source_metrics: {\n      total_unread: detailedEmails.length + fetchErrors.length,\n      fetched_email_count: detailedEmails.length,\n      fetched_message_ids: detailedEmails.map((e) => e.id),\n      failed_message_ids: fetchErrors.map((item) => item.id),\n    },\n    fetch_error: fetchErrors.length ? `Gagal mengambil detail ${fetchErrors.length} email unread` : null,\n    fetch_error_details: fetchErrors.slice(0, 5),\n  }\n}];"
       },
       "name": "Aggregate Email Details",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1392,
-        1888
+        784,
+        2128
       ],
-      "id": "8aaf87e6-01e8-46ba-a026-8c8019f4b5a1"
+      "id": "f50b09ba-8ec8-4b14-98e2-fd42cf95c956"
     },
     {
       "parameters": {
@@ -671,10 +684,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
-        2224
+        768,
+        2464
       ],
-      "id": "a946cb7b-98b6-44d3-bd8d-3301a3c5bfc8"
+      "id": "38145419-9b1d-4e8a-b201-a71d08efe409"
     },
     {
       "parameters": {
@@ -693,10 +706,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1680,
-        2016
+        1072,
+        2256
       ],
-      "id": "802fadcd-5367-42a7-997f-812ef52a0bcc"
+      "id": "ceb0d14a-e38f-4341-b99b-73517a758d80"
     },
     {
       "parameters": {
@@ -710,23 +723,23 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1856,
-        1936
+        1248,
+        2176
       ],
-      "id": "ee9eab81-24c8-48f9-ac28-b9ca59be03b6"
+      "id": "05a088b1-340f-4962-aac5-841e9d3db5b9"
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Email Summary Request Data').item.json.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    user_id: parsed.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
       },
       "name": "Parse Email Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2176,
-        2048
+        1568,
+        2288
       ],
-      "id": "ba27136a-86b0-4d9f-bc76-8e583af39029"
+      "id": "0fae1302-b5b1-4f73-815f-f2d9b9a8b8f3"
     },
     {
       "parameters": {
@@ -736,10 +749,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2400,
-        2048
+        1792,
+        2288
       ],
-      "id": "7c1f5d1a-d074-4a8e-987b-74ba83e1fa53"
+      "id": "ccb9abd9-3b05-43a9-b0c6-22a7d8f9a0ed"
     },
     {
       "parameters": {
@@ -751,10 +764,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2624,
-        2048
+        2016,
+        2288
       ],
-      "id": "710eb2eb-5856-441b-814b-cdbbaa121266"
+      "id": "63c04932-8d91-4db8-bb51-2ff37e3aee01"
     }
   ],
   "pinData": {},
@@ -965,6 +978,17 @@
       "main": [
         [
           {
+            "node": "Normalize Email Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email Detail": {
+      "main": [
+        [
+          {
             "node": "Loop Over Items",
             "type": "main",
             "index": 0
@@ -1095,7 +1119,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "04ace92a-75e6-4749-b394-93a042309a17",
+  "versionId": "2fa92388-fe77-452f-99a2-c58e1624f05a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

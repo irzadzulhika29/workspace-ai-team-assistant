@@ -62,7 +62,7 @@ const MODES = {
   TEST: "test",
 };
 
-const PROD_BASE_URL = "https://n8n.karyatech.web.id";
+const PROD_BASE_URL = "https://workflow.jagr.id";
 const DEFAULT_DEV_BASE_URL = import.meta.env.VITE_N8N_DEV_URL || "https://your-ngrok-url.ngrok.io";
 
 // Default values from .env

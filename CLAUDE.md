@@ -74,7 +74,7 @@ Two separate databases are in use:
 
 The workflow JSON lives in `n8n/workflow/`. Agent skill documentation is in `n8n/workflow/skills/` (Markdown files describing what each skill does: email, PowerPoint, reports).
 
-The production n8n instance is at `https://n8n.karyatech.web.id`. For local development, set `VITE_N8N_ENV=dev` and `VITE_N8N_DEV_URL` to your ngrok URL, or switch via the Settings modal in the UI.
+The production n8n instance is at `https://workflow.jagr.id`. For local development, set `VITE_N8N_ENV=dev` and `VITE_N8N_DEV_URL` to your ngrok URL, or switch via the Settings modal in the UI.
 
 ## Environment Variables
 

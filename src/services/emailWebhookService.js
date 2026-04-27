@@ -105,12 +105,13 @@ export const sendEmailToWebhook = async (email) => {
 };
 
 /**
- * Send email to webhook and create draft from response
+ * Send email to webhook and get draft from response
+ * Note: Webhook n8n already saves draft to Supabase, so we don't need to save again
  * @param {Object} email - Email object
- * @param {Function} createDraftCallback - Callback to create draft in store
+ * @param {Function} fetchDraftsCallback - Callback to refresh drafts list
  * @returns {Promise<Object>} Result
  */
-export const generateDraftFromWebhook = async (email, createDraftCallback) => {
+export const generateDraftFromWebhook = async (email, fetchDraftsCallback) => {
   try {
     // Send email to webhook
     const result = await sendEmailToWebhook(email);
@@ -119,51 +120,16 @@ export const generateDraftFromWebhook = async (email, createDraftCallback) => {
       throw new Error(result.error);
     }
 
-    // Extract draft from webhook response
-    // Response format: { drafts: [{ body_text, body_html, ... }] }
-    const draftFromWebhook = result.data?.drafts?.[0];
-    
-    if (!draftFromWebhook) {
-      throw new Error('No draft returned from webhook');
+    console.log('Webhook response:', result.data);
+
+    // Webhook n8n already saves draft to Supabase
+    // We just need to refresh the drafts list to show the new draft
+    if (fetchDraftsCallback) {
+      await fetchDraftsCallback();
     }
-
-    const draftContent = draftFromWebhook.body_text;
-    const draftHtml = draftFromWebhook.body_html;
-
-    if (!draftContent && !draftHtml) {
-      throw new Error('No draft content returned from webhook');
-    }
-
-    // Extract sender email
-    const senderMatch = email.from?.match(/<(.+?)>/);
-    const senderEmail = senderMatch ? senderMatch[1] : email.from;
-
-    // Prepare draft data for Supabase
-    const draftData = {
-      to_email: senderEmail,
-      subject: `Re: ${email.subject || '(No subject)'}`,
-      body_text: draftContent || '',
-      body_html: draftHtml || '',
-      source_message_id: email.id,
-      source_thread_id: email.threadId,
-      source_email_payload: {
-        from: email.from,
-        to: email.to,
-        subject: email.subject,
-        snippet: email.snippet,
-        date: email.date || email.internalDate,
-        body: email.body,
-        htmlBody: email.htmlBody
-      },
-      draft_type: 'reply'
-    };
-
-    // Create draft using callback (which will save to Supabase)
-    const draft = await createDraftCallback(draftData);
 
     return {
       success: true,
-      draft,
       webhookResponse: result.data
     };
   } catch (error) {

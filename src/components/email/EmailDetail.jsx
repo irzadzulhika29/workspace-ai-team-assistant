@@ -28,7 +28,7 @@ const parseEmailHeader = (value) => {
  * EmailDetail Component - Display full email content
  */
 export default function EmailDetail({ onDraftCreated }) {
-  const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar, createDraft } = useEmailStore();
+  const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar, fetchDrafts } = useEmailStore();
   const navigate = useNavigate();
   const [generatingDraft, setGeneratingDraft] = useState(false);
 
@@ -124,8 +124,9 @@ export default function EmailDetail({ onDraftCreated }) {
     setGeneratingDraft(true);
 
     try {
-      // Send email to webhook and generate draft
-      const result = await generateDraftFromWebhook(email, createDraft);
+      // Send email to webhook to generate draft
+      // Note: Webhook n8n already saves draft to Supabase
+      const result = await generateDraftFromWebhook(email, fetchDrafts);
 
       if (result.success) {
         // Notify parent to switch to drafts tab
