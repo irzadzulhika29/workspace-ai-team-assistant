@@ -4,7 +4,7 @@ const INVALID_FORMAT_TEXT = 'Format balasan dari server tidak sesuai dugaan.'
 const hasText = (value) => typeof value === 'string' && value.trim().length > 0
 
 const parseJsonString = (value) => {
-  if (!hasText(value) || !value.trim().startsWith('{')) {
+  if (!hasText(value) || !/^[{[]/.test(value.trim())) {
     return null
   }
 
@@ -21,6 +21,14 @@ const normalizeAgentText = (value) => {
   }
 
   const parsed = parseJsonString(value)
+
+  if (Array.isArray(parsed) && hasText(parsed[0]?.output)) {
+    return normalizeAgentText(parsed[0].output)
+  }
+
+  if (parsed && typeof parsed === 'object' && hasText(parsed.output)) {
+    return normalizeAgentText(parsed.output)
+  }
 
   if (parsed?.action === 'clarify' && hasText(parsed.message)) {
     return parsed.message.trim()

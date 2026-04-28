@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarDays, Clock3, Bug, CheckCircle2, Mail, Circle, RefreshCw } from 'lucide-react'
+import axios from 'axios'
 import { calendarApi } from '../services/calendarService'
 import { jiraApi } from '../services/jiraService'
 import { emailApi } from '../services/emailService'
@@ -51,6 +52,9 @@ export default function Dashboard() {
   const [unreadEmails, setUnreadEmails] = useState([])
   const [loadingEmails, setLoadingEmails] = useState(true)
   const [emailError, setEmailError] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+  const [calendarBriefing, setCalendarBriefing] = useState(null)
+  const [emailBriefing, setEmailBriefing] = useState(null)
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -145,13 +149,141 @@ export default function Dashboard() {
     return () => clearTimeout(timer)
   }, [])
 
+  const handleRefreshBriefings = async () => {
+    setRefreshing(true)
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+      
+      // Get Google access token
+      let googleAccessToken = null
+      try {
+        const tokenResponse = await axios.get(`${backendUrl}/api/google/token`, {
+          withCredentials: true,
+          timeout: 8000,
+        })
+        googleAccessToken = tokenResponse.data.access_token || null
+        console.log('Google token fetched:', googleAccessToken ? 'Success' : 'Empty')
+      } catch (err) {
+        console.warn('Could not fetch Google token:', err.response?.data || err.message)
+      }
+
+      // Get Jira credentials and create base64 auth
+      let jiraAuthBase64 = null
+      let jiraSubdomain = null
+      try {
+        const jiraResponse = await axios.get(`${backendUrl}/api/integrations/jira/n8n-credentials`, {
+          withCredentials: true,
+          timeout: 8000,
+        })
+        console.log('Jira credentials response:', jiraResponse.data)
+        const jiraCredentials = jiraResponse.data?.jira_credentials
+        if (jiraCredentials?.email && jiraCredentials?.api_token) {
+          jiraAuthBase64 = btoa(`${jiraCredentials.email}:${jiraCredentials.api_token}`)
+          jiraSubdomain = jiraCredentials.subdomain
+          console.log('Jira auth base64 created successfully, subdomain:', jiraSubdomain)
+        } else {
+          console.log('Jira credentials incomplete:', jiraCredentials)
+        }
+      } catch (err) {
+        console.warn('Could not fetch Jira credentials:', err.response?.data || err.message)
+      }
+
+      console.log('Sending briefings request with:', {
+        hasGoogleToken: !!googleAccessToken,
+        hasJiraAuth: !!jiraAuthBase64,
+        jiraSubdomain
+      })
+
+      // Hit briefings webhook with tokens
+      const response = await fetch('https://workflow.jagr.id/webhook-test/briefings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          google_access_token: googleAccessToken,
+          jira_auth_base64: jiraAuthBase64,
+          jira_subdomain: jiraSubdomain,
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Briefings webhook error:', errorText)
+        throw new Error('Failed to refresh briefings')
+      }
+      
+      const briefingsResult = await response.json()
+      console.log('Briefings response:', briefingsResult)
+      
+      // Update cards with briefings data from the response structure
+      const briefings = briefingsResult.briefings || {}
+      console.log('Extracted briefings:', briefings)
+      
+      // Update Jira card with AI summary
+      if (briefings.jira) {
+        const jiraBriefing = briefings.jira
+        console.log('Setting Jira briefing:', jiraBriefing)
+        // Use source_metrics to build summary
+        const metrics = jiraBriefing.source_metrics || {}
+        setJiraSummary({
+          total: metrics.total_issues || 0,
+          done: 0, // No done count in response, calculate from status
+          percent: 0,
+          byStatus: [],
+          briefing: jiraBriefing // Store full briefing for display
+        })
+        setLoadingJira(false)
+        setJiraError('')
+      }
+      
+      // Update Calendar card with AI summary
+      if (briefings.calendar) {
+        console.log('Setting Calendar briefing:', briefings.calendar)
+        setCalendarBriefing(briefings.calendar)
+        setNextEvents([])
+        setCalendarError('')
+        setLoadingEvents(false)
+      }
+      
+      // Update Email card with AI summary
+      if (briefings.email) {
+        console.log('Setting Email briefing:', briefings.email)
+        setEmailBriefing(briefings.email)
+        setUnreadEmails([])
+        setEmailError('')
+        setLoadingEmails(false)
+      }
+      
+      console.log('Briefings refreshed successfully')
+      console.log('Current state:', {
+        jiraSummary,
+        calendarBriefing,
+        emailBriefing
+      })
+    } catch (err) {
+      console.error('Error refreshing briefings:', err)
+      alert('Gagal refresh briefings. Silakan coba lagi.')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   return (
     <div className="p-5 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center justify-between gap-4 mb-2">
           <span className="text-[11px] font-mono text-brand-600 uppercase tracking-[0.24em]">
             Team Assistant Workspace
           </span>
+          <button
+            onClick={handleRefreshBriefings}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-800 transition-colors hover:bg-cyan-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
+            {refreshing ? 'Refreshing...' : 'Refresh Briefings'}
+          </button>
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold font-headline text-slateui-900 leading-tight tracking-tight">
           Selamat datang, <span className="text-cyan-700">Admin</span>
@@ -180,6 +312,68 @@ export default function Dashboard() {
             </div>
           ) : jiraError ? (
             <p className="text-sm text-rose-600">{jiraError}</p>
+          ) : jiraSummary.briefing ? (
+            <>
+              {/* AI Briefing Display */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 mb-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    jiraSummary.briefing.priority === 'high' ? 'bg-rose-100 text-rose-700' :
+                    jiraSummary.briefing.priority === 'medium' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
+                  }`}>
+                    {jiraSummary.briefing.priority === 'high' ? '🔴' : 
+                     jiraSummary.briefing.priority === 'medium' ? '🟡' : '🟢'}
+                    {jiraSummary.briefing.priority}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-slate-900 mb-2">{jiraSummary.briefing.headline}</p>
+                {jiraSummary.briefing.summary_points && jiraSummary.briefing.summary_points.length > 0 && (
+                  <ul className="text-xs text-slate-600 space-y-1 mb-3">
+                    {jiraSummary.briefing.summary_points.slice(0, 3).map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-cyan-600 mt-0.5">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {jiraSummary.briefing.recommendations && jiraSummary.briefing.recommendations.length > 0 && (
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="text-xs font-semibold text-slate-700 mb-1">Rekomendasi:</p>
+                    <ul className="text-xs text-slate-600 space-y-1">
+                      {jiraSummary.briefing.recommendations.slice(0, 2).map((rec, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-emerald-600 mt-0.5">→</span>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Link
+                  to="/workspace/jira"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  Lihat Jira
+                </Link>
+                <Link
+                  to="/chat/supervisor"
+                  state={{
+                    domain: 'jira',
+                    intent: 'generate_report',
+                    templatePrompt: 'Buatkan laporan progres Jira hari ini',
+                    context: { briefing: jiraSummary.briefing }
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-800 transition-colors hover:bg-cyan-100"
+                >
+                  Buat Report
+                </Link>
+              </div>
+            </>
           ) : jiraSummary.total === 0 ? (
             <p className="text-sm text-slate-500">Belum ada issue Jira yang terdeteksi.</p>
           ) : (
@@ -245,6 +439,43 @@ export default function Dashboard() {
             </div>
           ) : calendarError ? (
             <p className="text-sm text-rose-600">{calendarError}</p>
+          ) : calendarBriefing ? (
+            <>
+              {/* AI Briefing Display */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 mb-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    calendarBriefing.priority === 'high' ? 'bg-rose-100 text-rose-700' :
+                    calendarBriefing.priority === 'medium' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
+                  }`}>
+                    {calendarBriefing.priority === 'high' ? '🔴' : 
+                     calendarBriefing.priority === 'medium' ? '🟡' : '🟢'}
+                    {calendarBriefing.priority}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-slate-900 mb-2">{calendarBriefing.headline}</p>
+                {calendarBriefing.summary_points && calendarBriefing.summary_points.length > 0 && (
+                  <ul className="text-xs text-slate-600 space-y-1">
+                    {calendarBriefing.summary_points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-cyan-600 mt-0.5">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Link
+                  to="/workspace/calendar"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  Lihat Calendar
+                </Link>
+              </div>
+            </>
           ) : nextEvents.length === 0 ? (
             <p className="text-sm text-slate-500">Belum ada event yang akan datang.</p>
           ) : (
@@ -311,6 +542,68 @@ export default function Dashboard() {
             </div>
           ) : emailError ? (
             <p className="text-sm text-rose-600">{emailError}</p>
+          ) : emailBriefing ? (
+            <>
+              {/* AI Briefing Display */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 mb-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    emailBriefing.priority === 'high' ? 'bg-rose-100 text-rose-700' :
+                    emailBriefing.priority === 'medium' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
+                  }`}>
+                    {emailBriefing.priority === 'high' ? '🔴' : 
+                     emailBriefing.priority === 'medium' ? '🟡' : '🟢'}
+                    {emailBriefing.priority}
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-slate-900 mb-2">{emailBriefing.headline}</p>
+                {emailBriefing.summary_points && emailBriefing.summary_points.length > 0 && (
+                  <ul className="text-xs text-slate-600 space-y-1 mb-3">
+                    {emailBriefing.summary_points.slice(0, 3).map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-cyan-600 mt-0.5">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {emailBriefing.recommendations && emailBriefing.recommendations.length > 0 && (
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="text-xs font-semibold text-slate-700 mb-1">Rekomendasi:</p>
+                    <ul className="text-xs text-slate-600 space-y-1">
+                      {emailBriefing.recommendations.slice(0, 2).map((rec, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-emerald-600 mt-0.5">→</span>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Link
+                  to="/workspace/email"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  Lihat Email
+                </Link>
+                <Link
+                  to="/chat/supervisor"
+                  state={{
+                    domain: 'email',
+                    intent: 'draft_reply',
+                    templatePrompt: 'Buatkan draft balasan untuk email penting',
+                    context: { briefing: emailBriefing }
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-800 transition-colors hover:bg-cyan-100"
+                >
+                  Draft Reply
+                </Link>
+              </div>
+            </>
           ) : unreadEmails.length === 0 ? (
             <p className="text-sm text-slate-500">Tidak ada email yang belum dibaca.</p>
           ) : (
@@ -395,24 +688,6 @@ export default function Dashboard() {
             Lihat Detail
           </Link>
         </div>
-      </div>
-
-      <div className="mt-8 p-5 panel-muted">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Panduan Cepat</p>
-        <ul className="space-y-2 text-sm text-slate-600">
-          <li className="flex items-start gap-2">
-            <span className="w-1.5 h-1.5 bg-cyan-600 rounded-full mt-2 flex-shrink-0" />
-            Gunakan <strong>Settings</strong> di sidebar untuk mengubah URL webhook n8n tanpa perlu rebuild.
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="w-1.5 h-1.5 bg-slate-600 rounded-full mt-2 flex-shrink-0" />
-            Upload dokumen SOP ke folder <strong>Input (SOP)</strong> agar bisa digunakan oleh Knowledge Agent.
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full mt-2 flex-shrink-0" />
-            Riwayat chat tersimpan selama sesi aktif browser. Refresh halaman tidak akan menghapus riwayat percakapan.
-          </li>
-        </ul>
       </div>
     </div>
   )

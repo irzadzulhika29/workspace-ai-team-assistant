@@ -44,84 +44,78 @@ const normalizeFileUrl = (rawUrl) => {
 export default function FileWorkspace() {
   const navigate = useNavigate()
   const [previewFile, setPreviewFile] = useState(null)
-  const [uploadedFiles, setUploadedFiles] = useState([])
   const [supabaseDocs, setSupabaseDocs] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState(null)
   const [selectedDocument, setSelectedDocument] = useState(null)
 
-  useEffect(() => {
-    const loadDokumen = async () => {
-      try {
-        setIsLoading(true)
-        setFetchError(null)
-        const data = await fileApi.fetchDokumen()
+  const loadDokumen = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setFetchError(null)
+      const data = await fileApi.fetchDokumen()
 
-        console.log('[FileWorkspace] Raw data from Supabase:', data)
+      console.log('[FileWorkspace] Raw data from Supabase:', data)
 
-        const documents = []
-        let skippedCount = 0
+      const documents = []
+      let skippedCount = 0
 
-        for (const doc of data) {
-          const cleanUrl = normalizeFileUrl(doc.file_url)
+      for (const doc of data) {
+        const cleanUrl = normalizeFileUrl(doc.file_url)
 
-          // Skip dokumen dengan URL invalid
-          if (!cleanUrl) {
-            skippedCount++
-            console.warn('[FileWorkspace] Skipping document with invalid URL:', {
-              id: doc.id,
-              name: doc.nama_file,
-              rawUrl: doc.file_url
-            })
-            continue
-          }
-
-          documents.push({
-            id: doc.id ?? crypto.randomUUID(),
-            name: doc.nama_file ?? 'Untitled',
-            type: 'file',
-            url: cleanUrl,
-            downloadUrl: cleanUrl,
-            source: 'supabase',
-            createdAt: doc.created_at,
-            kategori: doc.kategori || 'uploaded', // uploaded or generated
-            documentType: doc.document_type || 'uncategorized',
-            metadata: doc.metadata || {},
+        // Skip dokumen dengan URL invalid
+        if (!cleanUrl) {
+          skippedCount++
+          console.warn('[FileWorkspace] Skipping document with invalid URL:', {
+            id: doc.id,
+            name: doc.nama_file,
+            rawUrl: doc.file_url
           })
+          continue
         }
 
-        console.log('[FileWorkspace] Processed documents:', {
-          total: data.length,
-          loaded: documents.length,
-          skipped: skippedCount,
+        documents.push({
+          id: doc.id ?? crypto.randomUUID(),
+          name: doc.nama_file ?? 'Untitled',
+          type: 'file',
+          url: cleanUrl,
+          downloadUrl: cleanUrl,
+          source: 'supabase',
+          createdAt: doc.created_at,
+          kategori: doc.kategori || 'uploaded', // uploaded or generated
+          documentType: doc.document_type || 'uncategorized',
+          metadata: doc.metadata || {},
         })
-
-        setSupabaseDocs(documents)
-      } catch (err) {
-        console.error('Gagal memuat dokumen dari Supabase:', err)
-        setFetchError(err.message)
-      } finally {
-        setIsLoading(false)
       }
-    }
 
-    loadDokumen()
+      console.log('[FileWorkspace] Processed documents:', {
+        total: data.length,
+        loaded: documents.length,
+        skipped: skippedCount,
+      })
+
+      setSupabaseDocs(documents)
+    } catch (err) {
+      console.error('Gagal memuat dokumen dari Supabase:', err)
+      setFetchError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    loadDokumen()
+  }, [loadDokumen])
 
   const handleUploaded = useCallback((result) => {
-    const file = {
-      id: crypto.randomUUID(),
-      name: result?.filename ?? 'Dokumen baru',
-      type: 'file',
-      url: result?.url ?? null,
-    }
-
-    setUploadedFiles((prev) => [...prev, file])
-  }, [])
+    console.log('[FileWorkspace] File uploaded successfully:', result)
+    // Reload documents from database after upload
+    loadDokumen()
+  }, [loadDokumen])
 
   const allDocuments = useMemo(
-    () => [...supabaseDocs, ...uploadedFiles],
-    [supabaseDocs, uploadedFiles]
+    () => supabaseDocs,
+    [supabaseDocs]
   )
 
   const folderData = useMemo(() => {

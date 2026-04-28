@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6224,
-        11136
+        1136,
+        880
       ],
-      "id": "fc4b38ca-2d41-42fd-ac61-763ae98309b4",
+      "id": "8bf84d53-6f1d-45d7-9b7a-eee6a5e7b3c3",
       "name": "Prepare Draft Payload"
     },
     {
@@ -86,14 +86,14 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7008,
-        11232
+        1920,
+        976
       ],
-      "id": "8e6c290f-73e7-45d3-961f-e19481a75f98",
+      "id": "4bea94f9-f63b-4222-9eba-d2ea1d4855fa",
       "name": "Create Draft Row",
       "credentials": {
         "supabaseApi": {
-          "id": "Wjp9D5ca2jChBcID",
+          "id": "ZwqxnZ30uSfeasNP",
           "name": "Supabase account"
         }
       }
@@ -167,14 +167,14 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7008,
-        11040
+        1920,
+        784
       ],
-      "id": "e5f842b1-444e-4efa-bea1-78ba41fb0337",
+      "id": "e2c9b8b1-0182-467d-8144-fb5276d47744",
       "name": "Update Draft Row",
       "credentials": {
         "supabaseApi": {
-          "id": "Wjp9D5ca2jChBcID",
+          "id": "ZwqxnZ30uSfeasNP",
           "name": "Supabase account"
         }
       }
@@ -186,10 +186,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7312,
-        11040
+        2224,
+        784
       ],
-      "id": "640fe664-c629-4623-b49a-dd3c9ce37119",
+      "id": "52e507d5-ffdd-492f-801e-d0a1b1bd9a39",
       "name": "Format Draft Response"
     },
     {
@@ -199,10 +199,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7536,
-        11040
+        2448,
+        784
       ],
-      "id": "a2e70d06-6909-4127-bbc8-42a89ab4d42e",
+      "id": "0af987df-dff0-4a90-9cd7-178225a75f83",
       "name": "Respond to Webhook"
     },
     {
@@ -213,10 +213,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6064,
-        10832
+        976,
+        576
       ],
-      "id": "e393a600-30e9-40dc-a848-274529117715",
+      "id": "dacd1dd0-ae48-465c-ba2b-33d6a01dc14f",
       "name": "Prepare Send Payload"
     },
     {
@@ -227,10 +227,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6528,
-        10832
+        1440,
+        576
       ],
-      "id": "ec44e853-d814-488a-8bc5-747b1e641862",
+      "id": "13a30f73-6ae3-45b8-ae02-30096921e089",
       "name": "Prepare Sent Draft Update"
     },
     {
@@ -306,14 +306,14 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7008,
-        10832
+        1920,
+        576
       ],
-      "id": "b3905959-c31b-4c0b-b415-d180e5a9a945",
+      "id": "d4705856-5099-4ce4-9dff-1e07e8a94947",
       "name": "Mark Draft As Sent",
       "credentials": {
         "supabaseApi": {
-          "id": "Wjp9D5ca2jChBcID",
+          "id": "ZwqxnZ30uSfeasNP",
           "name": "Supabase account"
         }
       }
@@ -346,10 +346,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5680,
-        11040
+        592,
+        784
       ],
-      "id": "78eb9191-e99f-4f1b-ba27-ed9172ab455d",
+      "id": "a487d7fa-b243-4c8c-906f-aa5fd38dd3fb",
       "name": "If"
     },
     {
@@ -360,15 +360,15 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        7056,
-        12368
+        1568,
+        2432
       ],
-      "id": "dd6faaaa-9ca3-4b81-84cf-99336e0ef97a",
+      "id": "702a1ce8-b5c5-41b8-95d6-b9313f890d5e",
       "name": "Groq Chat Model1",
       "credentials": {
         "groqApi": {
-          "id": "68b7yPyfO0nmCOn6",
-          "name": "Groq account"
+          "id": "72ktNmVndXqjvOfZ",
+          "name": "Groq"
         }
       }
     },
@@ -383,10 +383,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        5888,
-        11136
+        800,
+        880
       ],
-      "id": "fb2de54d-2c03-49c1-944d-5e1766cf3634",
+      "id": "2b50c557-8d62-4439-a7fb-750f401e2fe5",
       "name": "Draft & Send Email"
     },
     {
@@ -398,10 +398,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        6048,
-        11344
+        960,
+        1088
       ],
-      "id": "4fe32730-4946-4293-bd05-46784c1cbf7e",
+      "id": "a955d5db-f982-48ba-8773-2ad7f251f67a",
       "name": "Get Email Format"
     },
     {
@@ -432,10 +432,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6432,
-        11136
+        1344,
+        880
       ],
-      "id": "4d467fe8-12ab-45fb-aef4-d0accbec0b6e",
+      "id": "3501225b-f7ac-4169-9ece-83bf753987d6",
       "name": "Is Revision?"
     },
     {
@@ -463,10 +463,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6288,
-        10832
+        1200,
+        576
       ],
-      "id": "e5ce5392-b046-4156-98ff-532684997d06",
+      "id": "29761b30-8633-4c2e-b33c-5292622e8910",
       "name": "Send Email via Gmail API"
     },
     {
@@ -479,10 +479,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5488,
-        11488
+        400,
+        1232
       ],
-      "id": "7b1a163c-edd9-4463-971f-686e4724045e",
+      "id": "5fe6571c-589b-4601-ac33-56e4cb3a4b0d",
       "name": "Get Email Summary",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -493,10 +493,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        6816,
-        11488
+        1728,
+        1232
       ],
-      "id": "f56370b5-03bd-4143-8780-6a41a0a9cc2b",
+      "id": "c0ff1644-8b42-49c3-a4be-11f1b1f1b529",
       "name": "Loop Over Items"
     },
     {
@@ -529,10 +529,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        7008,
-        11680
+        1920,
+        1424
       ],
-      "id": "f5f492bf-7b16-42bd-9179-e66f23bb99da",
+      "id": "406775ee-2fb9-4e13-9e15-f05d79700197",
       "name": "Get Email Detail",
       "continueOnFail": true
     },
@@ -543,10 +543,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7232,
-        11680
+        2144,
+        1424
       ],
-      "id": "71f99487-0e9d-4ff6-aaa0-6466917c79bf",
+      "id": "35045b37-d53e-4ac3-b525-7ed213a83284",
       "name": "Normalize Email Detail"
     },
     {
@@ -579,10 +579,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5920,
-        11488
+        832,
+        1232
       ],
-      "id": "32bd8365-0a3f-407c-aebc-32b4e4623556",
+      "id": "91ca7127-df38-427d-8ea2-795b8ea34cc7",
       "name": "Get Unread Email"
     },
     {
@@ -612,10 +612,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6112,
-        11488
+        1024,
+        1232
       ],
-      "id": "e77ad322-d682-4459-8421-9a10fb977fc6",
+      "id": "305d758a-3f05-46bd-89fc-b6e798ca95ef",
       "name": "Has Unread Emails?"
     },
     {
@@ -627,10 +627,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        6480,
-        11472
+        1392,
+        1216
       ],
-      "id": "899acf27-ae27-477e-8447-f237c0594ee8",
+      "id": "55becbe5-7a50-4697-b72b-ebb4da8b961e",
       "name": "Split Out Email Messages"
     },
     {
@@ -641,10 +641,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5712,
-        11488
+        624,
+        1232
       ],
-      "id": "f7ed3dc2-febe-43d7-a2bd-a75695117cbb"
+      "id": "279ed191-9868-4066-9dab-05067ab39402"
     },
     {
       "parameters": {
@@ -654,10 +654,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7168,
-        11536
+        2080,
+        1280
       ],
-      "id": "dd0cc6d7-a1a3-4a83-a2be-d1a4d3c473da"
+      "id": "d8cc4e1d-c278-4b7c-a031-c20aae9a1fe9"
     },
     {
       "parameters": {
@@ -667,10 +667,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7152,
-        11872
+        2064,
+        1616
       ],
-      "id": "bf711549-a57b-4bc5-988e-e0ee12fd900a"
+      "id": "5d26e53e-0317-4554-b406-a5bf8a6039f0"
     },
     {
       "parameters": {
@@ -689,27 +689,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7456,
-        11664
+        2368,
+        1408
       ],
-      "id": "01452cca-600f-4f3d-a034-7c039342e19e"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.prompt }}",
-        "options": {
-          "systemMessage": "=Kamu adalah Email Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
-        }
-      },
-      "name": "Email Summary Agent",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        7632,
-        11584
-      ],
-      "id": "59a10e2b-aba5-44ae-ae60-45fd6b6313fc"
+      "id": "b7c98c7a-1f20-4dba-b7b3-f8d2aae41b64"
     },
     {
       "parameters": {
@@ -719,10 +702,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7952,
-        11696
+        2864,
+        1440
       ],
-      "id": "9dbd2fb9-ca1a-4610-bf9c-c82152fc1d2c"
+      "id": "f3a1ff4e-6e30-442a-b43f-7aecb1c366fd"
     },
     {
       "parameters": {
@@ -732,10 +715,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8176,
-        11696
+        3088,
+        1440
       ],
-      "id": "a681af1e-35cd-41c0-8a81-7fed702ff508"
+      "id": "9f97b4b8-0712-454c-9403-254db8ae9f0d"
     },
     {
       "parameters": {
@@ -747,47 +730,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        8400,
-        11696
+        3312,
+        1440
       ],
-      "id": "0c9bcb7e-1f46-44de-afe7-846f567bbacf"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.body.question }}",
-        "options": {
-          "systemMessage": "Kamu adalah agen tanya jawab untuk SATU dokumen yang dipilih pengguna.\n\nATURAN UTAMA:\n1. Jawab HANYA berdasarkan hasil tool `retrieve vector data`.\n2. Tool retrieval sudah difilter ke document_id milik dokumen yang dipilih pengguna. Jangan gunakan pengetahuan umum atau asumsi di luar hasil retrieval.\n3. Jika hasil retrieval tidak cukup untuk menjawab, jawab tepat dengan: `Maaf, informasi tersebut tidak ditemukan di dokumen yang dipilih.`\n4. Jangan mencampur jawaban dari dokumen lain.\n5. Jika jawaban ditemukan, berikan jawaban yang ringkas, langsung, dan sertakan bagian penutup `Sumber:` yang menyebut `nama_file` jika metadata tersedia, jika tidak pakai `document_id`.\n6. Jika pertanyaan meminta kutipan atau prosedur, ambil hanya dari konteks retrieval.\n\nFORMAT JAWABAN:\n- Gunakan bahasa Indonesia yang jelas dan profesional.\n- Jika berisi langkah/prosedur, gunakan daftar bernomor.\n- Akhiri dengan satu baris sumber, contoh: `Sumber: SOP Cuti Tahunan`."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        5840,
-        12288
-      ],
-      "id": "be1336da-9997-4206-a4e4-22537b661386",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": "openai/gpt-oss-120b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        5712,
-        12496
-      ],
-      "id": "6ef064e1-decc-4808-b671-f10a87bf9ede",
-      "name": "Groq Chat Model",
-      "credentials": {
-        "groqApi": {
-          "id": "68b7yPyfO0nmCOn6",
-          "name": "Groq account"
-        }
-      }
+      "id": "aa01b7bf-e086-468d-a5ff-eb18505c6c07"
     },
     {
       "parameters": {
@@ -818,35 +764,15 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        5904,
-        12528
+        816,
+        2272
       ],
-      "id": "2f7be12e-a291-40d3-b55d-68da896d6757",
+      "id": "11244003-1057-4a43-86a5-de3e6d0facc2",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
-          "id": "qjoVsvnMKymAPQQw",
+          "id": "SB4V6zC5jna5IHLU",
           "name": "PineconeApi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "modelName": "BAAI/bge-m3",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
-      "typeVersion": 1,
-      "position": [
-        5792,
-        12704
-      ],
-      "id": "2177f5c8-ee44-4b16-95b2-61b3129087c1",
-      "name": "Embeddings HuggingFace Inference2",
-      "credentials": {
-        "huggingFaceApi": {
-          "id": "133wsOINxPjAEron",
-          "name": "HuggingFaceApi account"
         }
       }
     },
@@ -857,10 +783,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6256,
-        12288
+        1168,
+        2032
       ],
-      "id": "62d35788-7d63-44ab-ae73-8cadd9d12e09",
+      "id": "db39f62e-5ac1-4da5-9fef-f2232b157687",
       "name": "Respond to Webhook1"
     },
     {
@@ -873,10 +799,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5472,
-        12288
+        0,
+        2032
       ],
-      "id": "c55a7b91-f60c-45ef-9b78-93c2f690b723",
+      "id": "a6ce8d3d-42eb-4565-a888-dd7f438b9d65",
       "name": "Chat Document",
       "webhookId": "1e9639af-7d9f-4d7a-9f67-fef0b9eeef64"
     },
@@ -887,10 +813,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5648,
-        12288
+        384,
+        2032
       ],
-      "id": "15a92bdd-edc1-494d-a4af-25e1ffb93696",
+      "id": "886e3322-557e-4381-9b0b-a5de466bdd4d",
       "name": "Prepare Document Query"
     },
     {
@@ -903,60 +829,12 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5472,
-        11040
+        384,
+        784
       ],
-      "id": "eb6bb281-27e9-4e90-8437-feba2151ebe3",
+      "id": "ebd88cf8-d1c4-45a3-9f16-4cdc85ff0d3b",
       "name": "Drafting Email Webhook",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
-    },
-    {
-      "parameters": {
-        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "timeMin",
-              "value": "={{ $json.body?.timeMin || $json.body?.time_min || $now.setZone('Asia/Jakarta').startOf('day').toISO() }}"
-            },
-            {
-              "name": "maxResults",
-              "value": "=5"
-            },
-            {
-              "name": "singleEvents",
-              "value": "=true"
-            },
-            {
-              "name": "orderBy",
-              "value": "=startTime"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $json.body.access_token }}"
-            },
-            {
-              "name": "Accept",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        5552,
-        10544
-      ],
-      "id": "d44a6103-d19c-4789-bef9-d7e2d4dbe8ea",
-      "name": "Get Top 5 Event"
     },
     {
       "parameters": {
@@ -965,10 +843,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5744,
-        10544
+        656,
+        288
       ],
-      "id": "532c5a40-9414-4515-bb83-83de1faa61c5",
+      "id": "e6dd61f6-71f8-4c30-a316-b275077d0d6c",
       "name": "Prepare Calendar Summary Context"
     },
     {
@@ -988,52 +866,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        5984,
-        10544
+        896,
+        288
       ],
-      "id": "57270f67-785d-4d4a-87b5-d3e6f94c5769",
+      "id": "3dec9b4e-aa70-482f-bcaa-47056302f8be",
       "name": "Build Calendar Summary Prompt"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        6368,
-        10704
-      ],
-      "id": "ae710456-a09a-4812-b3a4-c26edc1d46dc",
-      "name": "Groq Chat Model2",
-      "credentials": {
-        "groqApi": {
-          "id": "68b7yPyfO0nmCOn6",
-          "name": "Groq account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.prompt }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "Kamu membuat briefing singkat Calendar Workspace untuk team lead. Output wajib JSON valid sesuai schema yang diminta. Dilarang menambahkan markdown code block atau teks di luar JSON."
-            }
-          ]
-        },
-        "batching": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        6224,
-        10544
-      ],
-      "id": "456e4dc4-9360-4a54-b6e9-99cd4276ceb9",
-      "name": "Get Calendar Summary"
     },
     {
       "parameters": {
@@ -1042,10 +879,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6544,
-        10544
+        1456,
+        288
       ],
-      "id": "40e11c12-779d-466d-983f-81bf7e0a950e",
+      "id": "8383df10-f8e1-453e-81a0-a802513efba3",
       "name": "Parse Calendar Summary"
     },
     {
@@ -1055,10 +892,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6800,
-        10544
+        1712,
+        288
       ],
-      "id": "6f78a93e-89c9-4dbd-9999-e68b37836a25",
+      "id": "0e3b0bb9-2c43-4faf-a8bd-e9fb09e14f32",
       "name": "Build Calendar Summary Response"
     },
     {
@@ -1068,10 +905,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7088,
-        10544
+        2000,
+        288
       ],
-      "id": "9fef355e-5a3b-42d6-b8fa-1b4f97b92b2b",
+      "id": "393b81fd-2c11-4f0b-b06c-54ff5f735185",
       "name": "Respond to Webhook2"
     },
     {
@@ -1084,12 +921,137 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5296,
-        10544
+        208,
+        288
       ],
-      "id": "c7f1d389-3bcf-47b9-a79e-75c31f85bd74",
+      "id": "dc28d25b-1e7c-46cf-aec0-491075d87ec2",
       "name": "Get Summary",
       "webhookId": "1e4383e5-8647-4454-a5e6-755cc5bccc8d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "=Kamu adalah agen tanya jawab untuk SATU dokumen yang dipilih pengguna.\n\nATURAN UTAMA:\n1. Jawab HANYA berdasarkan hasil tool `retrieve vector data`.\n2. Tool retrieval sudah difilter ke document_id milik dokumen yang dipilih pengguna. Jangan gunakan pengetahuan umum atau asumsi di luar hasil retrieval.\n3. Jika hasil retrieval tidak cukup untuk menjawab, jawab tepat dengan: `Maaf, informasi tersebut tidak ditemukan di dokumen yang dipilih.`\n4. Jangan mencampur jawaban dari dokumen lain.\n5. Jika jawaban ditemukan, berikan jawaban yang ringkas, langsung, dan sertakan bagian penutup `Sumber:` yang menyebut `nama_file` jika metadata tersedia, jika tidak pakai `document_id`.\n6. Jika pertanyaan meminta kutipan atau prosedur, ambil hanya dari konteks retrieval.\n\nFORMAT JAWABAN:\n- Gunakan bahasa Indonesia yang jelas dan profesional.\n- Jika berisi langkah/prosedur, gunakan daftar bernomor.\n- Akhiri dengan satu baris sumber, contoh: `Sumber: SOP Cuti Tahunan`."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        2032
+      ],
+      "id": "54cd2506-8d7e-4cb3-a584-513dd8c3195a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ $json.body?.timeMin || $json.body?.time_min || $now.setZone('Asia/Jakarta').startOf('day').toISO() }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "=5"
+            },
+            {
+              "name": "singleEvents",
+              "value": "true"
+            },
+            {
+              "name": "orderBy",
+              "value": "startTime"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=Authorization",
+              "value": "=Bearer {{ $json.body.access_token }}"
+            },
+            {
+              "name": "=Accept",
+              "value": "=application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        288
+      ],
+      "id": "70f962c3-47a6-4f9e-8830-3068bd41dc86",
+      "name": "Get Top 5 Event"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Kamu membuat briefing singkat Calendar Workspace untuk team lead. Output wajib JSON valid sesuai schema yang diminta. Dilarang menambahkan markdown code block atau teks di luar JSON."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1104,
+        288
+      ],
+      "id": "68dd18a7-bb91-4442-adf5-bb5075dcfcaf",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=Kamu adalah Email Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        1408
+      ],
+      "id": "54015d3a-3654-41cc-a6b8-5820aa17fd75",
+      "name": "Email Summary Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        2480
+      ],
+      "id": "937b3ac7-61d9-4e28-b731-bb40a106090c",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "0rW2Paz5Jham8Eqn",
+          "name": "OpenAi account 6"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1176,7 +1138,17 @@
             "index": 0
           },
           {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
             "node": "Email Summary Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -1380,28 +1352,6 @@
         ]
       ]
     },
-    "Build Email Summary Prompt": {
-      "main": [
-        [
-          {
-            "node": "Email Summary Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Email Summary Agent": {
-      "main": [
-        [
-          {
-            "node": "Parse Email Summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Parse Email Summary": {
       "main": [
         [
@@ -1424,66 +1374,11 @@
         ]
       ]
     },
-    "Groq Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "retrieve vector data": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embeddings HuggingFace Inference2": {
-      "ai_embedding": [
-        [
-          {
-            "node": "retrieve vector data",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Chat Document": {
       "main": [
         [
           {
             "node": "Prepare Document Query",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Document Query": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
@@ -1501,55 +1396,11 @@
         ]
       ]
     },
-    "Get Top 5 Event": {
-      "main": [
-        [
-          {
-            "node": "Prepare Calendar Summary Context",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Prepare Calendar Summary Context": {
       "main": [
         [
           {
             "node": "Build Calendar Summary Prompt",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Calendar Summary Prompt": {
-      "main": [
-        [
-          {
-            "node": "Get Calendar Summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Groq Chat Model2": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Get Calendar Summary",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Calendar Summary": {
-      "main": [
-        [
-          {
-            "node": "Parse Calendar Summary",
             "type": "main",
             "index": 0
           }
@@ -1578,6 +1429,39 @@
         ]
       ]
     },
+    "Prepare Document Query": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retrieve vector data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Get Summary": {
       "main": [
         [
@@ -1588,18 +1472,83 @@
           }
         ]
       ]
+    },
+    "Get Top 5 Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Calendar Summary Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Calendar Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse Calendar Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Email Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Summary Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Email Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "retrieve vector data",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
-  "versionId": "7cbb115e-87ad-41e4-8e1b-fc07414604d5",
+  "versionId": "44a9fca4-ad9b-4ad4-8818-fc692508680b",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
+    "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"
   },
-  "id": "PsKJ7zivUqrP5Aap",
+  "id": "ruXMHJZBVpOdiJjp",
   "tags": []
 }

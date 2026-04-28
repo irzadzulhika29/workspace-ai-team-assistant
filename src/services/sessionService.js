@@ -11,12 +11,17 @@ const parseStoredAiOutput = (rawOutput) => {
 
   const trimmed = rawOutput.trim()
 
-  if (!trimmed.startsWith('{')) {
+  if (!/^[{[]/.test(trimmed)) {
     return { content: rawOutput, actionResults: {} }
   }
 
   try {
     const parsed = JSON.parse(trimmed)
+
+    if (Array.isArray(parsed) && typeof parsed[0]?.output === 'string') {
+      return parseStoredAiOutput(parsed[0].output)
+    }
+
     if (parsed.action === 'clarify' && typeof parsed.message === 'string') {
       return { content: parsed.message, actionResults: {} }
     }
@@ -27,9 +32,12 @@ const parseStoredAiOutput = (rawOutput) => {
       parsed.output ??
       rawOutput
 
-    if (typeof content === 'string' && content.trim().startsWith('{')) {
+    if (typeof content === 'string' && /^[{[]/.test(content.trim())) {
       try {
         const nested = JSON.parse(content.trim())
+        if (Array.isArray(nested) && typeof nested[0]?.output === 'string') {
+          content = nested[0].output
+        }
         if (nested.action === 'clarify' && typeof nested.message === 'string') {
           content = nested.message
         }
