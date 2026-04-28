@@ -3,33 +3,16 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "email",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        6208,
-        9248
-      ],
-      "id": "d5197a4b-6994-4a07-9860-dc11ac8e3932",
-      "name": "Webhook",
-      "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
-    },
-    {
-      "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const item = $input.item.json;\nconst body = $('Webhook').first().json.body ?? {};\n\nconst stripCodeFence = (value) =>\n  String(value || '')\n    .replace(/^```(?:json)?\\s*/i, '')\n    .replace(/\\s*```$/i, '')\n    .trim();\n\nconst parseJson = (raw) => {\n  const cleaned = stripCodeFence(raw);\n  try {\n    return JSON.parse(cleaned);\n  } catch (error) {\n    throw new Error(`Draft agent output is not valid JSON: ${cleaned}`);\n  }\n};\n\nconst extractEmail = (value) => {\n  const raw = String(value || '').trim();\n  const match = raw.match(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})/i);\n  return match?.[1] || raw || null;\n};\n\nconst sourceEmail = body.source_email ?? {};\nconst currentDraft = body.current_draft ?? {};\n\nif (!body.user_id) {\n  throw new Error('Webhook body.user_id is required to save draft email');\n}\n\nconst result = parseJson(item.output);\nconst now = new Date().toISOString();\nconst draftType = body.draft_type || result.draft_type || 'reply';\nconst fallbackTo = draftType === 'reply'\n  ? extractEmail(sourceEmail.from || body.from)\n  : extractEmail(sourceEmail.to || body.to);\n\nreturn {\n  json: {\n    draft_id: body.draft_id || null,\n    user_id: body.user_id,\n    session_id: body.session_id || null,\n    source_thread_id: sourceEmail.threadId || body.threadId || null,\n    source_message_id: sourceEmail.id || body.id || body.messageId || null,\n    draft_type: draftType,\n    status: 'draft',\n    to_email: result.to || currentDraft.to || fallbackTo,\n    cc: result.cc ?? currentDraft.cc ?? sourceEmail.cc ?? body.cc ?? '',\n    bcc: result.bcc ?? currentDraft.bcc ?? sourceEmail.bcc ?? body.bcc ?? '',\n    subject: result.subject || currentDraft.subject || sourceEmail.subject || body.subject || '',\n    body_text: result.body_text || result.message || currentDraft.body_text || sourceEmail.body || body.body || '',\n    body_html: result.body_html || result.message || currentDraft.body_html || sourceEmail.htmlBody || body.htmlBody || '',\n    attachments: Array.isArray(result.attachments)\n      ? result.attachments\n      : Array.isArray(currentDraft.attachments)\n        ? currentDraft.attachments\n        : Array.isArray(sourceEmail.attachments)\n          ? sourceEmail.attachments\n          : Array.isArray(body.attachments)\n            ? body.attachments\n            : [],\n    source_email_payload: body,\n    revision_note: body.revision_note || body.revision_instructions || null,\n    sent_message_id: null,\n    sent_at: null,\n    created_at: now,\n    updated_at: now,\n  },\n};\n"
+        "jsCode": "const item = $input.item.json;\nconst body = $('Drafting Email Webhook').first().json.body ?? {};\n\nconst stripCodeFence = (value) =>\n  String(value || '')\n    .replace(/^```(?:json)?\\s*/i, '')\n    .replace(/\\s*```$/i, '')\n    .trim();\n\nconst parseJson = (raw) => {\n  const cleaned = stripCodeFence(raw);\n  try {\n    return JSON.parse(cleaned);\n  } catch (error) {\n    throw new Error(`Draft agent output is not valid JSON: ${cleaned}`);\n  }\n};\n\nconst extractEmail = (value) => {\n  const raw = String(value || '').trim();\n  const match = raw.match(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,})/i);\n  return match?.[1] || raw || null;\n};\n\nconst sourceEmail = body.source_email ?? {};\nconst currentDraft = body.current_draft ?? {};\n\nif (!body.user_id) {\n  throw new Error('Webhook body.user_id is required to save draft email');\n}\n\nconst result = parseJson(item.output);\nconst now = new Date().toISOString();\nconst draftType = body.draft_type || result.draft_type || 'reply';\nconst fallbackTo = draftType === 'reply'\n  ? extractEmail(sourceEmail.from || body.from)\n  : extractEmail(sourceEmail.to || body.to);\n\nreturn {\n  json: {\n    draft_id: body.draft_id || null,\n    user_id: body.user_id,\n    session_id: body.session_id || null,\n    source_thread_id: sourceEmail.threadId || body.threadId || null,\n    source_message_id: sourceEmail.id || body.id || body.messageId || null,\n    draft_type: draftType,\n    status: 'draft',\n    to_email: result.to || currentDraft.to || fallbackTo,\n    cc: result.cc ?? currentDraft.cc ?? sourceEmail.cc ?? body.cc ?? '',\n    bcc: result.bcc ?? currentDraft.bcc ?? sourceEmail.bcc ?? body.bcc ?? '',\n    subject: result.subject || currentDraft.subject || sourceEmail.subject || body.subject || '',\n    body_text: result.body_text || result.message || currentDraft.body_text || sourceEmail.body || body.body || '',\n    body_html: result.body_html || result.message || currentDraft.body_html || sourceEmail.htmlBody || body.htmlBody || '',\n    attachments: Array.isArray(result.attachments)\n      ? result.attachments\n      : Array.isArray(currentDraft.attachments)\n        ? currentDraft.attachments\n        : Array.isArray(sourceEmail.attachments)\n          ? sourceEmail.attachments\n          : Array.isArray(body.attachments)\n            ? body.attachments\n            : [],\n    source_email_payload: body,\n    revision_note: body.revision_note || body.revision_instructions || null,\n    sent_message_id: null,\n    sent_at: null,\n    created_at: now,\n    updated_at: now,\n  },\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6960,
-        9344
+        6224,
+        11136
       ],
-      "id": "d5c09750-2daa-48a6-b8a0-2f7c93b7f1df",
+      "id": "fc4b38ca-2d41-42fd-ac61-763ae98309b4",
       "name": "Prepare Draft Payload"
     },
     {
@@ -103,10 +86,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7744,
-        9360
+        7008,
+        11232
       ],
-      "id": "811c2b6c-ed51-4a59-b9d7-f6b1033062e5",
+      "id": "8e6c290f-73e7-45d3-961f-e19481a75f98",
       "name": "Create Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -184,10 +167,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7744,
-        9184
+        7008,
+        11040
       ],
-      "id": "726d3da2-b697-4f69-9de5-f16aea2195af",
+      "id": "e5f842b1-444e-4efa-bea1-78ba41fb0337",
       "name": "Update Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -203,10 +186,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8016,
-        9200
+        7312,
+        11040
       ],
-      "id": "98458af8-6c22-4925-8185-08134ac97e78",
+      "id": "640fe664-c629-4623-b49a-dd3c9ce37119",
       "name": "Format Draft Response"
     },
     {
@@ -216,10 +199,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        8272,
-        9200
+        7536,
+        11040
       ],
-      "id": "1c1c61df-3685-4437-ac27-74e76a29ffc0",
+      "id": "a2e70d06-6909-4127-bbc8-42a89ab4d42e",
       "name": "Respond to Webhook"
     },
     {
@@ -230,10 +213,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6800,
-        9040
+        6064,
+        10832
       ],
-      "id": "f42a6cbd-f35d-42c0-8aec-37c5295db91d",
+      "id": "e393a600-30e9-40dc-a848-274529117715",
       "name": "Prepare Send Payload"
     },
     {
@@ -244,10 +227,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7264,
-        9040
+        6528,
+        10832
       ],
-      "id": "68e2322b-a07b-405e-bb58-7fab3aa999c2",
+      "id": "ec44e853-d814-488a-8bc5-747b1e641862",
       "name": "Prepare Sent Draft Update"
     },
     {
@@ -323,10 +306,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        7744,
-        9040
+        7008,
+        10832
       ],
-      "id": "b86823d5-6d5c-4994-9321-e436d1f1d45c",
+      "id": "b3905959-c31b-4c0b-b415-d180e5a9a945",
       "name": "Mark Draft As Sent",
       "credentials": {
         "supabaseApi": {
@@ -363,10 +346,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6416,
-        9248
+        5680,
+        11040
       ],
-      "id": "6eefbd7b-764f-4e40-b5eb-c21a5fd128e3",
+      "id": "78eb9191-e99f-4f1b-ba27-ed9172ab455d",
       "name": "If"
     },
     {
@@ -377,10 +360,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        7360,
-        10624
+        7056,
+        12368
       ],
-      "id": "6dcdf8b4-c8eb-4e90-a6ec-19c370a85835",
+      "id": "dd6faaaa-9ca3-4b81-84cf-99336e0ef97a",
       "name": "Groq Chat Model1",
       "credentials": {
         "groqApi": {
@@ -400,10 +383,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        6624,
-        9344
+        5888,
+        11136
       ],
-      "id": "81378ca7-370f-4e41-835d-e417e88e5e01",
+      "id": "fb2de54d-2c03-49c1-944d-5e1766cf3634",
       "name": "Draft & Send Email"
     },
     {
@@ -415,10 +398,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        6784,
-        9552
+        6048,
+        11344
       ],
-      "id": "a0f48d13-a829-44b1-9c48-4757d7e976a5",
+      "id": "4fe32730-4946-4293-bd05-46784c1cbf7e",
       "name": "Get Email Format"
     },
     {
@@ -449,10 +432,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        7168,
-        9344
+        6432,
+        11136
       ],
-      "id": "562ba775-9e2f-4370-8e06-ff285b00cdb9",
+      "id": "4d467fe8-12ab-45fb-aef4-d0accbec0b6e",
       "name": "Is Revision?"
     },
     {
@@ -480,10 +463,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        7024,
-        9040
+        6288,
+        10832
       ],
-      "id": "2281c0fd-7020-44e1-bd05-d5043f0b00e0",
+      "id": "e5ce5392-b046-4156-98ff-532684997d06",
       "name": "Send Email via Gmail API"
     },
     {
@@ -496,10 +479,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5792,
-        9744
+        5488,
+        11488
       ],
-      "id": "3cf3c392-1c25-4e0e-9079-b2ad2b4b720f",
+      "id": "7b1a163c-edd9-4463-971f-686e4724045e",
       "name": "Get Email Summary",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -510,10 +493,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        7120,
-        9744
+        6816,
+        11488
       ],
-      "id": "3cd328f2-8b6d-4a3d-95d2-9c81528cb59b",
+      "id": "f56370b5-03bd-4143-8780-6a41a0a9cc2b",
       "name": "Loop Over Items"
     },
     {
@@ -546,10 +529,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        7312,
-        9936
+        7008,
+        11680
       ],
-      "id": "bcfbf2b8-3f1a-4b8f-a57c-51169344ad4d",
+      "id": "f5f492bf-7b16-42bd-9179-e66f23bb99da",
       "name": "Get Email Detail",
       "continueOnFail": true
     },
@@ -560,10 +543,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7536,
-        9936
+        7232,
+        11680
       ],
-      "id": "a19a6af4-b4d9-4baf-9a95-efeb18f41c12",
+      "id": "71f99487-0e9d-4ff6-aaa0-6466917c79bf",
       "name": "Normalize Email Detail"
     },
     {
@@ -596,10 +579,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6224,
-        9744
+        5920,
+        11488
       ],
-      "id": "f654dc52-8802-4b3e-99ae-be4e42641925",
+      "id": "32bd8365-0a3f-407c-aebc-32b4e4623556",
       "name": "Get Unread Email"
     },
     {
@@ -629,10 +612,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        6416,
-        9744
+        6112,
+        11488
       ],
-      "id": "ba76bda4-8240-4269-a19e-ee1f4cac1300",
+      "id": "e77ad322-d682-4459-8421-9a10fb977fc6",
       "name": "Has Unread Emails?"
     },
     {
@@ -644,10 +627,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        6784,
-        9728
+        6480,
+        11472
       ],
-      "id": "1383fe4a-0bc2-42a3-ae53-fda45f0b4b33",
+      "id": "899acf27-ae27-477e-8447-f237c0594ee8",
       "name": "Split Out Email Messages"
     },
     {
@@ -658,10 +641,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6016,
-        9744
+        5712,
+        11488
       ],
-      "id": "d116ccbb-ac85-4f44-9ecf-108720f05b29"
+      "id": "f7ed3dc2-febe-43d7-a2bd-a75695117cbb"
     },
     {
       "parameters": {
@@ -671,10 +654,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7472,
-        9792
+        7168,
+        11536
       ],
-      "id": "31fd416f-00f4-4e37-b2dd-f44a58b79e44"
+      "id": "dd0cc6d7-a1a3-4a83-a2be-d1a4d3c473da"
     },
     {
       "parameters": {
@@ -684,10 +667,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7456,
-        10128
+        7152,
+        11872
       ],
-      "id": "06932b19-8a56-4ebf-9f9a-2ca72f90b0ea"
+      "id": "bf711549-a57b-4bc5-988e-e0ee12fd900a"
     },
     {
       "parameters": {
@@ -706,10 +689,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7760,
-        9920
+        7456,
+        11664
       ],
-      "id": "7a10b40a-51c5-4316-a067-1b7a6bd2d84b"
+      "id": "01452cca-600f-4f3d-a034-7c039342e19e"
     },
     {
       "parameters": {
@@ -723,10 +706,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        7936,
-        9840
+        7632,
+        11584
       ],
-      "id": "4a29ee73-e236-48ea-8fe4-7bda76262673"
+      "id": "59a10e2b-aba5-44ae-ae60-45fd6b6313fc"
     },
     {
       "parameters": {
@@ -736,10 +719,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8256,
-        9952
+        7952,
+        11696
       ],
-      "id": "67d4008e-4892-439d-a6c8-4437aadfd154"
+      "id": "9dbd2fb9-ca1a-4610-bf9c-c82152fc1d2c"
     },
     {
       "parameters": {
@@ -749,10 +732,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8480,
-        9952
+        8176,
+        11696
       ],
-      "id": "2277a93d-dc87-40dd-8570-edcf5ff15343"
+      "id": "a681af1e-35cd-41c0-8a81-7fed702ff508"
     },
     {
       "parameters": {
@@ -764,10 +747,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        8704,
-        9952
+        8400,
+        11696
       ],
-      "id": "b0d0c7ba-8ea6-48f1-ac5c-5075af5d7356"
+      "id": "0c9bcb7e-1f46-44de-afe7-846f567bbacf"
     },
     {
       "parameters": {
@@ -780,10 +763,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        6144,
-        10544
+        5840,
+        12288
       ],
-      "id": "dca90c68-b775-4020-ab64-65d2f1a77401",
+      "id": "be1336da-9997-4206-a4e4-22537b661386",
       "name": "AI Agent"
     },
     {
@@ -794,10 +777,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        6016,
-        10752
+        5712,
+        12496
       ],
-      "id": "b397b51a-b022-4a9d-ac1f-a7278ce258c0",
+      "id": "6ef064e1-decc-4808-b671-f10a87bf9ede",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -816,6 +799,7 @@
           "mode": "list",
           "cachedResultName": "rag-ai-agent"
         },
+        "topK": 6,
         "options": {
           "metadata": {
             "metadataValues": [
@@ -829,17 +813,15 @@
               }
             ]
           }
-        },
-        "topK": 6,
-        "includeDocumentMetadata": true
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        6208,
-        10784
+        5904,
+        12528
       ],
-      "id": "aaf4bfab-1cdf-48bd-acb9-c01d57d9f1a8",
+      "id": "2f7be12e-a291-40d3-b55d-68da896d6757",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -856,10 +838,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        6096,
-        10960
+        5792,
+        12704
       ],
-      "id": "cd7efb18-bf3b-43e9-a096-c6cc1f9d90d1",
+      "id": "2177f5c8-ee44-4b16-95b2-61b3129087c1",
       "name": "Embeddings HuggingFace Inference2",
       "credentials": {
         "huggingFaceApi": {
@@ -875,10 +857,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6560,
-        10544
+        6256,
+        12288
       ],
-      "id": "ff8e9b60-1987-473c-8df4-373a3876ea85",
+      "id": "62d35788-7d63-44ab-ae73-8cadd9d12e09",
       "name": "Respond to Webhook1"
     },
     {
@@ -891,10 +873,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        5776,
-        10544
+        5472,
+        12288
       ],
-      "id": "f8d4a353-4c3f-41dc-804e-1b0d5ab62eda",
+      "id": "c55a7b91-f60c-45ef-9b78-93c2f690b723",
       "name": "Chat Document",
       "webhookId": "1e9639af-7d9f-4d7a-9f67-fef0b9eeef64"
     },
@@ -905,11 +887,209 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5952,
+        5648,
+        12288
+      ],
+      "id": "15a92bdd-edc1-494d-a4af-25e1ffb93696",
+      "name": "Prepare Document Query"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        5472,
+        11040
+      ],
+      "id": "eb6bb281-27e9-4e90-8437-feba2151ebe3",
+      "name": "Drafting Email Webhook",
+      "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeMin",
+              "value": "={{ $json.body?.timeMin || $json.body?.time_min || $now.setZone('Asia/Jakarta').startOf('day').toISO() }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "=5"
+            },
+            {
+              "name": "singleEvents",
+              "value": "=true"
+            },
+            {
+              "name": "orderBy",
+              "value": "=startTime"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.body.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5552,
         10544
       ],
-      "id": "bf7d55cc-2748-4c66-bd97-2f174b68f11b",
-      "name": "Prepare Document Query"
+      "id": "d44a6103-d19c-4789-bef9-d7e2d4dbe8ea",
+      "name": "Get Top 5 Event"
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $json || {};\nconst rawEvents = Array.isArray(source.items)\n  ? source.items\n  : Array.isArray(source.events)\n    ? source.events\n    : source.summary || source.start || source.end\n      ? [source]\n      : [];\nconst events = rawEvents.slice(0, 5);\nconst now = new Date();\n\nconst getStartValue = (event) => event?.start?.dateTime || event?.start?.date || null;\nconst getEndValue = (event) => event?.end?.dateTime || event?.end?.date || null;\nconst formatters = {\n  dateTime: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n  }),\n  dateOnly: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n  }),\n};\n\nconst formatEventLabel = (value, isAllDay = false) => {\n  if (!value) return '-';\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return String(value);\n  return isAllDay ? formatters.dateOnly.format(parsed) : formatters.dateTime.format(parsed);\n};\n\nconst normalizedEvents = events.map((event) => {\n  const startValue = getStartValue(event);\n  const endValue = getEndValue(event);\n  const isAllDay = Boolean(event?.start?.date && !event?.start?.dateTime);\n  const start = startValue ? new Date(startValue) : null;\n  const end = endValue ? new Date(endValue) : null;\n  const attendeeEmails = Array.isArray(event.attendees)\n    ? event.attendees.map((attendee) => attendee?.email).filter(Boolean)\n    : [];\n\n  let status = 'unknown';\n  if (start && end && !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {\n    if (now >= start && now <= end) status = 'ongoing';\n    else if (now < start) status = 'upcoming';\n    else status = 'past';\n  }\n\n  return {\n    id: event.id || null,\n    summary: event.summary || '(Tanpa judul)',\n    description: event.description || '',\n    location: event.location || '',\n    hangoutLink: event.hangoutLink || '',\n    is_all_day: isAllDay,\n    start_iso: startValue,\n    end_iso: endValue,\n    start_label: formatEventLabel(startValue, isAllDay),\n    end_label: formatEventLabel(endValue, isAllDay),\n    attendee_count: attendeeEmails.length,\n    attendees: attendeeEmails,\n    status,\n    htmlLink: event.htmlLink || '',\n  };\n});\n\nconst todayKey = formatters.dateOnly.format(now);\nconst todayEvents = normalizedEvents.filter((event) => {\n  if (!event.start_iso) return false;\n  const start = new Date(event.start_iso);\n  if (Number.isNaN(start.getTime())) return false;\n  return formatters.dateOnly.format(start) === todayKey;\n});\n\nconst sortedForConflict = normalizedEvents\n  .filter((event) => event.start_iso && event.end_iso)\n  .map((event) => ({\n    ...event,\n    _start: new Date(event.start_iso).getTime(),\n    _end: new Date(event.end_iso).getTime(),\n  }))\n  .filter((event) => Number.isFinite(event._start) && Number.isFinite(event._end))\n  .sort((a, b) => a._start - b._start);\n\nlet hasConflict = false;\nfor (let i = 1; i < sortedForConflict.length; i += 1) {\n  if (sortedForConflict[i]._start < sortedForConflict[i - 1]._end) {\n    hasConflict = true;\n    break;\n  }\n}\n\nconst nextEvent = normalizedEvents.find((event) => event.status === 'ongoing' || event.status === 'upcoming') || null;\n\nreturn [{\n  json: {\n    user_id: $('Get Summary').first().json.body?.user_id || $('Get Summary').first().json.body?.userId || '',\n    generated_at: new Date().toISOString(),\n    calendar_summary: source.summary || '',\n    next_event: nextEvent,\n    events: normalizedEvents,\n    source_metrics: {\n      fetched_event_count: normalizedEvents.length,\n      today_event_count: todayEvents.length,\n      ongoing_event_count: normalizedEvents.filter((event) => event.status === 'ongoing').length,\n      has_conflict: hasConflict,\n      next_event_start: nextEvent?.start_iso || null,\n    },\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5744,
+        10544
+      ],
+      "id": "532c5a40-9414-4515-bb83-83de1faa61c5",
+      "name": "Prepare Calendar Summary Context"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7184d4d8-f120-4b55-b03c-747f4cbf92be",
+              "name": "prompt",
+              "type": "string",
+              "value": "=Kamu adalah Calendar Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 event kalender terdekat yang sudah dinormalisasi.\n2. Buat summary singkat dalam gaya AI Summary Card untuk Calendar Workspace.\n3. Sorot event terdekat, potensi konflik jadwal, event ongoing, dan event yang tampak butuh persiapan.\n4. Berikan rekomendasi follow-up singkat berbentuk poin.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"calendar\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"fetched_event_count\": number,\n    \"today_event_count\": number,\n    \"ongoing_event_count\": number,\n    \"has_conflict\": boolean,\n    \"next_event_start\": \"string | null\"\n  }\n}\n\nATURAN:\n- Summary harus siap dipakai sebagai poin-poin ringkas di Calendar Workspace.\n- Fokus pada apa yang paling penting untuk user/team lead, bukan meringkas semua event satu per satu secara panjang.\n- Gunakan `events[].summary` sebagai nama event/meeting.\n- Jangan gunakan `calendar_summary` sebagai nama event, karena itu adalah nama kalender/root summary.\n- Jika ada `next_event`, prioritaskan event itu di headline atau summary_points.\n- Jika ada event ongoing atau event terdekat, sebutkan di headline atau summary_points.\n- Jika tidak ada konflik, boleh bilang tidak ada konflik jadwal.\n- Jika description minim, attendees banyak, atau ada meet link, kamu boleh tandai event itu sebagai butuh persiapan.\n- Jangan mengarang detail event yang tidak ada di data.\n- Jika event kosong, tetap return JSON valid dengan status partial dan rekomendasi yang relevan.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5984,
+        10544
+      ],
+      "id": "57270f67-785d-4d4a-87b5-d3e6f94c5769",
+      "name": "Build Calendar Summary Prompt"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        6368,
+        10704
+      ],
+      "id": "ae710456-a09a-4812-b3a4-c26edc1d46dc",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "68b7yPyfO0nmCOn6",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Kamu membuat briefing singkat Calendar Workspace untuk team lead. Output wajib JSON valid sesuai schema yang diminta. Dilarang menambahkan markdown code block atau teks di luar JSON."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        6224,
+        10544
+      ],
+      "id": "456e4dc4-9360-4a54-b6e9-99cd4276ceb9",
+      "name": "Get Calendar Summary"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Calendar Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Calendar Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Calendar Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'calendar',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan kalender belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || fallbackMetrics,\n    },\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6544,
+        10544
+      ],
+      "id": "40e11c12-779d-466d-983f-81bf7e0a950e",
+      "name": "Parse Calendar Summary"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: true,\n    user_id: $json.user_id || '',\n    generated_at: $json.generated_at || new Date().toISOString(),\n    summary: $json.summary || null,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6800,
+        10544
+      ],
+      "id": "6f78a93e-89c9-4dbd-9999-e68b37836a25",
+      "name": "Build Calendar Summary Response"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        7088,
+        10544
+      ],
+      "id": "9fef355e-5a3b-42d6-b8fa-1b4f97b92b2b",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calendar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        5296,
+        10544
+      ],
+      "id": "c7f1d389-3bcf-47b9-a79e-75c31f85bd74",
+      "name": "Get Summary",
+      "webhookId": "1e4383e5-8647-4454-a5e6-755cc5bccc8d"
     }
   ],
   "pinData": {},
@@ -963,17 +1143,6 @@
         [
           {
             "node": "Format Draft Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -1320,6 +1489,105 @@
           }
         ]
       ]
+    },
+    "Drafting Email Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Top 5 Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Calendar Summary Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Calendar Summary Context": {
+      "main": [
+        [
+          {
+            "node": "Build Calendar Summary Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Calendar Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Get Calendar Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Get Calendar Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Calendar Summary": {
+      "main": [
+        [
+          {
+            "node": "Parse Calendar Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Calendar Summary": {
+      "main": [
+        [
+          {
+            "node": "Build Calendar Summary Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Calendar Summary Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Summary": {
+      "main": [
+        [
+          {
+            "node": "Get Top 5 Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1327,7 +1595,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "08f641c5-8097-4c29-adbe-47e7000d52a3",
+  "versionId": "7cbb115e-87ad-41e4-8e1b-fc07414604d5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"

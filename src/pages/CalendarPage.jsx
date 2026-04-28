@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Clock, MapPin, RefreshCw, AlertCircle, Users, ExternalLink, Video, FileText, Presentation, Mail, Bell, ArrowLeft } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, RefreshCw, AlertCircle, Users, ExternalLink, Video, FileText, Presentation, Bell, ArrowLeft } from 'lucide-react'
 import { calendarApi } from '../services/calendarService'
 
 const formatDateTime = (dateTime, fallbackDate) => {
@@ -69,6 +69,7 @@ const getEventGroup = (event) => {
 export default function CalendarPage() {
   const navigate = useNavigate()
   const [events, setEvents] = useState([])
+  const [aiSummary, setAiSummary] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -80,8 +81,9 @@ export default function CalendarPage() {
     setError('')
 
     try {
-      const items = await calendarApi.fetchCalendarEvents()
+      const { items, aiSummary: summary } = await calendarApi.fetchCalendarEvents()
       setEvents(items)
+      setAiSummary(summary)
     } catch (err) {
       setError(err.message || 'Tidak dapat mengambil jadwal kalender.')
     } finally {
@@ -97,11 +99,14 @@ export default function CalendarPage() {
   const upcomingEvents = events.filter(e => getEventGroup(e) !== 'today')
   
   const nextEvent = todayEvents.find(e => getEventStatus(e) === 'upcoming') || todayEvents[0]
-  const hasConflicts = false // TODO: implement conflict detection
+  const hasConflicts = aiSummary?.source_metrics?.has_conflict || false
   
   const handleEventSelect = (event) => {
     setSelectedEvent(event)
-    setShowMobileDetail(true)
+    // Only toggle mobile detail view on mobile
+    if (window.innerWidth < 1024) { // lg breakpoint
+      setShowMobileDetail(true)
+    }
   }
   
   const handleBackToList = () => {
@@ -109,31 +114,35 @@ export default function CalendarPage() {
   }
   
   const handleQuickAction = (action, event) => {
+    // Format event details
+    const startDate = event.start?.dateTime || event.start?.date
+    const endDate = event.end?.dateTime || event.end?.date
+    const formattedStart = startDate ? formatDateTime(event.start?.dateTime, event.start?.date) : '-'
+    const formattedEnd = endDate ? formatDateTime(event.end?.dateTime, event.end?.date) : '-'
+    
+    // Format attendees list
+    let attendeesText = ''
+    if (event.attendees && event.attendees.length > 0) {
+      const attendeesList = event.attendees.map(a => a.email).join(', ')
+      attendeesText = `\nPeserta: ${attendeesList}`
+    }
+    
+    const eventDetails = `Event: ${event.summary || 'Tanpa judul'}
+Waktu: ${formattedStart} - ${formattedEnd}${event.location ? `
+Lokasi: ${event.location}` : ''}${attendeesText}${event.description ? `
+Deskripsi: ${event.description}` : ''}${event.hangoutLink ? `
+Google Meet: ${event.hangoutLink}` : ''}`
+
     const prompts = {
-      agenda: `Buatkan agenda meeting untuk "${event.summary}"`,
-      slides: `Buatkan slides presentasi untuk meeting "${event.summary}"`,
-      report: `Buatkan laporan untuk meeting "${event.summary}"`,
-      followup: `Buatkan draft email follow-up untuk peserta meeting "${event.summary}"`,
-      reminder: `Buatkan draft reminder untuk peserta meeting "${event.summary}"`
+      agenda: `Buatkan agenda meeting untuk event berikut:\n\n${eventDetails}`,
+      slides: `Buatkan slides presentasi untuk event berikut:\n\n${eventDetails}`,
+      report: `Buatkan laporan untuk event berikut:\n\n${eventDetails}`,
+      followup: `Buatkan email follow-up untuk event berikut:\n\n${eventDetails}`,
     }
     
     navigate('/chat/supervisor', {
       state: {
-        domain: 'calendar',
-        intent: action,
-        templatePrompt: prompts[action],
-        context: {
-          event: {
-            id: event.id,
-            summary: event.summary,
-            description: event.description,
-            start: event.start,
-            end: event.end,
-            location: event.location,
-            attendees: event.attendees,
-            hangoutLink: event.hangoutLink
-          }
-        }
+        autoSendMessage: prompts[action]
       }
     })
   }
@@ -141,23 +150,30 @@ export default function CalendarPage() {
   const handleCustomRequest = () => {
     if (!customRequest.trim() || !selectedEvent) return
     
+    // Format event details
+    const startDate = selectedEvent.start?.dateTime || selectedEvent.start?.date
+    const endDate = selectedEvent.end?.dateTime || selectedEvent.end?.date
+    const formattedStart = startDate ? formatDateTime(selectedEvent.start?.dateTime, selectedEvent.start?.date) : '-'
+    const formattedEnd = endDate ? formatDateTime(selectedEvent.end?.dateTime, selectedEvent.end?.date) : '-'
+    
+    // Format attendees list
+    let attendeesText = ''
+    if (selectedEvent.attendees && selectedEvent.attendees.length > 0) {
+      const attendeesList = selectedEvent.attendees.map(a => a.email).join(', ')
+      attendeesText = `\nPeserta: ${attendeesList}`
+    }
+    
+    const eventDetails = `Event: ${selectedEvent.summary || 'Tanpa judul'}
+Waktu: ${formattedStart} - ${formattedEnd}${selectedEvent.location ? `
+Lokasi: ${selectedEvent.location}` : ''}${attendeesText}${selectedEvent.description ? `
+Deskripsi: ${selectedEvent.description}` : ''}${selectedEvent.hangoutLink ? `
+Google Meet: ${selectedEvent.hangoutLink}` : ''}`
+
+    const fullPrompt = `${customRequest}\n\nDetail event:\n${eventDetails}`
+    
     navigate('/chat/supervisor', {
       state: {
-        domain: 'calendar',
-        intent: 'custom_request',
-        templatePrompt: customRequest,
-        context: {
-          event: {
-            id: selectedEvent.id,
-            summary: selectedEvent.summary,
-            description: selectedEvent.description,
-            start: selectedEvent.start,
-            end: selectedEvent.end,
-            location: selectedEvent.location,
-            attendees: selectedEvent.attendees,
-            hangoutLink: selectedEvent.hangoutLink
-          }
-        }
+        autoSendMessage: fullPrompt
       }
     })
   }
@@ -194,11 +210,11 @@ export default function CalendarPage() {
         )}
       </div>
 
-      {/* Master-Detail Layout */}
+      {/* 3-Column Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Agenda Overview (hidden on mobile when detail is shown) */}
-        <div className={`w-full md:w-[35%] border-r border-slate-200 bg-slate-50 overflow-y-auto custom-scrollbar ${showMobileDetail ? 'hidden md:block' : 'block'}`}>
-          <div className="p-4 md:p-5 space-y-5">
+        {/* Left Panel - AI Summary */}
+        <div className="hidden lg:block w-[25%] border-r border-slate-200 bg-slate-50 overflow-y-auto custom-scrollbar">
+          <div className="p-4 space-y-4 min-h-screen">
             {/* AI Summary Card */}
             <div className="panel p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -214,6 +230,52 @@ export default function CalendarPage() {
                 <div className="space-y-2">
                   <div className="skeleton h-4 w-3/4" />
                   <div className="skeleton h-4 w-1/2" />
+                </div>
+              ) : aiSummary ? (
+                <div className="space-y-3">
+                  {/* Headline */}
+                  {aiSummary.headline && (
+                    <p className="text-sm font-semibold text-slate-900">
+                      {aiSummary.headline}
+                    </p>
+                  )}
+                  
+                  {/* Summary Points */}
+                  {aiSummary.summary_points && aiSummary.summary_points.length > 0 && (
+                    <ul className="space-y-1.5 text-sm text-slate-700">
+                      {aiSummary.summary_points.map((point, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-cyan-600 mt-1">•</span>
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  
+                  {/* Conflict Status */}
+                  {hasConflicts ? (
+                    <p className="text-amber-700 flex items-center gap-1.5 text-sm">
+                      <AlertCircle size={14} />
+                      Ada konflik jadwal
+                    </p>
+                  ) : (
+                    <p className="text-emerald-700 text-sm">Tidak ada konflik jadwal</p>
+                  )}
+                  
+                  {/* Recommendations */}
+                  {aiSummary.recommendations && aiSummary.recommendations.length > 0 && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <p className="text-xs font-semibold text-slate-600 mb-1.5">Rekomendasi:</p>
+                      <ul className="space-y-1 text-xs text-slate-600">
+                        {aiSummary.recommendations.map((rec, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-cyan-500 mt-0.5">→</span>
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2 text-sm">
@@ -232,6 +294,69 @@ export default function CalendarPage() {
                     </p>
                   ) : (
                     <p className="text-emerald-700">Tidak ada konflik jadwal</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Center Panel - Event List */}
+        <div className={`w-full lg:w-[35%] border-r border-slate-200 bg-white overflow-y-auto custom-scrollbar ${showMobileDetail ? 'hidden' : 'block'}`}>
+          <div className="p-4 space-y-5 min-h-screen">
+            {/* AI Summary Card - Mobile Only */}
+            <div className="lg:hidden panel p-4 bg-slate-50">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                  <CalendarDays size={16} className="text-cyan-700" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI Summary</p>
+                </div>
+              </div>
+              
+              {loading ? (
+                <div className="space-y-2">
+                  <div className="skeleton h-4 w-3/4" />
+                  <div className="skeleton h-4 w-1/2" />
+                </div>
+              ) : aiSummary ? (
+                <div className="space-y-3">
+                  {aiSummary.headline && (
+                    <p className="text-sm font-semibold text-slate-900">
+                      {aiSummary.headline}
+                    </p>
+                  )}
+                  
+                  {aiSummary.summary_points && aiSummary.summary_points.length > 0 && (
+                    <ul className="space-y-1.5 text-sm text-slate-700">
+                      {aiSummary.summary_points.slice(0, 3).map((point, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-cyan-600 mt-1">•</span>
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  
+                  {hasConflicts ? (
+                    <p className="text-amber-700 flex items-center gap-1.5 text-sm">
+                      <AlertCircle size={14} />
+                      Ada konflik jadwal
+                    </p>
+                  ) : (
+                    <p className="text-emerald-700 text-sm">Tidak ada konflik jadwal</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2 text-sm">
+                  <p className="text-slate-700">
+                    <span className="font-semibold text-slate-900">{todayEvents.length}</span> event hari ini
+                  </p>
+                  {nextEvent && (
+                    <p className="text-slate-600">
+                      Terdekat: <span className="font-medium text-slate-900">{nextEvent.summary}</span>
+                    </p>
                   )}
                 </div>
               )}
@@ -363,14 +488,14 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Right Panel - Event Workspace */}
-        <div className={`w-full md:w-[65%] bg-white overflow-y-auto custom-scrollbar ${showMobileDetail ? 'block' : 'hidden md:block'}`}>
+        {/* Right Panel - Event Detail */}
+        <div className={`w-full lg:w-[40%] bg-white overflow-y-auto custom-scrollbar ${showMobileDetail ? 'block' : 'hidden lg:block'}`}>
           {selectedEvent ? (
-            <div className="p-5 md:p-6 space-y-6">
+            <div className="p-5 md:p-6 space-y-6 min-h-screen">
               {/* Mobile Back Button */}
               <button
                 onClick={handleBackToList}
-                className="md:hidden inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-2"
+                className="lg:hidden inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-2"
               >
                 <ArrowLeft size={16} />
                 Kembali ke daftar
@@ -394,12 +519,6 @@ export default function CalendarPage() {
                       {selectedEvent.location}
                     </div>
                   )}
-                  {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
-                    <div className="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                      <Users size={13} className="text-slate-400" />
-                      {selectedEvent.attendees.length} peserta
-                    </div>
-                  )}
                   {selectedEvent.hangoutLink && (
                     <a
                       href={selectedEvent.hangoutLink}
@@ -414,6 +533,49 @@ export default function CalendarPage() {
                   )}
                 </div>
               </div>
+
+              {/* Attendees List */}
+              {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
+                <div className="panel p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users size={14} className="text-slate-500" />
+                    <h3 className="text-sm font-semibold text-slate-700">
+                      Peserta ({selectedEvent.attendees.length})
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    {selectedEvent.attendees.map((attendee, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm">
+                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-medium text-slate-600">
+                          {attendee.email?.charAt(0).toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-slate-700 truncate">{attendee.email}</p>
+                          {attendee.displayName && (
+                            <p className="text-xs text-slate-500 truncate">{attendee.displayName}</p>
+                          )}
+                        </div>
+                        {attendee.responseStatus && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            attendee.responseStatus === 'accepted' 
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : attendee.responseStatus === 'declined'
+                              ? 'bg-rose-100 text-rose-700'
+                              : attendee.responseStatus === 'tentative'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {attendee.responseStatus === 'accepted' ? 'Hadir' 
+                              : attendee.responseStatus === 'declined' ? 'Tidak hadir'
+                              : attendee.responseStatus === 'tentative' ? 'Mungkin'
+                              : 'Belum konfirmasi'}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Event Summary */}
               <div className="panel p-4">
@@ -453,13 +615,6 @@ export default function CalendarPage() {
                   >
                     <FileText size={14} />
                     Generate Report
-                  </button>
-                  <button
-                    onClick={() => handleQuickAction('followup', selectedEvent)}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                  >
-                    <Mail size={14} />
-                    Draft Follow-up
                   </button>
                   <button
                     onClick={() => handleQuickAction('reminder', selectedEvent)}
@@ -502,7 +657,7 @@ export default function CalendarPage() {
               </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center p-8">
+            <div className="h-full min-h-screen flex items-center justify-center p-8">
               <div className="text-center">
                 <CalendarDays size={48} className="mx-auto text-slate-300 mb-4" />
                 <p className="text-base font-medium text-slate-700">Pilih event dari daftar</p>

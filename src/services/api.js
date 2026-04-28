@@ -78,6 +78,7 @@ const ENDPOINTS = {
   STATUS: "status",
   UPLOAD: "upload-document",
   BRIEFINGS: "briefings",
+  CALENDAR: "calendar",
 };
 
 // ─── Helper functions ─────────────────────────────────────────────────────────
@@ -196,6 +197,13 @@ export const urls = {
     return buildWebhookUrl(ENDPOINTS.CHAT_DOCUMENT, env, mode, devUrl);
   },
 
+  getCalendar: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.CALENDAR, env, mode, devUrl);
+  },
+
   // Get all webhook URLs
   getAll: () => ({
     supervisor: urls.getSupervisor(),
@@ -205,6 +213,7 @@ export const urls = {
     status: urls.getStatus(),
     upload: urls.getUpload(),
     briefings: urls.getBriefings(),
+    calendar: urls.getCalendar(),
   }),
 
   // Get current config

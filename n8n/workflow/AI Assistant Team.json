@@ -32,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        29648,
-        26752
+        28736,
+        29392
       ],
-      "id": "548a272e-d7d6-482c-bd6d-23294b4497a6",
+      "id": "41b9859d-e309-4797-b7f1-d634fcb0cc7b",
       "name": "Upload Document to Table",
       "credentials": {
         "supabaseApi": {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        28752,
-        27104
+        27840,
+        29744
       ],
-      "id": "a8fcb54f-ca93-4178-84c6-2371296f59af",
+      "id": "30cf2e77-25b1-4ad4-88ea-bc5a8a404686",
       "name": "Respond to Webhook1"
     },
     {
@@ -84,10 +84,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        28512,
-        27104
+        27600,
+        29744
       ],
-      "id": "2821f62b-c9d9-4a6b-be72-aa364e5e0146",
+      "id": "18e07f67-9d81-4903-8bb4-8fee6cf7eddb",
       "name": "Send Email"
     },
     {
@@ -97,10 +97,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        28304,
-        27104
+        27392,
+        29744
       ],
-      "id": "a9999788-8972-4ec2-a43e-7c6bcd3f74ad",
+      "id": "013b6efd-c765-4464-90fe-f554f21beb36",
       "name": "Code in JavaScript1"
     },
     {
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        29008,
-        27776
+        28096,
+        30416
       ],
-      "id": "6a1009c0-e759-4129-9b2c-27c00a99e21e",
+      "id": "2fc31650-00f9-45d9-b9a9-fac5b19e5c9a",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -182,10 +182,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        26400,
-        28224
+        25488,
+        30864
       ],
-      "id": "a44c8895-f72b-4177-bcf1-9fe5da247c48",
+      "id": "bc2d2f41-583e-4f66-9e79-2240f1c6f2e6",
       "name": "Record token usage",
       "credentials": {
         "supabaseApi": {
@@ -196,7 +196,7 @@
     },
     {
       "parameters": {
-        "toolDescription": "=Gunakan tool ini untuk membuat event baru di Google Calendar pengguna.\n\nGunakan tool ini jika pengguna mengatakan:\n- \"jadwalkan meeting\", \"buat rapat\", \"tambah acara\", \"schedule event\"\n- \"ingatkan saya\", \"blok waktu\", \"buat agenda\"\n\nParameter yang WAJIB kamu tentukan:\n- summary: nama/judul event\n- start_datetime: waktu mulai format ISO 8601+07:00 → contoh: 2026-04-10T09:00:00+07:00\n- end_datetime: waktu selesai format ISO 8601+07:00 → contoh: 2026-04-10T10:00:00+07:00\n\nParameter opsional:\n- description: deskripsi atau catatan event\n- location: lokasi event\n- with_meet: true jika pengguna minta Google Meet link, false jika tidak\n\nAsumsi default jika tidak disebutkan:\n- Durasi: 1 jam\n- Jam kerja: 09:00–17:00 WIB\n- with_meet: false",
+        "toolDescription": "=Gunakan tool ini untuk membuat event baru di Google Calendar pengguna.\n\nGunakan tool ini jika pengguna mengatakan:\n- \"jadwalkan meeting\", \"buat rapat\", \"tambah acara\", \"schedule event\"\n- \"ingatkan saya\", \"blok waktu\", \"buat agenda\"\n\nParameter yang WAJIB kamu tentukan:\n- summary: nama/judul event\n- start_datetime: waktu mulai format ISO 8601+07:00 → contoh: 2026-04-10T09:00:00+07:00\n- end_datetime: waktu selesai format ISO 8601+07:00 → contoh: 2026-04-10T10:00:00+07:00\n\nParameter opsional:\n- description: deskripsi atau catatan event\n- location: lokasi event\n- attendees: daftar email peserta/undangan, pisahkan dengan koma jika lebih dari satu\n- with_meet: true jika pengguna minta Google Meet link, false jika tidak\n\nAsumsi default jika tidak disebutkan:\n- Durasi: 1 jam\n- Jam kerja: 09:00–17:00 WIB\n- with_meet: false",
         "method": "POST",
         "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
         "sendQuery": true,
@@ -205,6 +205,10 @@
             {
               "name": "=conferenceDataVersion",
               "value": "=1"
+            },
+            {
+              "name": "=sendUpdates",
+              "value": "=all"
             }
           ]
         },
@@ -223,26 +227,31 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, conferenceData: { createRequest: { requestId: 'meet-' + $now.toMillis(), conferenceSolutionKey: { type: 'hangoutsMeet' } } } }) }}",
+        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, ...(() => { const attendeeEmails = String($fromAI('attendees', 'Email peserta/undangan, pisahkan dengan koma. Kosongkan jika tidak ada.', 'string') || '').split(',').map(email => email.trim()).filter(Boolean); return attendeeEmails.length ? { attendees: attendeeEmails.map(email => ({ email, responseStatus: 'needsAction' })) } : {}; })(), conferenceData: { createRequest: { requestId: 'meet-' + $now.toMillis(), conferenceSolutionKey: { type: 'hangoutsMeet' } } } }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        27424,
-        28000
+        26816,
+        30608
       ],
-      "id": "c049dcce-df59-4f2a-8548-b8d98cc741c7",
+      "id": "b555e85c-caf4-48a4-a215-231584f62d4f",
       "name": "Create Event with Google Meet"
     },
     {
       "parameters": {
-        "toolDescription": "=Gunakan tool ini untuk membuat event baru di Google Calendar pengguna.\n\nGunakan tool ini jika pengguna mengatakan:\n- \"jadwalkan meeting\", \"buat rapat\", \"tambah acara\", \"schedule event\"\n- \"ingatkan saya\", \"blok waktu\", \"buat agenda\"\n\nParameter yang WAJIB kamu tentukan:\n- summary: nama/judul event\n- start_datetime: waktu mulai format ISO 8601+07:00 → contoh: 2026-04-10T09:00:00+07:00\n- end_datetime: waktu selesai format ISO 8601+07:00 → contoh: 2026-04-10T10:00:00+07:00\n\nParameter opsional:\n- description: deskripsi atau catatan event\n- location: lokasi event\n- with_meet: true jika pengguna minta Google Meet link, false jika tidak\n\nAsumsi default jika tidak disebutkan:\n- Durasi: 1 jam\n- Jam kerja: 09:00–17:00 WIB\n- with_meet: false",
+        "toolDescription": "=Gunakan tool ini untuk membuat event baru di Google Calendar pengguna.\n\nGunakan tool ini jika pengguna mengatakan:\n- \"jadwalkan meeting\", \"buat rapat\", \"tambah acara\", \"schedule event\"\n- \"ingatkan saya\", \"blok waktu\", \"buat agenda\"\n\nParameter yang WAJIB kamu tentukan:\n- summary: nama/judul event\n- start_datetime: waktu mulai format ISO 8601+07:00 → contoh: 2026-04-10T09:00:00+07:00\n- end_datetime: waktu selesai format ISO 8601+07:00 → contoh: 2026-04-10T10:00:00+07:00\n\nParameter opsional:\n- description: deskripsi atau catatan event\n- location: lokasi event\n- attendees: daftar email peserta/undangan, pisahkan dengan koma jika lebih dari satu\n- with_meet: true jika pengguna minta Google Meet link, false jika tidak\n\nAsumsi default jika tidak disebutkan:\n- Durasi: 1 jam\n- Jam kerja: 09:00–17:00 WIB\n- with_meet: false",
         "method": "POST",
         "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
         "sendQuery": true,
         "queryParameters": {
-          "parameters": []
+          "parameters": [
+            {
+              "name": "=sendUpdates",
+              "value": "=all"
+            }
+          ]
         },
         "sendHeaders": true,
         "headerParameters": {
@@ -259,16 +268,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' } }) }}",
+        "jsonBody": "={{ JSON.stringify({ summary: $fromAI('summary', 'Judul event', 'string'), description: $fromAI('description', 'Deskripsi event', 'string'), location: $fromAI('location', 'Lokasi event', 'string'), start: { dateTime: $fromAI('start_datetime', 'Waktu mulai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, end: { dateTime: $fromAI('end_datetime', 'Waktu selesai ISO 8601+07:00', 'string'), timeZone: 'Asia/Jakarta' }, ...(() => { const attendeeEmails = String($fromAI('attendees', 'Email peserta/undangan, pisahkan dengan koma. Kosongkan jika tidak ada.', 'string') || '').split(',').map(email => email.trim()).filter(Boolean); return attendeeEmails.length ? { attendees: attendeeEmails.map(email => ({ email, responseStatus: 'needsAction' })) } : {}; })() }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        27232,
-        28016
+        26624,
+        30624
       ],
-      "id": "fbfcc7d8-18c2-41f2-8c73-ef3cf1d8cecc",
+      "id": "5c84f3a0-dfe6-4f94-8173-6b7391cd60b8",
       "name": "Create Event"
     },
     {
@@ -314,10 +323,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        27600,
-        28016
+        27024,
+        30624
       ],
-      "id": "1c54457e-876b-417f-829b-24e3d1816550",
+      "id": "d26539e3-0d5a-4f6d-b276-9626b1b86615",
       "name": "Get Calendar Events"
     },
     {
@@ -337,10 +346,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        28688,
-        26928
+        27776,
+        29568
       ],
-      "id": "a18736dc-e7f3-45ff-914d-c1402d3bd754",
+      "id": "0da23f2d-981e-41b4-98af-5036d686325f",
       "name": "Edit Fields PPT"
     },
     {
@@ -370,10 +379,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        28496,
-        26928
+        27584,
+        29568
       ],
-      "id": "61b42dff-9ab7-4fdf-8489-a5bbbe0381f8",
+      "id": "2905679b-148f-4464-8189-526b8eed7792",
       "name": "api2pdf PPT"
     },
     {
@@ -383,10 +392,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        28320,
-        26928
+        27408,
+        29568
       ],
-      "id": "e3f96943-90f5-43e9-b0e3-19928651ecef",
+      "id": "ef8b5fa0-a060-452d-b736-6980edb86536",
       "name": "Inject PPT CSS"
     },
     {
@@ -398,10 +407,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        29392,
-        27840
+        28480,
+        30480
       ],
-      "id": "e06e8f9e-db62-4e28-8300-e9667f445ae8",
+      "id": "8a3ef3a9-ff3d-432d-a189-283504365488",
       "name": "Get Email Skills"
     },
     {
@@ -421,12 +430,12 @@
         "fieldsToSplitBy": "id, name, tokenUsage.model, execution_id, execution_time",
         "options": {}
       },
-      "id": "28d6b454-26f8-479c-910e-bcdeabff4d08",
+      "id": "ffa39c87-99b7-4b7a-ab27-7e8e90103114",
       "name": "Sum Token Totals - aggregate by model1",
       "type": "n8n-nodes-base.summarize",
       "position": [
-        26208,
-        28224
+        25296,
+        30864
       ],
       "typeVersion": 1.1
     },
@@ -436,12 +445,12 @@
         "include": "allOtherFields",
         "options": {}
       },
-      "id": "064d9158-8e28-4ca1-9a14-2dda9a83f263",
+      "id": "1a129c18-45a8-429b-937c-7f803929120d",
       "name": "Split Out",
       "type": "n8n-nodes-base.splitOut",
       "position": [
-        25984,
-        28224
+        25072,
+        30864
       ],
       "typeVersion": 1
     },
@@ -474,12 +483,12 @@
         "includeFields": "workflowData.id, workflowData.name",
         "options": {}
       },
-      "id": "739d1184-40fc-49b7-b1b2-32fcceb80bde",
+      "id": "e62cacba-c638-43ae-907b-b7c35626f5fe",
       "name": "Extract token usage data",
       "type": "n8n-nodes-base.set",
       "position": [
-        25744,
-        28224
+        24832,
+        30864
       ],
       "typeVersion": 3.4
     },
@@ -488,10 +497,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        25040,
-        28224
+        24128,
+        30864
       ],
-      "id": "153534a2-2994-40ce-a49f-2dd5777e3607",
+      "id": "d3034a64-b78b-4f2c-897b-6b69e8ba402b",
       "name": "Wait",
       "webhookId": "fafe54f2-df97-447a-9ec0-27fef65aa703"
     },
@@ -533,10 +542,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        30336,
-        26752
+        29424,
+        29392
       ],
-      "id": "caf6eb3b-a9a7-4fb0-b578-181af8183103",
+      "id": "3d61ca74-0db9-4580-82c3-a25d2b076363",
       "name": "Call 'AI Assistant Team'1"
     },
     {
@@ -549,12 +558,12 @@
           ]
         }
       },
-      "id": "bf295ee4-b986-47d5-a18d-0496c813c16c",
+      "id": "fdc77c3e-9daf-4e95-9c14-5a28a0fafaff",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        24848,
-        28224
+        23936,
+        30864
       ],
       "typeVersion": 1.1
     },
@@ -568,12 +577,12 @@
         },
         "requestOptions": {}
       },
-      "id": "49652510-139a-4acd-a7dc-685f63d27d52",
+      "id": "f1875a27-2fbc-4ec1-a5b3-675b36ccce0d",
       "name": "Get execution data",
       "type": "n8n-nodes-base.n8n",
       "position": [
-        25296,
-        28224
+        24384,
+        30864
       ],
       "typeVersion": 1,
       "credentials": {
@@ -590,10 +599,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25488,
-        28224
+        24576,
+        30864
       ],
-      "id": "626215d0-c74f-41d7-ab8a-47d29c415e8e",
+      "id": "79c5a595-9bc2-48b4-bed1-8f10d6441de9",
       "name": "Calculate Execution Time"
     },
     {
@@ -634,10 +643,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        28784,
-        27264
+        27872,
+        29904
       ],
-      "id": "9dd0e79f-69ee-47b2-b6a8-87f3257d4e1e",
+      "id": "4e4eafcf-c38c-4d1b-bd78-ca72f5b0a1bd",
       "name": "Call 'AI Assistant Team'"
     },
     {
@@ -650,10 +659,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        28480,
-        26752
+        27568,
+        29392
       ],
-      "id": "c031fe89-bab4-4b68-92ff-3a1379823bfb",
+      "id": "ffe6a15b-1945-4e6f-aacd-c42208d918f4",
       "name": "Markdown"
     },
     {
@@ -667,10 +676,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        27984,
-        27600
+        27072,
+        30240
       ],
-      "id": "42d189c5-48d2-4882-afb6-30d761d142de",
+      "id": "a8affb86-70c7-44a4-8b99-2adb278c7611",
       "name": "Report Agent"
     },
     {
@@ -684,10 +693,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        29232,
-        27568
+        28320,
+        30208
       ],
-      "id": "760a4f60-3804-435d-a3a4-06d46afdd592",
+      "id": "8f07d175-b415-4baa-b4cf-e1c21675873b",
       "name": "Communication Agent"
     },
     {
@@ -699,10 +708,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        28592,
-        27856
+        27680,
+        30496
       ],
-      "id": "488a64fd-5635-4125-bed7-58fc7cbc6475",
+      "id": "2d56b134-b8e0-486a-919f-ea8d878182c6",
       "name": "Get PPT Format"
     },
     {
@@ -714,10 +723,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        28448,
-        27856
+        27536,
+        30496
       ],
-      "id": "bd36e91d-fff8-45b6-ac81-975378a1c979",
+      "id": "edbd9d03-a055-4d64-b560-55cbc510a79e",
       "name": "Get Report Format"
     },
     {
@@ -731,10 +740,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        28368,
-        27600
+        27456,
+        30240
       ],
-      "id": "ca3a4bb8-a71c-45a4-b9f7-72b8c88c1838",
+      "id": "9ee514e7-fe73-47d2-ba35-a1397c43ffbf",
       "name": "Document Agent"
     },
     {
@@ -748,27 +757,27 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        26688,
-        27520
+        25776,
+        30160
       ],
-      "id": "b6e9765c-baf2-4edb-b07e-26790c3d7e96",
+      "id": "085c8e80-8952-4497-85a1-7e29d559704d",
       "name": "Knowledge Agent"
     },
     {
       "parameters": {
-        "toolDescription": "Kamu adalah Scheduler Agent, spesialis manajemen jadwal dan Google Calendar. Tugas utamamu adalah membantu pengguna mengelola seluruh kebutuhan penjadwalan mereka.\n\nINSTRUKSI MUTLAK PENGGUNAAN ALAT (TOOLS):\nKamu terhubung dengan Google Calendar. Kamu WAJIB memilih tool yang tepat berdasarkan instruksi pengguna:\n\n1. [Get Calendar Events] — Lihat & Cek Jadwal\n- TRIGGER: \"cek jadwal\", \"lihat agenda\", \"ada acara apa\", \"jadwal hari ini/minggu ini\", \"saya kosong tidak?\"\n- PARAMETER WAJIB: timeMin dan timeMax dalam format ISO 8601+07:00\n\n2. [Create Event] — Buat Event Tanpa Meet\n- TRIGGER: \"jadwalkan\", \"buat acara\", \"tambah agenda\", \"blok waktu\", tanpa menyebut video call/meet\n- PARAMETER WAJIB: summary, start_datetime, end_datetime dalam format ISO 8601+07:00\n\n3. [Create Event with Google Meet] — Buat Event Dengan Meet Link\n- TRIGGER: \"buat meeting\", \"dengan Google Meet\", \"meet link\", \"video call\", \"rapat online\"\n- PARAMETER WAJIB: summary, start_datetime, end_datetime dalam format ISO 8601+07:00\n\n4. [delete events calendar] — Hapus Event\n- TRIGGER: \"hapus jadwal\", \"batalkan meeting\", \"delete event\", \"cancel acara\"\n- WAJIB jalankan [Get Calendar Events] terlebih dahulu untuk mendapatkan event ID sebelum menghapus\n\nATURAN EKSEKUSI GANDA:\nJika pengguna meminta dua hal sekaligus (contoh: \"cek jadwal besok lalu buatkan meeting jam 10\"), kamu WAJIB memanggil kedua tool secara berurutan.\n\nKONFIRMASI:\nSetelah eksekusi berhasil, berikan laporan singkat dan profesional — sebutkan nama event, tanggal, waktu, dan (jika ada) Google Meet link yang dibuat.",
+        "toolDescription": "Kamu adalah Scheduler Agent, spesialis manajemen jadwal dan Google Calendar. Tugas utamamu adalah membantu pengguna mengelola seluruh kebutuhan penjadwalan mereka.\n\nINSTRUKSI MUTLAK PENGGUNAAN ALAT (TOOLS):\nKamu terhubung dengan Google Calendar. Kamu WAJIB memilih tool yang tepat berdasarkan instruksi pengguna:\n\n1. [Get Calendar Events] — Lihat & Cek Jadwal\n- TRIGGER: \"cek jadwal\", \"lihat agenda\", \"ada acara apa\", \"jadwal hari ini/minggu ini\", \"saya kosong tidak?\"\n- PARAMETER WAJIB: timeMin dan timeMax dalam format ISO 8601+07:00\n\n2. [Create Event] — Buat Event Tanpa Meet\n- TRIGGER: \"jadwalkan\", \"buat acara\", \"tambah agenda\", \"blok waktu\", tanpa menyebut video call/meet\n- PARAMETER WAJIB: summary, start_datetime, end_datetime dalam format ISO 8601+07:00\n- PARAMETER OPSIONAL: attendees berisi email peserta/undangan, pisahkan dengan koma jika lebih dari satu\n\n3. [Create Event with Google Meet] — Buat Event Dengan Meet Link\n- TRIGGER: \"buat meeting\", \"dengan Google Meet\", \"meet link\", \"video call\", \"rapat online\"\n- PARAMETER WAJIB: summary, start_datetime, end_datetime dalam format ISO 8601+07:00\n- PARAMETER OPSIONAL: attendees berisi email peserta/undangan, pisahkan dengan koma jika lebih dari satu\n\n4. [delete events calendar] — Hapus Event\n- TRIGGER: \"hapus jadwal\", \"batalkan meeting\", \"delete event\", \"cancel acara\"\n- WAJIB jalankan [Get Calendar Events] terlebih dahulu untuk mendapatkan event ID sebelum menghapus\n\nATURAN EKSEKUSI GANDA:\nJika pengguna meminta dua hal sekaligus (contoh: \"cek jadwal besok lalu buatkan meeting jam 10\"), kamu WAJIB memanggil kedua tool secara berurutan.\n\nKONFIRMASI:\nSetelah eksekusi berhasil, berikan laporan singkat dan profesional — sebutkan nama event, tanggal, waktu, dan (jika ada) Google Meet link yang dibuat.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "=Kamu adalah Scheduler Agent — Spesialis Manajemen Jadwal dan Google Calendar.\n\nTUGAS UTAMAMU:\nMengelola seluruh kebutuhan penjadwalan pengguna melalui Google Calendar, termasuk membuat event baru, membuat meeting dengan Google Meet link, melihat jadwal yang sudah ada, dan menghapus event.\n\nFAKTA WAKTU SAAT INI (KRITIS):\nWaktu sekarang adalah {{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} WIB (Zona Waktu: Asia/Jakarta / +07:00).\nJadikan ini sebagai acuan mutlak untuk semua perhitungan tanggal dan waktu. JANGAN gunakan tanggal lain selain yang tertera di sini.\n\nPANDUAN PENGGUNAAN TOOL:\n\n[create an event & google meet]\nGunakan jika pengguna meminta membuat jadwal rapat, meeting, atau acara apa pun.\nParameter wajib:\n- Summary: nama acara yang profesional dan deskriptif\n- Start: waktu mulai format ISO 8601 → contoh: \"2026-04-09T09:00:00+07:00\"\n- End: waktu selesai format ISO 8601 → contoh: \"2026-04-09T10:00:00+07:00\"\nAsumsi default jika tidak disebutkan: durasi 1 jam, jam kerja 09:00–17:00.\n\n[Get Calendar Events]\nGunakan jika pengguna bertanya tentang jadwal yang sudah ada, agenda hari ini/minggu ini, atau ketersediaan waktu.\nParameter yang WAJIB kamu tentukan:\n- timeMin: awal rentang waktu dalam ISO 8601+07:00\n- timeMax: akhir rentang waktu dalam ISO 8601+07:00\n\nCara menghitung rentang waktu berdasarkan konteks waktu saat ini:\n- \"hari ini\" → timeMin = [tanggal hari ini]T00:00:00+07:00, timeMax = [tanggal hari ini]T23:59:59+07:00\n- \"besok\" → timeMin = [tanggal besok]T00:00:00+07:00, timeMax = [tanggal besok]T23:59:59+07:00\n- \"minggu ini\" → timeMin = Senin minggu ini T00:00:00+07:00, timeMax = Minggu minggu ini T23:59:59+07:00\n- \"minggu depan\" → timeMin = Senin minggu depan T00:00:00+07:00, timeMax = Minggu minggu depan T23:59:59+07:00\n- \"2 minggu ke depan\" → timeMin = sekarang, timeMax = 14 hari dari sekarang T23:59:59+07:00\n- \"bulan ini\" → timeMin = tanggal 1 bulan ini T00:00:00+07:00, timeMax = hari terakhir bulan ini T23:59:59+07:00\n\n[delete events calendar]\nGunakan jika pengguna meminta menghapus atau membatalkan jadwal.\nWAJIB mendapatkan event ID terlebih dahulu — gunakan [Get Calendar Events] jika belum diketahui.\n\nATURAN EKSEKUSI:\n- Rumuskan semua parameter secara lengkap dan akurat SEBELUM memanggil tool.\n- Jika diminta membuat beberapa event berulang, panggil tool sebanyak jumlah event yang diperlukan.\n- Setelah eksekusi berhasil, berikan konfirmasi singkat: nama event, tanggal, waktu, dan apakah Google Meet link berhasil dibuat.\n- Jika ada ambiguitas (misal: \"minggu depan\" tanpa hari spesifik), asumsikan hari Senin dan tanyakan konfirmasi.\n\n[Create Event]\nGunakan jika pengguna ingin membuat event/jadwal TANPA Google Meet link.\n\n[Create Event with Google Meet]\nGunakan jika pengguna ingin membuat event/jadwal DENGAN Google Meet link.\nIndikator: \"buat meeting\", \"dengan meet link\", \"Google Meet\", \"video call\".\n\nUntuk kedua tool create, parameter wajib:\n- summary: nama event\n- start_datetime: ISO 8601+07:00\n- end_datetime: ISO 8601+07:00\nParameter opsional: description, location"
+          "systemMessage": "=Kamu adalah Scheduler Agent — Spesialis Manajemen Jadwal dan Google Calendar.\n\nTUGAS UTAMAMU:\nMengelola seluruh kebutuhan penjadwalan pengguna melalui Google Calendar, termasuk membuat event baru, membuat meeting dengan Google Meet link, melihat jadwal yang sudah ada, dan menghapus event.\n\nFAKTA WAKTU SAAT INI (KRITIS):\nWaktu sekarang adalah {{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} WIB (Zona Waktu: Asia/Jakarta / +07:00).\nJadikan ini sebagai acuan mutlak untuk semua perhitungan tanggal dan waktu. JANGAN gunakan tanggal lain selain yang tertera di sini.\n\nPANDUAN PENGGUNAAN TOOL:\n\n[create an event & google meet]\nGunakan jika pengguna meminta membuat jadwal rapat, meeting, atau acara apa pun.\nParameter wajib:\n- Summary: nama acara yang profesional dan deskriptif\n- Start: waktu mulai format ISO 8601 → contoh: \"2026-04-09T09:00:00+07:00\"\n- End: waktu selesai format ISO 8601 → contoh: \"2026-04-09T10:00:00+07:00\"\n- Attendees: email peserta/undangan jika pengguna menyebut orang yang harus diundang. Pisahkan beberapa email dengan koma.\nAsumsi default jika tidak disebutkan: durasi 1 jam, jam kerja 09:00–17:00.\n\n[Get Calendar Events]\nGunakan jika pengguna bertanya tentang jadwal yang sudah ada, agenda hari ini/minggu ini, atau ketersediaan waktu.\nParameter yang WAJIB kamu tentukan:\n- timeMin: awal rentang waktu dalam ISO 8601+07:00\n- timeMax: akhir rentang waktu dalam ISO 8601+07:00\n\nCara menghitung rentang waktu berdasarkan konteks waktu saat ini:\n- \"hari ini\" → timeMin = [tanggal hari ini]T00:00:00+07:00, timeMax = [tanggal hari ini]T23:59:59+07:00\n- \"besok\" → timeMin = [tanggal besok]T00:00:00+07:00, timeMax = [tanggal besok]T23:59:59+07:00\n- \"minggu ini\" → timeMin = Senin minggu ini T00:00:00+07:00, timeMax = Minggu minggu ini T23:59:59+07:00\n- \"minggu depan\" → timeMin = Senin minggu depan T00:00:00+07:00, timeMax = Minggu minggu depan T23:59:59+07:00\n- \"2 minggu ke depan\" → timeMin = sekarang, timeMax = 14 hari dari sekarang T23:59:59+07:00\n- \"bulan ini\" → timeMin = tanggal 1 bulan ini T00:00:00+07:00, timeMax = hari terakhir bulan ini T23:59:59+07:00\n\n[delete events calendar]\nGunakan jika pengguna meminta menghapus atau membatalkan jadwal.\nWAJIB mendapatkan event ID terlebih dahulu — gunakan [Get Calendar Events] jika belum diketahui.\n\nATURAN EKSEKUSI:\n- Rumuskan semua parameter secara lengkap dan akurat SEBELUM memanggil tool.\n- Jika diminta membuat beberapa event berulang, panggil tool sebanyak jumlah event yang diperlukan.\n- Setelah eksekusi berhasil, berikan konfirmasi singkat: nama event, tanggal, waktu, dan apakah Google Meet link berhasil dibuat.\n- Jika ada ambiguitas (misal: \"minggu depan\" tanpa hari spesifik), asumsikan hari Senin dan tanyakan konfirmasi.\n\n[Create Event]\nGunakan jika pengguna ingin membuat event/jadwal TANPA Google Meet link.\n\n[Create Event with Google Meet]\nGunakan jika pengguna ingin membuat event/jadwal DENGAN Google Meet link.\nIndikator: \"buat meeting\", \"dengan meet link\", \"Google Meet\", \"video call\".\n\nUntuk kedua tool create, parameter wajib:\n- summary: nama event\n- start_datetime: ISO 8601+07:00\n- end_datetime: ISO 8601+07:00\nParameter opsional: description, location, attendees\nJika pengguna meminta mengundang orang lain atau menyebut email peserta, isi attendees dengan email tersebut agar undangan Calendar dikirim."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        27680,
-        27600
+        26768,
+        30240
       ],
-      "id": "187a6de4-f892-4e59-ac7c-fdf4b2571f9d",
+      "id": "61e5dfa2-30af-4c0d-9dbc-87cc9454fcc4",
       "name": "Scheduler Agent"
     },
     {
@@ -781,10 +790,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 3,
       "position": [
-        28848,
-        27584
+        27936,
+        30224
       ],
-      "id": "5d60d4d5-b45b-4aab-a5f7-c4efa951813f",
+      "id": "b9639bf8-1ef2-4e48-8764-4f6e653ee14a",
       "name": "Task Agent"
     },
     {
@@ -795,10 +804,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        27040,
-        27056
+        26128,
+        29696
       ],
-      "id": "82b088dd-403f-40ce-82bb-b43e4404ca78",
+      "id": "4b6846cd-5ada-4f3b-8cad-1b88e8be3307",
       "name": "Extract CSV File"
     },
     {
@@ -809,10 +818,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        27040,
-        26880
+        26128,
+        29520
       ],
-      "id": "894943c2-3b8d-406e-8edd-c8f2e7042493",
+      "id": "d6a5d362-b245-4956-ace7-9eef8cbed2b5",
       "name": "Extract text",
       "credentials": {
         "mistralCloudApi": {
@@ -828,10 +837,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        28320,
-        26752
+        27408,
+        29392
       ],
-      "id": "9a3dca63-ad6b-4ae8-a661-a37facdc7b36",
+      "id": "aae658bd-a512-4d84-9c58-ae60499fcd4e",
       "name": "Code in JavaScript"
     },
     {
@@ -843,10 +852,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        29888,
-        26752
+        28976,
+        29392
       ],
-      "id": "3235dc19-e684-49c3-addf-abf0ba05679c",
+      "id": "4c502f5a-3220-410f-ae2e-0f7ef8ce23ae",
       "name": "Respond to Webhook2"
     },
     {
@@ -866,10 +875,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        28928,
-        26752
+        28016,
+        29392
       ],
-      "id": "9c83ebae-c9ab-46c2-9eb6-898ef6e0d3d5",
+      "id": "cac3a9af-f184-427c-8235-2db1aef96058",
       "name": "Edit Fields"
     },
     {
@@ -897,10 +906,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        29344,
-        26752
+        28432,
+        29392
       ],
-      "id": "ce132538-d626-4cee-a76e-573e0a8dbf7a",
+      "id": "620f6aaa-9581-40f5-9afa-3d0dd5ead515",
       "name": "HTTP Request3"
     },
     {
@@ -918,10 +927,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        29136,
-        26752
+        28224,
+        29392
       ],
-      "id": "1b9fd606-80f7-4c53-98d5-af7f38f80ed9",
+      "id": "0bb241be-529d-45a8-bb32-2ab2c3c5a3ef",
       "name": "HTTP Request2"
     },
     {
@@ -951,10 +960,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        28720,
-        26752
+        27808,
+        29392
       ],
-      "id": "4bdadb2a-035e-4820-b032-f0bafcd11be9",
+      "id": "1a92e3ec-2c17-4135-bbab-05d35048e078",
       "name": "HTTP Request1"
     },
     {
@@ -1066,40 +1075,11 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        28112,
-        27168
+        27200,
+        29808
       ],
-      "id": "6970f4da-2f53-4c66-bcac-adddbfcd03fc",
+      "id": "85a04050-317b-4091-b930-e9f06c3ebd2c",
       "name": "Route Output Type"
-    },
-    {
-      "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "Menghapus event dari Google Calendar berdasarkan event ID atau informasi event yang ditemukan sebelumnya. Gunakan tool ini ketika pengguna meminta untuk membatalkan, menghapus, atau menghilangkan jadwal dari kalender.\n\nTool ini hanya digunakan jika event yang dimaksud sudah diidentifikasi dengan jelas, biasanya melalui pencarian event sebelumnya.\n\nWhen to Use\n\nGunakan tool ini jika pengguna mengatakan hal seperti:\n\nhapus jadwal\n\nbatalkan meeting\n\ndelete event\n\nremove calendar event\n\ncancel appointment\n\nhilangkan agenda dari kalender\n\nPastikan event yang akan dihapus sudah diketahui event ID-nya atau telah ditemukan melalui proses pencarian sebelumnya.",
-        "operation": "delete",
-        "calendar": {
-          "__rl": true,
-          "value": "74958bcbbc4ab71e72395293996e5675d95c77ce58ae5b54bf830dfce543fe65@group.calendar.google.com",
-          "mode": "list",
-          "cachedResultName": "Karya Tech Calendar"
-        },
-        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleCalendarTool",
-      "typeVersion": 1.3,
-      "position": [
-        27776,
-        28016
-      ],
-      "id": "d041b6c2-da03-4113-acfa-1b7e03094366",
-      "name": "delete events calendar",
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "id": "hRTA3p2ajCtwCNsv",
-          "name": "Google Calendar account"
-        }
-      }
     },
     {
       "parameters": {
@@ -1118,10 +1098,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        27264,
-        27056
+        26352,
+        29696
       ],
-      "id": "c3cd88bc-42ed-434f-b386-7251d8e5a6d4",
+      "id": "7ed556c3-293e-4d8c-910f-a22e1f86cd00",
       "name": "combine promt + text csv"
     },
     {
@@ -1203,10 +1183,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        26800,
-        26864
+        25888,
+        29504
       ],
-      "id": "31979ed1-978a-4847-bde6-58b7050f0558",
+      "id": "89b920fd-2ab5-4387-b898-e609300b846b",
       "name": "Switch"
     },
     {
@@ -1226,10 +1206,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        27264,
-        26720
+        26352,
+        29360
       ],
-      "id": "15ff534d-03ed-4b0c-b501-1a27f8d875f2",
+      "id": "14e4bc1a-5514-4ef2-9922-427e1b700f3e",
       "name": "combine promt + text image"
     },
     {
@@ -1242,10 +1222,10 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        27040,
-        26720
+        26128,
+        29360
       ],
-      "id": "b301936a-75dd-4ab8-adfd-98d86bb52f50",
+      "id": "7eb8a32e-91cc-4bd0-9278-bf67dc7a475f",
       "name": "Tesseract"
     },
     {
@@ -1258,10 +1238,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        24496,
-        26768
+        23584,
+        29408
       ],
-      "id": "2cadae10-e013-4b82-bf82-6860857da4ee",
+      "id": "5628516a-292a-43b4-9b14-9e7698beb5ce",
       "name": "Sticky Note"
     },
     {
@@ -1294,10 +1274,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        27488,
-        26416
+        26576,
+        29056
       ],
-      "id": "7c17147a-6c2b-464f-b02c-97a08ff66527",
+      "id": "a876edb9-3dee-4666-aa5a-478b06c8880d",
       "name": "update chat title",
       "credentials": {
         "supabaseApi": {
@@ -1333,31 +1313,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        26944,
-        26432
+        26032,
+        29072
       ],
-      "id": "72f2b6c7-4192-461f-9cf3-2d7327a9094a",
+      "id": "696c8bd3-f15b-4401-ab86-e17673720978",
       "name": "is first chat?"
-    },
-    {
-      "parameters": {
-        "model": "arcee-ai/trinity-large-preview:free",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        27424,
-        27488
-      ],
-      "id": "94ede5f6-e665-4fb2-ab25-3f61b04cefb4",
-      "name": "arcee-ai/trinity-large-preview:free-",
-      "credentials": {
-        "openRouterApi": {
-          "id": "Bn1tGFgNk3U5Ux6Y",
-          "name": "OpenRouter account"
-        }
-      }
     },
     {
       "parameters": {
@@ -1383,10 +1343,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        26896,
-        27792
+        25984,
+        30432
       ],
-      "id": "48fcf059-c391-4b58-945f-15b7ceecd72e",
+      "id": "dfe701ac-058a-4fa7-945d-a4e5e9c564ae",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -1412,10 +1372,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        27040,
-        27232
+        26128,
+        29872
       ],
-      "id": "1991e743-e10a-42cd-9b91-53c6f0fb3321",
+      "id": "558d2f05-9dd5-4145-a02d-a72b327742b8",
       "name": "user promt only"
     },
     {
@@ -1435,10 +1395,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        27264,
-        26880
+        26352,
+        29520
       ],
-      "id": "cc31f79d-07f4-4951-ad15-cbc1915ab8bb",
+      "id": "ed2baa9c-b695-4434-a489-ae91130ca44a",
       "name": "combine promt + text file"
     },
     {
@@ -1468,10 +1428,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        26640,
-        27216
+        25728,
+        29856
       ],
-      "id": "5b198557-b790-42ab-b16f-86ab27c20881",
+      "id": "49494bfb-a2e3-4602-b0fb-0366f8632d5b",
       "name": "is file exist?"
     },
     {
@@ -1494,10 +1454,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        26688,
-        26432
+        25776,
+        29072
       ],
-      "id": "a9bf9a2f-8b7a-4346-9d3f-2b3ba4f2faf5",
+      "id": "6b1f0054-b84e-40e5-84a7-b65b85bbb096",
       "name": "Get a row",
       "credentials": {
         "supabaseApi": {
@@ -1522,10 +1482,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        27184,
-        26416
+        26272,
+        29056
       ],
-      "id": "01eb0e76-a350-412e-865b-c7a18e39e79d",
+      "id": "27b0f187-6fdf-429e-afef-c44b3f049296",
       "name": "Generate Chat Tittle"
     },
     {
@@ -1537,10 +1497,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        27600,
-        27488
+        26784,
+        30048
       ],
-      "id": "d82aef5b-c42d-413d-8f3c-75dd870bae65",
+      "id": "722bc2f5-9d29-4b43-a41a-f51cd81999bc",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1558,10 +1518,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        25488,
-        27184
+        24576,
+        29824
       ],
-      "id": "6bfbde5e-99c8-4908-8173-f90a9f15d4c2",
+      "id": "a521dcf9-bf10-4281-8178-d09d276a66e4",
       "name": "Merge"
     },
     {
@@ -1571,10 +1531,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25696,
-        27184
+        24784,
+        29824
       ],
-      "id": "4677cbba-8fb9-46b5-9e9a-99c62811c45c",
+      "id": "24914563-863d-4c88-8162-6c013af806d4",
       "name": "Prepare Document Metadata"
     },
     {
@@ -1612,10 +1572,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        25312,
-        26960
+        24400,
+        29600
       ],
-      "id": "982c368a-7895-4aa0-94ba-212c80de0e2a",
+      "id": "341f7051-c1b3-4be4-874b-7dd75c34a3c0",
       "name": "Create a row",
       "credentials": {
         "supabaseApi": {
@@ -1649,10 +1609,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        24848,
-        26944
+        23936,
+        29584
       ],
-      "id": "0da5c804-dd98-43bc-895d-b18fa2e2856f",
+      "id": "fb2566da-332d-44db-b027-a1f07b8b9b6e",
       "name": "HTTP Request"
     },
     {
@@ -1665,10 +1625,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        24592,
-        27200
+        23680,
+        29840
       ],
-      "id": "66b4de0a-c7c9-4d60-83a0-a268ea6d7367",
+      "id": "cde04ace-2912-407d-b903-f426127ba902",
       "name": "Upload Document",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1682,10 +1642,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        26432,
-        27216
+        25520,
+        29856
       ],
-      "id": "31b051c9-20c0-4019-8c8f-484439bfcaac",
+      "id": "1f7e6e95-681b-40c7-9740-d13ad95c1f80",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1693,7 +1653,6 @@
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.PromptFinal }}",
-        "needsFallback": true,
         "options": {
           "systemMessage": "=Kamu adalah AI Supervisor untuk tim internal perusahaan.\n\nTUGAS SATU-SATUNYA:\n1. Memahami maksud pengguna.\n2. Menentukan apakah pertanyaan harus dijawab langsung atau didelegasikan.\n3. Mendelegasikan tugas ke agen spesialis yang paling tepat.\n4. Jika diperlukan, mengorkestrasi urutan kerja ANTAR agen secara berantai.\n5. Meneruskan hasil agen kepada pengguna TANPA mengubah isi.\n\nKamu BUKAN agen ahli domain.\nKamu BUKAN sumber kebenaran untuk SOP, Jira, Google Calendar, email, atau pembuatan dokumen.\nJangan menjawab sendiri hal-hal yang seharusnya dikerjakan agen spesialis.\n\n─────────────────────────────────────────\nDAFTAR AGEN & FUNGSI RESMINYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nFungsi:\n- Menjawab pertanyaan yang jawabannya harus diambil dari dokumen internal perusahaan.\n- Topik: kebijakan internal, SOP, onboarding, payroll, cuti, aturan perusahaan, prosedur resmi.\n\nGunakan saat pengguna menanyakan:\n- aturan\n- kebijakan\n- SOP\n- prosedur\n- ketentuan\n- onboarding\n- payroll\n- cuti\n- peraturan perusahaan\n\nCatatan:\n- Supervisor DILARANG menjawab topik ini dari pengetahuan sendiri.\n- Semua pertanyaan SOP/kebijakan WAJIB ke Knowledge_Agent.\n\n[2] Scheduler_Agent\nFungsi:\n- Mengelola Google Calendar.\n- Membuat jadwal, melihat agenda, mengecek jadwal, membuat meeting, menghapus atau mengubah event.\n\nGunakan saat pengguna meminta:\n- jadwalkan\n- buat meeting\n- buat acara\n- cek jadwal\n- agenda\n- rapat\n- Google Meet\n- hapus jadwal\n- reschedule\n\nWaktu saat ini:\n{{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} WIB\n\n[3] Task_Agent\nFungsi:\n- Mengambil dan membaca data task/issue dari Jira.\n- Melihat daftar issue.\n- Mengecek backlog.\n- Mengecek status task.\n- Mengambil data progress proyek dari Jira.\n\nGunakan saat pengguna meminta:\n- lihat issue Jira\n- status task\n- backlog\n- sprint\n- progress proyek\n- daftar issue\n- task Jira\n\nCatatan penting:\n- Anggap Task_Agent berfokus pada PENGAMBILAN DATA Jira.\n- Jangan asumsikan Task_Agent bisa membuat tiket, assign task, atau mengubah issue kecuali memang tool yang tersedia mendukung itu.\n- Jika pengguna meminta rekap dari data Jira, Task_Agent mengambil datanya terlebih dahulu. Setelah itu hasilnya dapat diteruskan ke Report_Agent.\n\n[4] Document_Agent\nFungsi:\n- Membuat dokumen/file deliverable.\n- Membuat laporan formal, proposal, artikel, MOM, presentasi, slide, atau output yang harus menjadi file/PDF.\n\nGunakan saat pengguna meminta:\n- buatkan laporan formal\n- buat proposal\n- buat presentasi\n- buat slide\n- buat PPT\n- notulen\n- MOM\n- artikel\n- dokumen resmi\n- ekspor PDF\n- jadikan PDF\n- simpan sebagai PDF\n\nCatatan:\n- Document_Agent dipakai untuk OUTPUT BERUPA DOKUMEN/FILE.\n- Jika user meminta file/PDF dari data yang sudah ada, data itu harus dirapikan dulu jika perlu, lalu baru diteruskan ke Document_Agent.\n\n[5] Report_Agent\nFungsi:\n- Merapikan dan merangkum data yang SUDAH ADA menjadi rekap terstruktur dalam teks biasa di chat.\n- Membuat ringkasan, tabel rekap, dan laporan operasional berbasis data mentah yang diberikan.\n- TIDAK membuat file PDF.\n- TIDAK mencari data sendiri.\n\nGunakan saat pengguna meminta:\n- rekap\n- rangkum\n- ringkasan\n- tabel ringkasan\n- rekap progres\n- rangkum percakapan\n- buat tabel rekap\n\nCatatan penting:\n- Report_Agent hanya boleh dipanggil jika bahan mentahnya SUDAH tersedia.\n- Supervisor WAJIB menyertakan seluruh data yang ingin diringkas di dalam input ke Report_Agent.\n- Jika data belum ada dan harus diambil dulu dari Jira atau sumber lain, panggil agen sumber datanya terlebih dahulu.\n\n[6] Communication_Agent\nFungsi:\n- Membuat draft komunikasi tertulis untuk dikirim ke orang lain.\n- Membuat draft email, pengumuman, pesan pemberitahuan, surat, atau komunikasi resmi.\n- Dapat langsung mengirim email jika diminta.\n\nGunakan saat pengguna meminta:\n- buatkan email\n- draft email\n- tulis pengumuman\n- buat surat\n- kirim email\n- beritahu tim\n- notifikasi ke\n\n─────────────────────────────────────────\nATURAN ROUTING WAJIB\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG TANPA AGEN\nJawab langsung HANYA jika pengguna:\n- menyapa,\n- melakukan chit-chat,\n- bertanya hal umum yang tidak termasuk domain agen,\n- atau meminta bantuan ringan yang tidak membutuhkan tool/agen spesialis.\n\nJika bisa dijawab langsung, jawab singkat, ramah, dan profesional.\n\nATURAN 2 — JANGAN MENGAKU SEBAGAI AGEN AHLI\nSupervisor tidak boleh berpura-pura menjadi ahli SOP, Jira, Calendar, atau dokumen.\nJika domainnya milik agen lain, delegasikan.\n\nATURAN 3 — SOP / KEBIJAKAN WAJIB KE Knowledge_Agent\nUntuk semua pertanyaan tentang aturan perusahaan, SOP, kebijakan internal, payroll, cuti, onboarding, dan prosedur resmi:\n- JANGAN jawab sendiri.\n- WAJIB delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Task_Agent, Report_Agent, dan Document_Agent\nGunakan logika berikut:\n\nA. Jika pengguna membutuhkan DATA dari Jira\n→ panggil Task_Agent terlebih dahulu.\n\nB. Jika pengguna membutuhkan REKAP / RINGKASAN dari data yang sudah ada\n→ panggil Report_Agent.\n\nC. Jika pengguna membutuhkan FILE / PDF / DOKUMEN / PPT\n→ panggil Document_Agent.\n\nUrutan berantai yang benar:\n- Data Jira saja → Task_Agent\n- Data Jira + rekap → Task_Agent lalu Report_Agent\n- Data Jira + rekap + PDF/dokumen → Task_Agent lalu Report_Agent lalu Document_Agent\n\nATURAN 5 — MULTI-STEP ORCHESTRATION DIPERBOLEHKAN JIKA SATU TUJUAN\nJika satu permintaan pengguna membutuhkan beberapa tahap berurutan untuk mencapai SATU tujuan akhir, kamu BOLEH memanggil lebih dari satu agen secara berantai.\n\nContoh yang BENAR:\n- \"Tolong rekap progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent\n\n- \"Buatkan laporan PDF dari progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent lalu Document_Agent\n\nYang dimaksud \"satu tugas\" di sini adalah satu outcome akhir yang memang membutuhkan beberapa tahap.\nJangan membatasi diri ke satu agen jika hasil akhir memang mustahil dicapai tanpa tahap berurutan.\n\nATURAN 6 — JIKA MEMANG DUA PERMINTAAN TERPISAH, BOLEH DUA CABANG\nJika pengguna secara eksplisit meminta dua pekerjaan berbeda sekaligus, kamu boleh menjalankan dua jalur terpisah.\n\nContoh:\n- \"Buatkan draft email dan jadwalkan meeting\"\nIni adalah dua tugas berbeda:\n→ Communication_Agent\n→ Scheduler_Agent\n\nATURAN 7 — DELEGASI KE Report_Agent WAJIB MENYERTAKAN DATA LENGKAP\nJika kamu memanggil Report_Agent:\n- WAJIB sertakan seluruh data, teks, tabel, atau hasil agen sebelumnya yang akan diringkas.\n- DILARANG mengirim instruksi kosong seperti:\n  \"buatkan rekap\"\n  \"rangkum ini\"\n  \"buat tabel ringkasan\"\ntanpa isi datanya.\n\nATURAN 8 — JANGAN KIRIM DATA MENTAH KE Document_Agent JIKA MASIH BERANTAKAN\nJika pengguna meminta dokumen/PDF dari data operasional mentah (misalnya data Jira, hasil percakapan, tabel kasar):\n- rapikan dulu dengan Report_Agent bila perlu,\n- lalu kirim hasil yang sudah rapi ke Document_Agent.\n\nATURAN 9 — PASS-THROUGH HASIL AGEN\nJika kamu sudah menerima hasil dari agen mana pun, tampilkan hasil itu kepada pengguna secara UTUH dan MENTAH.\nDILARANG:\n- memparafrase,\n- memotong,\n- merangkum ulang,\n- mengubah format,\n- menambahkan kalimat pengantar/penutup,\n- merusak tabel Markdown.\n\nSalin 100% output agen apa adanya.\n\nATURAN 9B — KHUSUS Document_Agent\nJika Document_Agent mengembalikan output berupa kode HTML/Markdown beserta frasa:\n- \"Unduh Dokumen (PDF)\"\natau\n- \"Unduh Presentasi (PDF)\"\nmaka kamu WAJIB:\n1. Salin SELURUH output Document_Agent mulai dari karakter pertama hingga karakter terakhir — termasuk SEMUA kode HTML.\n2. DILARANG KERAS meringkas, memotong, atau menghapus kode HTML.\n3. DILARANG hanya menulis kalimat penutupnya saja tanpa HTML-nya.\n4. Output-mu HARUS dimulai dengan konten HTML (<section> atau ```html) jika Document_Agent menghasilkan HTML.\n5. Ini INSTRUKSI MUTLAK: bahkan jika output sangat panjang, TETAP salin seluruhnya verbatim.\n\nATURAN 9C — KHUSUS Communication_Agent\nJika Communication_Agent mengembalikan JSON dengan field \"action\",\nkamu WAJIB meneruskan JSON itu secara UTUH dan MENTAH.\nDILARANG:\n- mengubah JSON menjadi kalimat biasa,\n- menambahkan teks sebelum/sesudah JSON,\n- menaruhnya dalam markdown code block.\n\nContoh BENAR:\n{\"action\":\"send\",\"to\":\"user@email.com\",\"subject\":\"...\",\"message\":\"...\"}\n\nContoh SALAH:\n\"Email berhasil dikirim.\"\n\"The email has been sent successfully.\"\n\nATURAN 10 — PENGIRIMAN EMAIL SETELAH DRAFT DISETUJUI\nJika pengguna menyetujui draft email dan memberikan alamat tujuan, kamu WAJIB membangun input ke Communication_Agent dengan format PERSIS berikut:\n\nKIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\n\nDILARANG menulis:\n- \"gunakan draft sebelumnya\"\n- \"kirim email yang tadi\"\n- \"pakai isi email sebelumnya\"\n\nCommunication_Agent tidak memiliki memori draft. Isi email WAJIB disertakan penuh secara fisik.\n\nATURAN 11 — JIKA INFORMASI TIDAK CUKUP UNTUK MEMANGGIL AGEN\nJika pengguna meminta tindakan tetapi detail minimum belum cukup, kamu boleh meminta klarifikasi singkat.\nContoh:\n- jadwalkan meeting tetapi belum ada tanggal/jam\n- kirim email tetapi belum ada alamat tujuan\n- buat dokumen tetapi kontennya belum ada\n\nATURAN 12 — PRIORITAS PEMILIHAN AGEN\nGunakan prioritas ini saat ada potensi tumpang tindih:\n1. Knowledge_Agent untuk fakta/SOP internal\n2. Scheduler_Agent untuk Calendar\n3. Task_Agent untuk data Jira\n4. Report_Agent untuk rekap dari data yang sudah ada\n5. Document_Agent untuk file/PDF/PPT\n6. Communication_Agent untuk email/pesan resmi\n\nATURAN 13 — OUTPUT FINAL SUPERVISOR\nKecuali saat menjawab langsung tanpa agen, output final supervisor harus berupa salah satu dari berikut:\n- hasil mentah agen,\n- hasil mentah gabungan agent chain tahap akhir,\n- atau pertanyaan klarifikasi singkat jika data minimum belum cukup.\n\nJangan menambahkan narasi tambahan di luar itu.",
           "returnIntermediateSteps": true
@@ -1702,10 +1661,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        27632,
-        27216
+        26720,
+        29856
       ],
-      "id": "c086441b-1bac-4487-87bd-471abb7334d4",
+      "id": "97c00dc0-e393-4989-85f2-387da629d595",
       "name": "Supervisor Agent"
     },
     {
@@ -1717,10 +1676,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        28336,
-        27264
+        27424,
+        29904
       ],
-      "id": "4fc2dee7-4927-45c1-800f-95903c751570",
+      "id": "36748412-5a36-49ea-9daf-9544c90de649",
       "name": "Respond to Webhook"
     },
     {
@@ -1731,10 +1690,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        26800,
-        28016
+        25888,
+        30656
       ],
-      "id": "b70ce8ab-0e09-4b1d-a44d-192487f941b8",
+      "id": "cce67da8-e5c9-4250-91a5-248486bb22de",
       "name": "Embeddings HuggingFace Inference2",
       "credentials": {
         "huggingFaceApi": {
@@ -1748,10 +1707,10 @@
       "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
       "typeVersion": 1,
       "position": [
-        26208,
-        27296
+        25296,
+        29936
       ],
-      "id": "5d3ab32d-6e94-44ae-be9f-269b90580fb5",
+      "id": "65fc867a-6449-47b0-93e2-1c2138195f3b",
       "name": "Character Text Splitter"
     },
     {
@@ -1796,10 +1755,10 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        26032,
-        27088
+        25120,
+        29728
       ],
-      "id": "5fb4c8c4-6961-4060-b014-5ec01c97e320",
+      "id": "578c076b-78cb-4c82-9201-e344438da462",
       "name": "Default Data Loader"
     },
     {
@@ -1810,10 +1769,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        25872,
-        27104
+        24960,
+        29744
       ],
-      "id": "39a35aed-b615-46e4-aecb-8d9813212447",
+      "id": "dc8c9bff-336c-4b8f-833f-a7653f773803",
       "name": "Embeddings HuggingFace Inference",
       "credentials": {
         "huggingFaceApi": {
@@ -1836,10 +1795,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        25856,
-        26832
+        24944,
+        29472
       ],
-      "id": "d2540941-420c-4dba-aab9-f6a36f894822",
+      "id": "774c23bf-6e55-4c96-b061-18f73d8c762e",
       "name": "Pinecone Vector Store",
       "credentials": {
         "pineconeApi": {
@@ -1879,10 +1838,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        28544,
-        27264
+        27632,
+        29904
       ],
-      "id": "9a20bcb7-d64e-4355-b5a4-b9ebc97fe73c",
+      "id": "4a35ccbe-82f5-4c74-8016-b1f0c55331e5",
       "name": "Write Chat",
       "credentials": {
         "supabaseApi": {
@@ -1906,10 +1865,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        28912,
-        26928
+        28000,
+        29568
       ],
-      "id": "f326cb73-bb53-4a41-b8af-c099dc67b4ce",
+      "id": "860e3cf8-4445-413d-ad5c-0b322d3bdd7e",
       "name": "HTTP Request4"
     },
     {
@@ -1950,10 +1909,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        29264,
-        27104
+        28352,
+        29744
       ],
-      "id": "be7e6500-4b92-4fbd-a66e-27744b91d44f",
+      "id": "1d01ad02-a2e1-419a-91d0-641efc9d239c",
       "name": "Call 'AI Assistant Team'2"
     },
     {
@@ -1987,10 +1946,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        29392,
-        26928
+        28480,
+        29568
       ],
-      "id": "c057ca7e-312e-43b2-a120-48c9213a4d9e",
+      "id": "89cfef66-5f28-4cb1-9403-4469e376fe96",
       "name": "Upload Document to Table1",
       "credentials": {
         "supabaseApi": {
@@ -2037,10 +1996,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        30144,
-        26928
+        29232,
+        29568
       ],
-      "id": "44fc1869-2cf8-46ee-90fb-585858b57b21",
+      "id": "7409a8bc-4405-4838-aab5-0833a3d6e552",
       "name": "Call 'AI Assistant Team'3"
     },
     {
@@ -2052,10 +2011,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        29664,
-        26928
+        28752,
+        29568
       ],
-      "id": "5d25db5d-c7bf-4402-aeff-2ed3c4e87cce",
+      "id": "642db3a4-c3fa-41f6-ad2c-77ee55b0bee3",
       "name": "Respond to Webhook3"
     },
     {
@@ -2083,10 +2042,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        29168,
-        26928
+        28256,
+        29568
       ],
-      "id": "7119701a-e5b7-4ded-b899-c6ca613fc9e4",
+      "id": "0024e2dd-4608-4c14-8e4c-c1f5f2445ca5",
       "name": "HTTP Request5"
     },
     {
@@ -2120,10 +2079,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        29920,
-        26928
+        29008,
+        29568
       ],
-      "id": "59609e40-e262-45a1-92f8-007b3becc0bf",
+      "id": "1f1c5414-3da3-4afe-b5f7-72e1f7035ea9",
       "name": "Write Chat1",
       "credentials": {
         "supabaseApi": {
@@ -2139,10 +2098,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        27936,
-        27216
+        27024,
+        29856
       ],
-      "id": "e39aeb9b-f090-4d24-94be-17fca1d2bb71",
+      "id": "6a6dc8cb-c7da-414d-93a0-6f5ccc26f398",
       "name": "Extract Full Output"
     },
     {
@@ -2176,10 +2135,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        30112,
-        26752
+        29200,
+        29392
       ],
-      "id": "a7a540cb-5fd0-4ccf-a1e7-e84c290f25f1",
+      "id": "08178ecf-cec2-446f-8674-530e91dd41ab",
       "name": "Write Chat2",
       "credentials": {
         "supabaseApi": {
@@ -2195,10 +2154,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        28304,
-        27440
+        27392,
+        30080
       ],
-      "id": "c30febcf-246b-491b-989c-732838c61f02",
+      "id": "84cc8852-059e-4bfe-8811-5e4abc5ea70c",
       "name": "Format Draft Email"
     },
     {
@@ -2210,10 +2169,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        28544,
-        27440
+        27632,
+        30080
       ],
-      "id": "82e17ee9-7b7f-4024-a844-9b874c8daa3d",
+      "id": "eebebeeb-477f-462d-9d54-1f0f3d5f7b0f",
       "name": "Respond Draft Email"
     },
     {
@@ -2247,10 +2206,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        28992,
-        27104
+        28080,
+        29744
       ],
-      "id": "8455dc3f-d750-463d-b5ad-353bc3a5d564",
+      "id": "c68703b1-7146-4711-9d8c-9d5ec88813c7",
       "name": "Write Chat3",
       "credentials": {
         "supabaseApi": {
@@ -2290,10 +2249,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        28768,
-        27440
+        27856,
+        30080
       ],
-      "id": "063e68fb-fc0e-468c-9d58-0360d4e2c8d6",
+      "id": "00679c3d-d542-4794-8468-902fdc91d0a5",
       "name": "Write Chat4",
       "credentials": {
         "supabaseApi": {
@@ -2310,10 +2269,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        26704,
-        28688
+        25792,
+        31328
       ],
-      "id": "e4471bb8-9188-4cdd-ad16-ca2d213f677d",
+      "id": "98f0d154-26f0-426d-8043-5520eac9fc8a",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -2330,10 +2289,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        24832,
-        27424
+        23920,
+        30064
       ],
-      "id": "451fc5d0-eb53-47d3-91c8-e7a63671fd67",
+      "id": "9ce57c0b-d694-4952-9df8-f810c2581a75",
       "name": "Extract text for document classification",
       "credentials": {
         "mistralCloudApi": {
@@ -2350,10 +2309,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25120,
-        27424
+        24208,
+        30064
       ],
-      "id": "44462882-43cf-4b7f-832e-2cfa83d22184",
+      "id": "3bcfb058-edfe-436a-acf6-c5d395e310e2",
       "name": "Build Document Classification Excerpt"
     },
     {
@@ -2372,10 +2331,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        25408,
-        27424
+        24496,
+        30064
       ],
-      "id": "64b14512-ac91-407f-a0b2-20fc096375ff",
+      "id": "d44de60a-06af-4606-a52a-b8fcacf46fe6",
       "name": "Classify Document Type",
       "onError": "continueRegularOutput"
     },
@@ -2386,10 +2345,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25712,
-        27424
+        24800,
+        30064
       ],
-      "id": "28e870a1-9114-4280-b1da-6fad229f98b9",
+      "id": "724fd017-6d38-4591-9aaa-0537de8b3d0b",
       "name": "Normalize Document Type"
     },
     {
@@ -2401,10 +2360,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        25120,
-        26960
+        24208,
+        29600
       ],
-      "id": "ae87f3cf-1c84-4fd6-90fd-b0be639bace5",
+      "id": "0a9aa5e2-204a-45be-9973-b43f07cbd5f5",
       "name": "Merge Upload Success + Document Type"
     }
   ],
@@ -2768,17 +2727,6 @@
         ]
       ]
     },
-    "delete events calendar": {
-      "ai_tool": [
-        [
-          {
-            "node": "Scheduler Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "combine promt + text csv": {
       "main": [
         [
@@ -3053,17 +3001,6 @@
             "node": "Supervisor Agent",
             "type": "ai_tool",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "arcee-ai/trinity-large-preview:free-": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Supervisor Agent",
-            "type": "ai_languageModel",
-            "index": 1
           }
         ]
       ]
@@ -3401,7 +3338,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6fdfb453-af4d-4829-825e-9083c45e0c32",
+  "versionId": "2a544282-2dbe-4e40-8eb4-e27a539e1471",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "e60c03d94374d919b0dc032869ec6070b1f66f57703828244d98de84bf41ef67"
