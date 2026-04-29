@@ -171,8 +171,8 @@ export default function Top5EmailSummary() {
       }
 
       // Get n8n webhook URL
-      const baseUrl = urls.getN8nBaseUrl();
-      const webhookUrl = `${baseUrl}/webhook-test/email/summary`;
+      const webhookUrl = urls.getEmailSummary();
+      console.log('Email summary webhook URL:', webhookUrl);
 
       console.log('Fetching email summary from:', webhookUrl);
 

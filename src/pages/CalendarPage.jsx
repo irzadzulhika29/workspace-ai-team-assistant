@@ -142,7 +142,8 @@ Google Meet: ${event.hangoutLink}` : ''}`
     
     navigate('/chat/supervisor', {
       state: {
-        autoSendMessage: prompts[action]
+        autoSendMessage: prompts[action],
+        preFillOnly: true, // Pre-fill the input field, don't auto-send
       }
     })
   }
@@ -173,7 +174,8 @@ Google Meet: ${selectedEvent.hangoutLink}` : ''}`
     
     navigate('/chat/supervisor', {
       state: {
-        autoSendMessage: fullPrompt
+        autoSendMessage: fullPrompt,
+        preFillOnly: true, // Pre-fill the input field, don't auto-send
       }
     })
   }

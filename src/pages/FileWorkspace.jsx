@@ -184,6 +184,7 @@ export default function FileWorkspace() {
     navigate('/chat/supervisor', {
       state: {
         autoSendMessage: 'Buatkan dokumen / laporan progres untuk project saya. Tolong tanyakan detail yang diperlukan terlebih dahulu.',
+        preFillOnly: true, // Only pre-fill the input, don't auto-send
       }
     })
   }, [navigate])

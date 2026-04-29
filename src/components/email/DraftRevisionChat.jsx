@@ -61,8 +61,8 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
 
     try {
       // Use urls helper to get webhook URL based on settings
-      const baseUrl = urls.getN8nBaseUrl();
-      const webhookUrl = `${baseUrl}/webhook-test/email`;
+      const webhookUrl = urls.getEmail();
+      console.log('Email webhook URL:', webhookUrl);
 
       // Get user ID
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';

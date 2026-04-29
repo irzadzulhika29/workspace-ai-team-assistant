@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarDays, Clock3, Bug, CheckCircle2, Mail, Circle, RefreshCw } from 'lucide-react'
 import axios from 'axios'
+import { urls } from '../services/api'
 import { calendarApi } from '../services/calendarService'
 import { jiraApi } from '../services/jiraService'
 import { emailApi } from '../services/emailService'
@@ -194,8 +195,11 @@ export default function Dashboard() {
         jiraSubdomain
       })
 
-      // Hit briefings webhook with tokens
-      const response = await fetch('https://workflow.jagr.id/webhook-test/briefings', {
+      // Hit briefings webhook with tokens (using dynamic URL from api.js)
+      const briefingsUrl = urls.getBriefings()
+      console.log('Briefings webhook URL:', briefingsUrl)
+      
+      const response = await fetch(briefingsUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

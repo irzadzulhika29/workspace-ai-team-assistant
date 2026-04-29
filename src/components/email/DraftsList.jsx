@@ -162,8 +162,9 @@ export default function DraftsList({ onRevise }) {
       }
 
       // Send to webhook with action "send"
-      const baseUrl = urls.getN8nBaseUrl();
-      const webhookUrl = `${baseUrl}/webhook-test/email`;
+      const webhookUrl = urls.getEmail();
+      console.log('Email webhook URL:', webhookUrl);
+      
       const payload = {
         user_id: userId,
         draft_id: draft.id,

@@ -22,6 +22,11 @@ export default function SupervisorChat() {
   const location = useLocation();
   const autoSendProcessed = useRef(false);
 
+  // Reset autoSendProcessed when location changes
+  useEffect(() => {
+    autoSendProcessed.current = false;
+  }, [location.pathname]);
+
   const {
     supervisorMessages,
     addSupervisorMessage,
@@ -176,20 +181,32 @@ export default function SupervisorChat() {
     }
   }, [addSupervisorMessage, activeSupervisorSessionId])
 
-  // Handle auto-send from navigation state (Magic Button from Email or Draft Revision)
+  // Handle auto-send from navigation state (Magic Button from Email, Calendar, or Draft Revision)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
     const emailContext = location.state?.emailContext;
     const draftRevision = location.state?.draftRevision;
     const draft = location.state?.draft;
+    const preFillOnly = location.state?.preFillOnly; // Explicit flag for pre-fill only
 
-    // Handle pre-filled message (from FileWorkspace magic button)
-    if (autoSendMessage && !emailContext && !draftRevision && !autoSendProcessed.current) {
+    console.log('[SupervisorChat] Navigation state:', {
+      autoSendMessage: autoSendMessage ? 'present' : 'none',
+      preFillOnly,
+      emailContext: emailContext ? 'present' : 'none',
+      draftRevision,
+      autoSendProcessed: autoSendProcessed.current
+    });
+
+    // Handle pre-filled message (from FileWorkspace or CalendarPage - explicit pre-fill only)
+    if (autoSendMessage && preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
+      console.log('[SupervisorChat] Pre-filling message:', autoSendMessage.substring(0, 50) + '...');
       setPrefilledMessage(autoSendMessage);
       
-      // Clear navigation state
-      window.history.replaceState({}, document.title);
+      // Clear navigation state after a short delay to ensure React has updated
+      setTimeout(() => {
+        window.history.replaceState({}, document.title);
+      }, 100);
       return;
     }
 
@@ -226,9 +243,10 @@ Silakan berikan instruksi revisi untuk draft ini.`;
       return;
     }
 
-    // Handle auto-send message (Magic Reply)
-    if (autoSendMessage && !autoSendProcessed.current) {
+    // Handle auto-send message (from Email or other sources without preFillOnly flag)
+    if (autoSendMessage && !preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
+      console.log('[SupervisorChat] Auto-sending message');
       
       // Set flag to prevent session reload
       setAutoSending(true);
@@ -236,7 +254,7 @@ Silakan berikan instruksi revisi untuk draft ini.`;
       // Wait for session history to load, then send
       setTimeout(() => {
         handleSend(autoSendMessage, null, {
-          displayContent: 'Buatkan draft email balasan yang profesional dan sesuai konteks.',
+          displayContent: emailContext ? 'Buatkan draft email balasan yang profesional dan sesuai konteks.' : autoSendMessage,
           forwardedEmail: emailContext,
         });
         // Clear flag after send completes
