@@ -81,6 +81,7 @@ const ENDPOINTS = {
   CALENDAR: "calendar",
   EMAIL: "email",
   EMAIL_SUMMARY: "email/summary",
+  JIRA_SUMMARY: "jira-summary",
 };
 
 // ─── Helper functions ─────────────────────────────────────────────────────────
@@ -220,6 +221,13 @@ export const urls = {
     return buildWebhookUrl(ENDPOINTS.EMAIL_SUMMARY, env, mode, devUrl);
   },
 
+  getJiraSummary: () => {
+    const env = urls.getEnvironment();
+    const mode = urls.getMode();
+    const devUrl = urls.getDevBaseUrl();
+    return buildWebhookUrl(ENDPOINTS.JIRA_SUMMARY, env, mode, devUrl);
+  },
+
   // Get all webhook URLs
   getAll: () => ({
     supervisor: urls.getSupervisor(),
@@ -232,6 +240,7 @@ export const urls = {
     calendar: urls.getCalendar(),
     email: urls.getEmail(),
     emailSummary: urls.getEmailSummary(),
+    jiraSummary: urls.getJiraSummary(),
   }),
 
   // Get current config

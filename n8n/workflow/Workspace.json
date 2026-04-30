@@ -914,6 +914,164 @@
     {
       "parameters": {
         "httpMethod": "POST",
+        "path": "jira-summary",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        560
+      ],
+      "id": "66a7b8d2-31e1-4478-a391-ff7d4d0daaf7",
+      "name": "Get Jira Summary"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst normalizeSubdomain = (value) => String(value || '')\n  .trim()\n  .replace(/^https?:\\/\\//i, '')\n  .replace(/\\/.*$/, '');\n\nconst jiraSubdomain = normalizeSubdomain(\n  jiraCredentials.subdomain || body.jira_subdomain || body.jiraSubdomain || body.jira_base_url || body.jiraBaseUrl\n);\nconst jiraEmail = String(jiraCredentials.email || body.jira_email || body.jiraEmail || '').trim();\nconst jiraApiToken = String(jiraCredentials.api_token || body.jira_api_token || body.jiraApiToken || '').trim();\nconst jiraAuthBase64 = String(\n  body.jira_auth_base64 ||\n  body.jiraAuthBase64 ||\n  (jiraEmail && jiraApiToken ? Buffer.from(`${jiraEmail}:${jiraApiToken}`).toString('base64') : '')\n).trim();\nconst userId = String(body.user_id || body.userId || '').trim();\nconst jql = String(body.jql || body.jira_jql || 'updated >= -30d ORDER BY updated DESC').trim();\nconst maxResults = Math.min(Math.max(Number(body.maxResults || body.jira_max_results || 25), 1), 50);\n\nif (!jiraSubdomain) {\n  throw new Error('jira_subdomain is required for jira summary');\n}\n\nif (!jiraAuthBase64) {\n  throw new Error('jira_auth_base64 is required for jira summary');\n}\n\nreturn [{\n  json: {\n    user_id: userId,\n    generated_at: new Date().toISOString(),\n    jira_subdomain: jiraSubdomain,\n    jira_auth_base64: jiraAuthBase64,\n    jira_jql: jql,\n    jira_max_results: maxResults\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        560
+      ],
+      "id": "d0a9f7c1-f5c9-4f4d-8f5d-9a3cc58f55ef",
+      "name": "Prepare Jira Summary Request Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Prepare Jira Summary Request Data').item.json.jira_subdomain }}/rest/api/3/search/jql",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Basic {{ $('Prepare Jira Summary Request Data').item.json.jira_auth_base64 }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ jql: $('Prepare Jira Summary Request Data').item.json.jira_jql, maxResults: $('Prepare Jira Summary Request Data').item.json.jira_max_results, fields: ['summary', 'status', 'assignee', 'priority', 'updated', 'created', 'project', 'issuetype', 'duedate', 'labels', 'reporter'] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        688,
+        560
+      ],
+      "id": "a5d6770d-8e28-447a-bd5b-9ad0567d7621",
+      "name": "Get Jira Summary Issues"
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $json || {};\nconst rawIssues = Array.isArray(source.issues)\n  ? source.issues\n  : Array.isArray(source.items)\n    ? source.items\n    : Array.isArray(source.data)\n      ? source.data\n      : [];\n\nconst getField = (issue, ...keys) => {\n  for (const key of keys) {\n    const value = key.split('.').reduce((acc, part) => acc?.[part], issue);\n    if (value !== undefined && value !== null && value !== '') return value;\n  }\n  return '';\n};\n\nconst normalizeText = (value) => String(value || '').trim().toLowerCase();\nconst includesKeyword = (value, keywords) => {\n  const normalized = normalizeText(value);\n  return keywords.some((keyword) => normalized.includes(keyword));\n};\nconst highPriorityKeywords = ['highest', 'high', 'critical', 'urgent'];\nconst blockedKeywords = ['blocked', 'blocker', 'waiting', 'stuck'];\n\nconst formatters = {\n  dateOnly: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric'\n  }),\n  dateTime: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit'\n  })\n};\n\nconst formatDate = (value, mode = 'dateOnly') => {\n  if (!value) return '-';\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return String(value);\n  return formatters[mode].format(parsed);\n};\n\nconst getStatusCategoryKey = (issue) => {\n  const directKey = normalizeText(getField(issue, 'fields.status.statusCategory.key', 'status.statusCategory.key', 'statusCategory.key'));\n  if (directKey) return directKey;\n  const categoryName = normalizeText(getField(issue, 'fields.status.statusCategory.name', 'status.statusCategory.name', 'statusCategory.name'));\n  if (categoryName.includes('progress')) return 'indeterminate';\n  if (categoryName.includes('done')) return 'done';\n  return 'new';\n};\n\nconst isOverdueDate = (value) => {\n  if (!value) return false;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return false;\n  const today = new Date();\n  today.setHours(0, 0, 0, 0);\n  parsed.setHours(0, 0, 0, 0);\n  return parsed < today;\n};\n\nconst isDateToday = (value) => {\n  if (!value) return false;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return false;\n  return formatters.dateOnly.format(parsed) === formatters.dateOnly.format(new Date());\n};\n\nconst normalizedIssues = rawIssues.map((issue, index) => {\n  const issueKey = getField(issue, 'key', 'id', 'issueKey') || `ISSUE-${index + 1}`;\n  const summary = getField(issue, 'fields.summary', 'summary', 'title') || 'Tanpa judul issue';\n  const status = getField(issue, 'fields.status.name', 'status.name', 'status', 'state') || 'Unknown';\n  const statusCategoryKey = getStatusCategoryKey(issue);\n  const assignee = getField(issue, 'fields.assignee.displayName', 'assignee.displayName', 'assignee.name', 'assignee') || 'Belum ditugaskan';\n  const priority = getField(issue, 'fields.priority.name', 'priority.name', 'priority') || 'Tanpa prioritas';\n  const updatedAt = getField(issue, 'fields.updated', 'updated', 'updatedAt');\n  const createdAt = getField(issue, 'fields.created', 'created', 'createdAt');\n  const dueDate = getField(issue, 'fields.duedate', 'duedate', 'dueDate');\n  const projectName = getField(issue, 'fields.project.name', 'project.name', 'project') || 'Project tidak diketahui';\n  const issueType = getField(issue, 'fields.issuetype.name', 'issuetype.name', 'issueType') || 'Issue';\n  const reporter = getField(issue, 'fields.reporter.displayName', 'reporter.displayName', 'reporter.name', 'reporter') || 'Tidak diketahui';\n  const labels = Array.isArray(issue?.fields?.labels) ? issue.fields.labels : [];\n  const isDone = statusCategoryKey === 'done';\n  const isUnassigned = !getField(issue, 'fields.assignee.displayName', 'assignee.displayName', 'assignee.name', 'assignee');\n  const isHighPriority = includesKeyword(priority, highPriorityKeywords);\n  const isBlocked = includesKeyword(status, blockedKeywords) || labels.some((label) => includesKeyword(label, blockedKeywords));\n  const isOverdue = !isDone && isOverdueDate(dueDate);\n  const isUpdatedToday = isDateToday(updatedAt);\n  const urgencyScore = (isOverdue ? 100 : 0) + (isBlocked ? 80 : 0) + (isHighPriority ? 50 : 0) + (statusCategoryKey === 'indeterminate' ? 25 : 0) + (isUnassigned ? 15 : 0);\n\n  return {\n    key: issueKey,\n    summary,\n    status,\n    status_category_key: statusCategoryKey,\n    assignee,\n    priority,\n    updated_at: updatedAt,\n    updated_label: formatDate(updatedAt, 'dateTime'),\n    created_at: createdAt,\n    created_label: formatDate(createdAt, 'dateOnly'),\n    due_date: dueDate,\n    due_label: dueDate ? formatDate(dueDate, 'dateOnly') : null,\n    project_name: projectName,\n    issue_type: issueType,\n    reporter,\n    labels,\n    is_done: isDone,\n    is_unassigned: isUnassigned,\n    is_high_priority: isHighPriority,\n    is_blocked: isBlocked,\n    is_overdue: isOverdue,\n    is_updated_today: isUpdatedToday,\n    urgency_score: urgencyScore\n  };\n});\n\nconst todoIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'new');\nconst inProgressIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'indeterminate');\nconst doneIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'done');\nconst blockedIssues = normalizedIssues.filter((issue) => issue.is_blocked);\nconst highPriorityIssues = normalizedIssues.filter((issue) => issue.is_high_priority);\nconst unassignedIssues = normalizedIssues.filter((issue) => issue.is_unassigned);\nconst overdueIssues = normalizedIssues.filter((issue) => issue.is_overdue);\nconst updatedTodayIssues = normalizedIssues.filter((issue) => issue.is_updated_today);\nconst noDueDateInProgress = inProgressIssues.filter((issue) => !issue.due_date);\n\nconst assigneeCounts = normalizedIssues.reduce((acc, issue) => {\n  if (issue.is_unassigned) return acc;\n  acc[issue.assignee] = (acc[issue.assignee] || 0) + 1;\n  return acc;\n}, {});\n\nconst topAssignees = Object.entries(assigneeCounts)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 5)\n  .map(([name, issueCount]) => ({ name, issue_count: issueCount }));\n\nconst watchIssues = [...normalizedIssues]\n  .sort((a, b) => {\n    if (b.urgency_score !== a.urgency_score) return b.urgency_score - a.urgency_score;\n    return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime();\n  })\n  .slice(0, 8)\n  .map((issue) => ({\n    key: issue.key,\n    summary: issue.summary,\n    status: issue.status,\n    status_category_key: issue.status_category_key,\n    assignee: issue.assignee,\n    priority: issue.priority,\n    updated_label: issue.updated_label,\n    due_label: issue.due_label,\n    project_name: issue.project_name,\n    issue_type: issue.issue_type,\n    flags: {\n      is_overdue: issue.is_overdue,\n      is_blocked: issue.is_blocked,\n      is_high_priority: issue.is_high_priority,\n      is_unassigned: issue.is_unassigned\n    }\n  }));\n\nreturn [{\n  json: {\n    user_id: $('Prepare Jira Summary Request Data').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Request Data').first().json.generated_at || new Date().toISOString(),\n    jira_scope: {\n      jql: $('Prepare Jira Summary Request Data').first().json.jira_jql || '',\n      max_results: $('Prepare Jira Summary Request Data').first().json.jira_max_results || normalizedIssues.length\n    },\n    watch_issues: watchIssues,\n    source_metrics: {\n      total_issues: normalizedIssues.length,\n      todo_count: todoIssues.length,\n      in_progress_count: inProgressIssues.length,\n      done_count: doneIssues.length,\n      blocked_count: blockedIssues.length,\n      high_priority_count: highPriorityIssues.length,\n      unassigned_count: unassignedIssues.length,\n      overdue_count: overdueIssues.length,\n      updated_today_count: updatedTodayIssues.length,\n      no_due_date_in_progress_count: noDueDateInProgress.length,\n      top_assignees: topAssignees\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        560
+      ],
+      "id": "1792bd6f-31f5-4bf3-b02f-62df38f34a1b",
+      "name": "Prepare Jira Summary Context"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d95d6ad-9584-4e09-adf8-0988d772efeb",
+              "name": "prompt",
+              "type": "string",
+              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis ringkasan operasional Jira yang sudah dinormalisasi.\n2. Buat insight singkat untuk panel AI summary di Jira Workspace.\n3. Sorot progres, beban issue aktif, issue yang overdue, issue tanpa assignee, dan issue prioritas tinggi.\n4. Berikan rekomendasi tindak lanjut singkat berbentuk poin.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"done_count\": number,\n    \"blocked_count\": number,\n    \"high_priority_count\": number,\n    \"unassigned_count\": number,\n    \"overdue_count\": number,\n    \"updated_today_count\": number,\n    \"no_due_date_in_progress_count\": number\n  }\n}\n\nATURAN:\n- Summary harus siap dipakai sebagai AI insight card, bukan sekadar mengulang semua issue satu per satu.\n- Fokus pada kondisi operasional yang paling penting untuk leader atau project owner.\n- Prioritaskan overdue, blocked, unassigned, high priority, dan issue aktif yang belum punya due date.\n- Gunakan `watch_issues` sebagai bukti/detail utama jika menyebut issue tertentu.\n- Jangan mengarang sprint, blocker resmi, owner, atau deadline jika tidak ada di data.\n- Jika data kosong, tetap return JSON valid dengan status partial dan rekomendasi yang relevan.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        560
+      ],
+      "id": "6a472be1-bec6-4b1a-b6b4-fc700ad0e1da",
+      "name": "Build Jira Summary Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=Kamu adalah Jira Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        560
+      ],
+      "id": "8a7e810d-ef85-498c-8702-2f58e1a9d6f7",
+      "name": "Jira Summary Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Jira Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Jira Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'jira',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan Jira belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || fallbackMetrics\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        560
+      ],
+      "id": "1f80556c-c0b0-4ab8-b90e-d3f982a28ef8",
+      "name": "Parse Jira Summary"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    success: true,\n    user_id: $json.user_id || '',\n    generated_at: $json.generated_at || new Date().toISOString(),\n    summary: $json.summary || null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        560
+      ],
+      "id": "0ecfd0af-6d39-465b-90f4-975cabfbb1dd",
+      "name": "Build Jira Summary Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2208,
+        560
+      ],
+      "id": "bd62dfe8-59ec-441f-ae52-b4765554292d",
+      "name": "Respond Jira Summary"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
         "path": "calendar",
         "responseMode": "responseNode",
         "options": {}
@@ -1144,6 +1302,11 @@
           },
           {
             "node": "Email Summary Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Jira Summary Agent",
             "type": "ai_languageModel",
             "index": 0
           },
@@ -1423,6 +1586,94 @@
         [
           {
             "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Jira Summary": {
+      "main": [
+        [
+          {
+            "node": "Prepare Jira Summary Request Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Jira Summary Request Data": {
+      "main": [
+        [
+          {
+            "node": "Get Jira Summary Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Jira Summary Issues": {
+      "main": [
+        [
+          {
+            "node": "Prepare Jira Summary Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Jira Summary Context": {
+      "main": [
+        [
+          {
+            "node": "Build Jira Summary Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Jira Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Jira Summary Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira Summary Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Jira Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Jira Summary": {
+      "main": [
+        [
+          {
+            "node": "Build Jira Summary Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Jira Summary Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Jira Summary",
             "type": "main",
             "index": 0
           }
