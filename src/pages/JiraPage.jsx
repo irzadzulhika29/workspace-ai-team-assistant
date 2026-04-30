@@ -5,6 +5,8 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Bug,
+  ChevronLeft,
+  ChevronRight,
   CircleDot,
   ExternalLink,
   Flag,
@@ -301,6 +303,7 @@ export default function JiraPage() {
   const [aiSummary, setAiSummary] = useState(null)
   const [loading, setLoading] = useState(false)
   const [summaryLoading, setSummaryLoading] = useState(false)
+  const [activeSummarySlide, setActiveSummarySlide] = useState(0)
   const [error, setError] = useState('')
   const [summaryError, setSummaryError] = useState('')
   const [lastSyncedAt, setLastSyncedAt] = useState('')
@@ -360,8 +363,19 @@ export default function JiraPage() {
     loadJiraSummary()
   }, [loadIssues, loadJiraSummary])
 
+  useEffect(() => {
+    setActiveSummarySlide(0)
+  }, [aiSummary, summaryError])
+
   const boardGroups = useMemo(() => buildBoardGroups(issues), [issues])
   const metrics = useMemo(() => buildMetrics(issues), [issues])
+  const summarySlides = aiSummary
+    ? [
+        { key: 'overview', label: 'Overview' },
+        { key: 'findings', label: 'Findings' },
+        { key: 'actions', label: 'Actions' },
+      ]
+    : []
   return (
     <div className="h-full overflow-y-auto bg-[#f4f5f7] custom-scrollbar">
       <div className="mx-auto max-w-[1240px] p-5 md:p-8">
@@ -448,7 +462,7 @@ export default function JiraPage() {
           </div>
         ) : (
           <div className="mt-6 space-y-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:flex-nowrap lg:items-stretch lg:gap-3">
+            <div className="flex flex-col gap-4 lg:flex-row lg:flex-nowrap lg:items-start lg:gap-3">
               <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_12px_35px_rgba(15,23,42,0.06)] lg:w-[40%] lg:flex-shrink-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -607,7 +621,7 @@ export default function JiraPage() {
                 )
               })}
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] xl:min-h-[720px]">
+              <div className="self-start rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xl font-semibold text-slate-900">Operational Snapshot</p>
@@ -638,7 +652,46 @@ export default function JiraPage() {
                     </div>
                   ) : aiSummary ? (
                     <>
-                      <div className="rounded-2xl bg-slate-50 px-4 py-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          {summarySlides.map((slide, index) => (
+                            <button
+                              key={slide.key}
+                              type="button"
+                              onClick={() => setActiveSummarySlide(index)}
+                              className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                                activeSummarySlide === index
+                                  ? 'bg-[#ffede7] text-[#c45734]'
+                                  : 'bg-slate-100 text-slate-400 hover:text-slate-600'
+                              }`}
+                            >
+                              {slide.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setActiveSummarySlide((prev) => Math.max(prev - 1, 0))}
+                            disabled={activeSummarySlide === 0}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Slide sebelumnya"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveSummarySlide((prev) => Math.min(prev + 1, summarySlides.length - 1))}
+                            disabled={activeSummarySlide === summarySlides.length - 1}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Slide berikutnya"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={activeSummarySlide === 0 ? 'rounded-2xl bg-slate-50 px-4 py-4' : 'hidden rounded-2xl bg-slate-50 px-4 py-4'}>
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">AI Headline</p>
@@ -651,7 +704,7 @@ export default function JiraPage() {
                         <p className="mt-3 text-xs text-slate-500">Update: {formatDate(aiSummary.generated_at)}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className={activeSummarySlide === 0 ? 'grid grid-cols-2 gap-3' : 'hidden grid-cols-2 gap-3'}>
                         <div className="rounded-2xl border border-slate-200 px-4 py-3">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total Issue</p>
                           <p className="mt-2 text-2xl font-semibold text-slate-900">{aiSummary.source_metrics?.total_issues || 0}</p>
@@ -673,7 +726,7 @@ export default function JiraPage() {
                       </div>
 
                       {aiSummary.summary_points?.length ? (
-                        <div className="rounded-2xl border border-slate-200 px-4 py-4">
+                        <div className={activeSummarySlide === 1 ? 'rounded-2xl border border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-slate-200 px-4 py-4'}>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">AI Findings</p>
                           <ul className="mt-3 space-y-2">
                             {aiSummary.summary_points.map((point, index) => (
@@ -687,12 +740,12 @@ export default function JiraPage() {
                       ) : null}
 
                       {aiSummary.recommendations?.length ? (
-                        <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-4">
+                        <div className={activeSummarySlide === 2 ? 'rounded-2xl border border-dashed border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-dashed border-slate-200 px-4 py-4'}>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Recommendations</p>
                           <ul className="mt-3 space-y-2">
                             {aiSummary.recommendations.map((recommendation, index) => (
                               <li key={`${recommendation}-${index}`} className="flex items-start gap-2 text-sm text-slate-700">
-                                <span className="mt-0.5 text-emerald-600">→</span>
+                                <span className="mt-0.5 text-emerald-600">-&gt;</span>
                                 <span>{recommendation}</span>
                               </li>
                             ))}
@@ -700,7 +753,7 @@ export default function JiraPage() {
                         </div>
                       ) : null}
 
-                      <div className="rounded-2xl border border-slate-200 px-4 py-4">
+                      <div className={activeSummarySlide === 2 ? 'rounded-2xl border border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-slate-200 px-4 py-4'}>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Source Metrics</p>
                         <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-600">
                           <div className="rounded-xl bg-slate-50 px-3 py-2">To Do: {aiSummary.source_metrics?.todo_count || 0}</div>
