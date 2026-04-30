@@ -56,4 +56,16 @@ export const fileApi = {
     });
     return res.data;
   },
+
+  /**
+   * Delete a document from the Supabase `dokumen` table via backend.
+   * @param {string} documentId - UUID of the document to delete
+   * @returns {Promise<any>}
+   */
+  deleteDokumen: async (documentId) => {
+    const res = await axios.delete(`${urls.getBackendUrl()}/api/dokumen/${documentId}`, {
+      withCredentials: true,
+    });
+    return res.data;
+  },
 };

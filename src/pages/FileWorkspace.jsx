@@ -9,6 +9,7 @@ import {
   FileText,
   FolderOpen,
   Sparkles,
+  Trash2,
   Upload,
   X,
 } from 'lucide-react'
@@ -121,6 +122,9 @@ export default function FileWorkspace() {
   const [selectedDocument, setSelectedDocument] = useState(null)
   const [activeTab, setActiveTab] = useState('generated')
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [documentToDelete, setDocumentToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const loadDokumen = useCallback(async () => {
     try {
@@ -222,6 +226,42 @@ export default function FileWorkspace() {
 
   const handleSelectDocument = useCallback((document) => {
     setSelectedDocument(document)
+  }, [])
+
+  const handleDeleteClick = useCallback((document) => {
+    setDocumentToDelete(document)
+    setDeleteModalOpen(true)
+  }, [])
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!documentToDelete) return
+
+    try {
+      setIsDeleting(true)
+      await fileApi.deleteDokumen(documentToDelete.id)
+      
+      // Close modal
+      setDeleteModalOpen(false)
+      setDocumentToDelete(null)
+      
+      // Reload documents
+      await loadDokumen()
+      
+      // Clear selected document if it was deleted
+      if (selectedDocument?.id === documentToDelete.id) {
+        setSelectedDocument(null)
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error)
+      alert('Gagal menghapus dokumen: ' + error.message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [documentToDelete, loadDokumen, selectedDocument])
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteModalOpen(false)
+    setDocumentToDelete(null)
   }, [])
 
   const selectedTone = getDocumentTone(selectedDocument || { kategori: 'generated' })
@@ -441,6 +481,16 @@ export default function FileWorkspace() {
                     </a>
                   </div>
 
+                  <div className="mt-3">
+                    <button
+                      onClick={() => handleDeleteClick(selectedDocument)}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      <Trash2 size={15} />
+                      Hapus Dokumen
+                    </button>
+                  </div>
+
                   {selectedDocument.kategori === 'generated' ? (
                     <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
                       <p className="mb-1 flex items-center gap-2 text-sm font-semibold text-cyan-900">
@@ -510,6 +560,53 @@ export default function FileWorkspace() {
 
             <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
               <UploadZone onUploaded={handleUploaded} targetFolder="uploaded" />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {deleteModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+            <div className="mb-5 flex items-start gap-4">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+                <Trash2 size={24} />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold font-headline text-slateui-900">
+                  Hapus Dokumen
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slateui-500">
+                  Apakah Anda yakin ingin menghapus dokumen <span className="font-semibold text-slateui-900">{documentToDelete?.name}</span>? Tindakan ini tidak dapat dibatalkan.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={15} />
+                    Hapus
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

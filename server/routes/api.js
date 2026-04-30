@@ -108,6 +108,46 @@ router.get('/dokumen', requireAuth, async (req, res) => {
   }
 });
 
+// Delete a document from Supabase
+router.delete('/dokumen/:documentId', requireAuth, async (req, res) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.id;
+
+    // Verify ownership before deleting
+    const checkUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?id=eq.${encodeFilterValue(documentId)}&user_id=eq.${encodeFilterValue(userId)}&select=id`;
+    const checkResponse = await fetch(checkUrl, {
+      method: 'GET',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!checkResponse.ok) {
+      throw new Error(`Supabase error: ${checkResponse.status} ${checkResponse.statusText}`);
+    }
+
+    const docs = await checkResponse.json();
+    if (!docs || docs.length === 0) {
+      return res.status(404).json({ error: 'Document not found or you do not have permission to delete it' });
+    }
+
+    // Delete the document
+    const deleteUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?id=eq.${encodeFilterValue(documentId)}&user_id=eq.${encodeFilterValue(userId)}`;
+    const deleteResponse = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!deleteResponse.ok) {
+      throw new Error(`Failed to delete document: ${deleteResponse.status} ${deleteResponse.statusText}`);
+    }
+
+    res.json({ success: true, message: 'Document deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting dokumen:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Insert token usage execution data from n8n
 router.post('/token-usage', async (req, res) => {
   try {
