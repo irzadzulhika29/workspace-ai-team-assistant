@@ -1,144 +1,169 @@
 # Skill: Create Presentation
 
 ## Tujuan
-Gunakan skill ini untuk membuat materi presentasi atau slide. Jangan gunakan skill ini untuk menyusun laporan dokumen teks panjang.
+Gunakan skill ini untuk membuat presentasi yang ringkas, jelas, dan enak dipindai dalam bentuk HTML slide. Fokus utama skill ini adalah kualitas presentasi, bukan hanya HTML yang valid.
 
-## Aturan Batas Slide (SANGAT PENTING)
-Logika pembuatan slide Anda harus mengikuti aturan ini:
-1. **Satu Slide = Satu Section:** Setiap slide presentasi **WAJIB** dibungkus oleh tag `<section class="slide">` dan diakhiri dengan `</section>`.
-2. **Batas `<h1>`:** Setiap `<section class="slide">` **HANYA BOLEH MEMILIKI SATU** tag `<h1>` sebagai judul utama slide di bagian paling atas.
-3. **Isi Slide:** Semua konten pendukung untuk judul tersebut (seperti `<h2>`, `<ul>`, `<table>`, atau diagram) harus diletakkan **di dalam** `<section>` yang sama, di bawah `<h1>`. 
-4. **Pindah Slide:** Jika Anda ingin membuat judul `<h1>` baru (topik baru), Anda **WAJIB** menutup slide saat ini dengan `</section>` terlebih dahulu, lalu buka `<section class="slide">` baru.
+## Prinsip Presentasi
+1. **Satu slide = satu ide utama.**
+   Jika satu slide mencoba menjelaskan dua ide besar sekaligus, pecah menjadi dua slide.
+2. **Slide harus mudah dipindai dalam 5-8 detik.**
+   Pembaca harus cepat menangkap inti tanpa membaca paragraf panjang.
+3. **Narasi deck harus runtut.**
+   Urutan minimal yang disarankan:
+   - pembuka / konteks
+   - inti pembahasan
+   - keputusan / rekomendasi / next step
+4. **Prioritaskan insight, bukan transkrip.**
+   Jangan salin semua detail mentah ke slide. Ambil inti yang paling penting.
 
-## Validasi Struktur Wajib Sebelum Mengirim Hasil
-Sebelum mengirim HTML final, WAJIB cek ulang semua poin ini:
+## Struktur Deck yang Disarankan
+Gunakan alur yang proporsional untuk deck singkat maksimal 5 slide:
+
+1. **Slide pembuka**
+   - judul utama
+   - subjudul singkat bila perlu
+2. **Slide konteks / tujuan**
+   - mengapa topik ini penting
+   - apa yang akan dibahas
+3. **Slide inti 1**
+   - insight, data, perbandingan, atau status utama
+4. **Slide inti 2**
+   - lanjutan analisis, alur kerja, risiko, atau opsi
+5. **Slide penutup**
+   - kesimpulan, keputusan, atau next step
+
+Jika isi lebih sedikit, tidak wajib memaksakan 5 slide. Lebih baik 3-4 slide yang kuat daripada 5 slide kosong.
+
+## Aturan Kepadatan Isi
+- Maksimal 4 bullet per slide.
+- Setiap bullet idealnya 4-10 kata, jangan seperti paragraf.
+- Jangan menaruh paragraf panjang dalam slide.
+- Hindari tabel besar dan padat.
+- Jika data terlalu banyak, ringkas menjadi kategori, angka utama, atau perbandingan inti.
+
+## Pemilihan Format Isi
+Pilih format yang paling cocok untuk isi slide:
+
+### 1. Bullet List
+Gunakan jika:
+- menjelaskan poin utama
+- merangkum status
+- menyusun daftar tindakan
+
+Gunakan:
+- `<ul>` dan `<li>`
+- `<strong>` untuk kata kunci penting
+
+### 2. Tabel
+Gunakan jika:
+- perlu menunjukkan perbandingan singkat
+- ada 2-4 kolom yang memang membantu keputusan
+
+Jangan gunakan tabel jika:
+- isi tabel terlalu padat
+- data lebih mudah dipahami sebagai bullet
+
+### 3. Flow Diagram
+Gunakan jika:
+- menjelaskan proses
+- menjelaskan alur kerja
+- menjelaskan tahapan
+
+Gunakan struktur ini:
+
+```html
+<div class="flow-container">
+  <div class="flow-box">Langkah 1</div>
+  <div class="flow-arrow">&#8594;</div>
+  <div class="flow-box">Langkah 2</div>
+</div>
+```
+
+## Aturan Struktur HTML
+Aturan ini tetap WAJIB dipatuhi:
 1. Setiap slide HARUS berbentuk `<section class="slide"> ... </section>`.
 2. Setiap `<section class="slide">` HARUS memiliki **tepat satu** `<h1>`.
-   - Tidak boleh 0 `<h1>`.
-   - Tidak boleh 2 atau lebih `<h1>`.
-3. DILARANG menulis `<h1>` di luar `<section class="slide">`.
-4. Jika ingin membuat topik/judul baru:
-   - tutup slide saat ini dengan `</section>`
-   - buka slide baru dengan `<section class="slide">`
-   - lalu tulis `<h1>` baru
-5. Semua isi pendukung untuk satu judul harus tetap berada di slide yang sama, di bawah `<h1>` tersebut.
-
-Jika struktur ini tidak terpenuhi, hasil dianggap tidak valid.
-
-## Pilihan Format Konten Slide
-Pilih format yang paling cocok untuk isi slide Anda agar rapi dan tidak membosankan:
-* **Teks Biasa:** Gunakan `<ul>` dan `<li>`. Batasi teks agar tetap ringkas. Gunakan tag `<strong>` untuk menebalkan kata kunci.
-* **Matriks/Perbandingan:** WAJIB gunakan format tabel (`<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`).
-* **Alur/Langkah-langkah:** WAJIB gunakan struktur diagram HTML ini:
-  ```html
-  <div class="flow-container">
-    <div class="flow-box">Langkah 1</div>
-    <div class="flow-arrow">&#8594;</div>
-    <div class="flow-box">Langkah 2</div>
-  </div>
-  ```
+3. Jangan menulis `<h1>` di luar `<section class="slide">`.
+4. Jika topik berganti, tutup slide lama lalu buka slide baru.
+5. Semua isi pendukung untuk satu judul harus tetap berada di slide yang sama, di bawah `<h1>`.
 
 ## Aturan Penulisan HTML
-* Hasilkan kode HTML yang valid dan bersih tanpa CSS sebaris (inline CSS).
-* Jangan pernah meletakkan teks atau elemen HTML apa pun di luar tag `<section class="slide">`.
-* Jangan pernah menaruh dua `<h1>` di dalam satu `<section class="slide">`.
-* Jangan pernah membuka topik baru tanpa membuat `<section class="slide">` baru.
+- Hasilkan HTML yang valid dan bersih tanpa inline CSS.
+- Jangan letakkan elemen HTML apa pun di luar `<section class="slide">`.
+- Jangan gunakan dua `<h1>` dalam satu slide.
+- Jangan membuat slide kosong.
+- Jangan membuat slide penutup yang hanya berisi ucapan generik tanpa isi bermakna.
 
-## Contoh Keluaran Wajib (Referensi Format)
-Keluarkan hasil akhir dalam format HTML murni persis seperti struktur di bawah ini:
+## Checklist Kualitas Sebelum Mengirim
+Sebelum mengirim HTML final, cek ulang:
+1. Apakah setiap slide membawa satu ide utama?
+2. Apakah deck punya alur pembuka -> isi -> penutup?
+3. Apakah bullet cukup singkat dan mudah dipindai?
+4. Apakah tabel benar-benar perlu?
+5. Apakah tidak ada slide yang terasa terlalu penuh?
+6. Apakah seluruh slide sudah valid secara struktur HTML?
+
+## Contoh Keluaran Wajib
 
 ```html
 <section class="slide">
-  <h1>Judul Presentasi Utama</h1>
-  <h2>Subjudul atau Nama Pemateri</h2>
+  <h1>Evaluasi Kinerja Tim Produk Q2 2026</h1>
+  <h2>Ringkasan untuk Leadership Team</h2>
 </section>
 
 <section class="slide">
-  <h1>Agenda Pembahasan</h1>
+  <h1>Konteks dan Fokus Evaluasi</h1>
   <ul>
-    <li>Poin Pembahasan Pertama</li>
-    <li>Poin Pembahasan Kedua</li>
+    <li><strong>Tujuan:</strong> menilai progres kuartal berjalan</li>
+    <li><strong>Fokus:</strong> delivery, kualitas, dan risiko</li>
+    <li><strong>Periode:</strong> April-Juni 2026</li>
   </ul>
 </section>
 
 <section class="slide">
-  <h1>Perbandingan Kinerja (Contoh Tabel)</h1>
+  <h1>Pencapaian Utama</h1>
+  <ul>
+    <li><strong>3 fitur utama</strong> selesai diluncurkan</li>
+    <li><strong>Lead time</strong> turun 18%</li>
+    <li><strong>Bug kritis</strong> turun signifikan</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h1>Risiko dan Hambatan</h1>
   <table>
     <thead>
       <tr>
-        <th>Kategori A</th>
-        <th>Kategori B</th>
+        <th>Area</th>
+        <th>Kondisi</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Data 1</td>
-        <td>Data 2</td>
+        <td>QA Capacity</td>
+        <td>Masih jadi bottleneck release</td>
+      </tr>
+      <tr>
+        <td>Dependency</td>
+        <td>Integrasi vendor belum stabil</td>
       </tr>
     </tbody>
   </table>
 </section>
 
 <section class="slide">
-  <h1>Proses Eksekusi (Contoh Diagram Alur)</h1>
-  <div class="flow-container">
-    <div class="flow-box">Input Data</div>
-    <div class="flow-arrow">&#8594;</div>
-    <div class="flow-box">Proses AI</div>
-    <div class="flow-arrow">&#8594;</div>
-    <div class="flow-box">Output Selesai</div>
-  </div>
-</section>
-
-<section class="slide">
-  <h1>Kesimpulan</h1>
+  <h1>Keputusan dan Next Step</h1>
   <ul>
-    <li>Satu section hanya untuk satu H1.</li>
-    <li>Semua isi terkunci rapi di dalam section.</li>
-  </ul>
-</section>
-```
-
-## Contoh Struktur Salah (DILARANG)
-
-```html
-<section class="slide">
-  <h1>Pembukaan</h1>
-  <ul>
-    <li>Poin pembuka</li>
-  </ul>
-  <h1>Pembahasan Utama</h1>
-  <ul>
-    <li>Poin lanjutan</li>
-  </ul>
-</section>
-```
-
-Alasan salah:
-- Satu `section.slide` mengandung lebih dari satu `<h1>`.
-- `Pembahasan Utama` seharusnya berada pada slide baru.
-
-Versi benar:
-
-```html
-<section class="slide">
-  <h1>Pembukaan</h1>
-  <ul>
-    <li>Poin pembuka</li>
-  </ul>
-</section>
-
-<section class="slide">
-  <h1>Pembahasan Utama</h1>
-  <ul>
-    <li>Poin lanjutan</li>
+    <li>Tambahkan kapasitas QA sementara</li>
+    <li>Prioritaskan stabilisasi integrasi vendor</li>
+    <li>Review ulang milestone bulan depan</li>
   </ul>
 </section>
 ```
 
 ## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
 
-Setelah seluruh slide selesai ditulis, tutup respons dengan kalimat PERSIS berikut — tidak boleh diparafrase, disingkat, atau diganti dengan kalimat lain apapun:
+Setelah seluruh slide selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
 
 "Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya."
 
