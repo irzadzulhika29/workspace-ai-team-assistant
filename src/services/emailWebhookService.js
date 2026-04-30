@@ -6,10 +6,9 @@ import { urls } from './api';
  * Handles sending email data to n8n webhook for AI draft generation
  */
 
-// Use urls helper to get webhook URL based on settings
+// Use urls helper to get webhook URL based on settings (follows toggle mode)
 const getWebhookUrl = () => {
-  const baseUrl = urls.getN8nBaseUrl();
-  return `${baseUrl}/webhook-test/email`;
+  return urls.getEmail(); // Uses environment and mode from localStorage
 };
 
 /**

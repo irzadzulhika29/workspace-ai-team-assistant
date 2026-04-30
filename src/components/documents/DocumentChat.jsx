@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Send, Loader2, FileText } from 'lucide-react';
 import { chatApi } from '../../services/chatService';
 
@@ -101,9 +103,30 @@ export default function DocumentChat({ document }) {
                   : 'bg-gray-100 text-gray-900'
               }`}
             >
-              <div className="text-sm whitespace-pre-wrap break-words">
-                {msg.content}
-              </div>
+              {msg.role === 'user' ? (
+                <div className="text-sm whitespace-pre-wrap break-words">
+                  {msg.content}
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none break-words
+                  prose-p:my-1.5 prose-p:leading-relaxed
+                  prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-5
+                  prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5
+                  prose-li:my-0.5
+                  prose-strong:font-bold prose-strong:text-slate-900
+                  prose-headings:font-semibold prose-headings:my-2
+                  prose-a:text-brand-600 prose-a:underline
+                  prose-code:bg-slate-200 prose-code:px-1 prose-code:rounded prose-code:text-xs
+                  prose-pre:bg-slate-800 prose-pre:text-slate-100 prose-pre:rounded-lg prose-pre:p-3 prose-pre:overflow-x-auto
+                  prose-blockquote:border-l-2 prose-blockquote:border-slate-300 prose-blockquote:pl-3 prose-blockquote:text-slate-500
+                  prose-table:w-full prose-table:border-collapse prose-table:my-3
+                  prose-th:bg-slate-100 prose-th:border prose-th:border-slate-300 prose-th:px-3 prose-th:py-2 prose-th:text-left
+                  prose-td:border prose-td:border-slate-300 prose-td:px-3 prose-td:py-2">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         ))}

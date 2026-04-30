@@ -360,7 +360,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1568,
+        1616,
         2432
       ],
       "id": "702a1ce8-b5c5-41b8-95d6-b9313f890d5e",
@@ -1540,11 +1540,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "44a9fca4-ad9b-4ad4-8818-fc692508680b",
+  "versionId": "85857bd2-e54f-4d00-a822-f90e27663f1f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

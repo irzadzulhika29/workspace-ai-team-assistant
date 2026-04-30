@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - Sahara AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#3a302a",
+                        "on-secondary-fixed-variant": "#504840",
+                        "inverse-primary": "#f0a878",
+                        "secondary-fixed-dim": "#cec6be",
+                        "tertiary-container": "#d47070",
+                        "surface": "#faf5ee",
+                        "secondary": "#78706a",
+                        "surface-tint": "#c2652a",
+                        "on-secondary-fixed": "#2a2420",
+                        "primary-fixed-dim": "#f0a878",
+                        "on-primary-fixed": "#401a08",
+                        "on-tertiary-fixed-variant": "#6e3030",
+                        "surface-container-high": "#ece6dc",
+                        "surface-dim": "#dcd6cc",
+                        "tertiary-fixed": "#fce0e0",
+                        "surface-variant": "#ece6dc",
+                        "on-error-container": "#7a1a10",
+                        "secondary-fixed": "#eae2da",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#eae2da",
+                        "surface-container-low": "#f6f0e8",
+                        "primary-fixed": "#fbe8d8",
+                        "primary": "#c2652a",
+                        "error": "#c0392b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#9a9088",
+                        "outline-variant": "#d8d0c8",
+                        "on-surface-variant": "#605850",
+                        "on-tertiary-container": "#3a2020",
+                        "inverse-on-surface": "#faf5ee",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#fce4e0",
+                        "on-background": "#3a302a",
+                        "background": "#faf5ee",
+                        "tertiary-fixed-dim": "#e8a0a0",
+                        "on-secondary-container": "#605850",
+                        "surface-bright": "#faf5ee",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#f2ece4",
+                        "tertiary": "#8c3c3c",
+                        "primary-container": "#e08850",
+                        "on-primary-container": "#fbe8d8",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#8a4518",
+                        "surface-container-highest": "#e6e0d6",
+                        "inverse-surface": "#3a302a",
+                        "on-tertiary-fixed": "#2e1515"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["EB Garamond", "serif"],
+                        "display": ["EB Garamond", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline, .font-display { font-family: 'EB Garamond', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-[#faf5ee]/80 backdrop-blur-md flex justify-between items-center px-8 w-[calc(100%-16rem)]">
+<div class="font-['EB_Garamond'] font-bold text-orange-900 text-xl flex items-center gap-2">
+             Sahara AI
+        </div>
+<div class="flex items-center gap-4 text-stone-500">
+<button class="hover:text-orange-700 transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-orange-700 transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="hover:text-orange-700 transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 border-r border-orange-200/40 bg-orange-50 shadow-[2px_0_16px_rgba(58,48,42,0.04)] font-['Manrope'] antialiased flex flex-col h-full p-4 gap-2 z-50">
+<div class="flex items-center gap-3 mb-8 px-2 mt-4">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold font-headline overflow-hidden">
+<img alt="Project Manager Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCTo37do5fDf7UfNiq-Dgodw1dajxjV_1jPYmPNTU536yBSaLPzbkZTPY4eJZdCJMarxXTXlR_8itSELtDm39Zf7JY2ofJ9dhnosDCXDzEJy5qR81hadsLLp6bzAeGCr5qlSVrtJ9GSWavkZ6TmSGkCgK0rQJsrSnVj3eEGAZHLekbn3lLOIiUV_I6IIP2eo_gF8V7mBj61F41M2_XnA0nMTVJxe9Mtpor2bm5Mxv2iJ5qNHsOYaRXqYszB3z_c55XN8n0b8AHAHbJ"/>
+</div>
+<div>
+<h2 class="font-['EB_Garamond'] text-2xl tracking-tight text-orange-900 font-bold leading-tight">Sahara AI</h2>
+<p class="text-xs text-secondary uppercase tracking-wider font-semibold">Team Assistant</p>
+</div>
+</div>
+<button class="mb-6 w-full bg-primary text-on-primary hover:bg-primary/90 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-sm transition-all scale-98 active:opacity-80">
+<span class="material-symbols-outlined text-[20px]">add</span>
+            New Request
+        </button>
+<div class="space-y-1 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2.5 text-orange-800 font-bold bg-orange-100/50 rounded-lg scale-98 active:opacity-80 transition-all" href="#">
+<span class="material-symbols-outlined fill text-[22px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">forum</span>
+                Supervisor Chat
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">pinboard</span>
+                Jira
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">mail</span>
+                Email
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">calendar_month</span>
+                Calendar
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">description</span>
+                Documents
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">extension</span>
+                Integrations
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">generating_tokens</span>
+                Token Usage
+            </a>
+</div>
+<div class="mt-auto pt-4 border-t border-orange-200/40">
+<a class="flex items-center gap-3 px-3 py-2.5 text-stone-500 hover:text-orange-700 hover:bg-orange-100/30 rounded-lg transition-colors duration-200 scale-98 active:opacity-80" href="#">
+<span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+                Admin
+            </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12 min-h-screen">
+<div class="max-w-6xl mx-auto">
+<header class="mb-10">
+<h1 class="text-4xl font-headline text-on-surface mb-2 tracking-tight">Morning, Commander.</h1>
+<p class="text-on-surface-variant text-lg">Here is your operational overview for today.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Jira Card -->
+<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/60 shadow-[0_2px_16px_rgba(58,48,42,0.04)] flex flex-col h-full">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined fill text-2xl">pinboard</span>
+<h2 class="font-headline text-2xl text-on-surface m-0">Jira Sync</h2>
+</div>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs font-bold rounded-full tracking-wider uppercase">2 Blocks</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="bg-surface-bright rounded-xl p-4 border border-outline-variant/30">
+<div class="text-3xl font-headline text-on-surface">14</div>
+<div class="text-xs text-on-surface-variant uppercase tracking-wider mt-1">Open</div>
+</div>
+<div class="bg-surface-bright rounded-xl p-4 border border-outline-variant/30">
+<div class="text-3xl font-headline text-primary">5</div>
+<div class="text-xs text-on-surface-variant uppercase tracking-wider mt-1">In Review</div>
+</div>
+<div class="bg-surface-bright rounded-xl p-4 border border-outline-variant/30">
+<div class="text-3xl font-headline text-tertiary">2</div>
+<div class="text-xs text-on-surface-variant uppercase tracking-wider mt-1">Overdue</div>
+</div>
+</div>
+<div class="mb-8 flex-grow">
+<p class="text-on-surface-variant text-sm leading-relaxed">
+<strong class="text-on-surface">Sahara Insight:</strong> The 'Backend Auth Refactor' epic is stalled in review. Two critical bugs were logged this morning affecting the staging deployment. Recommend immediate sync with the lead developer.
+                        </p>
+</div>
+<div class="flex items-center gap-4 mt-auto pt-4 border-t border-outline-variant/40">
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm">Lihat Jira</button>
+<button class="flex-1 border border-outline text-on-surface py-2.5 rounded-lg font-semibold hover:bg-surface-container transition-colors text-sm">Buat Report</button>
+</div>
+</div>
+<!-- Calendar Card -->
+<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/60 shadow-[0_2px_16px_rgba(58,48,42,0.04)] flex flex-col h-full">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined fill text-2xl">calendar_month</span>
+<h2 class="font-headline text-2xl text-on-surface m-0">Agenda</h2>
+</div>
+<span class="text-sm font-semibold text-primary">Next: 15m</span>
+</div>
+<div class="bg-primary/5 rounded-xl p-5 border border-primary/20 mb-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
+<h3 class="font-headline text-xl text-on-surface mb-1 relative z-10">Product Strategy Sync</h3>
+<div class="flex items-center gap-4 text-on-surface-variant text-sm mb-3 relative z-10">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 10:30 AM</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">videocam</span> Meet</span>
+</div>
+<div class="flex -space-x-2 relative z-10">
+<img alt="Attendee 1" class="w-8 h-8 rounded-full border-2 border-surface-container-low" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBljkuXGVSbM4pYC4tE7gFS0xkZ2KrhjYhtf2kxxHKWlQqXiohtWeqgalOHrICqXE97__n0_MkvpTXoY82cc9qPIMcPKjq9kpVCpD9fl19oYBTCbA9aOuYb2CD1NgJenQIZl3gJayifRH1vpXG8QngesDcIQ1P9ECRdFhYeGusWcKB0ITMbooiwbWivJv34OaC81zel6RifVY3WmDF3ueLhDqpfnq9yzCaqrDVKdUmEjVTrUW6FWk42yZvFPbQxrCtcFGahdh-A3zQO"/>
+<img alt="Attendee 2" class="w-8 h-8 rounded-full border-2 border-surface-container-low" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnRknk69CUYQbo9-RaN-g5M7u1dDyPAyU2UeOEVwC3TSYzQK96Jl8K6QK6qEmbfLa0JlaeqUire5HrAYYEzy90BuEIdhfFR1eNs2W4VwPraI_L-8za5rH7X9xC9CQO5Xjy4E0QgmGRxONqmphz2BLXRdKUK1qw8H4Mfa0GM_paCG1WMt8JezeYDqlyaXdZYgrTK9LGCzvj3_P_MwIlRMo3-dwWiBsZzEk0aNcBUHWmR8a2OGOodeLd-9esMRpa2eFLXSc06KGO2SDD"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-low bg-surface-variant flex items-center justify-center text-xs font-bold text-on-surface-variant">+3</div>
+</div>
+</div>
+<div class="space-y-4 mb-8 flex-grow">
+<div class="flex items-start gap-4">
+<div class="text-xs font-bold text-on-surface-variant w-12 pt-1">1:00 PM</div>
+<div>
+<div class="font-semibold text-on-surface text-sm">Design Review: Onboarding</div>
+<div class="text-xs text-on-surface-variant">Design Team • 1h</div>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="text-xs font-bold text-on-surface-variant w-12 pt-1">3:30 PM</div>
+<div>
+<div class="font-semibold text-on-surface text-sm">1:1 with Alex</div>
+<div class="text-xs text-on-surface-variant">Alex Chen • 30m</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-auto pt-4 border-t border-outline-variant/40">
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm">Siapkan Brief</button>
+<button class="flex-1 border border-outline text-on-surface py-2.5 rounded-lg font-semibold hover:bg-surface-container transition-colors text-sm">Lihat Calendar</button>
+</div>
+</div>
+<!-- Email Card -->
+<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/60 shadow-[0_2px_16px_rgba(58,48,42,0.04)] flex flex-col h-full">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined fill text-2xl">mail</span>
+<h2 class="font-headline text-2xl text-on-surface m-0">Comms</h2>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-md">8 Unread</span>
+</div>
+</div>
+<div class="space-y-4 mb-8 flex-grow">
+<div class="group p-4 -mx-4 rounded-xl hover:bg-surface-bright transition-colors cursor-pointer border border-transparent hover:border-outline-variant/40">
+<div class="flex items-center justify-between mb-1">
+<span class="font-bold text-sm text-on-surface">Sarah Jenkins (Client)</span>
+<span class="text-xs text-tertiary font-bold px-2 py-0.5 bg-tertiary/10 rounded-full">Urgent</span>
+</div>
+<div class="font-headline text-lg text-on-surface mb-1 truncate">Q3 Deliverables Feedback</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">Hi team, reviewed the latest deck. We need to revise the timeline on slide 4 before the board meeting tomorrow...</p>
+</div>
+<div class="group p-4 -mx-4 rounded-xl hover:bg-surface-bright transition-colors cursor-pointer border border-transparent hover:border-outline-variant/40">
+<div class="flex items-center justify-between mb-1">
+<span class="font-semibold text-sm text-on-surface">System Alerts</span>
+<span class="text-xs text-on-surface-variant">1h ago</span>
+</div>
+<div class="font-headline text-lg text-on-surface mb-1 truncate">AWS Cost Anomaly Detected</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">Automated alert: S3 storage costs have spiked 15% above predicted baseline for the current billing cycle.</p>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-auto pt-4 border-t border-outline-variant/40">
+<button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit_document</span> Draft Reply
+                        </button>
+<button class="flex-1 border border-outline text-on-surface py-2.5 rounded-lg font-semibold hover:bg-surface-container transition-colors text-sm">Lihat Email</button>
+</div>
+</div>
+<!-- Token Usage Card -->
+<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/60 shadow-[0_2px_16px_rgba(58,48,42,0.04)] flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-8 relative z-10">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined fill text-2xl">generating_tokens</span>
+<h2 class="font-headline text-2xl text-on-surface m-0">Token Economy</h2>
+</div>
+</div>
+<div class="mb-10 relative z-10 flex-grow">
+<div class="flex items-end gap-2 mb-2">
+<span class="text-5xl font-headline text-on-surface tracking-tighter">842k</span>
+<span class="text-on-surface-variant pb-2 font-semibold">/ 1M limit</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-6">Current billing cycle resets in 12 days.</p>
+<div class="space-y-5">
+<div>
+<div class="flex justify-between text-xs font-semibold mb-2">
+<span class="text-on-surface">GPT-4 Turbo (Analysis)</span>
+<span class="text-on-surface-variant">65%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-semibold mb-2">
+<span class="text-on-surface">Claude 3 (Drafting)</span>
+<span class="text-on-surface-variant">25%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+<div class="bg-[#8c3c3c] h-2 rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-semibold mb-2">
+<span class="text-on-surface">Embeddings</span>
+<span class="text-on-surface-variant">10%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+<div class="bg-[#dcd6cc] h-2 rounded-full" style="width: 10%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant/40 relative z-10">
+<button class="w-full border border-outline text-on-surface py-2.5 rounded-lg font-semibold hover:bg-surface-container transition-colors text-sm">Lihat Detail</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
