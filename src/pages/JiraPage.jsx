@@ -623,10 +623,7 @@ export default function JiraPage() {
 
               <div className="self-start rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xl font-semibold text-slate-900">Operational Snapshot</p>
-                    <p className="mt-1 text-sm text-slate-500">Insight AI dari webhook test `jira-summary`.</p>
-                  </div>
+                  <p className="text-base font-semibold text-slate-900">AI Insights</p>
                   <button
                     type="button"
                     onClick={loadJiraSummary}
@@ -694,10 +691,9 @@ export default function JiraPage() {
                       <div className={activeSummarySlide === 0 ? 'rounded-2xl bg-slate-50 px-4 py-4' : 'hidden rounded-2xl bg-slate-50 px-4 py-4'}>
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">AI Headline</p>
-                            <p className="mt-2 text-base font-semibold leading-6 text-slate-900">{aiSummary.headline}</p>
+                            <p className="mt-2 text-xs font-semibold leading-6 text-slate-900">{aiSummary.headline}</p>
                           </div>
-                          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium uppercase text-slate-500">
+                          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[8px] font-medium uppercase text-slate-500">
                             {aiSummary.priority}
                           </span>
                         </div>

@@ -1,5 +1,7 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import { requireAuth } from '../middleware/auth.js';
+import { Prisma } from '@prisma/client';
 import { decrypt, encrypt } from '../utils/encryption.js';
 import prisma from '../lib/prisma.js';
 
@@ -7,6 +9,16 @@ const router = express.Router();
 
 const ALLOWED_PROXY_METHODS = new Set(['GET', 'POST', 'PUT', 'DELETE']);
 const JIRA_PATH_PREFIX = '/rest/api/3/';
+
+function isJiraCredentialDecryptError(error) {
+  const message = String(error?.message || '');
+  return (
+    message === 'Unsupported state or unable to authenticate data' ||
+    message === 'Encrypted token format is invalid' ||
+    message === 'ENCRYPTION_KEY is not configured' ||
+    message === 'ENCRYPTION_KEY must be exactly 32 bytes'
+  );
+}
 
 function normalizeSubdomain(value) {
   const cleaned = String(value || '').trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
@@ -27,12 +39,15 @@ function buildJiraHeaders(email, apiToken) {
 }
 
 async function getActiveJiraIntegration(userId) {
-  return prisma.jiraIntegration.findFirst({
-    where: {
-      userId,
-      isActive: true,
-    },
-  });
+  const rows = await prisma.$queryRaw`
+    SELECT "id", "userId", "subdomain", "email", "apiTokenEnc", "isActive", "createdAt", "updatedAt"
+    FROM "jira_integrations"
+    WHERE "userId" = ${userId} AND "isActive" = true
+    ORDER BY "updatedAt" DESC
+    LIMIT 1
+  `;
+
+  return rows[0] || null;
 }
 
 async function testJiraConnection(subdomain, email, apiToken) {
@@ -93,6 +108,14 @@ router.get('/jira/n8n-credentials', requireAuth, async (req, res) => {
       },
     });
   } catch (error) {
+    if (isJiraCredentialDecryptError(error)) {
+      return res.status(409).json({
+        error: 'Jira credential can no longer be decrypted',
+        message: 'Token Jira tersimpan dengan kunci enkripsi yang berbeda. Disconnect lalu connect ulang Jira.',
+        reconnectRequired: true,
+      });
+    }
+
     res.status(500).json({ error: error.message });
   }
 });
@@ -109,22 +132,20 @@ router.post('/jira', requireAuth, async (req, res) => {
 
     await testJiraConnection(subdomain, email, apiToken);
 
-    const integration = await prisma.jiraIntegration.upsert({
-      where: { userId: req.user.id },
-      update: {
-        subdomain,
-        email,
-        apiTokenEnc: encrypt(apiToken),
-        isActive: true,
-      },
-      create: {
-        userId: req.user.id,
-        subdomain,
-        email,
-        apiTokenEnc: encrypt(apiToken),
-        isActive: true,
-      },
-    });
+    const encryptedToken = encrypt(apiToken);
+    const rows = await prisma.$queryRaw(Prisma.sql`
+      INSERT INTO "jira_integrations" ("id", "userId", "subdomain", "email", "apiTokenEnc", "isActive", "createdAt", "updatedAt")
+      VALUES (${randomUUID()}, ${req.user.id}, ${subdomain}, ${email}, ${encryptedToken}, true, NOW(), NOW())
+      ON CONFLICT ("userId")
+      DO UPDATE SET
+        "subdomain" = EXCLUDED."subdomain",
+        "email" = EXCLUDED."email",
+        "apiTokenEnc" = EXCLUDED."apiTokenEnc",
+        "isActive" = true,
+        "updatedAt" = NOW()
+      RETURNING "subdomain", "email", "createdAt", "updatedAt"
+    `);
+    const integration = rows[0];
 
     res.json({
       connected: true,
@@ -140,9 +161,10 @@ router.post('/jira', requireAuth, async (req, res) => {
 
 router.delete('/jira', requireAuth, async (req, res) => {
   try {
-    await prisma.jiraIntegration.deleteMany({
-      where: { userId: req.user.id },
-    });
+    await prisma.$executeRaw`
+      DELETE FROM "jira_integrations"
+      WHERE "userId" = ${req.user.id}
+    `;
 
     res.json({ success: true });
   } catch (error) {
@@ -201,6 +223,14 @@ router.post('/jira/proxy', requireAuth, async (req, res) => {
 
     res.json(payload);
   } catch (error) {
+    if (isJiraCredentialDecryptError(error)) {
+      return res.status(409).json({
+        error: 'Jira credential can no longer be decrypted',
+        message: 'Token Jira tersimpan dengan kunci enkripsi yang berbeda. Disconnect lalu connect ulang Jira.',
+        reconnectRequired: true,
+      });
+    }
+
     console.error('Jira proxy error:', error);
     res.status(500).json({ error: error.message });
   }
