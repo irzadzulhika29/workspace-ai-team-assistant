@@ -17,7 +17,7 @@ Gunakan skill ini untuk membuat presentasi yang ringkas, jelas, dan enak dipinda
    Jangan salin semua detail mentah ke slide. Ambil inti yang paling penting.
 
 ## Struktur Deck yang Disarankan
-Gunakan alur yang proporsional untuk deck singkat maksimal 5 slide:
+Gunakan alur yang proporsional untuk deck singkat maksimal 10 slide:
 
 1. **Slide pembuka**
    - judul utama
@@ -35,9 +35,10 @@ Gunakan alur yang proporsional untuk deck singkat maksimal 5 slide:
 Jika isi lebih sedikit, tidak wajib memaksakan 5 slide. Lebih baik 3-4 slide yang kuat daripada 5 slide kosong.
 
 ## Aturan Kepadatan Isi
-- Maksimal 4 bullet per slide.
-- Setiap bullet idealnya 4-10 kata, jangan seperti paragraf.
-- Jangan menaruh paragraf panjang dalam slide.
+- Maksimal 5 bullet per slide.
+- Setiap bullet idealnya 4-14 kata, jangan berubah menjadi paragraf penuh.
+- Paragraf singkat 1-3 kalimat diperbolehkan jika memang lebih tepat daripada bullet list.
+- Gunakan ukuran konten yang lebih padat untuk detail pendukung, tetapi tetap utamakan scanability.
 - Hindari tabel besar dan padat.
 - Jika data terlalu banyak, ringkas menjadi kategori, angka utama, atau perbandingan inti.
 
@@ -53,6 +54,16 @@ Gunakan jika:
 Gunakan:
 - `<ul>` dan `<li>`
 - `<strong>` untuk kata kunci penting
+
+### 1A. Paragraf Ringkas
+Gunakan jika:
+- perlu menjelaskan konteks singkat
+- ada kalimat keputusan atau catatan penting yang tidak cocok dibelah jadi bullet
+
+Gunakan:
+- `<p>` untuk 1-3 kalimat singkat
+- `<h2>` sebagai subjudul bila perlu
+- maksimal 2 paragraf pendek per slide
 
 ### 2. Tabel
 Gunakan jika:
@@ -98,7 +109,7 @@ Aturan ini tetap WAJIB dipatuhi:
 Sebelum mengirim HTML final, cek ulang:
 1. Apakah setiap slide membawa satu ide utama?
 2. Apakah deck punya alur pembuka -> isi -> penutup?
-3. Apakah bullet cukup singkat dan mudah dipindai?
+3. Apakah bullet dan paragraf tetap mudah dipindai walau informasinya lebih padat?
 4. Apakah tabel benar-benar perlu?
 5. Apakah tidak ada slide yang terasa terlalu penuh?
 6. Apakah seluruh slide sudah valid secara struktur HTML?
