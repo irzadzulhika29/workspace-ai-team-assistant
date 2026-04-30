@@ -32,7 +32,7 @@ Gunakan alur yang proporsional untuk deck singkat maksimal 10 slide:
 5. **Slide penutup**
    - kesimpulan, keputusan, atau next step
 
-Jika isi lebih sedikit, tidak wajib memaksakan 5 slide. Lebih baik 3-4 slide yang kuat daripada 5 slide kosong.
+Jika isi lebih sedikit, tidak wajib memaksakan jumlah slide tertentu. Lebih baik 3-6 slide yang kuat daripada banyak slide kosong atau repetitif.
 
 ## Aturan Kepadatan Isi
 - Maksimal 5 bullet per slide.
