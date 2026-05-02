@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Paperclip, X } from 'lucide-react'
+import { Button } from '@/components/ui'
 
 /**
  * MessageInput — text input + send button for chat with optional file upload
@@ -63,20 +64,18 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
   }
 
   return (
-    <div className="
-      flex flex-col gap-2 px-4 py-3
-      bg-white/75 backdrop-blur-md border-t ghost-divider
-    ">
+    <div className="border-t border-neutral-200 bg-white px-4 py-4 md:px-6">
       {/* File Preview Area */}
       {selectedFile && (
-        <div className="flex items-center gap-2 p-2 w-fit bg-surface-sunken rounded-lg animate-fade-in">
-          <Paperclip size={14} className="text-slate-500" />
-          <span className="text-xs font-medium text-slate-700 max-w-[200px] truncate">
+        <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 animate-fade-in">
+          <Paperclip size={14} className="text-neutral-500" />
+          <span className="max-w-[220px] truncate text-xs font-medium text-neutral-700">
             {selectedFile.name}
           </span>
           <button
+            type="button"
             onClick={removeFile}
-            className="p-1 rounded-full hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors"
+            className="rounded-full p-1 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-error"
           >
             <X size={12} />
           </button>
@@ -98,50 +97,39 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
             <label
               htmlFor="file-upload"
               className={`
-                w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer
-                 text-slateui-500 hover:bg-surface-sunken hover:text-brand-600
+                flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-500
                 transition-colors duration-150
-                ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent hover:text-slate-500' : ''}
+                ${disabled ? 'cursor-not-allowed opacity-50 hover:bg-white hover:text-neutral-500' : 'hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500'}
               `}
             >
-              <Paperclip size={20} />
+              <Paperclip size={18} />
             </label>
           </div>
         )}
-        
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          placeholder={placeholder}
-          rows={1}
-          className="
-            flex-1 resize-none rounded-xl border border-transparent bg-surface-raised
-            px-4 py-2.5 text-sm text-slateui-900 shadow-[inset_0_0_0_1px_rgba(191,200,207,0.35)]
-            placeholder:text-slate-400
-            focus:outline-none focus:ring-0 focus:shadow-[inset_0_-2px_0_0_#006184]
-            disabled:opacity-50 disabled:cursor-not-allowed
-            transition-all duration-150 font-sans
-            custom-scrollbar
-          "
-          style={{ minHeight: '44px' }}
-        />
-        <button
+
+        <div className="flex-1 rounded-[1.25rem] border border-neutral-200 bg-white px-4 py-2 shadow-sm transition-all duration-150 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            placeholder={placeholder}
+            rows={1}
+            className="custom-scrollbar min-h-[44px] w-full resize-none bg-transparent py-0.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ maxHeight: '160px' }}
+          />
+        </div>
+
+        <Button
           onClick={handleSend}
           disabled={disabled || (!value.trim() && !selectedFile)}
-          className="
-            w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0
-            bg-brand-600 text-white
-            hover:bg-brand-700
-            disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed
-            transition-all duration-150
-          "
+          size="icon"
+          className="h-11 w-11 flex-shrink-0 rounded-xl"
           aria-label="Kirim pesan"
         >
           <Send size={16} />
-        </button>
+        </Button>
       </div>
     </div>
   )

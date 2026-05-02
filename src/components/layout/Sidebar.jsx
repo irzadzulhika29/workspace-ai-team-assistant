@@ -1,13 +1,13 @@
 import React from 'react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import { NavLink, useLocation } from 'react-router-dom'
+import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import SettingsModal from '../ui/SettingsModal'
+import { Button, NavItem } from '@/components/ui'
 import { useChatStore } from '../../store/chatStore'
 import { sessionApi } from '../../services/sessionService'
 import { useSidebar } from '../../context/SidebarContext'
-import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/',                 icon: LayoutDashboard, label: 'Dashboard'         },
@@ -18,16 +18,14 @@ const navItems = [
   { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
   { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
   { to: '/integrations',     icon: Plug,            label: 'Integrations'      },
+  { to: '__settings__',      icon: Settings,        label: 'Settings'          },
 ]
 
 export default function Sidebar() {
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [loggingOut, setLoggingOut] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate()
   const isSupervisorPage = location.pathname === '/chat/supervisor'
   const { open: mobileOpen, collapsed, close: closeMobile, toggleCollapse } = useSidebar()
-  const { user, logout } = useAuth()
 
   // ── Supervisor session state ───────────────────────────────────────────
   const {
@@ -166,21 +164,6 @@ export default function Sidebar() {
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // Logout handler
-  // ─────────────────────────────────────────────────────────────────────
-  const handleLogout = async () => {
-    setLoggingOut(true)
-    try {
-      await logout()
-      navigate('/login', { replace: true })
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      setLoggingOut(false)
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────────────────────────────
   const formatDate = (dateStr) => {
@@ -199,6 +182,10 @@ export default function Sidebar() {
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
   }
 
+  const isRouteActive = (path) => (
+    path === '/' ? location.pathname === '/' : location.pathname === path
+  )
+
   // Reusable session list renderer
   const renderSessionList = ({
     sessions,
@@ -210,17 +197,12 @@ export default function Sidebar() {
     onSelectSession,
     onDeleteSession,
   }) => (
-    <div className="mt-2 ml-3 pl-3 border-l ghost-divider space-y-1 animate-fade-in">
-      <button
+    <div className="mt-3 ml-4 space-y-2 border-l border-neutral-200 pl-4 animate-fade-in">
+      <Button
         onClick={onNewChat}
         disabled={creating}
-        className="
-          w-full flex items-center gap-2
-          px-2.5 py-1.5 rounded-md text-xs font-medium
-          bg-brand-600 hover:bg-brand-700 text-white shadow-[0_12px_24px_rgba(0,97,132,0.18)]
-          transition-all duration-200 active:scale-[0.98]
-          disabled:opacity-50 disabled:cursor-not-allowed
-        "
+        size="sm"
+        className="w-full justify-center gap-2 rounded-lg"
       >
         {creating ? (
           <Loader2 size={12} className="animate-spin" />
@@ -228,19 +210,19 @@ export default function Sidebar() {
           <Plus size={12} />
         )}
         {creating ? 'Membuat...' : 'New Chat'}
-      </button>
+      </Button>
 
-      <p className="text-slate-400 text-[9px] font-mono uppercase tracking-widest px-1 pt-1">
+      <p className="px-1 pt-1 text-[9px] font-mono uppercase tracking-[0.24em] text-neutral-400">
         Riwayat
       </p>
 
       <div className="max-h-[calc(100vh-380px)] overflow-y-auto sidebar-scrollbar space-y-0.5 pr-0.5">
         {loading ? (
           <div className="flex items-center justify-center py-4">
-            <Loader2 size={14} className="animate-spin text-slate-500" />
+            <Loader2 size={14} className="animate-spin text-neutral-500" />
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-[10px] text-slate-600 text-center py-3 px-1">
+          <p className="px-1 py-3 text-center text-[10px] text-neutral-500">
             Belum ada sesi.
           </p>
         ) : (
@@ -250,45 +232,46 @@ export default function Sidebar() {
               <div
                 key={session.id}
                 className={`
-                  w-full flex items-center gap-1 rounded-md
-                  transition-all duration-150 group relative
+                  group relative flex w-full items-center gap-1 rounded-lg border
+                  transition-all duration-150
                   ${isActive
-                    ? 'bg-white text-slateui-900 shadow-sm'
-                    : 'text-slateui-500 hover:text-slateui-900 hover:bg-white/55'
+                    ? 'border-primary-200 bg-primary-50/70 text-neutral-900 shadow-sm'
+                    : 'border-transparent text-neutral-500 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900'
                    }
                 `}
               >
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-brand-600 rounded-r-full" />
+                  <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary-500" />
                 )}
                 <button
+                  type="button"
                   onClick={() => onSelectSession(session.id)}
                   className="flex items-start gap-2 px-2 py-1.5 text-left flex-1 min-w-0"
                 >
                   <MessageSquare
                     size={11}
                     className={`mt-0.5 flex-shrink-0 ${
-                      isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slateui-500'
+                      isActive ? 'text-primary-500' : 'text-neutral-400 group-hover:text-primary-500'
                     }`}
                   />
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-medium truncate">
                       {session.judul || 'Obrolan Baru'}
                     </p>
-                    <p className={`text-[9px] mt-0.5 ${isActive ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <p className={`mt-0.5 text-[9px] ${isActive ? 'text-neutral-400' : 'text-neutral-500'}`}>
                       {formatDate(session.created_at)}
                     </p>
                   </div>
                 </button>
                 <button
+                  type="button"
                   onClick={(e) => onDeleteSession(e, session.id)}
                   title="Hapus sesi"
                   className={`
-                    flex-shrink-0 p-1 mr-1 rounded opacity-0 group-hover:opacity-100
-                    transition-opacity duration-150
+                    mr-1 flex-shrink-0 rounded p-1 opacity-0 transition-all duration-150 group-hover:opacity-100
                     ${isActive
-                     ? 'hover:bg-surface-high text-slate-400 hover:text-red-500'
-                      : 'hover:bg-surface text-slate-400 hover:text-red-500'
+                     ? 'text-neutral-400 hover:bg-white hover:text-error'
+                      : 'text-neutral-400 hover:bg-white hover:text-error'
                      }
                    `}
                 >
@@ -301,7 +284,7 @@ export default function Sidebar() {
       </div>
 
       {loadHist && (
-        <div className="flex items-center gap-1.5 px-1 py-1 text-[10px] text-slate-500">
+        <div className="flex items-center gap-1.5 px-1 py-1 text-[10px] text-neutral-500">
           <Loader2 size={10} className="animate-spin" />
           Memuat riwayat...
         </div>
@@ -312,76 +295,77 @@ export default function Sidebar() {
   return (
     <>
       <aside className={`
-        fixed top-0 left-0 h-screen z-40
-        bg-surface-high/95 backdrop-blur-xl flex flex-col
-        border-r border-white/30
-        select-none transition-all duration-300
+        fixed left-0 top-0 z-40 flex h-screen flex-col
+        border-r border-neutral-200 bg-white/95
+        select-none shadow-sm backdrop-blur-xl transition-all duration-300
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0
-        ${collapsed ? 'md:w-[72px]' : 'md:w-[240px]'}
-        w-[240px]
+        ${collapsed ? 'md:w-[72px]' : 'md:w-[270px]'}
+        w-[270px]
       `}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b ghost-divider justify-between">
+        <div className="relative flex items-center justify-between gap-3 border-b border-neutral-200 bg-gradient-stat px-4 py-5 text-white">
           <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${collapsed ? 'md:opacity-0 md:w-0' : 'opacity-100'}`}>
-            <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0 shadow-[0_12px_24px_rgba(0,97,132,0.18)]">
-              <MessageSquare size={14} className="text-white" />
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white/95 text-primary-500 shadow-stat">
+              <MessageSquare size={14} />
             </div>
             <div className="overflow-hidden">
-              <p className="text-slateui-900 text-base font-bold font-headline leading-tight truncate">
+              <p className="truncate text-base font-bold font-headline leading-tight text-white">
                 AI Team Assistant
               </p>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 mt-1">Executive Canvas</p>
+              <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-white/80">Executive Canvas</p>
             </div>
           </div>
           
           {/* Logo only when collapsed (desktop) */}
-          <div className={`hidden md:flex items-center justify-center transition-all duration-300 ${collapsed ? 'opacity-100 w-full' : 'opacity-0 w-0'}`}>
-            <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center shadow-[0_12px_24px_rgba(0,97,132,0.18)]">
-              <MessageSquare size={14} className="text-white" />
+          <div className={`pointer-events-none absolute inset-0 hidden md:flex items-center justify-center transition-all duration-300 ${collapsed ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 text-primary-500 shadow-stat">
+              <MessageSquare size={14} />
             </div>
           </div>
           
           {/* Close button — mobile only */}
           <button
             onClick={closeMobile}
-            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            type="button"
+            className="rounded-lg p-1.5 text-white/75 transition-colors hover:bg-white/10 hover:text-white md:hidden"
           >
             <X size={18} />
           </button>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto sidebar-scrollbar">
-          <p className={`text-slate-400 text-[10px] font-mono uppercase tracking-widest px-3 pb-2 transition-all duration-300 ${collapsed ? 'md:opacity-0 md:h-0 md:pb-0' : 'opacity-100'}`}>
+          <p className={`px-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-neutral-400 transition-all duration-300 ${collapsed ? 'md:opacity-0 md:h-0 md:pb-0' : 'opacity-100'}`}>
             Workspace
           </p>
           {navItems.map(({ to, icon: Icon, label }) => (
             <div key={to}>
-              <NavLink
-                to={to}
-                end={to === '/'}
-                onClick={closeMobile}
-                title={collapsed ? label : ''}
-                className={({ isActive }) =>
-                  `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                   transition-all duration-150 relative
-                   ${collapsed ? 'md:justify-center' : ''}
-                   ${isActive
-                       ? 'bg-white text-brand-700 shadow-sm translate-x-1'
-                       : 'text-slateui-500 hover:text-slateui-900 hover:bg-white/55'
-                     }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && !collapsed && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-600 rounded-r-full" />
-                    )}
-                    <Icon size={16} className={isActive ? 'text-brand-600' : 'text-slateui-500 group-hover:text-slateui-700'} />
-                    <span className={`transition-all duration-300 ${collapsed ? 'md:hidden' : ''}`}>{label}</span>
-                  </>
-                )}
-              </NavLink>
+              {to === '__settings__' ? (
+                <NavItem
+                  onClick={() => setSettingsOpen(true)}
+                  icon={<Icon size={16} />}
+                  label={label}
+                  collapsed={collapsed}
+                  title={collapsed ? label : ''}
+                  className="rounded-xl px-3 py-2.5"
+                />
+              ) : (
+                <NavItem
+                  asChild
+                  icon={<Icon size={16} />}
+                  label={label}
+                  active={isRouteActive(to)}
+                  collapsed={collapsed}
+                  className="rounded-xl px-3 py-2.5"
+                  title={collapsed ? label : ''}
+                >
+                  <NavLink
+                    to={to}
+                    end={to === '/'}
+                    onClick={closeMobile}
+                  />
+                </NavItem>
+              )}
 
               {/* Supervisor session sub-menu - hide when collapsed */}
               {!collapsed && to === '/chat/supervisor' && isSupervisorPage && renderSessionList({
@@ -398,85 +382,17 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        <div className="px-4 pb-4 space-y-2 border-t ghost-divider pt-3">
-          {/* User Info & Logout */}
-          {user && (
-            <div className={`mb-3 ${collapsed ? 'md:px-0' : 'px-2'}`}>
-              {!collapsed ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-50/80 border border-slate-100">
-                    {user.picture && (
-                      <img 
-                        src={user.picture} 
-                        alt={user.name} 
-                        className="w-9 h-9 rounded-full border-2 border-white shadow-sm flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-900 truncate">{user.name}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 border border-rose-200 hover:border-rose-300 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {loggingOut ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        <span>Logging out...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogOut size={14} />
-                        <span>Logout</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  title="Logout"
-                  className="w-full flex items-center justify-center p-2.5 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 hover:border-rose-300 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loggingOut ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <LogOut size={16} />
-                  )}
-                </button>
-              )}
-            </div>
-          )}
-
-          <button
-            onClick={() => setSettingsOpen(true)}
-            title={collapsed ? 'Settings' : ''}
-            className={`
-              w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-              text-slateui-500 hover:text-slateui-900 hover:bg-white/55
-              transition-all duration-150
-              ${collapsed ? 'md:justify-center' : ''}
-            `}
-          >
-            <Settings size={16} className="text-slateui-500" />
-            <span className={`transition-all duration-300 ${collapsed ? 'md:hidden' : ''}`}>Settings</span>
-          </button>
-        </div>
-
         {/* Collapse toggle button - positioned at sidebar border center */}
         <button
           onClick={toggleCollapse}
+          type="button"
           className={`
             hidden md:flex items-center justify-center
             absolute top-1/2 -translate-y-1/2 -right-4
             w-8 h-8 rounded-full
-            bg-white border-2 border-gray-200
-            shadow-md hover:shadow-lg
-            text-slate-600 hover:text-brand-600
+            bg-white border-2 border-neutral-200
+            shadow-sm hover:shadow-md
+            text-neutral-500 hover:text-primary-500 hover:border-primary-200
             transition-all duration-200
             z-50
             ${collapsed ? '' : ''}

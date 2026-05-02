@@ -4,11 +4,15 @@ import { useSidebar } from '../../context/SidebarContext'
 import { useLocation } from 'react-router-dom'
 
 const PAGE_TITLES = {
-  '/':                    'Dashboard',
-  '/chat/supervisor':     'Supervisor Agent',
-  '/workspace/files':     'Documents',
-  '/workspace/calendar':  'Calendar',
-  '/workspace/jira':      'Jira',
+  '/': 'Dashboard',
+  '/chat/supervisor': 'Supervisor Agent',
+  '/workspace/files': 'Documents',
+  '/workspace/calendar': 'Calendar',
+  '/workspace/email': 'Email',
+  '/workspace/jira': 'Jira',
+  '/monitoring/tokens': 'Token Monitor',
+  '/integrations': 'Integrations',
+  '/settings/integrations': 'Integrations',
 }
 
 export default function MobileHeader() {
@@ -17,24 +21,21 @@ export default function MobileHeader() {
   const title = PAGE_TITLES[location.pathname] ?? 'AI Team Assistant'
 
   return (
-    <header className="
-      md:hidden flex items-center gap-3 px-4 h-14
-      border-b ghost-divider bg-white/80 backdrop-blur-md
-      sticky top-0 z-20
-    ">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-neutral-200 bg-white/95 px-4 shadow-xs backdrop-blur-md md:hidden">
       <button
         onClick={toggle}
-        className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+        type="button"
+        className="rounded-lg p-1.5 text-neutral-500 transition-colors hover:bg-primary-50 hover:text-primary-600"
         aria-label="Toggle menu"
       >
         <Menu size={20} />
       </button>
 
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
+        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary-500 shadow-stat">
           <MessageSquare size={12} className="text-white" />
         </div>
-        <span className="text-sm font-bold font-headline text-slateui-900 truncate">{title}</span>
+        <span className="truncate text-sm font-bold font-headline text-neutral-900">{title}</span>
       </div>
     </header>
   )

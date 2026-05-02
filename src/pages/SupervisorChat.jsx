@@ -1,9 +1,11 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { shallow } from 'zustand/shallow'
+import { Alert, Button, EmptyState } from '@/components/ui'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
+import { sessionApi } from '../services/sessionService'
 import ChatBubble from '../components/chat/ChatBubble'
 import MessageInput from '../components/chat/MessageInput'
 import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
@@ -28,19 +30,23 @@ export default function SupervisorChat() {
   }, [location.pathname]);
 
   const {
+    supervisorSessions,
     supervisorMessages,
     addSupervisorMessage,
     clearSupervisor,
     activeSupervisorSessionId,
     setActiveSupervisorSession,
+    setSupervisorSessions,
     setAutoSending,
   } = useChatStore(
     (state) => ({
+      supervisorSessions: state.supervisorSessions,
       supervisorMessages: state.supervisorMessages,
       addSupervisorMessage: state.addSupervisorMessage,
       clearSupervisor: state.clearSupervisor,
       activeSupervisorSessionId: state.activeSupervisorSessionId,
       setActiveSupervisorSession: state.setActiveSupervisorSession,
+      setSupervisorSessions: state.setSupervisorSessions,
       setAutoSending: state.setAutoSending,
     }),
     shallow,
@@ -50,7 +56,82 @@ export default function SupervisorChat() {
   const [agentLabel, setAgentLabel] = useState('Supervisor Agent')
   const [error, setError] = useState(null)
   const [prefilledMessage, setPrefilledMessage] = useState('')
+  const [animatedSessionTitle, setAnimatedSessionTitle] = useState('Supervisor Agent')
   const bottomRef = useAutoScroll([supervisorMessages, loading])
+  const previousSessionTitleRef = useRef('')
+
+  const activeSession = useMemo(
+    () =>
+      supervisorSessions.find((session) => session.id === activeSupervisorSessionId) || null,
+    [activeSupervisorSessionId, supervisorSessions]
+  )
+
+  const activeSessionTitle = activeSession?.judul?.trim() || 'Supervisor Agent'
+
+  const syncSupervisorSessions = useCallback(
+    async (targetSessionId, { waitForGeneratedTitle = false } = {}) => {
+      let latestSession = null
+      const maxAttempts = waitForGeneratedTitle ? 5 : 1
+
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const sessions = await sessionApi.ambilSemuaSesi('general_chat')
+        setSupervisorSessions(sessions)
+        latestSession = sessions.find((session) => session.id === targetSessionId) || null
+
+        const hasGeneratedTitle =
+          latestSession?.judul &&
+          latestSession.judul.trim() &&
+          latestSession.judul.trim() !== 'Obrolan Baru'
+
+        if (!waitForGeneratedTitle || hasGeneratedTitle) {
+          return latestSession
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 900))
+      }
+
+      return latestSession
+    },
+    [setSupervisorSessions]
+  )
+
+  useEffect(() => {
+    const nextTitle = activeSessionTitle || 'Supervisor Agent'
+    const previousTitle = previousSessionTitleRef.current
+
+    if (!previousTitle) {
+      setAnimatedSessionTitle(nextTitle)
+      previousSessionTitleRef.current = nextTitle
+      return
+    }
+
+    if (previousTitle === nextTitle) {
+      return
+    }
+
+    if (nextTitle === 'Obrolan Baru' || nextTitle === 'Supervisor Agent') {
+      setAnimatedSessionTitle(nextTitle)
+      previousSessionTitleRef.current = nextTitle
+      return
+    }
+
+    let index = 0
+    setAnimatedSessionTitle('')
+
+    const intervalId = window.setInterval(() => {
+      index += 1
+      setAnimatedSessionTitle(nextTitle.slice(0, index))
+
+      if (index >= nextTitle.length) {
+        window.clearInterval(intervalId)
+        previousSessionTitleRef.current = nextTitle
+      }
+    }, 28)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [activeSessionTitle])
 
   const handleSend = useCallback(async (text, file, options = {}) => {
     setError(null)
@@ -71,11 +152,11 @@ export default function SupervisorChat() {
       // Auto-create session jika belum ada
       let sessionId = activeSupervisorSessionId
       if (!sessionId) {
-        const { sessionApi } = await import('../services/sessionService')
         const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
         if (newSession) {
           sessionId = newSession.id
           setActiveSupervisorSession(sessionId)
+          await syncSupervisorSessions(sessionId)
         }
       }
 
@@ -100,6 +181,8 @@ export default function SupervisorChat() {
         processingTime: normalizedData?.processing_time_ms ?? normalizedData?.processingTime,
         status:         normalizedData?.status,
       })
+
+      await syncSupervisorSessions(sessionId, { waitForGeneratedTitle: true })
     } catch (err) {
       setError(
         err.code === 'ECONNABORTED'
@@ -111,7 +194,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession])
+  }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession, syncSupervisorSessions])
 
   // Handle send email
   const handleSendEmail = useCallback(async (emailDraft) => {
@@ -135,6 +218,10 @@ export default function SupervisorChat() {
         processingTime: normalizedData?.processing_time_ms ?? normalizedData?.processingTime,
         status:         normalizedData?.status,
       })
+
+      if (activeSupervisorSessionId) {
+        await syncSupervisorSessions(activeSupervisorSessionId)
+      }
     } catch (err) {
       setError(
         err.message || 'Gagal mengirim email. Silakan coba lagi.'
@@ -142,7 +229,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }, [addSupervisorMessage, activeSupervisorSessionId])
+  }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
 
   // Handle regenerate email
   const handleRegenerateEmail = useCallback(async (emailDraft, improvementText) => {
@@ -172,6 +259,10 @@ export default function SupervisorChat() {
         processingTime: normalizedData?.processing_time_ms ?? normalizedData?.processingTime,
         status:         normalizedData?.status,
       })
+
+      if (activeSupervisorSessionId) {
+        await syncSupervisorSessions(activeSupervisorSessionId)
+      }
     } catch (err) {
       setError(
         err.message || 'Gagal membuat ulang draft email. Silakan coba lagi.'
@@ -179,7 +270,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }, [addSupervisorMessage, activeSupervisorSessionId])
+  }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
 
   // Handle auto-send from navigation state (Magic Button from Email, Calendar, or Draft Revision)
   useEffect(() => {
@@ -267,39 +358,47 @@ Silakan berikan instruksi revisi untuk draft ini.`;
   }, [location.state, handleSend, setAutoSending, addSupervisorMessage]);
 
   return (
-    <div className="flex flex-col h-screen bg-surface-sunken/80">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-neutral-50">
       {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b ghost-divider bg-white/80 backdrop-blur-md flex-shrink-0">
+      <div className="sticky top-0 z-20 flex flex-shrink-0 items-center justify-between border-b border-neutral-200 bg-white/95 px-6 py-4 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center shadow-[0_8px_18px_rgba(0,97,132,0.08)]">
-            <MessageSquare size={16} className="text-brand-600" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary-500 shadow-sm">
+            <MessageSquare size={16} />
           </div>
           <div>
-            <h1 className="text-base font-bold font-headline text-slateui-900">Supervisor Agent</h1>
-            <p className="text-xs text-slate-500 uppercase tracking-[0.18em]">Delegasi tugas · Jira · Google Calendar</p>
+            <h1 className="text-base font-bold font-headline text-neutral-900">
+              {animatedSessionTitle}
+              {animatedSessionTitle !== activeSessionTitle ? (
+                <span className="ml-0.5 inline-block h-[1em] w-px animate-pulse bg-primary-500 align-middle" />
+              ) : null}
+            </h1>
+            <p className="text-xs uppercase tracking-[0.18em] text-neutral-500">
+              Supervisor Agent
+            </p>
           </div>
         </div>
         {supervisorMessages.length > 0 && (
-          <button
+          <Button
             onClick={clearSupervisor}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-500 transition-colors"
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 px-3 text-xs text-neutral-500 hover:text-error"
           >
             <Trash2 size={13} />
             Hapus riwayat
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
+      <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-6 py-6 space-y-5">
         {supervisorMessages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-3 text-slate-400">
-            <MessageSquare size={36} className="opacity-20" />
-            <p className="text-sm font-medium">Belum ada percakapan</p>
-            <p className="text-xs max-w-xs">
-              Coba kirim: <em>&quot;Buat tiket Jira untuk bug login page&quot;</em> atau <em>&quot;Jadwalkan meeting review sprint besok jam 10.&quot;</em>
-            </p>
-          </div>
+          <EmptyState
+            icon={<MessageSquare size={36} className="opacity-20" />}
+            title="Belum ada percakapan"
+            description='Coba kirim: "Buat tiket Jira untuk bug login page" atau "Jadwalkan meeting review sprint besok jam 10."'
+            className="h-full min-h-[320px]"
+          />
         )}
 
         {supervisorMessages.map((msg) => (
@@ -319,10 +418,9 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         )}
 
         {error && (
-          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 animate-fade-in">
-            <span className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+          <Alert variant="error" title="Supervisor chat error" className="animate-fade-in">
             {error}
-          </div>
+          </Alert>
         )}
 
         <div ref={bottomRef} />

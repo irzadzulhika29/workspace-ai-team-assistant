@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Sidebar from './components/layout/Sidebar'
 import MobileHeader from './components/layout/MobileHeader'
 import Dashboard from './pages/Dashboard'
@@ -17,7 +17,10 @@ import { SidebarProvider, useSidebar } from './context/SidebarContext'
 import { AuthProvider } from './context/AuthContext'
 
 function Layout() {
+  const location = useLocation()
   const { open, collapsed, close } = useSidebar()
+  const isDashboardRoute = location.pathname === '/'
+  const isSupervisorRoute = location.pathname === '/chat/supervisor'
 
   return (
     <div className="flex min-h-screen w-full">
@@ -32,14 +35,22 @@ function Layout() {
       <Sidebar />
 
       <main
-        className={`flex-1 min-h-screen overflow-hidden flex flex-col transition-all duration-300`}
-        style={{ marginLeft: collapsed ? '72px' : '240px' }}
+        className="flex min-h-screen flex-1 flex-col overflow-hidden transition-all duration-300 md:ml-[var(--app-sidebar-offset)]"
+        style={{ '--app-sidebar-offset': collapsed ? '72px' : '270px' }}
       >
         {/* Mobile top header */}
         <MobileHeader />
 
-        <div className="flex-1 p-3 md:p-6 pt-0 md:pt-6">
-          <div className="min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100dvh-2.5rem)] overflow-hidden rounded-[1.25rem] bg-white/70 backdrop-blur-md shadow-[0_20px_40px_rgba(25,28,29,0.05)]">
+        <div className="flex-1 p-3 pt-0 md:p-6 md:pt-6">
+          <div
+            className={
+              isDashboardRoute
+                ? 'min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100dvh-2.5rem)]'
+                : isSupervisorRoute
+                  ? 'h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl bg-white shadow-sm md:h-[calc(100dvh-2.5rem)]'
+                : 'min-h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl bg-white shadow-sm md:min-h-[calc(100dvh-2.5rem)]'
+            }
+          >
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/chat/supervisor" element={<SupervisorChat />} />
@@ -70,18 +81,7 @@ export default function App() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route element={<SidebarProvider><Layout /></SidebarProvider>}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/chat/supervisor" element={<SupervisorChat />} />
-              <Route path="/workspace/files" element={<FileWorkspace />} />
-              <Route path="/workspace/calendar" element={<CalendarPage />} />
-              <Route path="/workspace/jira" element={<JiraPage />} />
-              <Route path="/workspace/email" element={<EmailPage />} />
-              <Route path="/debug/auth" element={<DebugAuthPage />} />
-              <Route path="/monitoring/tokens" element={<TokenMonitorPage />} />
-              <Route path="/settings/integrations" element={<IntegrationsPage />} />
-              <Route path="/integrations" element={<IntegrationsPage />} />
-            </Route>
+            <Route path="/*" element={<SidebarProvider><Layout /></SidebarProvider>} />
           </Route>
 
           {/* Catch all */}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, RefreshCw, Inbox, Mail, FileText, Send, Sparkles } from 'lucide-react';
+import { Alert, Button, Input, Tabs, TabsList, TabsTrigger } from '@/components/ui';
 import { useEmailStore } from '../store/emailStore';
 import EmailList from '../components/email/EmailList';
 import EmailDetail from '../components/email/EmailDetail';
@@ -101,111 +102,80 @@ export default function EmailPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="flex h-full min-h-0 flex-col bg-neutral-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Email</h1>
+      <div className="border-b border-neutral-200 bg-white px-6 py-4">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-neutral-900">Email</h1>
           
-          <button
+          <Button
             onClick={handleRefresh}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-lg"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
-          </button>
+          </Button>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search emails..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search emails..."
+            icon={<Search className="h-5 w-5" />}
+            className="flex-1 rounded-lg"
+          />
+          <Button
             type="submit"
-            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            variant="ghost"
+            size="md"
+            className="rounded-lg px-6"
           >
             Search
-          </button>
+          </Button>
         </form>
 
         {/* Error Message */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <Alert variant="error" className="mt-4" title="Email workspace error">
             {error}
-          </div>
+          </Alert>
         )}
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex gap-1">
-          <button
-            onClick={() => handleTabChange('inbox')}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-              activeTab === 'inbox'
-                ? 'border-blue-600 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-            }`}
-          >
-            <Inbox className="w-4 h-4" />
-            <span>Inbox</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('unread')}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-              activeTab === 'unread'
-                ? 'border-blue-600 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-            }`}
-          >
-            <Mail className="w-4 h-4" />
-            <span>Unread</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('drafts')}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-              activeTab === 'drafts'
-                ? 'border-blue-600 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Drafts</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('sent')}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-              activeTab === 'sent'
-                ? 'border-blue-600 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-            }`}
-          >
-            <Send className="w-4 h-4" />
-            <span>Sent / Follow-up</span>
-          </button>
-        </div>
+      <div className="border-b border-neutral-200 bg-white px-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="gap-1">
+            <TabsTrigger value="inbox" icon={<Inbox className="h-4 w-4" />}>
+              Inbox
+            </TabsTrigger>
+            <TabsTrigger value="unread" icon={<Mail className="h-4 w-4" />}>
+              Unread
+            </TabsTrigger>
+            <TabsTrigger value="drafts" icon={<FileText className="h-4 w-4" />}>
+              Drafts
+            </TabsTrigger>
+            <TabsTrigger value="sent" icon={<Send className="h-4 w-4" />}>
+              Sent / Follow-up
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Tab Content */}
         {activeTab === 'unread' && (
           <>
             {/* Left Panel: Email Summary (Recommendations) - Collapsible */}
             {showSummary && (
-              <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+              <div className="w-80 overflow-y-auto border-r border-neutral-200 bg-white">
                 <Top5EmailSummary />
               </div>
             )}
@@ -216,8 +186,8 @@ export default function EmailPage() {
                 onClick={() => setShowSummary(!showSummary)}
                 className={`absolute top-4 -left-3 z-10 p-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
                   showSummary 
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
-                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                    ? 'bg-gradient-stat text-white' 
+                    : 'border border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-50'
                 }`}
                 title={showSummary ? 'Hide AI Summary' : 'Show AI Summary'}
               >
@@ -226,7 +196,7 @@ export default function EmailPage() {
             </div>
 
             {/* Middle Panel: Email List */}
-            <div className="w-96 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+            <div className="flex w-96 flex-col overflow-hidden border-r border-neutral-200 bg-white">
               <div className="flex-1 overflow-y-auto">
                 <EmailList maxItems={10} unreadOnly={true} />
               </div>
@@ -240,7 +210,7 @@ export default function EmailPage() {
         {activeTab === 'inbox' && (
           <>
             {/* Email List */}
-            <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+            <div className="flex w-96 flex-col border-r border-neutral-200 bg-white">
               <EmailList />
             </div>
 
@@ -252,7 +222,7 @@ export default function EmailPage() {
         {activeTab === 'drafts' && (
           <>
             {/* Drafts List */}
-            <div className={revisingDraft ? 'w-1/2 bg-white overflow-hidden' : 'flex-1 bg-white'}>
+            <div className={revisingDraft ? 'w-1/2 overflow-hidden bg-white' : 'flex-1 bg-white'}>
               <DraftsList onRevise={handleReviseDraft} />
             </div>
 
@@ -272,7 +242,7 @@ export default function EmailPage() {
         {activeTab === 'sent' && (
           <>
             {/* Sent Email List */}
-            <div className="w-96 bg-white border-r border-gray-200 flex flex-col">
+            <div className="flex w-96 flex-col border-r border-neutral-200 bg-white">
               <EmailList />
             </div>
 

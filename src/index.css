@@ -7,16 +7,19 @@
 @layer base {
   :root {
     --sidebar-width: 240px;
+    --sidebar-width-collapsed: 72px;
     --header-height: 56px;
-    --app-bg: #f8f9fa;
-    --surface-0: #ffffff;
-    --surface-1: #f3f4f5;
-    --surface-2: #e7e8e9;
-    --line-soft: #bfc8cf;
-    --text-strong: #191c1d;
-    --text-muted: #545e76;
-    --primary: #006184;
-    --primary-soft: #c4e7ff;
+
+    /* Legacy variables kept as a compatibility bridge during phased migration. */
+    --app-bg: var(--surface-page);
+    --surface-0: var(--surface-card);
+    --surface-1: var(--color-neutral-100);
+    --surface-2: var(--color-neutral-200);
+    --line-soft: var(--border-default);
+    --text-strong: var(--text-primary);
+    --text-muted: var(--text-secondary);
+    --primary: var(--color-primary-500);
+    --primary-soft: var(--color-primary-100);
   }
 
   @media (max-width: 768px) {
@@ -35,7 +38,7 @@
   }
 
   html, body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, .font-headline {
@@ -45,10 +48,7 @@
 
   body {
     @apply font-sans;
-    background:
-      radial-gradient(circle at 0% 0%, rgba(196, 231, 255, 0.75) 0%, transparent 34%),
-      radial-gradient(circle at 100% 100%, rgba(225, 227, 228, 0.9) 0%, transparent 28%),
-      var(--app-bg);
+    background: var(--app-bg);
     color: var(--text-strong);
     margin: 0;
     min-height: 100dvh;
@@ -64,7 +64,7 @@
   .panel {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 1rem;
-    box-shadow: 0 20px 40px rgba(25, 28, 29, 0.05);
+    box-shadow: 0 20px 40px rgba(17, 17, 17, 0.05);
     backdrop-filter: blur(12px);
   }
 
@@ -84,22 +84,27 @@
     @apply bg-transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #bfc8cf;
+    background: var(--color-neutral-300);
     border-radius: 9999px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #6f787f;
+    background: var(--color-neutral-500);
   }
 
   .sidebar-scrollbar::-webkit-scrollbar {
-    width: 3px;
+    width: 0;
+    height: 0;
   }
   .sidebar-scrollbar::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
   .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: #bfc8cf;
+    background: var(--color-neutral-300);
     border-radius: 9999px;
+  }
+  .sidebar-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .message-enter {
@@ -107,7 +112,12 @@
   }
 
   .skeleton {
-    background: linear-gradient(90deg, #e7e8e9 0%, #f3f4f5 50%, #e7e8e9 100%);
+    background: linear-gradient(
+      90deg,
+      var(--color-neutral-200) 0%,
+      var(--color-neutral-100) 50%,
+      var(--color-neutral-200) 100%
+    );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
