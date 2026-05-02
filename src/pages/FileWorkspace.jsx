@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { ConfirmationModal } from '@/components/ui'
 import UploadZone from '../components/files/UploadZone'
 import DocumentChat from '../components/documents/DocumentChat'
 import { fileApi } from '../services/api'
@@ -566,50 +567,27 @@ export default function FileWorkspace() {
       ) : null}
 
       {deleteModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
-            <div className="mb-5 flex items-start gap-4">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-600">
-                <Trash2 size={24} />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold font-headline text-slateui-900">
-                  Hapus Dokumen
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slateui-500">
-                  Apakah Anda yakin ingin menghapus dokumen <span className="font-semibold text-slateui-900">{documentToDelete?.name}</span>? Tindakan ini tidak dapat dibatalkan.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleDeleteCancel}
-                disabled={isDeleting}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Menghapus...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 size={15} />
-                    Hapus
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmationModal
+          open={deleteModalOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          variant="danger"
+          title="Hapus Dokumen"
+          description={
+            <>
+              Apakah Anda yakin ingin menghapus dokumen{' '}
+              <span className="font-semibold text-slateui-900">
+                {documentToDelete?.name}
+              </span>
+              ? Tindakan ini tidak dapat dibatalkan.
+            </>
+          }
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isDeleting}
+          loadingLabel="Menghapus..."
+          icon={<Trash2 />}
+        />
       ) : null}
     </div>
   )

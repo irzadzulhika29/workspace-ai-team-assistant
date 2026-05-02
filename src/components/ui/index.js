@@ -3,6 +3,7 @@ export * from "./alert";
 export * from "./badge";
 export * from "./button";
 export * from "./card";
+export * from "./confirmation-modal";
 export * from "./empty-state";
 export * from "./hero-banner";
 export * from "./input";

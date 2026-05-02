@@ -71,6 +71,7 @@ export default function Sidebar() {
           timestamp: row.created_at || new Date().toISOString(),
           actionResults: msgData.actionResults ?? {},
           forwardedEmail: msgData.forwardedEmail ?? null,
+          documentAttachment: msgData.documentAttachment ?? null,
         }
       })
       setSupervisorMessages(messages)

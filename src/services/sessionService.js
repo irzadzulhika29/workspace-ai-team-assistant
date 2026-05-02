@@ -55,12 +55,49 @@ const parseStoredAiOutput = (rawOutput) => {
   }
 }
 
+const parseLegacyInstructionInput = (rawInput) => {
+  const normalized = rawInput.replace(/\r/g, '')
+  const match = normalized.match(/^instruction:\s*\n?([\s\S]*?)(?:\n+document_text:\s*\n?([\s\S]*))?$/i)
+
+  if (!match) {
+    return null
+  }
+
+  const content = (match[1] || '').trim()
+  return {
+    content,
+    forwardedEmail: null,
+    documentAttachment: null,
+  }
+}
+
 const parseStoredUserInput = (rawInput) => {
   if (!rawInput || typeof rawInput !== 'string') {
-    return { content: rawInput ?? '', forwardedEmail: null }
+    return { content: rawInput ?? '', forwardedEmail: null, documentAttachment: null }
   }
 
   const trimmed = rawInput.trim()
+
+  if (/^[{[]/.test(trimmed)) {
+    try {
+      const parsed = JSON.parse(trimmed)
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return {
+          content: parsed.content ?? '',
+          forwardedEmail: null,
+          documentAttachment: parsed.document_attachment ?? parsed.documentAttachment ?? null,
+        }
+      }
+    } catch {
+      // Fall through to legacy/plain-text parsing.
+    }
+  }
+
+  const legacyInstruction = parseLegacyInstructionInput(rawInput)
+  if (legacyInstruction) {
+    return legacyInstruction
+  }
+
   if (trimmed.startsWith('Buatkan draft email balasan berdasarkan email berikut:')) {
     const from = trimmed.match(/^Email dari:\s*(.+)$/m)?.[1]?.trim()
     const to = trimmed.match(/^Kepada:\s*(.+)$/m)?.[1]?.trim()
@@ -75,18 +112,19 @@ const parseStoredUserInput = (rawInput) => {
         subject: subject || '(tanpa subjek)',
         date,
       },
+      documentAttachment: null,
     }
   }
 
   if (!trimmed.startsWith('Kirim email ini sekarang:')) {
-    return { content: rawInput, forwardedEmail: null }
+    return { content: rawInput, forwardedEmail: null, documentAttachment: null }
   }
 
   const to = trimmed.match(/^To:\s*(.+)$/m)?.[1]?.trim()
   const subject = trimmed.match(/^Subject:\s*(.+)$/m)?.[1]?.trim()
 
   if (!to && !subject) {
-    return { content: 'Kirim email sekarang', forwardedEmail: null }
+    return { content: 'Kirim email sekarang', forwardedEmail: null, documentAttachment: null }
   }
 
   return {
@@ -96,6 +134,7 @@ const parseStoredUserInput = (rawInput) => {
       subject ? `Subject: ${subject}` : null,
     ].filter(Boolean).join('\n'),
     forwardedEmail: null,
+    documentAttachment: null,
   }
 }
 
@@ -167,6 +206,7 @@ export const sessionApi = {
               content: parsedInput.content,
               type: 'HumanMessage',
               forwardedEmail: parsedInput.forwardedEmail,
+              documentAttachment: parsedInput.documentAttachment,
             },
             created_at: row.created_at,
           });

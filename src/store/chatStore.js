@@ -12,6 +12,8 @@ import { persist, createJSONStorage } from 'zustand/middleware'
  * @property {Object}  [actionResults]
  * @property {number}  [processingTime]
  * @property {'success'|'error'} [status]
+ * @property {Object|null} [forwardedEmail]
+ * @property {Object|null} [documentAttachment]
  */
 
 const initialState = {

@@ -138,12 +138,13 @@ export default function SupervisorChat() {
     
     // Create UI message (show filename if no text, or both)
     const displayContent = options.displayContent
-      || (file && text ? `${text}\n\n*(Attachment: ${file.name})*` : file ? `*(Attachment: ${file.name})*` : text)
+      || text
     
     addSupervisorMessage({
       role: 'user',
       content: displayContent,
       forwardedEmail: options.forwardedEmail,
+      documentAttachment: file ? { name: file.name, mimeType: file.type || null } : null,
     })
     setLoading(true)
     setAgentLabel('Supervisor Agent')

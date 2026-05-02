@@ -251,6 +251,7 @@ Semua komponen dibangun di atas **shadcn/ui** + custom theming dalam **JavaScrip
 | **StatCard** | `stat-card.jsx` | `label`, `value`, `caption`, `trendIcon` |
 | **ListItem** | `list-item.jsx` | `sender`, `avatarUrl`, `title`, `body`, `badge` |
 | **NavItem** | `nav-item.jsx` | `icon`, `label`, `active` |
+| **ConfirmationModal** | `confirmation-modal.jsx` | `variant`, `title`, `description`, `onConfirm`, `loading` |
 
 ### 8.3. Organisms
 
@@ -318,6 +319,67 @@ Row untuk **Comms** (email) dan **Agenda**. Avatar di kiri, badge di kanan.
 ```
 
 Saat `active={true}`: background gradient merah, text putih, font-semibold. Default: text neutral, icon merah.
+
+#### ConfirmationModal
+
+```jsx
+// Danger variant (delete confirmation)
+<ConfirmationModal
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  onConfirm={handleDelete}
+  variant="danger"
+  title="Hapus Dokumen"
+  description="Apakah Anda yakin ingin menghapus dokumen ini? Tindakan ini tidak dapat dibatalkan."
+  confirmLabel="Hapus"
+  cancelLabel="Batal"
+  loading={isDeleting}
+  loadingLabel="Menghapus..."
+/>
+
+// Warning variant
+<ConfirmationModal
+  variant="warning"
+  title="Perubahan Belum Disimpan"
+  description="Anda memiliki perubahan yang belum disimpan."
+  confirmLabel="Keluar Tanpa Menyimpan"
+/>
+
+// Info variant
+<ConfirmationModal
+  variant="info"
+  title="Konfirmasi Tindakan"
+  description="Apakah Anda yakin ingin melanjutkan?"
+/>
+
+// Success variant
+<ConfirmationModal
+  variant="success"
+  title="Selesaikan Tugas"
+  description="Tandai tugas ini sebagai selesai?"
+/>
+```
+
+| Variant | Icon | Color | Use case |
+|---|---|---|---|
+| `danger` | AlertCircle | Red | Delete, destructive actions |
+| `warning` | AlertTriangle | Amber | Unsaved changes, caution |
+| `info` | Info | Blue | General confirmation |
+| `success` | CheckCircle2 | Green | Completion, positive actions |
+
+| Size | Max Width |
+|---|---|
+| `sm` | 384px |
+| `md` | 448px (default) |
+| `lg` | 512px |
+
+**Features:**
+- Loading state dengan spinner
+- Backdrop click to close (disabled saat loading)
+- Optional close button (X) di pojok kanan atas
+- Custom icon support
+- Rich description dengan JSX
+- Keyboard accessible
 
 ---
 

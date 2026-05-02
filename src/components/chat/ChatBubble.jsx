@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import { Bot, Mail, User } from 'lucide-react'
+import { Bot, FileText, Mail, User } from 'lucide-react'
 import { Avatar, AvatarFallback, Card, CardContent } from '@/components/ui'
 import AgentCard from '../ui/AgentCard'
 import SourceCitation from './SourceCitation'
@@ -106,6 +106,19 @@ function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
                         </p>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+              {message.documentAttachment?.name && (
+                <Card className="rounded-xl border-white/15 bg-white/10 shadow-none hover:shadow-none">
+                  <CardContent className="space-y-2 px-3 py-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                      <FileText size={13} />
+                      Dokumen
+                    </div>
+                    <p className="break-words text-xs leading-relaxed text-white/95">
+                      {message.documentAttachment.name}
+                    </p>
                   </CardContent>
                 </Card>
               )}

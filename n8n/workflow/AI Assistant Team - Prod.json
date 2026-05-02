@@ -1090,7 +1090,7 @@
             },
             {
               "fieldId": "input",
-              "fieldValue": "={{ (() => { try { return $('Set - Prompt From User').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From PDF Text').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From CSV Data').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From Image OCR').item.json.PromptFinal; } catch (e) {} try { return $('Main Webhook').item.json.body.message || ''; } catch (e) {} return $json.PromptFinal || ''; })() }}"
+              "fieldValue": "={{ (() => { const body = $('Main Webhook').item.json.body || {}; let fileName = ''; let mimeType = ''; try { fileName = $('Main Webhook').item.binary.file.fileName || ''; mimeType = $('Main Webhook').item.binary.file.mimeType || ''; } catch (e) {} const content = String(body.message || '').trim(); const documentName = String(body.document_name || fileName || '').trim(); const documentId = body.document_id || body.selected_document_id || null; const documentUrl = body.document_url || null; if (documentName || documentId || documentUrl) { return JSON.stringify({ content, document_attachment: { name: documentName || 'Dokumen', mimeType: mimeType || null, document_id: documentId, document_url: documentUrl } }); } return content; })() }}"
             },
             {
               "fieldId": "output",
@@ -1243,7 +1243,7 @@
             },
             {
               "fieldId": "input",
-              "fieldValue": "={{ (() => { try { return $('Set - Prompt From User').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From PDF Text').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From CSV Data').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From Image OCR').item.json.PromptFinal; } catch (e) {} try { return $('Main Webhook').item.json.body.message || ''; } catch (e) {} return $json.PromptFinal || ''; })() }}"
+              "fieldValue": "={{ (() => { const body = $('Main Webhook').item.json.body || {}; let fileName = ''; let mimeType = ''; try { fileName = $('Main Webhook').item.binary.file.fileName || ''; mimeType = $('Main Webhook').item.binary.file.mimeType || ''; } catch (e) {} const content = String(body.message || '').trim(); const documentName = String(body.document_name || fileName || '').trim(); const documentId = body.document_id || body.selected_document_id || null; const documentUrl = body.document_url || null; if (documentName || documentId || documentUrl) { return JSON.stringify({ content, document_attachment: { name: documentName || 'Dokumen', mimeType: mimeType || null, document_id: documentId, document_url: documentUrl } }); } return content; })() }}"
             },
             {
               "fieldId": "output",
@@ -1299,7 +1299,7 @@
             },
             {
               "fieldId": "input",
-              "fieldValue": "={{ (() => { try { return $('Set - Prompt From User').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From PDF Text').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From CSV Data').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From Image OCR').item.json.PromptFinal; } catch (e) {} try { return $('Main Webhook').item.json.body.message || ''; } catch (e) {} return $json.PromptFinal || ''; })() }}"
+              "fieldValue": "={{ (() => { const body = $('Main Webhook').item.json.body || {}; let fileName = ''; let mimeType = ''; try { fileName = $('Main Webhook').item.binary.file.fileName || ''; mimeType = $('Main Webhook').item.binary.file.mimeType || ''; } catch (e) {} const content = String(body.message || '').trim(); const documentName = String(body.document_name || fileName || '').trim(); const documentId = body.document_id || body.selected_document_id || null; const documentUrl = body.document_url || null; if (documentName || documentId || documentUrl) { return JSON.stringify({ content, document_attachment: { name: documentName || 'Dokumen', mimeType: mimeType || null, document_id: documentId, document_url: documentUrl } }); } return content; })() }}"
             },
             {
               "fieldId": "output",
@@ -1370,7 +1370,7 @@
             },
             {
               "fieldId": "input",
-              "fieldValue": "={{ (() => { try { return $('Set - Prompt From User').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From PDF Text').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From CSV Data').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From Image OCR').item.json.PromptFinal; } catch (e) {} try { return $('Main Webhook').item.json.body.message || ''; } catch (e) {} return $json.PromptFinal || ''; })() }}"
+              "fieldValue": "={{ (() => { const body = $('Main Webhook').item.json.body || {}; let fileName = ''; let mimeType = ''; try { fileName = $('Main Webhook').item.binary.file.fileName || ''; mimeType = $('Main Webhook').item.binary.file.mimeType || ''; } catch (e) {} const content = String(body.message || '').trim(); const documentName = String(body.document_name || fileName || '').trim(); const documentId = body.document_id || body.selected_document_id || null; const documentUrl = body.document_url || null; if (documentName || documentId || documentUrl) { return JSON.stringify({ content, document_attachment: { name: documentName || 'Dokumen', mimeType: mimeType || null, document_id: documentId, document_url: documentUrl } }); } return content; })() }}"
             },
             {
               "fieldId": "output",
@@ -1413,7 +1413,7 @@
             },
             {
               "fieldId": "input",
-              "fieldValue": "={{ (() => { try { return $('Set - Prompt From User').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From PDF Text').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From CSV Data').item.json.PromptFinal; } catch (e) {} try { return $('Set - Prompt From Image OCR').item.json.PromptFinal; } catch (e) {} try { return $('Main Webhook').item.json.body.message || ''; } catch (e) {} return $json.PromptFinal || ''; })() }}"
+              "fieldValue": "={{ (() => { const body = $('Main Webhook').item.json.body || {}; let fileName = ''; let mimeType = ''; try { fileName = $('Main Webhook').item.binary.file.fileName || ''; mimeType = $('Main Webhook').item.binary.file.mimeType || ''; } catch (e) {} const content = String(body.message || '').trim(); const documentName = String(body.document_name || fileName || '').trim(); const documentId = body.document_id || body.selected_document_id || null; const documentUrl = body.document_url || null; if (documentName || documentId || documentUrl) { return JSON.stringify({ content, document_attachment: { name: documentName || 'Dokumen', mimeType: mimeType || null, document_id: documentId, document_url: documentUrl } }); } return content; })() }}"
             },
             {
               "fieldId": "output",
@@ -2401,7 +2401,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "369e7714-ed66-400a-96f9-a03f48d698e0",
+  "versionId": "d525e820-08b3-40b3-b225-1a47811153b5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"
