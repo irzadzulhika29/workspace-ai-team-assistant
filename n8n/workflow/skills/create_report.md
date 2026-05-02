@@ -1,68 +1,117 @@
-# Skill: Create Report
+# Skill: Create Text Document
 
 ## Tujuan
-Gunakan skill ini untuk menyusun dokumen laporan formal, artikel panjang, atau proposal teknis. Jangan gunakan skill ini untuk membuat presentasi atau slide.
+Gunakan skill ini untuk menyusun dokumen teks profesional dalam format Markdown. Skill ini hanya berlaku untuk dokumen non-presentasi. Jenis dokumen yang dicakup:
+- `laporan formal`
+- `proposal`
+- `MOM/notulen`
+- `artikel`
 
-## Struktur Laporan Wajib
-Susun laporan menggunakan hierarki berikut:
+Jangan gunakan skill ini untuk slide atau presentasi.
 
-1. **Judul Laporan:** Buat judul spesifik dan deskriptif.
-2. **Ringkasan Eksekutif:** Tulis inti permasalahan dan hasil akhir maksimal dalam tiga kalimat.
-3. **Pendahuluan:** Jelaskan konteks, tujuan, dan batasan masalah.
-4. **Analisis Utama:** Pecah data dan temuan menjadi sub-bab berjenjang. Gunakan poin-poin untuk rincian data.
-5. **Kesimpulan:** Tarik kesimpulan logis dari analisis utama.
-6. **Rekomendasi:** Berikan langkah tindak lanjut spesifik berdasarkan kesimpulan.
+## Protokol Wajib
+1. Identifikasi dulu jenis dokumen yang paling tepat dari permintaan pengguna.
+2. Pilih SATU template di bawah ini. Jangan mencampur struktur antar-template.
+3. Gunakan hanya informasi yang secara eksplisit diberikan pengguna.
+4. Jika data belum cukup untuk jenis dokumen yang dipilih, minta klarifikasi spesifik sebelum mulai menulis.
 
-## Aturan Penulisan
-* Gunakan bahasa formal, objektif, dan lugas.
-* Tulis kalimat aktif dan padat.
-* Hindari kalimat pasif.
-* Fokus pada fakta dan data empiris.
-* Hindari metafora dan bahasa kiasan.
-* Gunakan format Markdown untuk merapikan struktur dokumen.
+## Template per Jenis Dokumen
 
-## Langkah Eksekusi
-1. Ekstrak topik utama dan data spesifik dari permintaan pengguna.
-2. Minta klarifikasi jika pengguna tidak memberikan data atau konteks yang cukup.
-3. Hasilkan draf laporan lengkap sesuai struktur wajib di atas.
+### 1. Laporan Formal
+Gunakan untuk:
+- laporan evaluasi
+- laporan status
+- laporan analisis
+- laporan operasional
 
-## Contoh Keluaran (Referensi Format)
-Keluarkan hasil akhir menggunakan format Markdown seperti contoh di bawah ini:
+Struktur default:
+1. `# Judul Laporan`
+2. `## Ringkasan Eksekutif`
+3. `## Latar Belakang`
+4. `## Temuan Utama`
+5. `## Analisis`
+6. `## Kesimpulan`
+7. `## Rekomendasi`
 
-```markdown
-# Laporan Evaluasi Kinerja AI Agent pada Layanan Pelanggan Toko Kopi Jaya
+Catatan:
+- Jika pengguna hanya meminta ringkasan singkat, kamu boleh memadatkan isi tiap bagian.
+- Jika pengguna tidak meminta rekomendasi, jangan mengarang rekomendasi; cukup tulis kesimpulan.
 
-## Ringkasan Eksekutif
-Toko Kopi Jaya mengimplementasikan AI Agent untuk menangani pertanyaan pelanggan. Sistem ini meningkatkan kecepatan respons sebesar 45% selama bulan pertama. Perusahaan perlu menambah kapasitas peladen untuk menangani lonjakan lalu lintas data pada jam sibuk.
+### 2. Proposal
+Gunakan untuk:
+- proposal kegiatan
+- proposal proyek
+- proposal pengadaan
+- proposal kerja sama
 
-## Pendahuluan
-Laporan ini mengevaluasi kinerja operasional AI Agent selama kuartal pertama 2026. Tujuan evaluasi meliputi pengukuran waktu respons dan tingkat kepuasan pelanggan. Kami menggunakan standar metrik industri layanan pelanggan sebagai parameter pengujian.
+Struktur default:
+1. `# Judul Proposal`
+2. `## Ringkasan Proposal`
+3. `## Latar Belakang`
+4. `## Tujuan`
+5. `## Ruang Lingkup`
+6. `## Rencana Pelaksanaan`
+7. `## Kebutuhan Sumber Daya / Anggaran` jika tersedia
+8. `## Penutup`
 
-## Analisis Utama
+Catatan:
+- Jika data anggaran tidak ada, jangan tambahkan angka atau asumsi.
+- Fokus proposal adalah tujuan, ruang lingkup, dan rencana pelaksanaan yang meyakinkan namun tetap faktual.
 
-### 1. Kecepatan Respons
-* AI Agent memproses 1.200 pertanyaan pelanggan per hari. 
-* Waktu respons rata-rata turun dari 12 menit menjadi 2 menit.
+### 3. MOM / Notulen
+Gunakan untuk:
+- notulen rapat
+- minutes of meeting
+- ringkasan hasil rapat formal
 
-### 2. Akurasi Jawaban
-* Sistem menjawab 88% pertanyaan dengan benar pada percobaan pertama. 
-* Agen manusia mengambil alih 12% sisa pertanyaan kompleks.
+Struktur default:
+1. `# Notulen Rapat`
+2. `## Informasi Rapat`
+   Isi dengan tanggal, waktu, peserta, dan topik jika tersedia.
+3. `## Agenda`
+4. `## Poin Pembahasan`
+5. `## Keputusan`
+6. `## Tindak Lanjut`
 
-### 3. Beban Peladen
-* Penggunaan CPU peladen mencapai 95% pada jam sibuk. 
-* Kondisi ini menyebabkan latensi sistem selama 3 detik.
+Catatan:
+- Jika peserta atau waktu tidak tersedia, tulis hanya bagian yang memang ada.
+- `Tindak Lanjut` harus berbentuk daftar action item yang jelas jika sumber datanya memang memuat itu.
 
-## Kesimpulan
-Implementasi AI Agent berhasil meningkatkan efisiensi waktu respons pelanggan secara signifikan. Namun, kapasitas infrastruktur saat ini membatasi kinerja optimal sistem.
+### 4. Artikel
+Gunakan untuk:
+- artikel informatif
+- artikel internal
+- tulisan penjelasan panjang
 
-## Rekomendasi
-* Tingkatkan spesifikasi peladen ke level berikutnya sebelum kuartal kedua.
-* Latih ulang model AI menggunakan data percakapan terbaru untuk meningkatkan akurasi.
-```
+Struktur default:
+1. `# Judul Artikel`
+2. paragraf pembuka tanpa heading jika lebih natural
+3. `##` subjudul per topik utama
+4. penutup singkat atau `## Kesimpulan` bila memang diperlukan
+
+Catatan:
+- Artikel tidak harus memakai pola laporan formal.
+- Prioritaskan alur baca yang alami, bukan struktur administratif.
+
+## Aturan Penulisan Umum
+- Gunakan bahasa Indonesia yang formal, jelas, dan profesional.
+- Gunakan Markdown yang rapi.
+- Tulis kalimat aktif, padat, dan mudah dipindai.
+- Hindari metafora, filler, dan basa-basi yang tidak menambah isi.
+- Fokus pada fakta, konteks, keputusan, dan struktur yang relevan dengan jenis dokumen.
+- Jangan gunakan HTML.
+- Jangan membuat bagian yang tidak didukung data.
+
+## Aturan Saat Data Tidak Cukup
+Jika informasi belum cukup, jangan membuat dokumen setengah jadi. Tanyakan kebutuhan spesifik sesuai jenis dokumen, misalnya:
+- laporan: tujuan, data utama, periode, temuan penting
+- proposal: tujuan, ruang lingkup, target hasil, timeline, anggaran
+- MOM: tanggal rapat, peserta, agenda, keputusan, tindak lanjut
+- artikel: topik, sudut pandang, pembaca sasaran, poin utama
 
 ## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
 
-Setelah seluruh isi laporan selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
+Setelah seluruh isi dokumen selesai ditulis, tutup respons dengan kalimat PERSIS berikut:
 
 "Dokumen Anda sudah siap. Silakan klik tombol 'Unduh Dokumen (PDF)' untuk menyimpannya."
 

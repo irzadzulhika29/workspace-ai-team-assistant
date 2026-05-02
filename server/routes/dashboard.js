@@ -1,4 +1,5 @@
 import express from 'express';
+import { Prisma } from '@prisma/client';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
@@ -11,6 +12,16 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+function isJiraCredentialDecryptError(error) {
+  const message = String(error?.message || '');
+  return (
+    message === 'Unsupported state or unable to authenticate data' ||
+    message === 'Encrypted token format is invalid' ||
+    message === 'ENCRYPTION_KEY is not configured' ||
+    message === 'ENCRYPTION_KEY must be exactly 32 bytes'
+  );
+}
 
 function isN8nRequest(req) {
   return Boolean(process.env.N8N_API_KEY) && req.headers['x-n8n-api-key'] === process.env.N8N_API_KEY;
@@ -40,15 +51,18 @@ async function getBriefingTargets({ userId } = {}) {
           expiresAt: true,
         },
       },
-      jiraIntegration: {
-        select: {
-          subdomain: true,
-          email: true,
-          isActive: true,
-        },
-      },
     },
   });
+
+  const userIds = users.map((user) => user.id);
+  const jiraRows = userIds.length > 0
+    ? await prisma.$queryRaw(Prisma.sql`
+      SELECT "userId", "isActive"
+      FROM "jira_integrations"
+      WHERE "isActive" = true AND "userId" IN (${Prisma.join(userIds)})
+    `)
+    : [];
+  const activeJiraUserIds = new Set(jiraRows.map((row) => row.userId));
 
   return users
     .map((user) => {
@@ -58,7 +72,7 @@ async function getBriefingTargets({ userId } = {}) {
         domains.push('calendar', 'email');
       }
 
-      if (user.jiraIntegration?.isActive) {
+      if (activeJiraUserIds.has(user.id)) {
         domains.push('jira');
       }
 
@@ -69,7 +83,7 @@ async function getBriefingTargets({ userId } = {}) {
         domains,
         integrations: {
           google: Boolean(user.googleToken),
-          jira: Boolean(user.jiraIntegration?.isActive),
+          jira: activeJiraUserIds.has(user.id),
         },
       };
     })
@@ -214,17 +228,14 @@ router.get('/briefing-data/jira', requireN8nApiKey, async (req, res) => {
       });
     }
 
-    const integration = await prisma.jiraIntegration.findFirst({
-      where: {
-        userId,
-        isActive: true,
-      },
-      select: {
-        subdomain: true,
-        email: true,
-        apiTokenEnc: true,
-      },
-    });
+    const rows = await prisma.$queryRaw`
+      SELECT "subdomain", "email", "apiTokenEnc"
+      FROM "jira_integrations"
+      WHERE "userId" = ${userId} AND "isActive" = true
+      ORDER BY "updatedAt" DESC
+      LIMIT 1
+    `;
+    const integration = rows[0];
 
     if (!integration) {
       return res.status(404).json({
@@ -267,6 +278,15 @@ router.get('/briefing-data/jira', requireN8nApiKey, async (req, res) => {
     });
   } catch (error) {
     console.error('Error in /briefing-data/jira endpoint:', error);
+
+    if (isJiraCredentialDecryptError(error)) {
+      return res.status(409).json({
+        error: 'Jira credential can no longer be decrypted',
+        message: 'Token Jira tersimpan dengan kunci enkripsi yang berbeda. Disconnect lalu connect ulang Jira.',
+        reconnectRequired: true,
+      });
+    }
+
     res.status(500).json({
       error: 'Internal server error',
       details: error.message,
