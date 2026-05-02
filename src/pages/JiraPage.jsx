@@ -13,6 +13,7 @@ import {
   FolderKanban,
   ListChecks,
   RefreshCw,
+  Sparkles,
   UserRound,
   UserMinus,
 } from 'lucide-react'
@@ -377,91 +378,90 @@ export default function JiraPage() {
       ]
     : []
   return (
-    <div className="h-full overflow-y-auto bg-[#f4f5f7] custom-scrollbar">
-      <div className="mx-auto max-w-[1240px] p-5 md:p-8">
-        <div className="rounded-[28px] bg-[linear-gradient(90deg,rgba(255,244,239,0.96),rgba(255,238,231,0.88)),url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center px-6 py-6 text-slate-900 shadow-[0_20px_50px_rgba(255,98,61,0.18)] md:px-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#c95b37]">Jira Workspace</p>
-              <h1 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">Daftar Issue Jira</h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-700 md:text-base">
-                Menampilkan issue Jira dari hasil refresh, disimpan lokal agar tidak hilang saat reload.
+    <div className="h-full overflow-y-auto custom-scrollbar">
+      <div className="rounded-[28px] bg-[linear-gradient(90deg,rgba(255,244,239,0.96),rgba(255,238,231,0.88)),url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80')] bg-cover bg-center px-6 py-6 text-slate-900 shadow-[0_20px_50px_rgba(255,98,61,0.18)] md:px-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#c95b37]">Jira Workspace</p>
+            <h1 className="mt-3 text-3xl font-semibold leading-tight md:text-5xl">Daftar Issue Jira</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-700 md:text-base">
+              Menampilkan issue Jira dari hasil refresh, disimpan lokal agar tidak hilang saat reload.
+            </p>
+            {lastSyncedAt ? (
+              <p className="mt-3 inline-flex rounded-full border border-[#f3b7a4] bg-white/80 px-3 py-1 text-xs font-medium text-[#a84d31]">
+                Terakhir sinkron: {formatDate(lastSyncedAt)}
               </p>
-              {lastSyncedAt ? (
-                <p className="mt-3 inline-flex rounded-full border border-[#f3b7a4] bg-white/80 px-3 py-1 text-xs font-medium text-[#a84d31]">
-                  Terakhir sinkron: {formatDate(lastSyncedAt)}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={loadIssues}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#e8a38f] bg-white px-5 py-3 text-sm font-semibold text-[#c45734] transition-colors hover:bg-[#fff7f3] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                {loading ? 'Syncing...' : 'Sync Jira'}
-              </button>
-
-              <Link
-                to="/chat/supervisor"
-                state={{
-                  domain: 'jira',
-                  intent: 'create_ticket',
-                  templatePrompt: 'Buat tiket Jira baru berdasarkan kebutuhan saya.',
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#ff623d] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#ff744f]"
-              >
-                Create Issue
-                <ArrowUpRight size={16} />
-              </Link>
-            </div>
+            ) : null}
           </div>
-        </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-8 border-b border-slate-300 px-2">
-          {tabs.map((tab, index) => (
+          <div className="flex flex-wrap items-center gap-3">
             <button
-              key={tab}
-              type="button"
-              className={`pb-3 text-sm font-medium transition-colors ${
-                index === 0 ? 'border-b-2 border-[#ff623d] text-[#ff623d]' : 'text-slate-400'
-              }`}
+              onClick={loadIssues}
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#e8a38f] bg-white px-5 py-3 text-sm font-semibold text-[#c45734] transition-colors hover:bg-[#fff7f3] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {tab}
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Syncing...' : 'Sync Jira'}
             </button>
-          ))}
+
+            <Link
+              to="/chat/supervisor"
+              state={{
+                domain: 'jira',
+                intent: 'create_ticket',
+                templatePrompt: 'Buat tiket Jira baru berdasarkan kebutuhan saya.',
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#ff623d] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#ff744f]"
+            >
+              Create Issue
+              <ArrowUpRight size={16} />
+            </Link>
+          </div>
         </div>
+      </div>
 
-        {error ? (
-          <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 flex items-start gap-2">
-            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-        ) : null}
+      <div className="mt-5 flex flex-wrap items-center gap-8 px-2">
+        {tabs.map((tab, index) => (
+          <button
+            key={tab}
+            type="button"
+            className={`pb-3 text-sm font-medium transition-colors ${
+              index === 0 ? 'border-b-2 border-[#ff623d] text-[#ff623d]' : 'text-slate-400'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
-        {loading && issues.length === 0 ? (
-          <div className="mt-6 space-y-4">
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.45fr_0.95fr_0.95fr_0.95fr_1fr]">
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <div key={idx} className="skeleton h-28 rounded-3xl" />
-              ))}
-            </div>
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1fr_1fr_0.9fr]">
-              {Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="skeleton h-[520px] rounded-3xl" />
-              ))}
-            </div>
+      {error ? (
+        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 flex items-start gap-2">
+          <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      ) : null}
+
+      {loading && issues.length === 0 ? (
+        <div className="mt-6 space-y-4">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.45fr_0.95fr_0.95fr_0.95fr_1fr]">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx} className="skeleton h-28 rounded-3xl" />
+            ))}
           </div>
-        ) : issues.length === 0 ? (
-          <div className="mt-6 rounded-3xl bg-white px-6 py-16 text-center shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
-            <Bug size={30} className="mx-auto text-slate-300" />
-            <p className="mt-4 text-sm font-medium text-slate-700">Belum ada issue yang ditampilkan.</p>
-            <p className="mt-1 text-xs text-slate-500">Klik tombol sync untuk menarik data Jira terbaru.</p>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1fr_1fr_0.9fr]">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className="skeleton h-[520px] rounded-3xl" />
+            ))}
           </div>
-        ) : (
-          <div className="mt-6 space-y-4">
+        </div>
+      ) : issues.length === 0 ? (
+        <div className="mt-6 rounded-3xl bg-white px-6 py-16 text-center shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
+          <Bug size={30} className="mx-auto text-slate-300" />
+          <p className="mt-4 text-sm font-medium text-slate-700">Belum ada issue yang ditampilkan.</p>
+          <p className="mt-1 text-xs text-slate-500">Klik tombol sync untuk menarik data Jira terbaru.</p>
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:flex-nowrap lg:items-start lg:gap-3">
               <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_12px_35px_rgba(15,23,42,0.06)] lg:w-[40%] lg:flex-shrink-0">
                 <div className="flex items-start justify-between gap-4">
@@ -520,7 +520,7 @@ export default function JiraPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-4 xl:gap-3">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_0.9fr_0.9fr_1.15fr] xl:gap-3">
               {lanes.map((lane) => {
                 const items = boardGroups[lane.key]
                 const theme = getLaneTheme(lane.key)
@@ -621,14 +621,19 @@ export default function JiraPage() {
                 )
               })}
 
-              <div className="self-start rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_12px_35px_rgba(15,23,42,0.06)]">
+              <div className="self-start rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-base font-semibold text-slate-900">AI Insights</p>
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff1eb] text-[#ff623d]">
+                      <Sparkles size={18} />
+                    </div>
+                    <p className="text-[1.05rem] font-semibold text-slate-900">AI Insights</p>
+                  </div>
                   <button
                     type="button"
                     onClick={loadJiraSummary}
                     disabled={summaryLoading}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                     aria-label="Refresh AI summary Jira"
                     title="Refresh AI summary Jira"
                   >
@@ -639,9 +644,13 @@ export default function JiraPage() {
                 <div className="mt-5 space-y-4">
                   {summaryLoading ? (
                     <div className="space-y-3">
-                      <div className="skeleton h-16 rounded-2xl" />
-                      <div className="skeleton h-24 rounded-2xl" />
-                      <div className="skeleton h-32 rounded-2xl" />
+                      <div className="skeleton h-12 rounded-2xl" />
+                      <div className="skeleton h-32 rounded-3xl" />
+                      <div className="grid grid-cols-2 gap-3">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                          <div key={index} className="skeleton h-24 rounded-2xl" />
+                        ))}
+                      </div>
                     </div>
                   ) : summaryError ? (
                     <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -649,81 +658,105 @@ export default function JiraPage() {
                     </div>
                   ) : aiSummary ? (
                     <>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          {summarySlides.map((slide, index) => (
-                            <button
-                              key={slide.key}
-                              type="button"
-                              onClick={() => setActiveSummarySlide(index)}
-                              className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                                activeSummarySlide === index
-                                  ? 'bg-[#ffede7] text-[#c45734]'
-                                  : 'bg-slate-100 text-slate-400 hover:text-slate-600'
-                              }`}
-                            >
-                              {slide.label}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-2">
+                      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-1">
+                        {summarySlides.map((slide, index) => (
                           <button
+                            key={slide.key}
                             type="button"
-                            onClick={() => setActiveSummarySlide((prev) => Math.max(prev - 1, 0))}
-                            disabled={activeSummarySlide === 0}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                            aria-label="Slide sebelumnya"
+                            onClick={() => setActiveSummarySlide(index)}
+                            className={`rounded-xl px-3 py-2 text-[11px] font-semibold transition-colors ${
+                              activeSummarySlide === index
+                                ? 'bg-white text-[#ff623d] shadow-sm'
+                                : 'text-slate-400 hover:text-slate-600'
+                            }`}
                           >
-                            <ChevronLeft size={16} />
+                            {slide.label}
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setActiveSummarySlide((prev) => Math.min(prev + 1, summarySlides.length - 1))}
-                            disabled={activeSummarySlide === summarySlides.length - 1}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                            aria-label="Slide berikutnya"
-                          >
-                            <ChevronRight size={16} />
-                          </button>
-                        </div>
+                        ))}
                       </div>
 
-                      <div className={activeSummarySlide === 0 ? 'rounded-2xl bg-slate-50 px-4 py-4' : 'hidden rounded-2xl bg-slate-50 px-4 py-4'}>
+                      <div className={activeSummarySlide === 0 ? 'rounded-3xl border border-[#f4ddd5] bg-[linear-gradient(180deg,#fffaf8_0%,#fff5f1_100%)] px-4 py-4' : 'hidden rounded-3xl border border-[#f4ddd5] bg-[linear-gradient(180deg,#fffaf8_0%,#fff5f1_100%)] px-4 py-4'}>
                         <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="mt-2 text-xs font-semibold leading-6 text-slate-900">{aiSummary.headline}</p>
+                          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/90 text-[#ff623d] shadow-sm">
+                            <Sparkles size={18} />
                           </div>
-                          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[8px] font-medium uppercase text-slate-500">
+                          <span className="rounded-full bg-[#ffe9df] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#ff623d]">
                             {aiSummary.priority}
                           </span>
                         </div>
-                        <p className="mt-3 text-xs text-slate-500">Update: {formatDate(aiSummary.generated_at)}</p>
+                        <div className="mt-3">
+                          <p className="text-sm font-semibold text-slate-900">Ringkasan AI</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">{aiSummary.headline}</p>
+                          <p className="mt-4 text-xs font-medium text-slate-500">Update: {formatDate(aiSummary.generated_at)}</p>
+                        </div>
                       </div>
 
                       <div className={activeSummarySlide === 0 ? 'grid grid-cols-2 gap-3' : 'hidden grid-cols-2 gap-3'}>
-                        <div className="rounded-2xl border border-slate-200 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Total Issue</p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-900">{aiSummary.source_metrics?.total_issues || 0}</p>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Total Issue</p>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef4ff] text-[#4f73ff]">
+                              <ListChecks size={18} />
+                            </div>
+                          </div>
+                          <p className="mt-3 text-4xl font-semibold text-slate-900">{aiSummary.source_metrics?.total_issues || 0}</p>
                         </div>
-                        <div className="rounded-2xl border border-slate-200 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Active Issue</p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-900">
+                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Active Issue</p>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f2ebff] text-[#8a63ff]">
+                              <CircleDot size={18} />
+                            </div>
+                          </div>
+                          <p className="mt-3 text-4xl font-semibold text-slate-900">
                             {(aiSummary.source_metrics?.todo_count || 0) + (aiSummary.source_metrics?.in_progress_count || 0)}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-slate-200 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Unassigned</p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-900">{aiSummary.source_metrics?.unassigned_count || 0}</p>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Unassigned</p>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#e8f8ee] text-[#39a765]">
+                              <UserMinus size={18} />
+                            </div>
+                          </div>
+                          <p className="mt-3 text-4xl font-semibold text-slate-900">{aiSummary.source_metrics?.unassigned_count || 0}</p>
                         </div>
-                        <div className="rounded-2xl border border-slate-200 px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Overdue</p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-900">{aiSummary.source_metrics?.overdue_count || 0}</p>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Overdue</p>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff1eb] text-[#ff7a4a]">
+                              <AlertTriangle size={18} />
+                            </div>
+                          </div>
+                          <p className="mt-3 text-4xl font-semibold text-slate-900">{aiSummary.source_metrics?.overdue_count || 0}</p>
                         </div>
                       </div>
 
                       {aiSummary.summary_points?.length ? (
-                        <div className={activeSummarySlide === 1 ? 'rounded-2xl border border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-slate-200 px-4 py-4'}>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">AI Findings</p>
+                        <div className={activeSummarySlide === 1 ? 'rounded-3xl border border-slate-200 bg-white px-4 py-4' : 'hidden rounded-3xl border border-slate-200 bg-white px-4 py-4'}>
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-900">Findings</p>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setActiveSummarySlide((prev) => Math.max(prev - 1, 0))}
+                                disabled={activeSummarySlide === 0}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Slide sebelumnya"
+                              >
+                                <ChevronLeft size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveSummarySlide((prev) => Math.min(prev + 1, summarySlides.length - 1))}
+                                disabled={activeSummarySlide === summarySlides.length - 1}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Slide berikutnya"
+                              >
+                                <ChevronRight size={16} />
+                              </button>
+                            </div>
+                          </div>
                           <ul className="mt-3 space-y-2">
                             {aiSummary.summary_points.map((point, index) => (
                               <li key={`${point}-${index}`} className="flex items-start gap-2 text-sm text-slate-700">
@@ -736,8 +769,30 @@ export default function JiraPage() {
                       ) : null}
 
                       {aiSummary.recommendations?.length ? (
-                        <div className={activeSummarySlide === 2 ? 'rounded-2xl border border-dashed border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-dashed border-slate-200 px-4 py-4'}>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Recommendations</p>
+                        <div className={activeSummarySlide === 2 ? 'rounded-3xl border border-dashed border-slate-200 bg-white px-4 py-4' : 'hidden rounded-3xl border border-dashed border-slate-200 bg-white px-4 py-4'}>
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-900">Actions</p>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setActiveSummarySlide((prev) => Math.max(prev - 1, 0))}
+                                disabled={activeSummarySlide === 0}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Slide sebelumnya"
+                              >
+                                <ChevronLeft size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveSummarySlide((prev) => Math.min(prev + 1, summarySlides.length - 1))}
+                                disabled={activeSummarySlide === summarySlides.length - 1}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Slide berikutnya"
+                              >
+                                <ChevronRight size={16} />
+                              </button>
+                            </div>
+                          </div>
                           <ul className="mt-3 space-y-2">
                             {aiSummary.recommendations.map((recommendation, index) => (
                               <li key={`${recommendation}-${index}`} className="flex items-start gap-2 text-sm text-slate-700">
@@ -749,7 +804,7 @@ export default function JiraPage() {
                         </div>
                       ) : null}
 
-                      <div className={activeSummarySlide === 2 ? 'rounded-2xl border border-slate-200 px-4 py-4' : 'hidden rounded-2xl border border-slate-200 px-4 py-4'}>
+                      <div className={activeSummarySlide === 2 ? 'rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4' : 'hidden rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4'}>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Source Metrics</p>
                         <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-600">
                           <div className="rounded-xl bg-slate-50 px-3 py-2">To Do: {aiSummary.source_metrics?.todo_count || 0}</div>
@@ -769,9 +824,8 @@ export default function JiraPage() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

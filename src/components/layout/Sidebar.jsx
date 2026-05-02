@@ -115,7 +115,6 @@ export default function Sidebar() {
       if (sessions.length === 0) {
         setActiveSupervisorSession(null)
         clearSupervisor()
-        await handleNewSupChat()
       } else if (sessions.length > 0) {
         const hasActiveSession =
           activeSupervisorSessionId &&
@@ -133,7 +132,7 @@ export default function Sidebar() {
     } finally {
       setLoadingSupSessions(false)
     }
-  }, [activeSupervisorSessionId, clearSupervisor, handleNewSupChat, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions, isAutoSending])
+  }, [activeSupervisorSessionId, clearSupervisor, loadSupSessionHistory, setActiveSupervisorSession, setSupervisorSessions, isAutoSending])
 
   useEffect(() => {
     if (isSupervisorPage) loadSupSessions()
@@ -159,7 +158,8 @@ export default function Sidebar() {
         setActiveSupervisorSession(sessions[0].id)
         await loadSupSessionHistory(sessions[0].id)
       } else {
-        await handleNewSupChat()
+        setActiveSupervisorSession(null)
+        clearSupervisor()
       }
     }
   }

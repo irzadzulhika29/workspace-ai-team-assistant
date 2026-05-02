@@ -586,7 +586,7 @@ export default function FileWorkspace() {
           cancelLabel="Batal"
           loading={isDeleting}
           loadingLabel="Menghapus..."
-          icon={<Trash2 />}
+          icon={Trash2}
         />
       ) : null}
     </div>

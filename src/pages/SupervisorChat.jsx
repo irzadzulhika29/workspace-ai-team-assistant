@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { MessageSquare, Trash2 } from 'lucide-react'
+import { MessageSquare, Plus, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { shallow } from 'zustand/shallow'
-import { Alert, Button, EmptyState } from '@/components/ui'
+import { Alert, Button, ConfirmationModal, EmptyState } from '@/components/ui'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
 import { sessionApi } from '../services/sessionService'
@@ -57,6 +57,9 @@ export default function SupervisorChat() {
   const [error, setError] = useState(null)
   const [prefilledMessage, setPrefilledMessage] = useState('')
   const [animatedSessionTitle, setAnimatedSessionTitle] = useState('Supervisor Agent')
+  const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState(false)
+  const [isClearingHistory, setIsClearingHistory] = useState(false)
+  const [creatingSession, setCreatingSession] = useState(false)
   const bottomRef = useAutoScroll([supervisorMessages, loading])
   const previousSessionTitleRef = useRef('')
 
@@ -135,6 +138,11 @@ export default function SupervisorChat() {
 
   const handleSend = useCallback(async (text, file, options = {}) => {
     setError(null)
+
+    if (!activeSupervisorSessionId) {
+      setError('Belum ada sesi chat aktif. Klik tombol New Chat terlebih dahulu untuk membuat sesi baru.')
+      return
+    }
     
     // Create UI message (show filename if no text, or both)
     const displayContent = options.displayContent
@@ -150,19 +158,10 @@ export default function SupervisorChat() {
     setAgentLabel('Supervisor Agent')
 
     try {
-      // Auto-create session jika belum ada
-      let sessionId = activeSupervisorSessionId
-      if (!sessionId) {
-        const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
-        if (newSession) {
-          sessionId = newSession.id
-          setActiveSupervisorSession(sessionId)
-          await syncSupervisorSessions(sessionId)
-        }
-      }
+      const sessionId = activeSupervisorSessionId
 
       if (!sessionId) {
-        throw new Error('Gagal membuat sesi chat. Pastikan Anda sudah login terlebih dahulu.')
+        throw new Error('Belum ada sesi chat aktif. Klik tombol New Chat terlebih dahulu untuk membuat sesi baru.')
       }
 
       const data = await chatApi.sendToSupervisor(text, 'chat', sessionId, file)
@@ -195,7 +194,7 @@ export default function SupervisorChat() {
     } finally {
       setLoading(false)
     }
-  }, [addSupervisorMessage, activeSupervisorSessionId, setActiveSupervisorSession, syncSupervisorSessions])
+  }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
 
   // Handle send email
   const handleSendEmail = useCallback(async (emailDraft) => {
@@ -272,6 +271,42 @@ export default function SupervisorChat() {
       setLoading(false)
     }
   }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
+
+  const handleClearHistoryClick = useCallback(() => {
+    setClearHistoryModalOpen(true)
+  }, [])
+
+  const handleClearHistoryCancel = useCallback(() => {
+    setClearHistoryModalOpen(false)
+  }, [])
+
+  const handleClearHistoryConfirm = useCallback(() => {
+    setIsClearingHistory(true)
+    clearSupervisor()
+    setIsClearingHistory(false)
+    setClearHistoryModalOpen(false)
+  }, [clearSupervisor])
+
+  const handleCreateChat = useCallback(async () => {
+    setCreatingSession(true)
+    setError(null)
+
+    try {
+      const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
+
+      if (!newSession) {
+        throw new Error('Gagal membuat sesi chat baru.')
+      }
+
+      setActiveSupervisorSession(newSession.id)
+      clearSupervisor()
+      await syncSupervisorSessions(newSession.id)
+    } catch (err) {
+      setError(err.message || 'Gagal membuat sesi chat baru.')
+    } finally {
+      setCreatingSession(false)
+    }
+  }, [clearSupervisor, setActiveSupervisorSession, syncSupervisorSessions])
 
   // Handle auto-send from navigation state (Magic Button from Email, Calendar, or Draft Revision)
   useEffect(() => {
@@ -380,7 +415,7 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         </div>
         {supervisorMessages.length > 0 && (
           <Button
-            onClick={clearSupervisor}
+            onClick={handleClearHistoryClick}
             variant="ghost"
             size="sm"
             className="gap-1.5 px-3 text-xs text-neutral-500 hover:text-error"
@@ -396,8 +431,24 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         {supervisorMessages.length === 0 && !loading && (
           <EmptyState
             icon={<MessageSquare size={36} className="opacity-20" />}
-            title="Belum ada percakapan"
-            description='Coba kirim: "Buat tiket Jira untuk bug login page" atau "Jadwalkan meeting review sprint besok jam 10."'
+            title={activeSupervisorSessionId ? 'Belum ada percakapan' : 'Mulai percakapan baru'}
+            description={
+              activeSupervisorSessionId
+                ? 'Coba kirim: "Buat tiket Jira untuk bug login page" atau "Jadwalkan meeting review sprint besok jam 10."'
+                : 'Belum ada sesi chat aktif. Buat chat baru untuk mulai berdiskusi dengan Supervisor Agent.'
+            }
+            action={
+              !activeSupervisorSessionId ? (
+                <Button
+                  onClick={handleCreateChat}
+                  disabled={creatingSession}
+                  className="gap-2"
+                >
+                  <Plus size={14} />
+                  {creatingSession ? 'Membuat...' : 'Create Chat'}
+                </Button>
+              ) : null
+            }
             className="h-full min-h-[320px]"
           />
         )}
@@ -435,6 +486,22 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         allowFile={true}
         initialValue={prefilledMessage}
       />
+
+      {clearHistoryModalOpen ? (
+        <ConfirmationModal
+          open={clearHistoryModalOpen}
+          onClose={handleClearHistoryCancel}
+          onConfirm={handleClearHistoryConfirm}
+          variant="danger"
+          title="Hapus Riwayat Chat"
+          description="Apakah Anda yakin ingin menghapus riwayat chat pada tampilan ini? Tindakan ini tidak dapat dibatalkan."
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isClearingHistory}
+          loadingLabel="Menghapus..."
+          icon={Trash2}
+        />
+      ) : null}
     </div>
   )
 }

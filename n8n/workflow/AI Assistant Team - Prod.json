@@ -32,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1840,
-        32
+        2992,
+        128
       ],
-      "id": "35bcd965-ff3d-48aa-a2db-77f190733036",
+      "id": "92c3d5fe-3069-4ef5-a409-278f12069565",
       "name": "Supabase - Save Report Document",
       "credentials": {
         "supabaseApi": {
@@ -47,16 +47,16 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n  {\n    \"myField\": $json.output\n  }\n}}",
+        "responseBody": "={{\n  {\n    \"myField\": \"Email dengan subjek \" + $('Code - Build Gmail Payload').item.json.subject + \" berhasil terkirim ke \" + $('Code - Build Gmail Payload').item.json.to\n  }\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        944,
-        384
+        2096,
+        480
       ],
-      "id": "34ca37d9-3164-4fda-9ba9-66740d7fbcdc",
+      "id": "26e1cb53-8143-44f6-8cbf-7c96674c8c5e",
       "name": "Respond - Email Sent"
     },
     {
@@ -84,23 +84,23 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        704,
-        384
+        1856,
+        480
       ],
-      "id": "fe9b80de-2574-4cdd-b7b5-97280e4fccdb",
+      "id": "5222636f-85da-40ad-86c6-32e32dd88c4d",
       "name": "HTTP - Send Gmail Message"
     },
     {
       "parameters": {
-        "jsCode": "let raw = $input.first().json.output;\n\n// Cek apakah output adalah nested Communication_Agent_response\nif (raw.includes('Communication_Agent_response')) {\n  const outer = JSON.parse(raw);\n  const content = JSON.parse(outer.Communication_Agent_response.content);\n  raw = content[0].output;\n}\n\n// Strip markdown code block jika ada\nraw = raw.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n\nconst output = JSON.parse(raw);\nconst token = $('Main Webhook').first().json.body.google_access_token;\n\nconst rawEmail = [\n  'To: ' + output.to,\n  'Subject: ' + output.subject,\n  'Content-Type: text/html; charset=utf-8',\n  '',\n  output.message\n].join('\\r\\n');\n\nconst encoded = Buffer.from(rawEmail)\n  .toString('base64')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{\n  json: {\n    raw: encoded,\n    to: output.to,\n    subject: output.subject,\n    token: token\n  }\n}];"
+        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    return parsed;\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n\n  if (!subject && !message) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'send',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: message || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst output = parseEmailPayload(raw);\nconst token = $('Main Webhook').first().json.body.google_access_token;\n\nconst rawEmail = [\n  'To: ' + output.to,\n  'Subject: ' + output.subject,\n  'Content-Type: text/html; charset=utf-8',\n  '',\n  output.message\n].join('\\r\\n');\n\nconst encoded = Buffer.from(rawEmail)\n  .toString('base64')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{\n  json: {\n    raw: encoded,\n    to: output.to,\n    subject: output.subject,\n    token: token\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        384
+        1664,
+        480
       ],
-      "id": "c9649fc3-39c5-4787-844b-bdfb85fbb518",
+      "id": "4aa393e6-0a9f-4633-9f2e-909a29abccec",
       "name": "Code - Build Gmail Payload"
     },
     {
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1200,
-        1056
+        2352,
+        1152
       ],
-      "id": "33f11a6f-2c56-404b-907d-42cb0452ff36",
+      "id": "25bf6fb8-93b0-402a-ad57-5cc8bb05d641",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -178,10 +178,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -112,
-        1248
+        1040,
+        1344
       ],
-      "id": "abb80106-c70b-4af2-86a3-eb4634d0a95c",
+      "id": "66063cc4-b4c0-4852-b4d7-979a08cb7d17",
       "name": "Create Event with Google Meet"
     },
     {
@@ -219,10 +219,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -304,
-        1264
+        848,
+        1360
       ],
-      "id": "d1329cc3-d857-4efc-bfdf-8e50b1d04494",
+      "id": "e9da3912-6a37-44ce-80ea-6dc4c0848138",
       "name": "Create Event"
     },
     {
@@ -260,10 +260,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        320,
-        1264
+        1472,
+        1360
       ],
-      "id": "00b0b6d0-e21e-48e3-98fc-886e1e2acfec",
+      "id": "6737e0c7-e7af-4e8a-a42b-f4bdfece3117",
       "name": "Update Event"
     },
     {
@@ -309,10 +309,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        128,
-        1264
+        1280,
+        1360
       ],
-      "id": "32772bff-d09e-40cf-b595-5517ae47da8c",
+      "id": "17adabb9-4636-45b5-8403-7e7807e71c63",
       "name": "Get Calendar Events"
     },
     {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        880,
-        208
+        2032,
+        304
       ],
-      "id": "08f39dd2-f923-40a2-8262-e1f7dfd38506",
+      "id": "71360923-0297-4466-b337-802dd3fb0b25",
       "name": "Set - Presentation Filename"
     },
     {
@@ -365,10 +365,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        688,
-        208
+        1840,
+        304
       ],
-      "id": "7e484a61-5a3b-4e80-b0d1-d987b45fcfce",
+      "id": "86c83502-a901-4517-9e71-79f8296be878",
       "name": "HTTP - Render Presentation PDF"
     },
     {
@@ -378,10 +378,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        208
+        1664,
+        304
       ],
-      "id": "e00a6e33-76cc-4e03-a65a-d01d67901f05",
+      "id": "6b335400-0fe7-4af6-bad7-fe5ae2ed93f9",
       "name": "Code - Prepare Presentation HTML"
     },
     {
@@ -393,10 +393,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1584,
-        1120
+        2736,
+        1216
       ],
-      "id": "926b45b5-6de2-4e7c-8ba4-b14fcdf1ef44",
+      "id": "f1e5bf74-3d8a-46d5-9c47-60694a7c0740",
       "name": "Get Email Skills"
     },
     {
@@ -409,10 +409,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        672,
-        32
+        1824,
+        128
       ],
-      "id": "5490b5e0-4f1f-4e72-ab3a-6e43d1e2378f",
+      "id": "2db9d4b2-cc98-40a8-aca4-0540d0d67cb5",
       "name": "Markdown - Report To HTML"
     },
     {
@@ -426,10 +426,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        176,
-        880
+        1328,
+        976
       ],
-      "id": "422a2e52-d7d7-4b0a-9a00-d63fdb947c3a",
+      "id": "6256eeaa-6dd3-46ed-98ea-d96f94755b2c",
       "name": "Report Agent"
     },
     {
@@ -443,10 +443,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1424,
-        848
+        2576,
+        944
       ],
-      "id": "bc6f58ea-3679-4566-9834-bf978c79758d",
+      "id": "5189d475-422e-4a9f-8093-65da57cde9eb",
       "name": "Communication Agent"
     },
     {
@@ -458,10 +458,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        784,
-        1136
+        1936,
+        1232
       ],
-      "id": "f7cddfe9-fa7a-45f3-b08b-050d3376cd6f",
+      "id": "531964cc-6cf4-470c-a2f0-7732d4bacc52",
       "name": "Get PPT Format"
     },
     {
@@ -473,10 +473,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        640,
-        1136
+        1792,
+        1232
       ],
-      "id": "e79dc447-ed60-4da4-a8f3-b9762cfacb41",
+      "id": "7b540e42-24be-454a-ac5a-5a7640f4879b",
       "name": "Get Report Format"
     },
     {
@@ -490,10 +490,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        560,
-        880
+        1712,
+        976
       ],
-      "id": "d1910dab-d2bc-4ce6-a80b-0aafed529970",
+      "id": "e5309600-b62b-4425-9dc2-bdfa9aef38a0",
       "name": "Document Agent"
     },
     {
@@ -507,10 +507,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1152,
-        800
+        0,
+        896
       ],
-      "id": "f26bfec1-ebf4-4f7e-b95b-c15e885c1a51",
+      "id": "7ddbe924-b2ad-460b-912b-b34cf7233a14",
       "name": "Knowledge Agent"
     },
     {
@@ -524,10 +524,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -160,
-        880
+        992,
+        976
       ],
-      "id": "945f54ad-517d-43e3-a6e1-a54a85f47f15",
+      "id": "57a7a383-5ab1-49d7-a384-b9917cb9531b",
       "name": "Scheduler Agent"
     },
     {
@@ -540,10 +540,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1040,
-        864
+        2192,
+        960
       ],
-      "id": "01c3a3b7-4af4-4f38-8aab-0818f9c0486c",
+      "id": "0284bfd4-3c66-48f4-9a64-c73426ac6f51",
       "name": "Task Agent"
     },
     {
@@ -554,10 +554,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        -784,
-        160
+        368,
+        256
       ],
-      "id": "c33fa1b1-6f42-4ddf-b48d-7c805547b070",
+      "id": "f618301d-3dc5-4245-98ba-9e3a9488e87d",
       "name": "Extract - PDF Text",
       "credentials": {
         "mistralCloudApi": {
@@ -573,10 +573,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        32
+        1664,
+        128
       ],
-      "id": "bf5440a3-2728-41ef-9b45-88985750d3c2",
+      "id": "5a46efd4-90a0-44e2-b7b4-cd5d311dbe68",
       "name": "Code - Convert Markdown Tables"
     },
     {
@@ -588,10 +588,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2080,
-        32
+        3232,
+        128
       ],
-      "id": "763a6e6a-dcb5-492b-8581-cfc49d9b69dc",
+      "id": "2c3f0124-cb82-4376-9e2d-38bb36b10893",
       "name": "Respond - Report PDF Ready"
     },
     {
@@ -611,10 +611,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1120,
-        32
+        2272,
+        128
       ],
-      "id": "65420814-7919-4f1f-8f82-fc65cdd698b3",
+      "id": "5579f3b4-c95b-4a64-8c7c-f3c2995cf08d",
       "name": "Set - Report Filename"
     },
     {
@@ -642,10 +642,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1536,
-        32
+        2688,
+        128
       ],
-      "id": "ec8b40c8-b215-40c6-ad59-b0c9d08b5d5e",
+      "id": "d2c6fa70-4a1a-427d-84df-3a3e0388d7a4",
       "name": "HTTP - Upload Report PDF"
     },
     {
@@ -663,10 +663,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1328,
-        32
+        2480,
+        128
       ],
-      "id": "64a8b8a1-4f67-4287-bb13-3282d7457e9c",
+      "id": "f1558e2e-19ba-4081-bc75-3c4ff9974e10",
       "name": "HTTP - Download Report PDF"
     },
     {
@@ -696,10 +696,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        912,
-        32
+        2064,
+        128
       ],
-      "id": "b7c86451-47ff-4397-9929-59f39fe0f8de",
+      "id": "745685eb-16a3-4961-9df9-67b70e49a5a6",
       "name": "HTTP - Render Report PDF"
     },
     {
@@ -719,10 +719,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -576,
-        320
+        576,
+        416
       ],
-      "id": "af2147e9-912b-420b-8493-d0ae4d277514",
+      "id": "3b7cb18d-e94d-4740-9602-60ccb6cfea9f",
       "name": "Set - Prompt From CSV Data"
     },
     {
@@ -742,10 +742,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -576,
-        -32
+        576,
+        64
       ],
-      "id": "2d2914fe-aefc-4670-8d8d-efd53ec60150",
+      "id": "62570be9-554d-4882-b453-1dc44b62e55d",
       "name": "Set - Prompt From Image OCR"
     },
     {
@@ -758,10 +758,10 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        -784,
-        -32
+        368,
+        64
       ],
-      "id": "85127285-f8b6-4c79-b359-46577d1040e8",
+      "id": "d0e41844-0da1-4da2-a665-b4a393287d78",
       "name": "OCR - Extract Image Text"
     },
     {
@@ -794,10 +794,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -320,
-        -256
+        832,
+        -160
       ],
-      "id": "ad364903-f481-4f4b-b89a-2712518f97fa",
+      "id": "47de4c3c-f061-4846-808a-23b39a40c100",
       "name": "Supabase - Update Chat Title",
       "credentials": {
         "supabaseApi": {
@@ -833,10 +833,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -864,
-        -240
+        288,
+        -144
       ],
-      "id": "22ea8bb9-08a7-45cc-8903-5002091aa57c",
+      "id": "0f348dd3-f52b-4e47-82ad-d490a1f3b5da",
       "name": "IF - Is New Chat"
     },
     {
@@ -863,10 +863,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -944,
-        1072
+        208,
+        1168
       ],
-      "id": "78c86f76-c802-4be3-a986-9a55edb420f0",
+      "id": "dd883214-12ec-4e7c-bb19-17a0daad88c5",
       "name": "Pinecone - Retrieve Context",
       "credentials": {
         "pineconeApi": {
@@ -892,10 +892,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -784,
-        496
+        368,
+        592
       ],
-      "id": "88699a5f-b4e3-4cdc-8f60-ed5893cb4f7c",
+      "id": "95fbd8d7-8566-4d01-ba16-c38c25f861cc",
       "name": "Set - Prompt From User"
     },
     {
@@ -915,10 +915,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -576,
-        160
+        576,
+        256
       ],
-      "id": "d6b80a76-66c5-432e-b259-607bc4ff0e5d",
+      "id": "678c8dbf-275d-489a-b3d9-92e61822254b",
       "name": "Set - Prompt From PDF Text"
     },
     {
@@ -948,10 +948,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1200,
-        480
+        -48,
+        576
       ],
-      "id": "5b31beef-e223-4775-aad3-4d077e2a53d4",
+      "id": "9fa9fb8f-c1b9-4e42-91e9-a2af1588b5b1",
       "name": "IF - Has File Attachment"
     },
     {
@@ -974,10 +974,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1056,
-        -240
+        96,
+        -144
       ],
-      "id": "971b2b4c-5f77-478c-9cf7-c748fe08bb06",
+      "id": "13944319-9923-4283-91e0-1fff6e9c81b1",
       "name": "Supabase - Get Chat Session",
       "credentials": {
         "supabaseApi": {
@@ -1002,10 +1002,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -624,
-        -256
+        528,
+        -160
       ],
-      "id": "be383118-b3b9-45cb-8214-331fd82aabfb",
+      "id": "a8fbc9be-ab2f-4f37-94e2-141ce5b6b197",
       "name": "LLM - Generate Chat Title"
     },
     {
@@ -1017,10 +1017,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -144,
-        688
+        1008,
+        784
       ],
-      "id": "4152bb39-5cf7-4dcf-a477-8a53adf28b80",
+      "id": "ffead516-148b-44b3-8984-e1f32b50e63e",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1039,10 +1039,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1408,
-        480
+        -256,
+        576
       ],
-      "id": "a5a3d999-e617-454a-bda7-57d1ac33896d",
+      "id": "37497d12-dc68-4a35-8710-c8db6d262aeb",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1058,10 +1058,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -208,
-        496
+        944,
+        592
       ],
-      "id": "a52cccb6-011f-4d55-882a-e2441b7fe4d0",
+      "id": "81ef80d5-2cd9-4eea-a671-f36429335046",
       "name": "Supervisor Agent"
     },
     {
@@ -1073,10 +1073,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        528,
-        544
+        1680,
+        640
       ],
-      "id": "e5524b20-6ccf-4430-979b-81535e8ee27c",
+      "id": "bb98f0f8-1459-4289-a918-7ab8cb1af064",
       "name": "Respond - Chat Output"
     },
     {
@@ -1110,10 +1110,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        736,
-        544
+        1888,
+        640
       ],
-      "id": "e95c32ee-845b-454f-a396-bb86fb026477",
+      "id": "0395ce25-7db1-4899-bf7b-a52726beeafb",
       "name": "Supabase - Log Chat Response",
       "credentials": {
         "supabaseApi": {
@@ -1137,10 +1137,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1104,
-        208
+        2256,
+        304
       ],
-      "id": "92bf1054-0381-441f-bdde-bf6d870f1b07",
+      "id": "a4c43798-6c7a-45a5-aa8f-fcb27992b89a",
       "name": "HTTP - Download Presentation PDF"
     },
     {
@@ -1174,10 +1174,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1584,
-        208
+        2736,
+        304
       ],
-      "id": "43172224-86c7-4eb3-84f6-beb1a2ca70a6",
+      "id": "8ab7a936-7e15-4ec2-9e30-61992fb7f529",
       "name": "Supabase - Save Presentation Document",
       "credentials": {
         "supabaseApi": {
@@ -1195,10 +1195,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1808,
-        208
+        2960,
+        304
       ],
-      "id": "29d2be6d-faa8-47f0-8b3e-b8dfeb9c58d3",
+      "id": "5a48b47d-c329-429c-b219-fb2c20864667",
       "name": "Respond - Presentation PDF Ready"
     },
     {
@@ -1226,10 +1226,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1360,
-        208
+        2512,
+        304
       ],
-      "id": "3dfaf62d-813f-492b-80b6-bd8334f97769",
+      "id": "69d3fc6e-39bd-444d-8799-a97c677ed5c9",
       "name": "HTTP - Upload Presentation PDF"
     },
     {
@@ -1263,10 +1263,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2112,
-        208
+        3264,
+        304
       ],
-      "id": "d0b862eb-4472-40f4-ab30-200754477f13",
+      "id": "35cab724-870f-46d2-87b7-1609eb8e23ee",
       "name": "Supabase - Log Presentation PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1277,15 +1277,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// This node normalizes supervisor pass-through so downstream routing sees\n// the original specialist output instead of a paraphrased wrapper.\n// It also recovers mistaken pass-through email-send templates\n// into the JSON shape expected by Route Output Type.\n\nconst inputJson = $input.first().json;\nconst supervisorOutput = String(inputJson.output || '');\nconst getOriginalPrompt = () => {\n  try {\n    return $('Set - Prompt From User').first().json?.PromptFinal || '';\n  } catch (error) {\n    return '';\n  }\n};\n\nconst originalPrompt = getOriginalPrompt();\n\nconst parseSendTemplate = (text) => {\n  if (typeof text !== 'string' || !/KIRIMKAN\\s+SEKARANG/i.test(text)) {\n    return null;\n  }\n\n  const normalized = text.replace(/\\r/g, '').trim();\n  const match = normalized.match(/KIRIMKAN\\s+SEKARANG\\s+email\\s+lengkap\\s+dibawah\\s+ini\\s+ke\\s+alamat:\\s*([^\\n]+)\\n+---\\n*SUBJECT:\\s*([^\\n]+)\\n+([\\s\\S]+?)\\n*---\\s*$/i);\n\n  if (!match) {\n    return null;\n  }\n\n  return {\n    action: 'send',\n    to: match[1].trim(),\n    subject: match[2].trim(),\n    message: match[3].trim(),\n  };\n};\n\nconst recoveredSend = parseSendTemplate(supervisorOutput) || parseSendTemplate(originalPrompt);\nif (recoveredSend) {\n  return [{\n    json: {\n      ...inputJson,\n      output: JSON.stringify(recoveredSend),\n      _recovered_send: true,\n    },\n  }];\n}\n\nconst extractStepOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 3; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\\\"output\\\"')) {\n        try {\n          current = JSON.parse(trimmed);\n          continue;\n        } catch (error) {}\n      }\n    }\n    break;\n  }\n  return String(current || '');\n};\n\nconst pickDocumentObservation = () => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const observation = extractStepOutput(step?.observation || step?.output || '');\n    if (!observation) continue;\n\n    const hasPresentationMarkup = /<section\\b[^>]*class=[\\\"'][^\\\"']*slide/i.test(observation);\n    const hasDocumentSignal = observation.includes('Unduh Dokumen (PDF)') || observation.includes('Unduh Presentasi (PDF)');\n    const isSubstantial = observation.length > 120;\n\n    if ((hasPresentationMarkup || hasDocumentSignal) && isSubstantial) {\n      return observation.trim();\n    }\n  }\n  return '';\n};\n\nconst documentObservation = pickDocumentObservation();\nconst trimmedSupervisor = supervisorOutput.trim();\nconst hasHTML = /<(section|div)\\b/i.test(supervisorOutput) || supervisorOutput.includes('```html');\nconst startsWithDocumentMarkup = /^(<section\\b|<div\\b|```html)/i.test(trimmedSupervisor);\nconst isPPTSignal = supervisorOutput.includes('Unduh Presentasi (PDF)');\nconst isPDFSignal = supervisorOutput.includes('Unduh Dokumen (PDF)');\nconst hasConflictingSignals = isPPTSignal && isPDFSignal;\nconst hasSupervisorNarration = /(Berikut hasil|Saya akan buatkan|Slide presentasi sudah siap|Laporan Anda sudah siap! Silakan unduh)/i.test(trimmedSupervisor);\nconst shouldUseDocumentObservation = Boolean(documentObservation) && (( !hasHTML && (isPPTSignal || isPDFSignal)) || (hasHTML && !startsWithDocumentMarkup) || hasConflictingSignals || hasSupervisorNarration);\n\nif (shouldUseDocumentObservation) {\n  return [{\n    json: {\n      ...inputJson,\n      output: documentObservation,\n      _recovered: true,\n    },\n  }];\n}\n\nreturn [{ json: inputJson }];"
+        "jsCode": "// This node normalizes supervisor pass-through so downstream routing sees\n// the original specialist output instead of a paraphrased wrapper.\n// It also recovers mistaken pass-through email-send templates\n// into the JSON shape expected by Route Output Type.\n\nconst inputJson = $input.first().json;\nconst supervisorOutput = String(inputJson.output || '');\nconst getOriginalPrompt = () => {\n  try {\n    return $('Set - Prompt From User').first().json?.PromptFinal || '';\n  } catch (error) {\n    return '';\n  }\n};\n\nconst originalPrompt = getOriginalPrompt();\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst parseSendTemplate = (text) => {\n  if (typeof text !== 'string' || !/KIRIMKAN\\s+SEKARANG/i.test(text)) {\n    return null;\n  }\n\n  const normalized = text.replace(/\\r/g, '').trim();\n  const match = normalized.match(/KIRIMKAN\\s+SEKARANG\\s+email\\s+lengkap\\s+dibawah\\s+ini\\s+ke\\s+alamat:\\s*([^\\n]+)\\n+---\\n*SUBJECT:\\s*([^\\n]+)\\n+([\\s\\S]+?)\\n*---\\s*$/i);\n\n  if (!match) {\n    return null;\n  }\n\n  return {\n    action: 'send',\n    to: match[1].trim(),\n    subject: match[2].trim(),\n    message: match[3].trim(),\n  };\n};\n\nconst extractStepOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\\\"output\\\"')) {\n        const parsed = tryParseJson(trimmed);\n        if (parsed !== null) {\n          current = parsed;\n          continue;\n        }\n      }\n    }\n    break;\n  }\n  return String(current || '');\n};\n\nconst normalizeEmailOutput = (value) => {\n  let current = value;\n\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object') {\n      if (current.Communication_Agent_response?.content) {\n        current = current.Communication_Agent_response.content;\n        continue;\n      }\n      if (current.output !== undefined) {\n        current = current.output;\n        continue;\n      }\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n      const parsed = tryParseJson(trimmed);\n      if (parsed !== null) {\n        current = parsed;\n        continue;\n      }\n      current = trimmed;\n    }\n\n    break;\n  }\n\n  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {\n    const action = typeof current.action === 'string' ? current.action.trim().toLowerCase() : '';\n    if (action === 'send' || action === 'draft') {\n      return JSON.stringify(current);\n    }\n  }\n\n  if (typeof current === 'string') {\n    const trimmed = current.trim();\n    const parsed = tryParseJson(trimmed);\n    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {\n      const action = typeof parsed.action === 'string' ? parsed.action.trim().toLowerCase() : '';\n      if (action === 'send' || action === 'draft') {\n        return JSON.stringify(parsed);\n      }\n    }\n  }\n\n  return null;\n};\n\nconst pickEmailObservation = () => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const normalized =\n      normalizeEmailOutput(step?.observation) ||\n      normalizeEmailOutput(step?.output);\n\n    if (normalized) {\n      return normalized;\n    }\n  }\n  return null;\n};\n\nconst recoveredSend = parseSendTemplate(supervisorOutput) || parseSendTemplate(originalPrompt);\nif (recoveredSend) {\n  return [{\n    json: {\n      ...inputJson,\n      output: JSON.stringify(recoveredSend),\n      _recovered_send: true,\n    },\n  }];\n}\n\nconst normalizedEmailOutput = normalizeEmailOutput(inputJson.output) || pickEmailObservation();\nif (normalizedEmailOutput) {\n  return [{\n    json: {\n      ...inputJson,\n      output: normalizedEmailOutput,\n      _normalized_email_output: true,\n    },\n  }];\n}\n\nconst documentObservation = (() => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const observation = extractStepOutput(step?.observation || step?.output || '');\n    if (!observation) continue;\n\n    const hasPresentationMarkup = /<section\\b[^>]*class=[\\\"'][^\\\"']*slide/i.test(observation);\n    const hasDocumentSignal = observation.includes('Unduh Dokumen (PDF)') || observation.includes('Unduh Presentasi (PDF)');\n    const isSubstantial = observation.length > 120;\n\n    if ((hasPresentationMarkup || hasDocumentSignal) && isSubstantial) {\n      return observation.trim();\n    }\n  }\n  return '';\n})();\n\nconst trimmedSupervisor = supervisorOutput.trim();\nconst hasHTML = /<(section|div)\\b/i.test(supervisorOutput) || supervisorOutput.includes('```html');\nconst startsWithDocumentMarkup = /^(<section\\b|<div\\b|```html)/i.test(trimmedSupervisor);\nconst isPPTSignal = supervisorOutput.includes('Unduh Presentasi (PDF)');\nconst isPDFSignal = supervisorOutput.includes('Unduh Dokumen (PDF)');\nconst hasConflictingSignals = isPPTSignal && isPDFSignal;\nconst hasSupervisorNarration = /(Berikut hasil|Saya akan buatkan|Slide presentasi sudah siap|Laporan Anda sudah siap! Silakan unduh)/i.test(trimmedSupervisor);\nconst shouldUseDocumentObservation = Boolean(documentObservation) && (( !hasHTML && (isPPTSignal || isPDFSignal)) || (hasHTML && !startsWithDocumentMarkup) || hasConflictingSignals || hasSupervisorNarration);\n\nif (shouldUseDocumentObservation) {\n  return [{\n    json: {\n      ...inputJson,\n      output: documentObservation,\n      _recovered: true,\n    },\n  }];\n}\n\nreturn [{ json: inputJson }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        128,
-        496
+        1280,
+        592
       ],
-      "id": "70084f56-f0a1-453f-b8fb-a20e48f10562",
+      "id": "e3377c14-7299-4428-bb00-3dd4bb1a7fed",
       "name": "Code - Extract Final Output"
     },
     {
@@ -1319,10 +1319,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2304,
-        32
+        3456,
+        128
       ],
-      "id": "822d0165-e122-4744-82f9-59bb40f77c8f",
+      "id": "19e23af0-1950-49d8-a381-fa5b62c61a75",
       "name": "Supabase - Log Report PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1333,15 +1333,15 @@
     },
     {
       "parameters": {
-        "jsCode": "let raw = $input.first().json.output || '';\n\nif (raw.includes('Communication_Agent_response')) {\n  const outer = JSON.parse(raw);\n  const content = JSON.parse(outer.Communication_Agent_response.content);\n  raw = content[0].output;\n}\n\nraw = raw.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n\nconst draft = JSON.parse(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
+        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    return parsed;\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n\n  if (!subject && !message) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'draft',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: message || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst draft = parseEmailPayload(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        496,
-        720
+        1648,
+        816
       ],
-      "id": "a8a407b4-b6a9-4f34-9250-fadb56d90795",
+      "id": "9ea180d6-a754-4b45-b9ad-67779ae1817c",
       "name": "Code - Format Draft Email Response"
     },
     {
@@ -1353,10 +1353,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        736,
-        720
+        1888,
+        816
       ],
-      "id": "bf2ea706-fff6-44a3-a525-0235247bf3ee",
+      "id": "a3ab6a3a-3124-46da-b318-06c3a3d9e510",
       "name": "Respond - Draft Email"
     },
     {
@@ -1390,10 +1390,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1184,
-        384
+        2336,
+        480
       ],
-      "id": "64c5e395-6403-4d22-80af-0bae84c46332",
+      "id": "90c812a7-22f5-4dd6-9003-af589b08285a",
       "name": "Supabase - Log Email Sent Response",
       "credentials": {
         "supabaseApi": {
@@ -1433,10 +1433,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        960,
-        720
+        2112,
+        816
       ],
-      "id": "df9390e1-ee3e-4df0-b5b7-6edc99ef8972",
+      "id": "5e7cc673-fdff-4477-9135-19d3f7c339c8",
       "name": "Supabase - Log Draft Email Response",
       "credentials": {
         "supabaseApi": {
@@ -1453,10 +1453,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        352,
-        1664
+        1504,
+        1760
       ],
-      "id": "e72f3d85-d796-4773-ae3f-779c4b76fc28",
+      "id": "12addea5-088c-45e5-b5d7-aabbdee77a17",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -1543,10 +1543,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -1040,
-        272
+        112,
+        368
       ],
-      "id": "887abc9a-3d5c-48a6-91bc-5748ab6ab8a1",
+      "id": "1e94ce67-8e87-4254-86e5-95239cadac85",
       "name": "Switch - Attachment Type"
     },
     {
@@ -1557,10 +1557,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -784,
-        320
+        368,
+        416
       ],
-      "id": "bcd75d4b-d403-4b40-bb0e-b36dd2dadbd4",
+      "id": "7c8b8f93-0abc-4b9f-9046-8fb780429a42",
       "name": "Extract - CSV Rows"
     },
     {
@@ -1672,10 +1672,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        272,
-        352
+        1424,
+        448
       ],
-      "id": "53778319-5edc-46cf-8cea-5b3c65a720d4",
+      "id": "3cc319de-badb-475e-8e22-a06d3d811438",
       "name": "Switch - Output Type"
     },
     {
@@ -1687,10 +1687,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -864,
-        1280
+        288,
+        1376
       ],
-      "id": "30d45096-67ec-48c1-9d0b-cea9fd5b2189",
+      "id": "c086540e-effd-457a-aa09-dcd26d9c5e35",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
@@ -2401,7 +2401,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d525e820-08b3-40b3-b225-1a47811153b5",
+  "versionId": "0b835c84-2dcf-4dc3-b655-b0905e8cb99d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

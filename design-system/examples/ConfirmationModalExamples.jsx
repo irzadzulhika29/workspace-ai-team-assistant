@@ -2,12 +2,7 @@ import React, { useState } from 'react'
 import { ConfirmationModal } from '@/components/ui'
 import { Trash2 } from 'lucide-react'
 
-/**
- * ConfirmationModalExamples — Contoh penggunaan ConfirmationModal
- * 
- * File ini mendemonstrasikan berbagai cara menggunakan ConfirmationModal
- * dengan berbagai variant, size, dan konfigurasi.
- */
+
 export default function ConfirmationModalExamples() {
   const [dangerOpen, setDangerOpen] = useState(false)
   const [warningOpen, setWarningOpen] = useState(false)
