@@ -1,6 +1,7 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
+import '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();

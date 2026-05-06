@@ -21,7 +21,14 @@
   },
   "rules": {
     "react/prop-types": "off",
-    "no-unused-vars": "warn"
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-uses-react": "off",
+    "no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "^React$"
+      }
+    ]
   },
   "ignorePatterns": ["dist/", "node_modules/", ".git/"]
 }

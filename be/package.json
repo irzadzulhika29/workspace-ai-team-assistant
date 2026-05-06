@@ -1,0 +1,32 @@
+{
+  "name": "team-assistant-be",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run prisma:generate && nodemon server/index.js",
+    "start": "node server/index.js",
+    "lint": "eslint . --ext js --max-warnings 0",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "@supabase/supabase-js": "^2.104.1",
+    "axios": "^1.6.8",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "googleapis": "^171.4.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "prisma": "^5.20.0"
+  }
+}

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
@@ -6,6 +5,7 @@ import pg from 'pg';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import './config/env.js';
 import passport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
@@ -16,14 +16,14 @@ import emailDraftsRoutes from './routes/emailDrafts.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import prisma from './lib/prisma.js';
 
-const app = express();
 const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === 'production';
+const app = express();
 const PgStore = connectPgSimple(session);
 const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const clientDistPath = path.resolve(__dirname, '..', 'dist');
+const clientDistPath = path.resolve(__dirname, '..', '..', 'fe', 'dist');
 
 if (isProduction) {
   app.set('trust proxy', 1);

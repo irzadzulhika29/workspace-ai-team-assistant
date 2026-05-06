@@ -1,6 +1,7 @@
 import express from 'express';
 import { Prisma } from '@prisma/client';
 import { createClient } from '@supabase/supabase-js';
+import '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 import { decrypt } from '../utils/encryption.js';
