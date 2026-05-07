@@ -1,5 +1,5 @@
 {
-  "name": "Get Summary Activity",
+  "name": "Dashboard Summary",
   "nodes": [
     {
       "parameters": {
@@ -460,8 +460,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -2096,
-        -336
+        -2000,
+        -320
       ],
       "id": "f6f9b6dd-8e7f-4bac-ad3b-81c580a374b8",
       "name": "Get Email Detail"
@@ -618,9 +618,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "openai/gpt-oss-20b",
+          "value": "deepseek-v3-2",
           "mode": "list",
-          "cachedResultName": "openai/gpt-oss-20b"
+          "cachedResultName": "deepseek-v3-2"
         },
         "options": {}
       },
@@ -635,7 +635,7 @@
       "credentials": {
         "openAiApi": {
           "id": "0rW2Paz5Jham8Eqn",
-          "name": "OpenAi account 6"
+          "name": "AC API"
         }
       }
     },
@@ -903,7 +903,7 @@
       "main": [
         [
           {
-            "node": "Aggregate Email Details",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -1037,7 +1037,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d49c84e8-b4e7-4fc6-a431-a5854ed03587",
+  "versionId": "90d173dc-d3a1-4b0e-91d2-9bde1d874e8c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"
