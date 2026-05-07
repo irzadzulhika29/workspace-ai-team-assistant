@@ -15,6 +15,7 @@ Panduan wajib untuk Communication Agent dalam membuat draft email profesional ya
 6. Footer atau tanda tangan wajib mengikuti profil user aktif jika konteks menyediakan `user_name`, `user_job_title`, atau `user_email`.
 7. Jangan gunakan tanda tangan generik seperti `Manajemen`, `Admin`, `Tim Operasional`, atau placeholder `[Nama Pengirim]` jika nama user tersedia.
 8. Jika jabatan kosong, tampilkan nama saja tanpa baris jabatan kosong.
+9. Jangan pernah menyalin token contoh seperti `[Nama Pengirim dari user_name]` atau `[Jabatan dari user_job_title jika ada]` ke output final. Token itu hanya penanda, dan wajib diganti dengan nilai aktual.
 
 ---
 
@@ -78,8 +79,8 @@ Prioritas penerapan:
 
   <p style="margin-top: 24px;">
     Hormat saya,<br>
-    <strong>[Nama Pengirim dari user_name]</strong><br>
-    <span style="color: #555;">[Jabatan dari user_job_title jika ada]</span>
+    <strong>Nama User Aktual</strong><br>
+    <span style="color: #555;">Jabatan User Aktual</span>
   </p>
 
 </div>
@@ -109,7 +110,7 @@ Subject: `[PENGUMUMAN] [Topik Singkat]`
     <p>[Isi pengumuman utama.]</p>
     <p>[Detail atau langkah yang perlu diambil penerima.]</p>
     <p>Demikian pengumuman ini disampaikan. Atas perhatiannya kami ucapkan terima kasih.</p>
-    <p style="margin-top: 20px;">Hormat saya,<br><strong>[Nama dari user_name]</strong><br><span style="color:#555;">[Jabatan dari user_job_title jika ada]</span></p>
+    <p style="margin-top: 20px;">Hormat saya,<br><strong>Nama User Aktual</strong><br><span style="color:#555;">Jabatan User Aktual</span></p>
   </div>
 </div>
 ```
