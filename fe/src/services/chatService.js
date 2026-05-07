@@ -80,6 +80,9 @@ const getUserScopedContext = async () => {
 
   return {
     userId: currentUser.id,
+    userName: currentUser.name || "",
+    userEmail: currentUser.email || "",
+    userJobTitle: currentUser.jobTitle || "",
     googleAccessToken,
     jiraCredentials,
   };
@@ -95,7 +98,7 @@ export const chatApi = {
    * @param {File|null} file - Optional file attachment
    */
   sendToSupervisor: async (message, action = "chat", sessionId = null, file = null) => {
-    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+    const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     if (file) {
       // Create FormData if file is present
@@ -103,6 +106,9 @@ export const chatApi = {
       formData.append("action", action);
       formData.append("session_id", sessionId || getSessionId());
       formData.append("user_id", userId);
+      formData.append("user_name", userName);
+      formData.append("user_email", userEmail);
+      formData.append("user_job_title", userJobTitle);
       formData.append("message", message || ""); // Message can be empty if sending only a file
       formData.append("chat_type", "general_chat");
       formData.append("timestamp", new Date().toISOString());
@@ -121,6 +127,9 @@ export const chatApi = {
         action,
         session_id: sessionId || getSessionId(),
         user_id: userId,
+        user_name: userName,
+        user_email: userEmail,
+        user_job_title: userJobTitle,
         message,
         context_filter: null,
         chat_type: "general_chat",
@@ -137,7 +146,7 @@ export const chatApi = {
    * @param {string|null} sessionId - Optional explicit session ID
    */
   sendEmail: async (emailDraft, sessionId = null) => {
-    const { userId, googleAccessToken } = await getUserScopedContext();
+    const { userId, userName, userEmail, userJobTitle, googleAccessToken } = await getUserScopedContext();
     
     if (!googleAccessToken) {
       throw new Error('Google access token tidak tersedia. Silakan login dengan Google terlebih dahulu.');
@@ -152,6 +161,9 @@ Message: ${emailDraft.message}`;
       action: "send_email",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      user_name: userName,
+      user_email: userEmail,
+      user_job_title: userJobTitle,
       message,
       chat_type: "general_chat",
       timestamp: new Date().toISOString(),
@@ -166,7 +178,7 @@ Message: ${emailDraft.message}`;
    * @param {string|null} sessionId - Optional explicit session ID
    */
   regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
-    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+    const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     const message = `Buat ulang draft email ini dengan perbaikan berikut: "${improvementText}"
 
@@ -181,6 +193,9 @@ Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      user_name: userName,
+      user_email: userEmail,
+      user_job_title: userJobTitle,
       message,
       chat_type: "general_chat",
       timestamp: new Date().toISOString(),
@@ -196,12 +211,15 @@ Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
    * @param {string|null} sessionId - Optional explicit session ID
    */
   sendMessage: async (message, documentContext = {}, sessionId = null) => {
-    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+    const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     return post(urls.getSupervisor, {
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      user_name: userName,
+      user_email: userEmail,
+      user_job_title: userJobTitle,
       message,
       document_id: documentContext.document_id || null,
       document_name: documentContext.document_name || null,
@@ -220,12 +238,15 @@ Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
    * @param {string|null} sessionId - Optional explicit session ID
    */
   sendToDocumentChat: async (message, documentContext = {}, sessionId = null) => {
-    const { userId, googleAccessToken, jiraCredentials } = await getUserScopedContext();
+    const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     return post(urls.getChatDocument, {
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      user_name: userName,
+      user_email: userEmail,
+      user_job_title: userJobTitle,
       message,
       document_id: documentContext.document_id || null,
       document_name: documentContext.document_name || null,

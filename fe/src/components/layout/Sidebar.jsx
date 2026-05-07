@@ -3,7 +3,6 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
-import SettingsModal from '../ui/SettingsModal'
 import { Button, NavItem } from '@/components/ui'
 import { useChatStore } from '../../store/chatStore'
 import { sessionApi } from '../../services/sessionService'
@@ -18,11 +17,10 @@ const navItems = [
   { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
   { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
   { to: '/integrations',     icon: Plug,            label: 'Integrations'      },
-  { to: '__settings__',      icon: Settings,        label: 'Settings'          },
+  { to: '/settings',         icon: Settings,        label: 'Settings'          },
 ]
 
 export default function Sidebar() {
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const location = useLocation()
   const isSupervisorPage = location.pathname === '/chat/supervisor'
   const { open: mobileOpen, collapsed, close: closeMobile, toggleCollapse } = useSidebar()
@@ -341,32 +339,21 @@ export default function Sidebar() {
           </p>
           {navItems.map(({ to, icon: Icon, label }) => (
             <div key={to}>
-              {to === '__settings__' ? (
-                <NavItem
-                  onClick={() => setSettingsOpen(true)}
-                  icon={<Icon size={16} />}
-                  label={label}
-                  collapsed={collapsed}
-                  title={collapsed ? label : ''}
-                  className="rounded-xl px-3 py-2.5"
+              <NavItem
+                asChild
+                icon={<Icon size={16} />}
+                label={label}
+                active={isRouteActive(to)}
+                collapsed={collapsed}
+                className="rounded-xl px-3 py-2.5"
+                title={collapsed ? label : ''}
+              >
+                <NavLink
+                  to={to}
+                  end={to === '/'}
+                  onClick={closeMobile}
                 />
-              ) : (
-                <NavItem
-                  asChild
-                  icon={<Icon size={16} />}
-                  label={label}
-                  active={isRouteActive(to)}
-                  collapsed={collapsed}
-                  className="rounded-xl px-3 py-2.5"
-                  title={collapsed ? label : ''}
-                >
-                  <NavLink
-                    to={to}
-                    end={to === '/'}
-                    onClick={closeMobile}
-                  />
-                </NavItem>
-              )}
+              </NavItem>
 
               {/* Supervisor session sub-menu - hide when collapsed */}
               {!collapsed && to === '/chat/supervisor' && isSupervisorPage && renderSessionList({
@@ -407,8 +394,6 @@ export default function Sidebar() {
           )}
         </button>
       </aside>
-
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   )
 }

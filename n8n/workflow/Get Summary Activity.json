@@ -12,24 +12,24 @@
       "typeVersion": 2.1,
       "position": [
         -3504,
-        -368
+        -624
       ],
-      "id": "3fd0dee2-0be6-4dc2-81c2-53575931e3a4",
+      "id": "ad9e4305-bdbb-4070-b64d-06d40c263fc8",
       "name": "Webhook",
       "webhookId": "78bcae28-9ec4-4e8c-acc1-cbf84e842956",
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst normalizeSubdomain = (value) => String(value || '')\n  .trim()\n  .replace(/^https?:\\/\\//i, '')\n  .replace(/\\/.*$/, '');\nconst subdomainRaw = normalizeSubdomain(\n  jiraCredentials.subdomain || body.jira_subdomain || body.jiraSubdomain || body.jira_base_url || body.jiraBaseUrl\n);\nconst jakartaParts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'Asia/Jakarta',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n}).formatToParts(new Date());\nconst getPart = (type) => jakartaParts.find((part) => part.type === type)?.value;\nconst dateKey = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;\nconst jiraEmail = jiraCredentials.email || body.jira_email || body.jiraEmail || '';\nconst jiraApiToken = jiraCredentials.api_token || body.jira_api_token || body.jiraApiToken || '';\nconst jiraAuthBase64 = body.jira_auth_base64 || body.jiraAuthBase64 || (\n  jiraEmail && jiraApiToken ? Buffer.from(`${jiraEmail}:${jiraApiToken}`).toString('base64') : ''\n);\n\nreturn [\n  {\n    json: {\n      user_id: String(body.user_id || body.userId || '').trim(),\n      requested_at: body.timestamp || new Date().toISOString(),\n      google_access_token: body.google_access_token || '',\n      jira_subdomain: subdomainRaw,\n      jira_email: jiraEmail,\n      jira_api_token: jiraApiToken,\n      jira_auth_base64: jiraAuthBase64,\n      today_start: `${dateKey}T00:00:00+07:00`,\n      today_end: `${dateKey}T23:59:59+07:00`,\n      gmail_query: 'is:unread newer_than:7d',\n      gmail_max_results: 5,\n      jira_jql: 'statusCategory != Done ORDER BY updated DESC',\n      jira_max_results: 25\n    }\n  }\n];"
+        "jsCode": "const body = $json.body || {};\nconst jiraCredentials = body.jira_credentials || {};\nconst normalizeSubdomain = (value) => String(value || '')\n  .trim()\n  .replace(/^https?:\\/\\//i, '')\n  .replace(/\\/.*$/, '');\nconst subdomainRaw = normalizeSubdomain(\n  jiraCredentials.subdomain || body.jira_subdomain || body.jiraSubdomain || body.jira_base_url || body.jiraBaseUrl\n);\nconst now = new Date();\nconst futureDate = new Date(now);\nfutureDate.setDate(futureDate.getDate() + 14);\nconst jiraEmail = jiraCredentials.email || body.jira_email || body.jiraEmail || '';\nconst jiraApiToken = jiraCredentials.api_token || body.jira_api_token || body.jiraApiToken || '';\nconst jiraAuthBase64 = body.jira_auth_base64 || body.jiraAuthBase64 || (\n  jiraEmail && jiraApiToken ? Buffer.from(`${jiraEmail}:${jiraApiToken}`).toString('base64') : ''\n);\n\nreturn [\n  {\n    json: {\n      user_id: String(body.user_id || body.userId || '').trim(),\n      requested_at: body.timestamp || new Date().toISOString(),\n      google_access_token: body.google_access_token || '',\n      jira_subdomain: subdomainRaw,\n      jira_email: jiraEmail,\n      jira_api_token: jiraApiToken,\n      jira_auth_base64: jiraAuthBase64,\n      calendar_time_min: now.toISOString(),\n      calendar_time_max: futureDate.toISOString(),\n      gmail_query: 'is:unread newer_than:7d',\n      gmail_max_results: 5,\n      jira_jql: 'statusCategory != Done ORDER BY updated DESC',\n      jira_max_results: 25\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -3248,
-        -368
+        -624
       ],
-      "id": "3d1e610f-b102-470d-8b69-1a9a8dfd3dcb",
+      "id": "f63dcec8-b3d1-463a-bd55-4a47283b7e6c",
       "name": "Prepare Request Data"
     },
     {
@@ -42,9 +42,9 @@
       "typeVersion": 1,
       "position": [
         -2528,
-        -144
+        -400
       ],
-      "id": "3d5b975b-4282-404a-b4da-091bba075207",
+      "id": "05fbd517-487c-4931-8ee4-6aefdc68e328",
       "name": "Split Out Email Messages"
     },
     {
@@ -55,9 +55,9 @@
       "typeVersion": 2,
       "position": [
         -1904,
-        -192
+        -448
       ],
-      "id": "eb501094-2d0b-4c33-abff-8d6f3bd2473e",
+      "id": "21f09a0e-91c3-4763-889c-b7e61f36316d",
       "name": "Aggregate Email Details"
     },
     {
@@ -68,9 +68,9 @@
       "typeVersion": 2,
       "position": [
         -2080,
-        272
+        16
       ],
-      "id": "6896a756-ec92-4369-be53-27b8e45d662b",
+      "id": "b31a291f-c775-4aa0-bc49-7c63fa5091fd",
       "name": "Build Empty Email Payload"
     },
     {
@@ -79,7 +79,7 @@
           "assignments": [
             {
               "name": "prompt",
-              "value": "=Kamu adalah Calendar Briefing Agent.\n\nTugas:\n1. Analisis data kalender hari ini.\n2. Buat ringkasan yang singkat, relevan, dan operasional.\n3. Berikan rekomendasi prioritas untuk leader.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"calendar\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_events\": number,\n    \"events_with_meet\": number,\n    \"events_without_description\": number\n  }\n}\n\nATURAN:\n- Jangan halusinasi meeting atau agenda yang tidak ada.\n- Jika data kosong atau request gagal, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n- Fokus pada meeting penting hari ini, bentrok waktu, event tanpa deskripsi, dan event dengan Google Meet.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "value": "=Kamu adalah Calendar Briefing Agent.\n\nTugas:\n1. Analisis maksimal 3 agenda terdekat dari data kalender ke depan.\n2. Tentukan prioritas singkat untuk domain calendar.\n3. Untuk SETIAP agenda, tentukan 1 sampai 3 AI action yang paling relevan berdasarkan kebutuhan agenda tersebut.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"calendar\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"agenda_actions\": [\n    {\n      \"id\": \"string\",\n      \"threadId\": \"string\",\n      \"title\": \"string\",\n      \"actions\": [\n        {\n          \"label\": \"string\",\n          \"intent\": \"prepare_rundown | prepare_talking_points | follow_up_event | enrich_event_notes | review_schedule_conflict\",\n          \"target\": \"supervisor\",\n          \"prompt\": \"string\",\n          \"context\": {\n            \"briefing_domain\": \"calendar\",\n            \"focus\": \"string\",\n            \"event_ids\": [\"string\"],\n            \"thread_id\": \"string\"\n          }\n        }\n      ]\n    }\n  ],\n  \"source_metrics\": {\n    \"total_events\": number,\n    \"events_with_meet\": number,\n    \"events_without_description\": number\n  }\n}\n\nATURAN:\n- Jangan halusinasi meeting atau agenda yang tidak ada.\n- Gunakan `id` agenda PERSIS seperti di data sumber.\n- Isi `threadId` dengan id agenda yang sama bila memang tidak ada thread terpisah.\n- `agenda_actions` maksimal 3 agenda, dan setiap agenda maksimal 3 action.\n- Setiap `prompt` harus siap dikirim ke Supervisor, spesifik ke agenda terkait, dan jangan generik.\n- Jika data kosong atau request gagal, tetap return JSON dengan status partial atau failed.\n- JANGAN gunakan label `Buat Agenda` atau intent `prepare_meeting` untuk rekomendasi AI karena CTA itu sudah disediakan oleh tombol utama dashboard.\n- Jika konteksnya persiapan meeting, gunakan `Susun Rundown` atau `Susun Talking Points` sebagai gantinya.\n- Fokus pada agenda terdekat, meeting penting, bentrok waktu, event tanpa deskripsi, event dengan Google Meet, dan kebutuhan tindak lanjut yang paling masuk akal.\n- Pilih label aksi yang singkat dan natural untuk tombol dashboard.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
               "type": "string"
             }
           ]
@@ -90,9 +90,9 @@
       "typeVersion": 3.4,
       "position": [
         -2736,
-        -608
+        -864
       ],
-      "id": "6e039725-4733-477f-bc9b-6918397bf066",
+      "id": "8ee988cc-a83d-4836-ad8f-bd4ad613a83e",
       "name": "Build Calendar Prompt"
     },
     {
@@ -101,7 +101,7 @@
           "assignments": [
             {
               "name": "prompt",
-              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis daftar issue Jira yang masih aktif atau belum selesai.\n2. Buat ringkasan progres, bottleneck, dan prioritas.\n3. Berikan rekomendasi tindak lanjut singkat.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"high_priority_count\": number\n  }\n}\n\nATURAN:\n- Jangan mengarang sprint, blocker, atau progres bila tidak muncul di data.\n- Jika request gagal atau data kosong, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n- Fokus pada issue prioritas tinggi, issue yang masih To Do, dan issue yang sedang In Progress.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis daftar issue Jira yang masih aktif atau belum selesai.\n2. Tentukan prioritas singkat untuk domain Jira.\n3. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"high_priority_count\": number\n  }\n}\n\nATURAN:\n- Jangan mengarang sprint, blocker, atau progres bila tidak muncul di data.\n- Jika request gagal atau data kosong, tetap return JSON dengan status partial atau failed.\n- Fokus pada issue prioritas tinggi, issue yang masih To Do, dan issue yang sedang In Progress.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
               "type": "string"
             }
           ]
@@ -112,9 +112,9 @@
       "typeVersion": 3.4,
       "position": [
         -2736,
-        -368
+        -624
       ],
-      "id": "dac230a8-903e-42d6-8e30-35180fde4a05",
+      "id": "791e9e3d-ffd6-4123-a82c-4cfd275cd2f5",
       "name": "Build Jira Prompt"
     },
     {
@@ -123,7 +123,7 @@
           "assignments": [
             {
               "name": "prompt",
-              "value": "=Kamu adalah Email Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 unread email teratas.\n2. Buat ringkasan email itu tentang apa agar user tidak perlu membuka semua email yang tidak penting.\n3. Bedakan email yang tampak penting dengan email yang tampak seperti promosi, newsletter, atau notifikasi biasa.\n4. Berikan rekomendasi follow-up singkat.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"email\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_unread\": number,\n    \"fetched_email_count\": number\n  }\n}\n\nATURAN:\n- Gunakan subject, from, snippet, dan body ringkas untuk menilai isi email.\n- Jangan menyalin body email panjang apa adanya.\n- Jika email tampak seperti iklan, promo, newsletter, atau notifikasi massal, sebutkan sebagai low-value update.\n- Jika email tampak butuh tindakan, follow-up, atau perhatian cepat, naikkan prioritas.\n- Jangan mengarang isi yang tidak ada di data.\n- Jika request gagal atau email kosong, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "value": "=Kamu adalah Email Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 unread email teratas.\n2. Abaikan email yang jelas berupa notifikasi sistem, promo, newsletter, update otomatis aplikasi, atau bot. Contoh umum: Google, Jira, Atlassian, GitHub notification, Figma notification, no-reply, noreply, notification, digest, calendar update, billing alert, system alert, app update.\n3. Pilih 1 email yang paling layak di-follow-up karena tampak berasal dari orang/perusahaan yang benar-benar mengajak komunikasi atau membutuhkan respons.\n4. Buat 1 insight singkat kenapa email itu penting.\n5. Buat 1 action `Buatkan Draft` yang akan dikirim ke Supervisor.\n6. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"email\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"focus_email\": {\n    \"id\": \"string\",\n    \"threadId\": \"string\",\n    \"reason\": \"string\",\n    \"action\": {\n      \"label\": \"Buatkan Draft\",\n      \"intent\": \"draft_reply\",\n      \"target\": \"supervisor\",\n      \"prompt\": \"string\",\n      \"context\": {\n        \"briefing_domain\": \"email\",\n        \"focus\": \"priority_follow_up\",\n        \"email_ids\": [\"string\"],\n        \"thread_id\": \"string\"\n      }\n    }\n  },\n  \"source_metrics\": {\n    \"total_unread\": number,\n    \"fetched_email_count\": number\n  }\n}\n\nATURAN:\n- Gunakan subject, from, snippet, dan body ringkas untuk menilai isi email.\n- Jangan menyalin body email panjang apa adanya.\n- Jika email tampak seperti iklan, promo, newsletter, atau notifikasi massal, abaikan dari kandidat `focus_email`.\n- Utamakan email dari manusia, rekan kerja, klien, recruiter, partner, vendor, atau perusahaan yang tampak mengharapkan balasan.\n- Jika semua email tampak notifikasi/aplikasi dan tidak ada yang layak di-follow-up, return `focus_email: null`.\n- Jangan mengarang isi yang tidak ada di data.\n- Jika request gagal atau email kosong, tetap return JSON dengan status partial atau failed.\n- Prompt action harus siap dikirim ke Supervisor untuk membuat draft balasan yang profesional.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
               "type": "string"
             }
           ]
@@ -134,68 +134,48 @@
       "typeVersion": 3.4,
       "position": [
         -1648,
-        -192
+        -448
       ],
-      "id": "436f561c-50d4-482e-b014-539ddab05f49",
+      "id": "35a435e2-3b84-4e81-9d8d-6ff0782cf99e",
       "name": "Build Email Prompt"
     },
     {
       "parameters": {
-        "model": "openai/gpt-oss-120b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        -1840,
-        512
-      ],
-      "id": "5658ab3b-b516-4e4b-9e0e-22fc2725e23e",
-      "name": "Groq Chat Model",
-      "credentials": {
-        "groqApi": {
-          "id": "72ktNmVndXqjvOfZ",
-          "name": "Groq"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      calendar_briefing: {\n        domain: 'calendar',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan kalender belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst sourcePayload = $('Get Upcoming Calendar').item.json || {};\nconst sourceEvents = Array.isArray(sourcePayload.items) ? sourcePayload.items.slice(0, 3) : [];\nconst safeSourceMetrics = parsed.source_metrics && typeof parsed.source_metrics === 'object' ? parsed.source_metrics : {};\nconst sanitizeText = (value, fallback = '') => {\n  const normalized = String(value || '').trim();\n  return normalized || fallback;\n};\nconst normalizeAgendaIntent = (intent) => {\n  const normalized = sanitizeText(intent);\n  if (normalized === 'prepare_meeting') return 'prepare_rundown';\n  return normalized || 'prepare_rundown';\n};\nconst normalizeAgendaLabel = (label, intent) => {\n  const normalized = sanitizeText(label);\n  if (!normalized || normalized.toLowerCase() === 'buat agenda') {\n    if (intent === 'prepare_rundown') return 'Susun Rundown';\n    if (intent === 'prepare_talking_points') return 'Susun Talking Points';\n  }\n  return normalized || 'Susun Rundown';\n};\nconst buildEventDetails = (event) => {\n  if (!event || typeof event !== 'object') return 'Detail agenda belum tersedia.';\n\n  const startLabel = event?.start?.dateTime || event?.start?.date || '-';\n  const endLabel = event?.end?.dateTime || event?.end?.date || '-';\n  const attendeeText = Array.isArray(event.attendees) && event.attendees.length\n    ? `\\nPeserta: ${event.attendees.map((attendee) => attendee.email || attendee.displayName).filter(Boolean).join(', ')}`\n    : '';\n\n  return `Event: ${event.summary || 'Tanpa judul'}\\nWaktu: ${startLabel} - ${endLabel}${event.location ? `\\nLokasi: ${event.location}` : ''}${attendeeText}${event.description ? `\\nDeskripsi: ${event.description}` : ''}${event.hangoutLink ? `\\nGoogle Meet: ${event.hangoutLink}` : ''}`;\n};\nconst buildEventContext = (event, focus = 'event_preparation') => {\n  const eventId = sanitizeText(event?.id);\n  return {\n    briefing_domain: 'calendar',\n    focus,\n    event_ids: eventId ? [eventId] : [],\n    thread_id: eventId,\n    event_id: eventId,\n    event_summary: sanitizeText(event?.summary, 'Tanpa judul'),\n    event_start: sanitizeText(event?.start?.dateTime || event?.start?.date),\n    event_end: sanitizeText(event?.end?.dateTime || event?.end?.date),\n    event_location: sanitizeText(event?.location),\n    event_description: sanitizeText(event?.description),\n    event_hangout_link: sanitizeText(event?.hangoutLink),\n    event_attendees: Array.isArray(event?.attendees)\n      ? event.attendees.map((attendee) => attendee.email || attendee.displayName).filter(Boolean)\n      : [],\n  };\n};\nconst buildPromptByIntent = (intent, event, fallbackLabel = 'agenda ini') => {\n  const details = buildEventDetails(event);\n  switch (intent) {\n    case 'prepare_rundown':\n      return `Buatkan rundown meeting yang ringkas, urutan bahasan, estimasi waktu, dan output yang perlu dicapai untuk ${fallbackLabel} berikut:\\n\\n${details}`;\n    case 'prepare_talking_points':\n      return `Buatkan talking points utama, pertanyaan penting, dan outcome yang perlu dicapai untuk ${fallbackLabel} berikut:\\n\\n${details}`;\n    case 'follow_up_event':\n      return `Buatkan draft follow-up dan daftar next step untuk ${fallbackLabel} berikut:\\n\\n${details}`;\n    case 'review_schedule_conflict':\n      return `Cek apakah ada bentrok jadwal, dependensi waktu, atau komitmen lain yang perlu diwaspadai untuk ${fallbackLabel} berikut. Jika ada risiko, jelaskan mitigasinya.\\n\\n${details}`;\n    case 'enrich_event_notes':\n      return `Tolong bantu lengkapi catatan persiapan, kebutuhan, dan hal yang perlu dicek untuk ${fallbackLabel} berikut:\\n\\n${details}`;\n    default:\n      return `Analisis agenda berikut dan sarankan tindak lanjut paling relevan.\\n\\n${details}`;\n  }\n};\nconst buildFallbackActions = (event) => {\n  return [\n    {\n      label: 'Susun Rundown',\n      intent: 'prepare_rundown',\n      target: 'supervisor',\n      prompt: buildPromptByIntent('prepare_rundown', event),\n      context: buildEventContext(event, 'meeting_rundown'),\n    },\n    {\n      label: 'Susun Talking Points',\n      intent: 'prepare_talking_points',\n      target: 'supervisor',\n      prompt: buildPromptByIntent('prepare_talking_points', event),\n      context: buildEventContext(event, 'talking_points'),\n    },\n    {\n      label: event?.hangoutLink ? 'Buat Follow-up' : 'Lengkapi Catatan',\n      intent: event?.hangoutLink ? 'follow_up_event' : 'enrich_event_notes',\n      target: 'supervisor',\n      prompt: buildPromptByIntent(event?.hangoutLink ? 'follow_up_event' : 'enrich_event_notes', event),\n      context: buildEventContext(event, event?.hangoutLink ? 'follow_up' : 'event_notes'),\n    },\n  ];\n};\nconst eventLookup = new Map(\n  sourceEvents\n    .map((event) => [sanitizeText(event?.id), event])\n    .filter(([id]) => id),\n);\nconst normalizeAction = (action, fallbackAction, sourceEvent) => {\n  const fallbackContext = fallbackAction?.context && typeof fallbackAction.context === 'object'\n    ? fallbackAction.context\n    : buildEventContext(sourceEvent);\n  const intent = normalizeAgendaIntent(action?.intent || fallbackAction?.intent);\n  const label = normalizeAgendaLabel(action?.label || fallbackAction?.label, intent);\n  const focus = sanitizeText(action?.context?.focus, fallbackContext.focus || 'event_preparation');\n  const context = {\n    ...fallbackContext,\n    ...(action?.context && typeof action.context === 'object' ? action.context : {}),\n    ...buildEventContext(sourceEvent, focus),\n  };\n  const generatedPrompt = buildPromptByIntent(intent, sourceEvent, label.toLowerCase());\n  const providedPrompt = sanitizeText(action?.prompt);\n\n  return {\n    label,\n    intent,\n    target: 'supervisor',\n    prompt: providedPrompt\n      ? `${providedPrompt}\\n\\nKonteks agenda lengkap:\\n${buildEventDetails(sourceEvent)}`\n      : generatedPrompt,\n    context,\n  };\n};\nconst normalizedAgendaActions = (Array.isArray(parsed.agenda_actions) ? parsed.agenda_actions.slice(0, 3) : [])\n  .map((entry, index) => {\n    const candidateId = sanitizeText(entry?.id || entry?.threadId);\n    const matchedEvent = candidateId ? eventLookup.get(candidateId) : null;\n    const sourceEvent = matchedEvent || sourceEvents[index] || null;\n    if (!sourceEvent) return null;\n\n    const fallbackActions = buildFallbackActions(sourceEvent);\n    const actions = Array.isArray(entry?.actions) && entry.actions.length\n      ? entry.actions.slice(0, 3).map((action, actionIndex) => normalizeAction(action, fallbackActions[actionIndex] || fallbackActions[0], sourceEvent))\n      : fallbackActions;\n    const resolvedEventId = sanitizeText(sourceEvent?.id);\n\n    return {\n      id: resolvedEventId,\n      threadId: resolvedEventId,\n      title: sanitizeText(entry?.title, sourceEvent?.summary || 'Tanpa judul'),\n      actions,\n    };\n  })\n  .filter(Boolean);\n\nif (!normalizedAgendaActions.length) {\n  for (const event of sourceEvents) {\n    const eventId = sanitizeText(event?.id);\n    normalizedAgendaActions.push({\n      id: eventId,\n      threadId: eventId,\n      title: sanitizeText(event?.summary, 'Tanpa judul'),\n      actions: buildFallbackActions(event),\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      calendar_briefing: {\n        domain: 'calendar',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        agenda_actions: normalizedAgendaActions,\n        source_metrics: {\n          ...safeSourceMetrics,\n          agenda_action_count: normalizedAgendaActions.length,\n        }\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -2192,
-        -608
+        -864
       ],
-      "id": "7e65e831-ac4e-408d-af90-31292d3d85a1",
+      "id": "1a2f7f2d-6fbc-42cf-add1-b221fd280c69",
       "name": "Parse Calendar Briefing"
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      jira_briefing: {\n        domain: 'jira',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan Jira belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      jira_briefing: {\n        domain: 'jira',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -2192,
-        -368
+        -624
       ],
-      "id": "f558820e-fb79-45d9-97de-1dcc430210a8",
+      "id": "06273eb7-4a4f-466a-b524-eba59931bc17",
       "name": "Parse Jira Briefing"
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      email_briefing: {\n        domain: 'email',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: parsed.headline || 'Ringkasan email belum tersedia',\n        summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst sourcePayload = $('Aggregate Email Details').item.json || {};\nconst sourceEmails = Array.isArray(sourcePayload.emails) ? sourcePayload.emails.slice(0, 5) : [];\nconst safeSourceMetrics = parsed.source_metrics && typeof parsed.source_metrics === 'object'\n  ? parsed.source_metrics\n  : (sourcePayload.source_metrics || {});\nconst sanitizeText = (value, fallback = '') => {\n  const normalized = String(value || '').trim();\n  return normalized || fallback;\n};\nconst looksAutomated = (email) => {\n  const from = sanitizeText(email?.from).toLowerCase();\n  const subject = sanitizeText(email?.subject).toLowerCase();\n  const snippet = sanitizeText(email?.snippet).toLowerCase();\n  const body = sanitizeText(email?.body).toLowerCase();\n  const haystack = `${from} ${subject} ${snippet} ${body}`;\n\n  const automatedSignals = [\n    'no-reply',\n    'noreply',\n    'notification',\n    'notifications',\n    'digest',\n    'newsletter',\n    'unsubscribe',\n    'calendar',\n    'google',\n    'jira',\n    'atlassian',\n    'github',\n    'figma',\n    'system alert',\n    'billing alert',\n    'app update',\n    'do-not-reply',\n  ];\n\n  return automatedSignals.some((signal) => haystack.includes(signal));\n};\nconst scoreEmail = (email) => {\n  const from = sanitizeText(email?.from).toLowerCase();\n  const subject = sanitizeText(email?.subject).toLowerCase();\n  const snippet = sanitizeText(email?.snippet).toLowerCase();\n  const body = sanitizeText(email?.body).toLowerCase();\n  const haystack = `${subject} ${snippet} ${body}`;\n  let score = 0;\n\n  if (!looksAutomated(email)) score += 4;\n  if (haystack.includes('please') || haystack.includes('could you') || haystack.includes('can you')) score += 2;\n  if (haystack.includes('reply') || haystack.includes('respond') || haystack.includes('feedback')) score += 2;\n  if (haystack.includes('meeting') || haystack.includes('proposal') || haystack.includes('confirm')) score += 1;\n  if (from.includes('@gmail.com') || from.includes('@outlook.com') || from.includes('@yahoo.com')) score += 1;\n\n  return score;\n};\nconst emailLookup = new Map(sourceEmails.map((email) => [sanitizeText(email?.id), email]).filter(([id]) => id));\nconst bestFallbackEmail = sourceEmails\n  .filter((email) => !looksAutomated(email))\n  .sort((a, b) => scoreEmail(b) - scoreEmail(a))[0] || null;\nconst selectedEmailId = sanitizeText(parsed?.focus_email?.id);\nconst selectedThreadId = sanitizeText(parsed?.focus_email?.threadId);\nconst matchedFocusEmail = sourceEmails.find((email) => sanitizeText(email?.id) === selectedEmailId || sanitizeText(email?.threadId) === selectedThreadId) || null;\nconst focusEmail = matchedFocusEmail || bestFallbackEmail;\nconst buildEmailDetails = (email) => {\n  if (!email || typeof email !== 'object') return 'Detail email belum tersedia.';\n  return `Pengirim: ${sanitizeText(email?.from, '-')}` +\n    `\\nSubject: ${sanitizeText(email?.subject, '(Tanpa subjek)')}` +\n    `\\nSnippet: ${sanitizeText(email?.snippet, '-')}` +\n    `\\nBody ringkas: ${sanitizeText(email?.body || email?.snippet, '-')}`;\n};\nconst buildEmailContext = (email) => ({\n  briefing_domain: 'email',\n  focus: 'priority_follow_up',\n  email_ids: sanitizeText(email?.id) ? [sanitizeText(email?.id)] : [],\n  thread_id: sanitizeText(email?.threadId),\n  email_id: sanitizeText(email?.id),\n  email_from: sanitizeText(email?.from),\n  email_subject: sanitizeText(email?.subject, '(Tanpa subjek)'),\n  email_snippet: sanitizeText(email?.snippet),\n  email_body: sanitizeText(email?.body || email?.snippet),\n});\nconst normalizedFocusEmail = focusEmail ? {\n  id: sanitizeText(focusEmail.id),\n  threadId: sanitizeText(focusEmail.threadId, sanitizeText(focusEmail.id)),\n  reason: sanitizeText(parsed?.focus_email?.reason, 'Email ini paling layak ditindaklanjuti karena tampak berasal dari pengirim yang benar-benar mengharapkan respons.'),\n  action: {\n    label: 'Buatkan Draft',\n    intent: 'draft_reply',\n    target: 'supervisor',\n    prompt: sanitizeText(parsed?.focus_email?.action?.prompt, 'Buatkan draft balasan profesional untuk email prioritas ini.') + `\\n\\nKonteks email lengkap:\\n${buildEmailDetails(focusEmail)}`,\n    context: {\n      ...buildEmailContext(focusEmail),\n      ...(parsed?.focus_email?.action?.context && typeof parsed.focus_email.action.context === 'object' ? parsed.focus_email.action.context : {}),\n      ...buildEmailContext(focusEmail),\n    },\n  },\n} : null;\n\nreturn [\n  {\n    json: {\n      email_briefing: {\n        domain: 'email',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || (normalizedFocusEmail ? 'high' : 'low'),\n        focus_email: normalizedFocusEmail,\n        source_metrics: {\n          ...safeSourceMetrics,\n          ignored_automated_candidates: sourceEmails.filter(looksAutomated).length,\n          follow_up_candidate_found: Boolean(normalizedFocusEmail),\n        }\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -1072,
-        -192
+        -448
       ],
-      "id": "68c030e2-8bbb-4557-9abe-027d46891d79",
+      "id": "43e61656-65d3-4a1d-a290-33ad6377bf62",
       "name": "Parse Email Briefing"
     },
     {
@@ -208,9 +188,9 @@
       "typeVersion": 3.2,
       "position": [
         -1952,
-        -448
+        -704
       ],
-      "id": "0557c48d-b574-401a-9db7-22277c5e6130",
+      "id": "33625d38-7546-4538-85cd-0d6d13a773fa",
       "name": "Merge Jira + Calendar"
     },
     {
@@ -223,9 +203,9 @@
       "typeVersion": 3.2,
       "position": [
         -1680,
-        -432
+        -688
       ],
-      "id": "f4a666cd-3e4a-47e5-8de3-033ac42ebd10",
+      "id": "a8e9560c-6e55-4758-86e5-32ea7e5f3723",
       "name": "Merge All Briefings"
     },
     {
@@ -236,9 +216,9 @@
       "typeVersion": 2,
       "position": [
         -1328,
-        -368
+        -624
       ],
-      "id": "c78b99d4-cc1c-4488-b8a0-1caad3934f9f",
+      "id": "022e32f3-5809-43db-a470-ecd28786a30f",
       "name": "Build Dashboard Response"
     },
     {
@@ -250,23 +230,23 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        80,
-        -496
+        96,
+        -752
       ],
-      "id": "6a840815-e7e4-4bd6-8c54-4cc67d6f25c6",
+      "id": "c2798404-e4f8-44fc-947f-9af2beec4e3e",
       "name": "Respond to Webhook"
     },
     {
       "parameters": {
-        "jsCode": "const payload = $json || {};\nconst userId = String(payload.user_id || '').trim();\nconst generatedAt = payload.generated_at || new Date().toISOString();\nconst briefings = payload.briefings && typeof payload.briefings === 'object' ? payload.briefings : {};\nconst allowedPriorities = new Set(['high', 'medium', 'low']);\nconst allowedStatuses = new Set(['success', 'partial', 'failed']);\nconst rows = [];\n\nfor (const domain of ['jira', 'calendar', 'email']) {\n  const briefing = briefings[domain];\n  if (!briefing || !userId) continue;\n\n  rows.push({\n    user_id: userId,\n    domain,\n    priority: allowedPriorities.has(briefing.priority) ? briefing.priority : 'medium',\n    headline: String(briefing.headline || '').trim() || 'Briefing belum tersedia',\n    summary_points: Array.isArray(briefing.summary_points) ? briefing.summary_points.slice(0, 4) : [],\n    source_metrics: briefing.source_metrics && typeof briefing.source_metrics === 'object' ? briefing.source_metrics : {},\n    generated_at: generatedAt,\n    status: allowedStatuses.has(briefing.status) ? briefing.status : 'success',\n    error_message: briefing.error_message ? String(briefing.error_message) : null,\n  });\n}\n\nreturn [{\n  json: {\n    response_payload: payload,\n    supabase_rows: rows,\n  }\n}];"
+        "jsCode": "const payload = $json || {};\nconst userId = String(payload.user_id || '').trim();\nconst generatedAt = payload.generated_at || new Date().toISOString();\nconst briefings = payload.briefings && typeof payload.briefings === 'object' ? payload.briefings : {};\nconst allowedPriorities = new Set(['high', 'medium', 'low']);\nconst allowedStatuses = new Set(['success', 'partial', 'failed']);\nconst rows = [];\n\nfor (const domain of ['jira', 'calendar', 'email']) {\n  const briefing = briefings[domain];\n  if (!briefing || !userId) continue;\n\n  rows.push({\n    user_id: userId,\n    domain,\n    priority: allowedPriorities.has(briefing.priority) ? briefing.priority : 'medium',\n    headline: 'Briefing metadata only',\n    summary_points: [],\n    source_metrics: briefing.source_metrics && typeof briefing.source_metrics === 'object' ? briefing.source_metrics : {},\n    generated_at: generatedAt,\n    status: allowedStatuses.has(briefing.status) ? briefing.status : 'success',\n    error_message: briefing.error_message ? String(briefing.error_message) : null,\n  });\n}\n\nreturn [{\n  json: {\n    response_payload: payload,\n    supabase_rows: rows,\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -1072,
-        -512
+        -768
       ],
-      "id": "fb2eb05f-e964-4954-b27f-c166e1ca8a91",
+      "id": "f9649242-5425-4e3e-a896-16be17b4b213",
       "name": "Prepare Supabase Upsert Rows"
     },
     {
@@ -279,9 +259,9 @@
       "typeVersion": 3.2,
       "position": [
         -384,
-        -640
+        -896
       ],
-      "id": "f2d3d12f-6430-46f6-9d30-08b9db077b4d",
+      "id": "bf44c04f-d0e0-4d9d-9037-1e032b664782",
       "name": "Merge Supabase Result"
     },
     {
@@ -292,9 +272,9 @@
       "typeVersion": 2,
       "position": [
         -192,
-        -496
+        -752
       ],
-      "id": "036eb469-cb9c-45e5-85b1-ac67ab67ffae",
+      "id": "90155ad1-aaa4-4b71-b5e5-6fb29530efcc",
       "name": "Build Final Webhook Response"
     },
     {
@@ -305,9 +285,9 @@
       "typeVersion": 3,
       "position": [
         -2304,
-        -176
+        -432
       ],
-      "id": "f7bfca9f-8573-438b-8352-01bf293aab6f",
+      "id": "87a56c3a-1303-4f9c-979a-096a05ad45ee",
       "name": "Loop Over Items"
     },
     {
@@ -318,11 +298,11 @@
           "parameters": [
             {
               "name": "=timeMin",
-              "value": "={{ $('Prepare Request Data').item.json.today_start }}"
+              "value": "={{ $('Prepare Request Data').item.json.calendar_time_min }}"
             },
             {
               "name": "=timeMax",
-              "value": "={{ $('Prepare Request Data').item.json.today_end }}"
+              "value": "={{ $('Prepare Request Data').item.json.calendar_time_max }}"
             },
             {
               "name": "=singleEvents",
@@ -334,11 +314,11 @@
             },
             {
               "name": "=maxResults",
-              "value": "=20"
+              "value": "=3"
             },
             {
               "name": "=fields",
-              "value": "=items(id,summary,start,end,location,description,hangoutLink,status,organizer),timeZone"
+              "value": "=items(id,summary,start,end,location,description,hangoutLink,status,organizer,attendees(email,displayName,responseStatus)),timeZone"
             }
           ]
         },
@@ -357,10 +337,10 @@
       "typeVersion": 4.2,
       "position": [
         -3024,
-        -608
+        -864
       ],
-      "id": "5839860c-c5ac-4ced-a4f2-fd2194f4800a",
-      "name": "Get Today Calendar"
+      "id": "47745bee-b51f-4f36-8906-dae80c8d9cc4",
+      "name": "Get Upcoming Calendar"
     },
     {
       "parameters": {
@@ -374,9 +354,9 @@
       "typeVersion": 2.2,
       "position": [
         -2544,
-        -608
+        -864
       ],
-      "id": "e303e24b-be85-4dc3-a42f-2fd79536a3ca",
+      "id": "c120e5d3-a768-466a-92d2-2abec5be1f02",
       "name": "Calendar Briefing Agent"
     },
     {
@@ -409,9 +389,9 @@
       "typeVersion": 4.2,
       "position": [
         -3040,
-        -368
+        -624
       ],
-      "id": "7927e59b-bfb1-4c97-b7b8-f7dec9954918",
+      "id": "42483733-e812-4f17-b2e5-5018a79eacbd",
       "name": "Get Jira Issues"
     },
     {
@@ -445,9 +425,9 @@
       "typeVersion": 4.2,
       "position": [
         -3040,
-        -144
+        -400
       ],
-      "id": "fee02cd3-9104-437e-b7c5-629e480e487c",
+      "id": "123855d2-0ca5-44c8-b821-b6546f449c05",
       "name": "Get Unread Email"
     },
     {
@@ -481,9 +461,9 @@
       "typeVersion": 4.2,
       "position": [
         -2096,
-        -80
+        -336
       ],
-      "id": "e612187d-c094-4449-a9e4-75561067404f",
+      "id": "f6f9b6dd-8e7f-4bac-ad3b-81c580a374b8",
       "name": "Get Email Detail"
     },
     {
@@ -514,9 +494,9 @@
       "typeVersion": 2.2,
       "position": [
         -864,
-        -512
+        -768
       ],
-      "id": "3db6179a-b5f3-471e-a872-cee35cb6d035",
+      "id": "9d361e52-1482-400a-b0e9-256920c405c5",
       "name": "Has Supabase Rows?"
     },
     {
@@ -562,9 +542,9 @@
       "typeVersion": 4.2,
       "position": [
         -592,
-        -736
+        -992
       ],
-      "id": "5b5775e3-6f6c-4289-9593-4e7e9a19347d",
+      "id": "8f48588f-872f-4033-910f-31196e8938eb",
       "name": "Upsert Briefings To Supabase"
     },
     {
@@ -595,9 +575,9 @@
       "typeVersion": 2.2,
       "position": [
         -2832,
-        -144
+        -400
       ],
-      "id": "9efad737-0f97-4ecd-9615-49feeac90645",
+      "id": "4c004936-fb0e-45bc-b488-536247a123bb",
       "name": "Has Unread Emails?"
     },
     {
@@ -612,9 +592,9 @@
       "typeVersion": 2.2,
       "position": [
         -2528,
-        -368
+        -624
       ],
-      "id": "15f7fef4-a8fc-43b9-b2c3-0ca4703644ab",
+      "id": "08671fb4-e75c-471a-b660-d95285726b90",
       "name": "Jira Briefing Agent"
     },
     {
@@ -629,18 +609,18 @@
       "typeVersion": 2.2,
       "position": [
         -1440,
-        -192
+        -448
       ],
-      "id": "2ca7fd0f-3b07-4dc5-beef-9e532bf5a93a",
+      "id": "bc3df4d4-707b-4dce-9730-dfbc89fe3b41",
       "name": "Email Briefing Agent"
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "deepseek-v4-flash",
+          "value": "openai/gpt-oss-20b",
           "mode": "list",
-          "cachedResultName": "deepseek-v4-flash"
+          "cachedResultName": "openai/gpt-oss-20b"
         },
         "options": {}
       },
@@ -648,14 +628,34 @@
       "typeVersion": 1.2,
       "position": [
         -1680,
-        512
+        256
       ],
-      "id": "d2b350fd-a914-4931-9fe1-e2890f33dc04",
+      "id": "929e7dac-c521-4ce5-ad3c-614205170bf3",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
           "id": "0rW2Paz5Jham8Eqn",
           "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        256
+      ],
+      "id": "7f7c37ad-defc-4d45-a1ce-ca4c1602fc02",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "72ktNmVndXqjvOfZ",
+          "name": "Groq"
         }
       }
     }
@@ -827,7 +827,7 @@
       "main": [
         [
           {
-            "node": "Get Today Calendar",
+            "node": "Get Upcoming Calendar",
             "type": "main",
             "index": 0
           },
@@ -844,7 +844,7 @@
         ]
       ]
     },
-    "Get Today Calendar": {
+    "Get Upcoming Calendar": {
       "main": [
         [
           {
@@ -877,27 +877,6 @@
         ]
       ]
     },
-    "Groq Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Calendar Briefing Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Jira Briefing Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Email Briefing Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get Jira Issues": {
       "main": [
         [
@@ -924,7 +903,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Aggregate Email Details",
             "type": "main",
             "index": 0
           }
@@ -1027,9 +1006,30 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
+    "Groq Chat Model": {
       "ai_languageModel": [
         []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Jira Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Calendar Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Email Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -1037,7 +1037,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b07f91ce-075a-4062-ae7a-5df19fa208a5",
+  "versionId": "d49c84e8-b4e7-4fc6-a431-a5854ed03587",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

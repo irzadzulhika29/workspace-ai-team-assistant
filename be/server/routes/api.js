@@ -225,9 +225,29 @@ router.get('/token-usage', async (req, res) => {
     const limit = Number.isInteger(requestedLimit)
       ? Math.min(Math.max(requestedLimit, 1), 500)
       : 100;
+    const period = String(req.query.period || '').trim().toLowerCase();
 
-    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens,execution_time&order=timestamp.desc&limit=${limit}`;
-    const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens`;
+    let periodStart = null;
+    let periodEnd = null;
+
+    if (period === 'current_month') {
+      const now = new Date();
+      periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+      periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
+    }
+
+    const filterSegments = [];
+    if (periodStart) {
+      filterSegments.push(`timestamp=gte.${encodeURIComponent(periodStart.toISOString())}`);
+    }
+    if (periodEnd) {
+      filterSegments.push(`timestamp=lt.${encodeURIComponent(periodEnd.toISOString())}`);
+    }
+
+    const filterQuery = filterSegments.length ? `&${filterSegments.join('&')}` : '';
+
+    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens,execution_time&order=timestamp.desc&limit=${limit}${filterQuery}`;
+    const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens,timestamp${filterQuery}`;
 
     const [recentResponse, summaryResponse] = await Promise.all([
       fetch(recentUrl, {
@@ -278,7 +298,12 @@ router.get('/token-usage', async (req, res) => {
         totalTokens: summary.totalInputTokens + summary.totalCompletionTokens,
         totalWorkflows: summary._workflowSet.size,
         latestTimestamp: rows[0]?.timestamp || null,
-      }
+      },
+      period: {
+        type: period || 'all_time',
+        start: periodStart ? periodStart.toISOString() : null,
+        end: periodEnd ? periodEnd.toISOString() : null,
+      },
     });
   } catch (error) {
     console.error('Error fetching token usage:', error);

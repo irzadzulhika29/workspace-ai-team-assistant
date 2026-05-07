@@ -27,7 +27,9 @@ export function AuthProvider({ children }) {
           id: data.userId,
           name: data.name,
           email: data.email,
+          jobTitle: data.jobTitle || "",
           picture: data.picture,
+          hasGoogleToken: Boolean(data.hasGoogleToken),
         })
       } else {
         setUser(null)

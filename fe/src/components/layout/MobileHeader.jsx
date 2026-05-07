@@ -12,6 +12,7 @@ const PAGE_TITLES = {
   '/workspace/jira': 'Jira',
   '/monitoring/tokens': 'Token Monitor',
   '/integrations': 'Integrations',
+  '/settings': 'Settings',
   '/settings/integrations': 'Integrations',
 }
 

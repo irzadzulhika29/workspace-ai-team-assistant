@@ -3,6 +3,22 @@ import DOMPurify from 'dompurify'
 import { ChevronDown, ExternalLink, Calendar, Mail, Ticket, Send, RefreshCw } from 'lucide-react'
 import { Badge, Button, Card, CardContent, Input } from '@/components/ui'
 
+const formatAgentLabel = ({ agentUsed, emailDraft }) => {
+  if (emailDraft) {
+    return 'Communication Agent'
+  }
+
+  if (!agentUsed || agentUsed === 'pm') {
+    return 'PM Agent'
+  }
+
+  if (agentUsed === 'communication') {
+    return 'Communication Agent'
+  }
+
+  return `${agentUsed} agent`
+}
+
 /**
  * AgentCard — displays structured results from PM Agent (Jira + Google Calendar)
  * @param {Object} props
@@ -21,6 +37,8 @@ export default function AgentCard({ jiraUrl, calendarUrl, emailDraft, agentUsed,
   const [emailExpanded, setEmailExpanded] = useState(true)
 
   if (!jiraUrl && !calendarUrl && !emailDraft) return null
+
+  const agentLabel = formatAgentLabel({ agentUsed, emailDraft })
 
   const safeEmailHtml = emailDraft?.message
     ? DOMPurify.sanitize(emailDraft.message)
@@ -61,7 +79,7 @@ export default function AgentCard({ jiraUrl, calendarUrl, emailDraft, agentUsed,
       <CardContent className="space-y-3 px-4 py-4">
         <div className="flex items-center justify-between gap-3">
           <Badge variant="outline" className="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-            {agentUsed ?? 'pm'} agent
+            {agentLabel}
           </Badge>
           <span className="text-[11px] text-neutral-400">Action results</span>
         </div>

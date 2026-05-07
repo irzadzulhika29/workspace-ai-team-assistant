@@ -3,6 +3,7 @@ export * from "./alert";
 export * from "./badge";
 export * from "./button";
 export * from "./card";
+export * from "./carousel";
 export * from "./confirmation-modal";
 export * from "./empty-state";
 export * from "./hero-banner";
@@ -17,5 +18,6 @@ export * from "./tabs";
 export * from "./token-usage";
 
 export { default as AgentCard } from "./AgentCard.jsx";
+export { default as AnimatedList } from "./animated-list.jsx";
 export { default as SettingsModal } from "./SettingsModal.jsx";
 export { default as SkeletonLoader } from "./SkeletonLoader.jsx";

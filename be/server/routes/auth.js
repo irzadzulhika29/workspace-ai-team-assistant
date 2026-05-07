@@ -1,6 +1,7 @@
 import express from 'express';
 import passport from '../config/passport.js';
 import prisma from '../lib/prisma.js';
+import { requireAuth } from '../middleware/auth.js';
 import { deleteN8nCredential } from '../services/n8nService.js';
 
 const router = express.Router();
@@ -94,6 +95,7 @@ router.get('/google/status', async (req, res) => {
       userId: user.id,
       email: user.email,
       name: user.name,
+      jobTitle: user.jobTitle,
       picture: user.picture,
       credentialId: user.n8nCredentialId,
       hasGoogleToken: hasToken
@@ -152,6 +154,34 @@ router.get('/me', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
   res.json(req.user);
+});
+
+router.patch('/profile', requireAuth, async (req, res) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    const jobTitle = String(req.body?.jobTitle || '').trim();
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        ...(name ? { name } : {}),
+        jobTitle: jobTitle || null,
+      },
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        jobTitle: updatedUser.jobTitle,
+        picture: updatedUser.picture,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 export default router;

@@ -12,6 +12,7 @@ import TokenMonitorPage from './pages/TokenMonitorPage'
 import EmailPage from './pages/EmailPage'
 import DebugAuthPage from './pages/DebugAuthPage'
 import LoginPage from './pages/LoginPage'
+import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
 import { AuthProvider } from './context/AuthContext'
@@ -61,6 +62,7 @@ function Layout() {
               <Route path="/workspace/email" element={<EmailPage />} />
               <Route path="/debug/auth" element={<DebugAuthPage />} />
               <Route path="/monitoring/tokens" element={<TokenMonitorPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/integrations" element={<IntegrationsPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
               <Route path="*" element={<Dashboard />} />

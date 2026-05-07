@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
   CalendarDays,
@@ -18,6 +18,7 @@ import { jiraApi } from "../services/jiraService";
 import { emailApi } from "../services/emailService";
 import {
   Alert,
+  AnimatedList,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -25,12 +26,16 @@ import {
   Button,
   Card,
   CardContent,
+  Carousel,
+  CarouselContent,
+  CarouselIndicator,
+  CarouselItem,
+  CarouselNavigation,
   CardHeader,
   CardTitle,
   EmptyState,
   HeroBanner,
   Input,
-  ListItem,
   StatCard,
   TokenUsage,
 } from "@/components/ui";
@@ -52,6 +57,7 @@ const REVIEW_STATUS_KEYWORDS = [
 ];
 const BRIEFINGS_STORAGE_KEY = "dashboard_briefings_cache";
 const TOKEN_LIMIT = 1_000_000;
+const DASHBOARD_RUNTIME_CACHE = new Map();
 const DASHBOARD_HERO_BACKGROUND = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <svg width="1600" height="360" viewBox="0 0 1600 360" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="1600" height="360" fill="#141414"/>
@@ -86,6 +92,8 @@ const DASHBOARD_HERO_BACKGROUND = `data:image/svg+xml;utf8,${encodeURIComponent(
 const getBriefingsCacheKey = (userId) =>
   `${BRIEFINGS_STORAGE_KEY}:${userId || "anonymous"}`;
 
+const getDashboardRuntimeCacheKey = (userId) => userId || "anonymous";
+
 const readBriefingsCache = (userId) => {
   try {
     const raw = localStorage.getItem(getBriefingsCacheKey(userId));
@@ -109,6 +117,13 @@ const writeBriefingsCache = (userId, payload) => {
   } catch (error) {
     console.warn("Failed to write dashboard briefings cache:", error);
   }
+};
+
+const readDashboardRuntimeCache = (userId) =>
+  DASHBOARD_RUNTIME_CACHE.get(getDashboardRuntimeCacheKey(userId)) || null;
+
+const writeDashboardRuntimeCache = (userId, payload) => {
+  DASHBOARD_RUNTIME_CACHE.set(getDashboardRuntimeCacheKey(userId), payload);
 };
 
 const getIssueStatus = (issue) => {
@@ -187,7 +202,16 @@ const extractEmailHeader = (email, name) => {
   const header = email?.payload?.headers?.find(
     (item) => item.name?.toLowerCase() === name.toLowerCase(),
   );
-  return header?.value || "";
+  if (header?.value) return header.value;
+
+  const flatFieldMap = {
+    from: email?.from,
+    to: email?.to,
+    subject: email?.subject,
+    date: email?.date,
+  };
+
+  return flatFieldMap[name.toLowerCase()] || "";
 };
 
 const extractSenderName = (from = "") => {
@@ -233,25 +257,6 @@ const formatCompactNumber = (value) => {
   return String(safeValue);
 };
 
-const abbreviateLabel = (value) => {
-  if (!value) return "N/A";
-
-  const chunks = String(value)
-    .replace(/[^a-zA-Z0-9 ]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (chunks.length >= 2) {
-    return chunks
-      .slice(0, 3)
-      .map((chunk) => chunk[0])
-      .join("")
-      .toUpperCase();
-  }
-
-  return chunks[0].slice(0, 3).toUpperCase();
-};
-
 const getAvatarInitials = (value) =>
   String(value || "AI")
     .split(" ")
@@ -270,28 +275,217 @@ const getDaysUntil = (event) => {
   return diff;
 };
 
-const createTokenSeries = (rows) => {
+const buildEventDetails = (event) => {
+  if (!event || typeof event !== "object") return "Detail agenda belum tersedia.";
+
+  const attendees = Array.isArray(event.attendees) ? event.attendees : [];
+  const attendeeText = attendees.length
+    ? `\nPeserta: ${attendees
+        .map((attendee) => attendee.email || attendee.displayName)
+        .filter(Boolean)
+        .join(", ")}`
+    : "";
+
+  return `Event: ${event.summary || "Tanpa judul"}
+Waktu: ${formatEventDate(event)} ${formatEventTime(event)}${event.location ? `\nLokasi: ${event.location}` : ""}${attendeeText}${event.description ? `\nDeskripsi: ${event.description}` : ""}${event.hangoutLink ? `\nGoogle Meet: ${event.hangoutLink}` : ""}`;
+};
+
+const buildAgendaContext = (event) => ({
+  event_id: String(event?.id || "").trim(),
+  event_summary: event?.summary || "Tanpa judul",
+  event_start: event?.start?.dateTime || event?.start?.date || "",
+  event_end: event?.end?.dateTime || event?.end?.date || "",
+  event_location: event?.location || "",
+  event_description: event?.description || "",
+  event_hangout_link: event?.hangoutLink || "",
+  event_attendees: Array.isArray(event?.attendees)
+    ? event.attendees
+        .map((attendee) => attendee.email || attendee.displayName)
+        .filter(Boolean)
+    : [],
+});
+
+const buildActionPromptWithAgendaContext = (action, event) => {
+  const basePrompt = String(action?.prompt || "").trim();
+  const eventDetails = buildEventDetails(event);
+  const contextBlock = `Konteks agenda lengkap:\n${eventDetails}`;
+
+  if (!basePrompt) return contextBlock;
+  if (basePrompt.includes(eventDetails)) return basePrompt;
+  return `${basePrompt}\n\n${contextBlock}`;
+};
+
+const buildEmailDetails = (email) => {
+  const from = extractEmailHeader(email, "From");
+  const subject = extractEmailHeader(email, "Subject");
+  const senderName = extractSenderName(from) || "Pengirim tidak diketahui";
+
+  return `Pengirim: ${senderName}
+From: ${from || "-"}
+Subject: ${subject || "(Tanpa subjek)"}
+Snippet: ${email?.snippet || "-"}
+Body ringkas: ${email?.body || email?.snippet || "-"}`;
+};
+
+const buildEmailContext = (email) => ({
+  email_id: String(email?.id || "").trim(),
+  thread_id: String(email?.threadId || "").trim(),
+  email_from: extractEmailHeader(email, "From"),
+  email_subject: extractEmailHeader(email, "Subject"),
+  email_snippet: email?.snippet || "",
+  email_body: email?.body || "",
+  email_sender_name:
+    extractSenderName(extractEmailHeader(email, "From")) ||
+    "Pengirim tidak diketahui",
+});
+
+const buildEmailActionPrompt = (action, email) => {
+  const basePrompt = String(action?.prompt || "").trim();
+  const emailDetails = buildEmailDetails(email);
+  const contextBlock = `Konteks email lengkap:\n${emailDetails}`;
+
+  if (!basePrompt) {
+    return `Buatkan draft balasan profesional untuk email berikut.\n\n${contextBlock}`;
+  }
+
+  if (basePrompt.includes(emailDetails)) return basePrompt;
+  return `${basePrompt}\n\n${contextBlock}`;
+};
+
+const getAgendaLookupKey = (value) =>
+  String(value?.threadId || value?.id || "").trim();
+
+const createAgendaActionState = (action, event, briefing) => ({
+  autoSendMessage: buildActionPromptWithAgendaContext(action, event),
+  preFillOnly: true,
+  domain: "calendar",
+  intent: action.intent,
+  templatePrompt: buildActionPromptWithAgendaContext(action, event),
+  context: {
+    briefing,
+    event,
+    action,
+    briefing_domain: "calendar",
+    ...buildAgendaContext(event),
+    ...(action.context && typeof action.context === "object"
+      ? action.context
+      : {}),
+  },
+});
+
+const createEmailActionState = (action, email, briefing) => ({
+  autoSendMessage: buildEmailActionPrompt(action, email),
+  preFillOnly: true,
+  domain: "email",
+  intent: action?.intent || "draft_reply",
+  templatePrompt: buildEmailActionPrompt(action, email),
+  context: {
+    briefing,
+    email,
+    action,
+    briefing_domain: "email",
+    ...buildEmailContext(email),
+    ...(action?.context && typeof action.context === "object"
+      ? action.context
+      : {}),
+  },
+});
+
+const buildFallbackAgendaActions = (event) => {
+  const eventId = String(event?.id || "").trim();
+  const details = buildEventDetails(event);
+  const baseContext = {
+    briefing_domain: "calendar",
+    focus: "event_preparation",
+    event_ids: eventId ? [eventId] : [],
+    thread_id: eventId,
+  };
+
+  return [
+    {
+      label: "Susun Rundown",
+      intent: "prepare_rundown",
+      target: "supervisor",
+      prompt: `Buatkan rundown meeting yang ringkas, urutan bahasan, estimasi waktu, dan output yang perlu dicapai untuk event berikut:\n\n${details}`,
+      context: {
+        ...baseContext,
+        focus: "meeting_rundown",
+      },
+    },
+    {
+      label: "Susun Talking Points",
+      intent: "prepare_talking_points",
+      target: "supervisor",
+      prompt: `Buatkan talking points utama, pertanyaan penting, dan outcome yang perlu dicapai untuk event berikut:\n\n${details}`,
+      context: {
+        ...baseContext,
+        focus: "talking_points",
+      },
+    },
+    {
+      label: event?.hangoutLink ? "Buat Follow-up" : "Lengkapi Catatan",
+      intent: event?.hangoutLink ? "follow_up_event" : "enrich_event_notes",
+      target: "supervisor",
+      prompt: event?.hangoutLink
+        ? `Buatkan draft follow-up dan daftar next step untuk event berikut:\n\n${details}`
+        : `Tolong bantu lengkapi catatan persiapan dan kebutuhan yang perlu dicek untuk event berikut:\n\n${details}`,
+      context: {
+        ...baseContext,
+        focus: event?.hangoutLink ? "follow_up" : "event_notes",
+      },
+    },
+  ];
+};
+
+const createDailyTokenSeries = (rows, limit = TOKEN_LIMIT) => {
   const buckets = new Map();
 
   for (const row of Array.isArray(rows) ? rows : []) {
-    const key =
-      row.llm_model || row.workflow_name || row.workflow_id || "Unknown";
+    const timestamp = row?.timestamp ? new Date(row.timestamp) : null;
+    if (!timestamp || Number.isNaN(timestamp.getTime())) continue;
+
+    const dayKey = timestamp.toLocaleDateString("en-CA", {
+      timeZone: "Asia/Jakarta",
+    });
     const total =
       Number(row.input_tokens || 0) + Number(row.completion_tokens || 0);
-    buckets.set(key, (buckets.get(key) || 0) + total);
+
+    buckets.set(dayKey, (buckets.get(dayKey) || 0) + total);
   }
 
-  const entries = Array.from(buckets.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8);
+  const sortedDays = Array.from(buckets.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
 
-  const maxValue = entries[0]?.[1] || 1;
+  return sortedDays.map(([dayKey, total]) => {
+    const dayDate = new Date(`${dayKey}T00:00:00+07:00`);
+    const percentage = Math.min(
+      100,
+      Math.round((total / Math.max(limit, 1)) * 100),
+    );
 
-  return entries.map(([label, value]) => ({
-    label: abbreviateLabel(label),
-    value,
-    percentage: Math.max(12, Math.round((value / maxValue) * 100)),
-  }));
+    return {
+      key: dayKey,
+      label: dayDate.toLocaleDateString("id-ID", {
+        day: "2-digit",
+      }),
+      total,
+      percentage,
+      fillPercentage: Math.max(percentage, total > 0 ? 12 : 0),
+    };
+  });
+};
+
+const formatMonthLabel = (value) => {
+  if (!value) return "Bulan ini";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Bulan ini";
+
+  return date.toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
 };
 
 const DashboardShell = ({ title, subtitle, countLabel, children, actions }) => (
@@ -332,6 +526,111 @@ const ActionLink = ({ to, state, children, primary = false }) => (
     </Link>
   </Button>
 );
+
+const AgendaSlide = ({ event, activeIndex }) => {
+  const attendeeCount = event?.attendees?.length || 0;
+  const attendees = attendeeCount > 0 ? event.attendees.slice(0, 4) : [];
+  const metaDate = formatEventDate(event);
+  const metaTime = formatEventTime(event);
+
+  return (
+    <div className="flex flex-col rounded-[1.6rem] border border-primary-200/70 bg-gradient-to-r from-[#fff1ec] via-[#fdf3f0] to-[#fbefec] p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="max-w-[32rem]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary-500/80">
+            Agenda {activeIndex + 1}
+          </p>
+          <p className="mt-2 line-clamp-2 text-[1rem] font-semibold leading-[1.08] tracking-[-0.03em] text-neutral-950">
+            {event.summary || "Tanpa judul"}
+          </p>
+        </div>
+      
+      </div>
+
+      <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-[1.05rem] font-medium text-slate-500">
+        <span className="inline-flex items-center gap-3">
+          <Clock3 className="h-5 w-5 text-slate-500" />
+          {metaDate}
+        </span>
+        <span className="inline-flex items-center gap-3">
+          <CalendarDays className="h-5 w-5 text-slate-500" />
+          {metaTime}
+        </span>
+      </div>
+
+      <div className="mt-auto flex items-end justify-between gap-4 pt-7">
+        <div className="flex min-h-[2.75rem] items-center">
+          {attendees.length > 0 ? (
+            <div className="flex -space-x-2.5">
+              {attendees.map((attendee, index) => (
+                <Avatar
+                  key={`${attendee.email || attendee.displayName || index}`}
+                  size="md"
+                  className="border-[3px] border-white shadow-sm"
+                >
+                  <AvatarFallback>
+                    {getAvatarInitials(
+                      attendee.displayName || attendee.email || "AT",
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs font-medium text-slate-500">
+              Belum ada peserta terdaftar
+            </p>
+          )}
+        </div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-500/65">
+          {attendeeCount > 0 ? `${attendeeCount} peserta` : "Tanpa peserta"}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const EmailListItem = ({ email, selected = false }) => {
+  const from = extractEmailHeader(email, "From");
+  const subject = extractEmailHeader(email, "Subject");
+  const senderName = extractSenderName(from) || "Pengirim tidak diketahui";
+
+  return (
+    <div
+      className={`flex min-h-[7.25rem] flex-col rounded-[1.3rem] border p-3.5 transition-colors duration-200 ${
+        selected
+          ? "border-primary-300 bg-primary-50/40"
+          : "border-neutral-200 bg-gradient-to-r from-white via-neutral-50 to-white"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Avatar
+            size="sm"
+            className="border border-neutral-200 bg-neutral-200/80"
+          >
+            <AvatarFallback>{getAvatarInitials(senderName)}</AvatarFallback>
+          </Avatar>
+          <p className="truncate text-sm font-medium text-neutral-700">
+            {senderName}
+          </p>
+        </div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-600">
+          <Mail className="h-4 w-4" />
+        </div>
+      </div>
+
+      <div>
+        <p className="truncate text-base font-semibold leading-tight tracking-[-0.02em] text-neutral-950">
+          {subject || "(Tanpa subjek)"}
+        </p>
+        <p className="mt-1.5 truncate text-xs leading-5 text-neutral-600">
+          {email?.snippet || "Ringkasan email belum tersedia."}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const TopBar = ({
   user,
@@ -393,6 +692,7 @@ const TopBar = ({
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [nextEvents, setNextEvents] = useState([]);
   const [jiraIssues, setJiraIssues] = useState([]);
@@ -408,6 +708,7 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState("");
   const [calendarBriefing, setCalendarBriefing] = useState(null);
+  const [activeAgendaIndex, setActiveAgendaIndex] = useState(0);
   const [emailBriefing, setEmailBriefing] = useState(null);
   const [jiraBriefing, setJiraBriefing] = useState(null);
   const [briefingsCacheResolved, setBriefingsCacheResolved] = useState(false);
@@ -416,6 +717,7 @@ export default function Dashboard() {
     totalExecutions: 0,
     totalInputTokens: 0,
     totalCompletionTokens: 0,
+    latestTimestamp: null,
   });
   const [tokenRows, setTokenRows] = useState([]);
 
@@ -435,6 +737,27 @@ export default function Dashboard() {
       applyBriefingsPayload(cachedBriefings);
     }
 
+    const cachedRuntimeState = readDashboardRuntimeCache(user?.id);
+    if (cachedRuntimeState) {
+      setNextEvents(Array.isArray(cachedRuntimeState.nextEvents) ? cachedRuntimeState.nextEvents : []);
+      setJiraIssues(Array.isArray(cachedRuntimeState.jiraIssues) ? cachedRuntimeState.jiraIssues : []);
+      setUnreadEmails(Array.isArray(cachedRuntimeState.unreadEmails) ? cachedRuntimeState.unreadEmails : []);
+      setTokenSummary(
+        cachedRuntimeState.tokenSummary || {
+          totalTokens: 0,
+          totalExecutions: 0,
+          totalInputTokens: 0,
+          totalCompletionTokens: 0,
+          latestTimestamp: null,
+        },
+      );
+      setTokenRows(Array.isArray(cachedRuntimeState.tokenRows) ? cachedRuntimeState.tokenRows : []);
+      setLoadingEvents(false);
+      setLoadingJira(false);
+      setLoadingEmails(false);
+      setLoadingTokens(false);
+    }
+
     setBriefingsCacheResolved(true);
   }, [applyBriefingsPayload, authLoading, user?.id]);
 
@@ -445,7 +768,16 @@ export default function Dashboard() {
     try {
       const payload = await calendarApi.fetchCalendarEvents();
       const items = Array.isArray(payload?.items) ? payload.items : [];
-      setNextEvents(items.slice(0, 5));
+      const now = Date.now();
+      const upcomingItems = items.filter((event) => {
+        const startDate = event?.start?.dateTime || event?.start?.date;
+        if (!startDate) return false;
+
+        const eventTime = new Date(startDate).getTime();
+        return !Number.isNaN(eventTime) && eventTime >= now;
+      });
+
+      setNextEvents(upcomingItems.slice(0, 3));
     } catch (err) {
       setCalendarError(err.message || "Tidak dapat mengambil jadwal kalender.");
       setNextEvents([]);
@@ -506,13 +838,16 @@ export default function Dashboard() {
     setTokenError("");
 
     try {
-      const payload = await tokenUsageApi.ambilDataToken(50);
+      const payload = await tokenUsageApi.ambilDataToken(500, {
+        period: "current_month",
+      });
       setTokenSummary(
         payload?.summary || {
           totalTokens: 0,
           totalExecutions: 0,
           totalInputTokens: 0,
           totalCompletionTokens: 0,
+          latestTimestamp: null,
         },
       );
       setTokenRows(Array.isArray(payload?.rows) ? payload.rows : []);
@@ -523,6 +858,7 @@ export default function Dashboard() {
         totalExecutions: 0,
         totalInputTokens: 0,
         totalCompletionTokens: 0,
+        latestTimestamp: null,
       });
       setTokenRows([]);
     } finally {
@@ -532,6 +868,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!briefingsCacheResolved) return;
+    if (readDashboardRuntimeCache(user?.id)) return;
 
     loadEvents();
     loadJira();
@@ -543,6 +880,33 @@ export default function Dashboard() {
     loadEvents,
     loadJira,
     loadTokenUsage,
+    user?.id,
+  ]);
+
+  useEffect(() => {
+    if (authLoading || !briefingsCacheResolved) return;
+    if (loadingEvents || loadingJira || loadingEmails || loadingTokens) return;
+
+    writeDashboardRuntimeCache(user?.id, {
+      nextEvents,
+      jiraIssues,
+      unreadEmails,
+      tokenSummary,
+      tokenRows,
+    });
+  }, [
+    authLoading,
+    briefingsCacheResolved,
+    jiraIssues,
+    loadingEmails,
+    loadingEvents,
+    loadingJira,
+    loadingTokens,
+    nextEvents,
+    tokenRows,
+    tokenSummary,
+    unreadEmails,
+    user?.id,
   ]);
 
   const handleRefreshBriefings = useCallback(async () => {
@@ -661,9 +1025,6 @@ export default function Dashboard() {
   }, [jiraBriefing?.source_metrics, jiraIssues]);
 
   const jiraSummaryText = useMemo(() => {
-    if (jiraBriefing?.headline) return jiraBriefing.headline;
-    if (jiraBriefing?.summary_points?.[0])
-      return jiraBriefing.summary_points[0];
     if (!jiraIssues.length)
       return "Belum ada issue Jira yang terdeteksi untuk diringkas.";
 
@@ -674,8 +1035,6 @@ export default function Dashboard() {
 
     return `Distribusi issue saat ini: ${statusLines}.`;
   }, [
-    jiraBriefing?.headline,
-    jiraBriefing?.summary_points,
     jiraIssues.length,
     jiraSummary.byStatus,
   ]);
@@ -706,27 +1065,109 @@ export default function Dashboard() {
   }, [query, unreadEmails]);
 
   const heroDescription = useMemo(() => {
-    if (jiraBriefing?.headline) return jiraBriefing.headline;
-    if (calendarBriefing?.headline) return calendarBriefing.headline;
-    if (emailBriefing?.headline) return emailBriefing.headline;
     return "Menampilkan issue Jira, agenda terdekat, email penting, dan token usage dari workspace operasional Anda.";
-  }, [
-    calendarBriefing?.headline,
-    emailBriefing?.headline,
-    jiraBriefing?.headline,
-  ]);
+  }, []);
 
   const greetingName = user?.name?.split(" ")[0] || "Admin";
+  const agendaEvents = visibleEvents.slice(0, 3);
+  const emailListItems = visibleEmails.slice(0, 5);
   const leadEvent = visibleEvents[0];
-  const supportingEvents = visibleEvents.slice(1, 3);
   const leadEventDays = leadEvent ? getDaysUntil(leadEvent) : null;
   const notificationCount =
     emailBriefing?.source_metrics?.total_unread || visibleEmails.length || 0;
-  const tokenSeries = useMemo(() => createTokenSeries(tokenRows), [tokenRows]);
-  const tokenUsagePercent = Math.min(
-    100,
-    Math.round(((tokenSummary.totalTokens || 0) / TOKEN_LIMIT) * 100),
+  const tokenSeries = useMemo(
+    () => createDailyTokenSeries(tokenRows, TOKEN_LIMIT),
+    [tokenRows],
   );
+  const tokenMonthLabel = useMemo(
+    () => formatMonthLabel(tokenSummary.latestTimestamp),
+    [tokenSummary.latestTimestamp],
+  );
+  const focusedEmail = useMemo(() => {
+    const focusEmail = emailBriefing?.focus_email;
+    if (!focusEmail) return null;
+
+    const focusId = String(focusEmail.id || focusEmail.email_id || "").trim();
+    const focusThreadId = String(focusEmail.threadId || focusEmail.thread_id || "").trim();
+
+    return (
+      visibleEmails.find(
+        (email) =>
+          String(email?.id || "").trim() === focusId ||
+          String(email?.threadId || "").trim() === focusThreadId,
+      ) || null
+    );
+  }, [emailBriefing?.focus_email, visibleEmails]);
+  const focusedEmailAction = useMemo(() => {
+    if (!focusedEmail) return null;
+
+    const action = emailBriefing?.focus_email?.action;
+    if (action && typeof action === "object") {
+      return {
+        ...action,
+        intent: action.intent || "draft_reply",
+        label: action.label || "Buatkan Draft",
+      };
+    }
+
+    return {
+      label: "Buatkan Draft",
+      intent: "draft_reply",
+      target: "supervisor",
+      prompt: "Buatkan draft balasan profesional untuk email prioritas ini.",
+      context: {
+        briefing_domain: "email",
+        focus: "priority_follow_up",
+        email_ids: focusedEmail?.id ? [focusedEmail.id] : [],
+        thread_id: focusedEmail?.threadId || "",
+      },
+    };
+  }, [emailBriefing?.focus_email?.action, focusedEmail]);
+  const agendaActionLookup = useMemo(() => {
+    const lookup = new Map();
+    const agendaActions = Array.isArray(calendarBriefing?.agenda_actions)
+      ? calendarBriefing.agenda_actions
+      : [];
+
+    for (const item of agendaActions) {
+      const key = getAgendaLookupKey(item);
+      if (!key) continue;
+
+      const actions = Array.isArray(item.actions)
+        ? item.actions.filter(
+            (action) =>
+              action &&
+              typeof action === "object" &&
+              String(action.prompt || "").trim(),
+          )
+        : [];
+
+      lookup.set(key, actions.slice(0, 3));
+    }
+
+    return lookup;
+  }, [calendarBriefing?.agenda_actions]);
+  const activeAgenda = agendaEvents[activeAgendaIndex] || null;
+  const activeAgendaActions = useMemo(() => {
+    if (!activeAgenda) return [];
+
+    const key = getAgendaLookupKey(activeAgenda);
+    const mappedActions = key ? agendaActionLookup.get(key) : null;
+    return mappedActions?.length
+      ? mappedActions
+      : buildFallbackAgendaActions(activeAgenda);
+  }, [activeAgenda, agendaActionLookup]);
+
+  useEffect(() => {
+    if (!agendaEvents.length) {
+      setActiveAgendaIndex(0);
+      return;
+    }
+
+    if (activeAgendaIndex > agendaEvents.length - 1) {
+      setActiveAgendaIndex(0);
+    }
+  }, [activeAgendaIndex, agendaEvents.length]);
 
   return (
     <div>
@@ -761,7 +1202,7 @@ export default function Dashboard() {
 
         <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <DashboardShell
-            title="Jira Sync"
+            title="Task Progress"
             actions={
               <>
                 <ActionLink to="/workspace/jira" primary>
@@ -827,10 +1268,9 @@ export default function Dashboard() {
                     <span className="font-semibold text-neutral-900">
                       {jiraSummaryText}
                     </span>{" "}
-                    {jiraBriefing?.summary_points?.[1] ||
-                      (jiraSummary.total
-                        ? `Saat ini ${jiraSummary.done} issue telah selesai dari ${jiraSummary.total} issue yang terlacak.`
-                        : "Belum ada issue yang bisa diringkas dari Jira saat ini.")}
+                    {jiraSummary.total
+                      ? `Saat ini ${jiraSummary.done} issue telah selesai dari ${jiraSummary.total} issue yang terlacak.`
+                      : "Belum ada issue yang bisa diringkas dari Jira saat ini."}
                   </p>
                 </div>
               </>
@@ -844,27 +1284,32 @@ export default function Dashboard() {
                 ? leadEventDays > 0
                   ? `End in ${leadEventDays} Days`
                   : "Scheduled today"
-                : calendarBriefing?.headline || "Agenda terdekat"
+                : "Agenda terdekat"
             }
             actions={
               <>
                 <ActionLink
                   to="/chat/supervisor"
                   primary
-                  state={{
-                    domain: "calendar",
-                    intent: "prepare_meeting",
-                    templatePrompt:
-                      "Siapkan brief meeting dan agenda untuk event terdekat",
-                    context: calendarBriefing
-                      ? {
-                          briefing: calendarBriefing,
-                          events: visibleEvents.slice(0, 3),
-                        }
-                      : { events: visibleEvents.slice(0, 3) },
-                  }}
+                  state={createAgendaActionState(
+                    {
+                      label: "Buat Agenda",
+                      intent: "prepare_meeting",
+                      prompt: activeAgenda
+                        ? `Buatkan agenda meeting yang terstruktur untuk event berikut:\n\n${buildEventDetails(activeAgenda)}`
+                        : "Buatkan agenda meeting untuk agenda terdekat saya hari ini.",
+                      context: {
+                        briefing_domain: "calendar",
+                        focus: "meeting_agenda",
+                        event_ids: activeAgenda?.id ? [activeAgenda.id] : [],
+                        thread_id: activeAgenda?.id || "",
+                      },
+                    },
+                    activeAgenda,
+                    calendarBriefing,
+                  )}
                 >
-                  Siapkan Brief
+                  Buat Agenda
                 </ActionLink>
                 <ActionLink to="/workspace/calendar">Lihat Calendar</ActionLink>
               </>
@@ -882,71 +1327,70 @@ export default function Dashboard() {
               </Alert>
             ) : leadEvent ? (
               <>
-                <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
-                  <p className="text-xl font-semibold text-neutral-900">
-                    {leadEvent.summary || "Tanpa judul"}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-neutral-500">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock3 className="h-4 w-4 text-primary-500" />
-                      {formatEventDate(leadEvent)}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-4 w-4 text-primary-500" />
-                      {formatEventTime(leadEvent)}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex -space-x-2">
-                    {(leadEvent?.attendees || [])
-                      .slice(0, 3)
-                      .map((attendee, index) => (
-                        <Avatar
-                          key={`${attendee.email || attendee.displayName || index}`}
-                          size="sm"
-                          className="border-2 border-white shadow-sm"
-                        >
-                          <AvatarFallback>
-                            {getAvatarInitials(
-                              attendee.displayName || attendee.email || "AT",
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                      ))}
-                    {!leadEvent?.attendees || leadEvent.attendees.length === 0
-                      ? ["DS", "PM", "UX"].map((initial) => (
-                          <Avatar
-                            key={initial}
-                            size="sm"
-                            className="border-2 border-white shadow-sm"
-                          >
-                            <AvatarFallback>{initial}</AvatarFallback>
-                          </Avatar>
-                        ))
-                      : null}
-                  </div>
-                </div>
+                <Carousel
+                  className="w-full"
+                  disableDrag={agendaEvents.length <= 1}
+                  index={activeAgendaIndex}
+                  onIndexChange={setActiveAgendaIndex}
+                >
+                  <CarouselContent>
+                    {agendaEvents.map((event, index) => (
+                      <CarouselItem key={event.id || `${event.summary}-${index}`}>
+                        <AgendaSlide
+                          event={event}
+                          activeIndex={index}
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {agendaEvents.length > 1 ? (
+                    <>
+                      <CarouselNavigation alwaysShow />
+                      <CarouselIndicator />
+                    </>
+                  ) : null}
+                </Carousel>
 
-                <div className="space-y-4">
-                  {supportingEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className="grid grid-cols-[88px_1fr] gap-4"
-                    >
-                      <div className="text-sm font-semibold text-neutral-700">
-                        {formatEventTime(event)}
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-neutral-900">
-                          {event.summary || "Tanpa judul"}
+                {activeAgenda ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-primary-200/80 p-2">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      {/* <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500/80">
+                          Aksi Rekomendasi
                         </p>
-                        <p className="text-sm text-neutral-400">
-                          {calendarBriefing?.summary_points?.[0] ||
-                            "Agenda kerja terjadwal"}
+                        <p className="mt-1 text-sm font-semibold text-neutral-900">
+                          {activeAgenda.summary || "Agenda terpilih"}
                         </p>
+                        <p className="mt-1 text-xs text-neutral-500">
+                          Aksi ini berubah mengikuti agenda yang sedang aktif di carousel.
+                        </p>
+                      </div> */}
+                      <div className="flex flex-wrap gap-2">
+                        {activeAgendaActions.map((action, index) => (
+                          <Button
+                            key={`${action.intent || action.label || "agenda"}-${index}`}
+                            variant={ "outline"}
+                            className="rounded-full"
+                            onClick={() =>
+                              navigate(
+                                "/chat/supervisor",
+                                {
+                                  state: createAgendaActionState(
+                                    action,
+                                    activeAgenda,
+                                    calendarBriefing,
+                                  ),
+                                },
+                              )
+                            }
+                          >
+                            {action.label || "Buka Supervisor"}
+                          </Button>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : null}
               </>
             ) : (
               <EmptyState
@@ -958,29 +1402,32 @@ export default function Dashboard() {
           </DashboardShell>
 
           <DashboardShell
-            title="Comms"
-            subtitle={
-              emailBriefing?.headline ||
-              (notificationCount
-                ? `Ada ${notificationCount} email perlu ditinjau`
-                : "Inbox relatif tenang")
-            }
+            title="Email"
+           
             actions={
               <>
                 <ActionLink
                   to="/chat/supervisor"
                   primary
-                  state={{
-                    domain: "email",
-                    intent: "draft_reply",
-                    templatePrompt: "Buatkan draft balasan untuk email penting",
-                    context: emailBriefing
-                      ? {
-                          briefing: emailBriefing,
-                          emails: visibleEmails.slice(0, 4),
+                  state={
+                    focusedEmail && focusedEmailAction
+                      ? createEmailActionState(
+                          focusedEmailAction,
+                          focusedEmail,
+                          emailBriefing,
+                        )
+                      : {
+                          domain: "email",
+                          intent: "draft_reply",
+                          templatePrompt: "Buatkan draft balasan untuk email penting",
+                          context: emailBriefing
+                            ? {
+                                briefing: emailBriefing,
+                                emails: visibleEmails.slice(0, 5),
+                              }
+                            : { emails: visibleEmails.slice(0, 5) },
                         }
-                      : { emails: visibleEmails.slice(0, 4) },
-                  }}
+                  }
                 >
                   Draft Reply
                 </ActionLink>
@@ -997,27 +1444,79 @@ export default function Dashboard() {
                 {emailError}
               </Alert>
             ) : visibleEmails.length ? (
-              <div className="space-y-3">
-                {visibleEmails.slice(0, 4).map((email, index) => {
-                  const from = extractEmailHeader(email, "From");
-                  const subject = extractEmailHeader(email, "Subject");
-                  const senderName = extractSenderName(from);
+              <>
+                {focusedEmail && focusedEmailAction ? (
+                  <div className="relative overflow-hidden rounded-lg bg-gradient-stat p-4 text-white shadow-stat">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium opacity-90">
+                          Insight Prioritas
+                        </p>
+                        <p className="mt-2 truncate text-lg font-bold leading-tight text-white">
+                          {extractEmailHeader(focusedEmail, "Subject") ||
+                            "(Tanpa subjek)"}
+                        </p>
+                        <p className="mt-3 text-[10px] leading-snug text-white/80">
+                          {emailBriefing?.focus_email?.reason ||
+                            "Email ini paling layak ditindaklanjuti dibandingkan unread email lain."}
+                        </p>
+                      </div>
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/95 text-primary-500">
+                        <Mail className="h-4 w-4" />
+                      </div>
+                    </div>
 
-                  return (
-                    <ListItem
-                      key={email.id}
-                      sender={senderName || "Pengirim tidak diketahui"}
-                      title={subject || "(Tanpa subjek)"}
-                      body={email.snippet || "Ringkasan email belum tersedia."}
-                      badge={{
-                        label: index === 0 ? "Urgent" : "Unread",
-                        variant: index === 0 ? "urgent" : "info",
-                      }}
-                      className="rounded-xl px-4 py-3 shadow-none"
+                    <div className="mt-4">
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-xl border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                        onClick={() =>
+                          navigate("/chat/supervisor", {
+                            state: createEmailActionState(
+                              focusedEmailAction,
+                              focusedEmail,
+                              emailBriefing,
+                            ),
+                          })
+                        }
+                      >
+                        {focusedEmailAction.label || "Buatkan Draft"}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-[1.25rem] border border-dashed border-neutral-200 bg-neutral-50 px-4 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                      Insight Prioritas
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-neutral-900">
+                      Tidak ada email mendesak saat ini
+                    </p>
+                    <p className="mt-1 text-xs text-neutral-500">
+                      Dari unread email yang masuk, belum ada yang cukup prioritas untuk direkomendasikan follow-up cepat.
+                    </p>
+                  </div>
+                )}
+
+                <AnimatedList
+                  items={emailListItems}
+                  onItemSelect={() => navigate("/workspace/email")}
+                  showGradients
+                  enableArrowNavigation={false}
+                  displayScrollbar
+                  className="max-w-full"
+                  listClassName="max-h-[15.5rem]"
+                  itemClassName="cursor-pointer"
+                  renderItem={(email, index, selected) => (
+                    <EmailListItem
+                      key={email.id || index}
+                      email={email}
+                      selected={selected}
                     />
-                  );
-                })}
-              </div>
+                  )}
+                  getItemKey={(email, index) => email.id || index}
+                />
+              </>
             ) : (
               <EmptyState
                 icon={<Mail className="h-8 w-8" />}
@@ -1028,8 +1527,8 @@ export default function Dashboard() {
           </DashboardShell>
 
           <DashboardShell
-            title="Token Economy"
-            subtitle="Ditarik dari log eksekusi n8n terbaru"
+            title="Token Monitor"
+            subtitle={`Akumulasi penggunaan ${tokenMonthLabel}`}
             actions={
               <>
                 <ActionLink to="/monitoring/tokens" primary>
@@ -1059,37 +1558,59 @@ export default function Dashboard() {
               <Alert variant="error" title="Token usage error">
                 {tokenError}
               </Alert>
+            ) : !tokenSeries.length ? (
+              <EmptyState
+                icon={<TrendingUp className="h-8 w-8" />}
+                title="Belum ada data token bulan ini"
+                description="Log penggunaan token untuk bulan berjalan belum tersedia di Supabase."
+              />
             ) : (
               <>
                 <TokenUsage
                   used={formatCompactNumber(tokenSummary.totalTokens)}
                   limit="1M Limit"
+                  className="rounded-[1.7rem] px-8 py-7"
                 />
 
-                <div className="rounded-2xl bg-white p-2">
-                  <div className="mb-4 flex items-end justify-between gap-3 px-2 text-xs font-semibold text-neutral-400">
-                    <span>0</span>
-                    <span>{tokenUsagePercent}%</span>
-                    <span>100%</span>
+                <div className="rounded-[1.7rem] bg-white px-2 py-3">
+                  <div className="grid grid-cols-[3rem_minmax(0,1fr)] gap-4">
+                    <div className="flex h-56 flex-col justify-between pb-8 text-right text-xs font-semibold text-neutral-400">
+                      <span>100%</span>
+                      <span>70%</span>
+                      <span>50%</span>
+                      <span>20%</span>
+                      <span>0</span>
+                    </div>
+
+                    <div className="overflow-x-auto pb-2">
+                      <div className="flex min-w-max items-end gap-5 px-1">
+                        {tokenSeries.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex w-8 flex-col items-center gap-3"
+                          >
+                            <div className="relative flex h-56 w-4 items-end overflow-hidden rounded-full bg-primary-100/80">
+                              <div
+                                className="w-full rounded-full bg-primary-500 shadow-[0_0_12px_rgba(232,67,34,0.35)]"
+                                style={{ height: `${item.fillPercentage}%` }}
+                              />
+                            </div>
+                            <div className="text-center">
+                              <span className="block text-xs font-semibold text-neutral-600">
+                                {item.label}
+                              </span>
+                              <span className="block text-[10px] text-neutral-400">
+                                {item.percentage}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4 px-2 sm:grid-cols-8">
-                    {tokenSeries.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex flex-col items-center gap-3"
-                      >
-                        <div className="relative flex h-44 w-4 items-end overflow-hidden rounded-full bg-primary-100/70">
-                          <div
-                            className="w-full rounded-full bg-primary-500 shadow-[0_0_12px_rgba(232,67,34,0.35)]"
-                            style={{ height: `${item.percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium text-neutral-500">
-                          {item.label}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="mt-3 rounded-xl border border-primary-100 bg-primary-50/45 px-3 py-2 text-xs text-neutral-600">
+                    Persentase batang dihitung dari total input + completion token per hari terhadap limit 1M token di bulan {tokenMonthLabel}.
                   </div>
                 </div>
               </>

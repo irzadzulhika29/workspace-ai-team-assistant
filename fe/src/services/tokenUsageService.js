@@ -2,10 +2,10 @@ import axios from 'axios'
 import { urls } from './api'
 
 export const tokenUsageApi = {
-  ambilDataToken: async (limit = 100) => {
+  ambilDataToken: async (limit = 100, options = {}) => {
     try {
       const res = await axios.get(`${urls.getBackendUrl()}/api/token-usage`, {
-        params: { limit },
+        params: { limit, ...options },
       })
       return res.data
     } catch (error) {

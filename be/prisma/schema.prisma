@@ -49,6 +49,7 @@ model User {
   googleId         String?       @unique
   email            String        @unique
   name             String
+  jobTitle         String?
   picture          String?
   n8nCredentialId  String?
   createdAt        DateTime      @default(now())

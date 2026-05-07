@@ -11,10 +11,10 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
-import { urls } from "../../services/api";
-import JiraIntegrationCard from "../integrations/JiraIntegrationCard";
-import { Avatar, AvatarFallback, AvatarImage, Badge, Button, Modal, ModalBody } from "@/components/ui";
+import { useAuth } from "../context/AuthContext";
+import { urls } from "../services/api";
+import JiraIntegrationCard from "../components/integrations/JiraIntegrationCard";
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button } from "@/components/ui";
 
 const getInitials = (value) =>
   String(value || "AI")
@@ -27,18 +27,29 @@ const getInitials = (value) =>
 const sectionCardClassName =
   "rounded-[1.6rem] border border-primary-100/80 bg-white/92 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur";
 
-function SettingsSection({ icon: Icon, kicker, title, description, children, tone = "text-primary-500 bg-primary-50" }) {
+function SettingsSection({
+  icon: Icon,
+  kicker,
+  title,
+  description,
+  children,
+  tone = "text-primary-500 bg-primary-50",
+}) {
   return (
     <section className={sectionCardClassName}>
       <div className="flex items-start gap-4">
-        <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${tone}`}>
+        <div
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${tone}`}
+        >
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
             {kicker}
           </p>
-          <h3 className="mt-1 text-lg font-semibold text-neutral-950">{title}</h3>
+          <h3 className="mt-1 text-lg font-semibold text-neutral-950">
+            {title}
+          </h3>
           {description ? (
             <p className="mt-1 text-sm text-neutral-500">{description}</p>
           ) : null}
@@ -50,7 +61,7 @@ function SettingsSection({ icon: Icon, kicker, title, description, children, ton
   );
 }
 
-export default function SettingsModal({ open, onClose }) {
+export default function SettingsPage() {
   const { user, checkAuthStatus } = useAuth();
   const [mode, setMode] = useState(() => urls.getMode());
   const [profileForm, setProfileForm] = useState({ name: "", jobTitle: "" });
@@ -60,19 +71,15 @@ export default function SettingsModal({ open, onClose }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!open) return;
-
     setMode(urls.getMode());
     setProfileForm({
       name: user?.name || "",
       jobTitle: user?.jobTitle || "",
     });
     setError("");
-  }, [open, user?.jobTitle, user?.name]);
+  }, [user?.jobTitle, user?.name]);
 
   const hasGoogleConnection = Boolean(user?.hasGoogleToken);
-
-  if (!open) return null;
 
   const handleSaveWebhookMode = () => {
     urls.setMode(mode);
@@ -132,56 +139,55 @@ export default function SettingsModal({ open, onClose }) {
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      size="xl"
-      className="overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.98),_rgba(249,250,251,0.95)_35%,_rgba(255,241,236,0.96)_100%)]"
-      title=""
-      description=""
-    >
-      <ModalBody className="max-h-[88vh] overflow-y-auto px-0 pb-0">
-        <div className="border-b border-primary-100/70 px-6 pb-6 pt-6">
-          <div className="overflow-hidden rounded-[1.9rem] bg-[linear-gradient(135deg,#191919_0%,#3f2f2b_45%,#ff623d_100%)] p-6 text-white shadow-[0_24px_80px_rgba(255,98,61,0.24)]">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="flex items-start gap-4">
-                <Avatar size="lg" className="h-16 w-16 border-2 border-white/25 shadow-lg">
-                  {user?.picture ? <AvatarImage src={user.picture} alt={user?.name || "User"} /> : null}
-                  <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
-                </Avatar>
+    <div className="h-full overflow-y-auto custom-scrollbar p-5 md:p-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="overflow-hidden rounded-[1.9rem] bg-[linear-gradient(135deg,#191919_0%,#3f2f2b_45%,#ff623d_100%)] p-6 text-white shadow-[0_24px_80px_rgba(255,98,61,0.24)]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex items-start gap-4">
+              <Avatar
+                size="lg"
+                className="h-16 w-16 border-2 border-white/25 shadow-lg"
+              >
+                {user?.picture ? (
+                  <AvatarImage src={user.picture} alt={user?.name || "User"} />
+                ) : null}
+                <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
+              </Avatar>
 
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/65">
-                    Settings Control Room
-                  </p>
-                  <h2 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
-                    {user?.name || "Workspace Profile"}
-                  </h2>
-                  <p className="mt-1 text-sm text-white/72">
-                    Kelola identitas kerja, koneksi Google, Jira, dan mode webhook dari satu tempat.
-                  </p>
-                </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-white/65">
+                  Settings Control Room
+                </p>
+                <h1 className="mt-2 text-3xl text-white font-semibold tracking-[-0.03em]">
+                  {user?.name || "Workspace Profile"}
+                </h1>
+                <p className="mt-1 text-sm text-white/72">
+                  Kelola identitas kerja, koneksi Google, Jira, dan mode webhook
+                  dari satu tempat.
+                </p>
               </div>
+            </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Badge className="rounded-full border-white/20 bg-white/10 px-3 py-1 text-white">
-                  {hasGoogleConnection ? "Google Connected" : "Google Not Connected"}
-                </Badge>
-                <Badge className="rounded-full border-white/20 bg-white/10 px-3 py-1 text-white">
-                  Mode {mode === "test" ? "Test" : "Production"}
-                </Badge>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge className="rounded-full border-white/20 bg-white/10 px-3 py-1 text-white">
+                {hasGoogleConnection
+                  ? "Google Connected"
+                  : "Google Not Connected"}
+              </Badge>
+              <Badge className="rounded-full border-white/20 bg-white/10 px-3 py-1 text-white">
+                Mode {mode === "test" ? "Test" : "Production"}
+              </Badge>
             </div>
           </div>
-
-          {error ? (
-            <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {error}
-            </div>
-          ) : null}
         </div>
 
-        <div className="grid gap-5 px-6 py-6 xl:grid-cols-[1.05fr_0.95fr]">
+        {error ? (
+          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="mt-6 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-5">
             <SettingsSection
               icon={UserRound}
@@ -247,7 +253,10 @@ export default function SettingsModal({ open, onClose }) {
                   )}
                 </Button>
                 <p className="text-xs text-neutral-500">
-                  Email akun: <span className="font-medium text-neutral-700">{user?.email || "-"}</span>
+                  Email akun:{" "}
+                  <span className="font-medium text-neutral-700">
+                    {user?.email || "-"}
+                  </span>
                 </p>
               </div>
             </SettingsSection>
@@ -264,7 +273,9 @@ export default function SettingsModal({ open, onClose }) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-neutral-950">
-                        {hasGoogleConnection ? "Terhubung ke akun Google" : "Google belum terhubung"}
+                        {hasGoogleConnection
+                          ? "Terhubung ke akun Google"
+                          : "Google belum terhubung"}
                       </p>
                       {hasGoogleConnection ? (
                         <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -274,7 +285,8 @@ export default function SettingsModal({ open, onClose }) {
                       {user?.email || "Belum ada akun terhubung"}
                     </p>
                     <p className="mt-2 text-xs text-neutral-500">
-                      Gunakan akun ini sebagai identitas utama untuk agent email, calendar, dan briefing.
+                      Gunakan akun ini sebagai identitas utama untuk agent email,
+                      calendar, dan briefing.
                     </p>
                   </div>
 
@@ -342,7 +354,11 @@ export default function SettingsModal({ open, onClose }) {
                   </button>
                 </div>
 
-                <Button variant="outline" className="rounded-xl" onClick={handleSaveWebhookMode}>
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={handleSaveWebhookMode}
+                >
                   {saved ? "Tersimpan" : "Simpan Mode"}
                 </Button>
               </div>
@@ -371,7 +387,7 @@ export default function SettingsModal({ open, onClose }) {
 
           </div>
         </div>
-      </ModalBody>
-    </Modal>
+      </div>
+    </div>
   );
 }
