@@ -352,6 +352,19 @@ const buildEmailActionPrompt = (action, email) => {
   return `${basePrompt}\n\n${contextBlock}`;
 };
 
+const createEmailPromptCard = (action, email, briefing) => ({
+  type: "email_recommendation",
+  badge: "Email Recommendation",
+  title: extractEmailHeader(email, "Subject") || "(Tanpa subjek)",
+  from: extractSenderName(extractEmailHeader(email, "From")) || extractEmailHeader(email, "From") || "-",
+  date: extractEmailHeader(email, "Date") || "",
+  summary:
+    email?.snippet ||
+    briefing?.focus_email?.reason ||
+    "Email prioritas dari dashboard untuk ditindaklanjuti lewat Supervisor.",
+  intent: action?.intent || "draft_reply",
+});
+
 const getAgendaLookupKey = (value) =>
   String(value?.threadId || value?.id || "").trim();
 
@@ -376,6 +389,8 @@ const createAgendaActionState = (action, event, briefing) => ({
 const createEmailActionState = (action, email, briefing) => ({
   autoSendMessage: buildEmailActionPrompt(action, email),
   preFillOnly: true,
+  displayContent: "Buatkan draft balasan email yang profesional dan sesuai konteks.",
+  promptCard: createEmailPromptCard(action, email, briefing),
   domain: "email",
   intent: action?.intent || "draft_reply",
   templatePrompt: buildEmailActionPrompt(action, email),

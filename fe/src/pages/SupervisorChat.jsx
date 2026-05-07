@@ -23,6 +23,7 @@ const AGENT_STATUS_LABELS = {
 export default function SupervisorChat() {
   const location = useLocation();
   const autoSendProcessed = useRef(false);
+  const pendingPromptOverrideRef = useRef(null);
 
   // Reset autoSendProcessed when location changes
   useEffect(() => {
@@ -144,14 +145,30 @@ export default function SupervisorChat() {
       return
     }
     
-    // Create UI message (show filename if no text, or both)
+    const pendingOverride = !options.displayContent && !file ? pendingPromptOverrideRef.current : null
+    const shouldUsePendingOverride =
+      Boolean(
+        pendingOverride &&
+        text.trim() &&
+        text.trim() === pendingOverride.displayContent &&
+        pendingOverride.rawText
+      )
+
+    const actualText = shouldUsePendingOverride ? pendingOverride.rawText : text
     const displayContent = options.displayContent
-      || text
+      || (shouldUsePendingOverride ? pendingOverride.displayContent : text)
+    const promptCard = options.promptCard
+      || (shouldUsePendingOverride ? pendingOverride.promptCard : null)
+
+    if (shouldUsePendingOverride) {
+      pendingPromptOverrideRef.current = null
+    }
     
     addSupervisorMessage({
       role: 'user',
       content: displayContent,
       forwardedEmail: options.forwardedEmail,
+      promptCard,
       documentAttachment: file ? { name: file.name, mimeType: file.type || null } : null,
     })
     setLoading(true)
@@ -164,7 +181,7 @@ export default function SupervisorChat() {
         throw new Error('Belum ada sesi chat aktif. Klik tombol New Chat terlebih dahulu untuk membuat sesi baru.')
       }
 
-      const data = await chatApi.sendToSupervisor(text, 'chat', sessionId, file)
+      const data = await chatApi.sendToSupervisor(actualText, 'chat', sessionId, file)
       const normalizedData = normalizeResponsePayload(data)
 
       const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
@@ -315,9 +332,12 @@ export default function SupervisorChat() {
     const draftRevision = location.state?.draftRevision;
     const draft = location.state?.draft;
     const preFillOnly = location.state?.preFillOnly; // Explicit flag for pre-fill only
+    const displayContent = location.state?.displayContent;
+    const promptCard = location.state?.promptCard;
 
     console.log('[SupervisorChat] Navigation state:', {
       autoSendMessage: autoSendMessage ? 'present' : 'none',
+      displayContent: displayContent ? 'present' : 'none',
       preFillOnly,
       emailContext: emailContext ? 'present' : 'none',
       draftRevision,
@@ -328,7 +348,12 @@ export default function SupervisorChat() {
     if (autoSendMessage && preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
       console.log('[SupervisorChat] Pre-filling message:', autoSendMessage.substring(0, 50) + '...');
-      setPrefilledMessage(autoSendMessage);
+      setPrefilledMessage(displayContent || autoSendMessage);
+      pendingPromptOverrideRef.current = {
+        rawText: autoSendMessage,
+        displayContent: displayContent || autoSendMessage,
+        promptCard: promptCard || null,
+      };
       
       // Clear navigation state after a short delay to ensure React has updated
       setTimeout(() => {
@@ -381,8 +406,9 @@ Silakan berikan instruksi revisi untuk draft ini.`;
       // Wait for session history to load, then send
       setTimeout(() => {
         handleSend(autoSendMessage, null, {
-          displayContent: emailContext ? 'Buatkan draft email balasan yang profesional dan sesuai konteks.' : autoSendMessage,
+          displayContent: displayContent || (emailContext ? 'Buatkan draft email balasan yang profesional dan sesuai konteks.' : autoSendMessage),
           forwardedEmail: emailContext,
+          promptCard: promptCard || null,
         });
         // Clear flag after send completes
         setTimeout(() => setAutoSending(false), 2000);

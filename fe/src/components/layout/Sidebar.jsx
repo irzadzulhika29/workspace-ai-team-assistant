@@ -69,6 +69,7 @@ export default function Sidebar() {
           timestamp: row.created_at || new Date().toISOString(),
           actionResults: msgData.actionResults ?? {},
           forwardedEmail: msgData.forwardedEmail ?? null,
+          promptCard: msgData.promptCard ?? null,
           documentAttachment: msgData.documentAttachment ?? null,
         }
       })

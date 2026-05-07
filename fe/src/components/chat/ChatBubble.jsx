@@ -109,6 +109,38 @@ function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
                   </CardContent>
                 </Card>
               )}
+              {message.promptCard && (
+                <Card className="rounded-xl border-white/15 bg-white/10 shadow-none hover:shadow-none">
+                  <CardContent className="space-y-2 px-3 py-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                      <Mail size={13} />
+                      {message.promptCard.badge || 'Prompt Context'}
+                    </div>
+                    <div className="space-y-1 text-xs leading-relaxed text-white/95">
+                      <p className="break-words font-semibold text-white">
+                        {message.promptCard.title || '(tanpa judul)'}
+                      </p>
+                      {message.promptCard.from && (
+                        <p className="break-words">
+                          <span className="text-white/65">Dari:</span>{' '}
+                          {message.promptCard.from}
+                        </p>
+                      )}
+                      {message.promptCard.date && (
+                        <p className="break-words">
+                          <span className="text-white/65">Tanggal:</span>{' '}
+                          {message.promptCard.date}
+                        </p>
+                      )}
+                      {message.promptCard.summary && (
+                        <p className="line-clamp-4 break-words text-white/90">
+                          {message.promptCard.summary}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               {message.documentAttachment?.name && (
                 <Card className="rounded-xl border-white/15 bg-white/10 shadow-none hover:shadow-none">
                   <CardContent className="space-y-2 px-3 py-3">

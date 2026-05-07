@@ -67,13 +67,55 @@ const parseLegacyInstructionInput = (rawInput) => {
   return {
     content,
     forwardedEmail: null,
+    promptCard: null,
+    documentAttachment: null,
+  }
+}
+
+const parseDashboardEmailRecommendationInput = (rawInput) => {
+  const normalized = rawInput.replace(/\r/g, '')
+
+  if (!/Konteks email lengkap:/i.test(normalized)) {
+    return null
+  }
+
+  if (!/draft balasan email|draft email balasan|balasan email/i.test(normalized)) {
+    return null
+  }
+
+  const from =
+    normalized.match(/^Pengirim:\s*(.+)$/m)?.[1]?.trim() ||
+    normalized.match(/^From:\s*(.+)$/m)?.[1]?.trim() ||
+    ''
+  const subject = normalized.match(/^Subject:\s*(.+)$/m)?.[1]?.trim() || ''
+  const date = normalized.match(/^Tanggal:\s*(.+)$/m)?.[1]?.trim() || ''
+  const snippet =
+    normalized.match(/^Snippet:\s*([\s\S]*?)(?=\n(?:Body ringkas|Konteks email lengkap|From|Subject):|\s*$)/mi)?.[1]?.trim() ||
+    normalized.match(/^Body ringkas:\s*([\s\S]*?)(?=\n(?:Konteks email lengkap|From|Subject):|\s*$)/mi)?.[1]?.trim() ||
+    ''
+
+  if (!from && !subject && !snippet) {
+    return null
+  }
+
+  return {
+    content: 'Buatkan draft balasan email yang profesional dan sesuai konteks.',
+    forwardedEmail: null,
+    promptCard: {
+      type: 'email_recommendation',
+      badge: 'Email Recommendation',
+      title: subject || '(tanpa subjek)',
+      from: from || '-',
+      date,
+      summary: snippet,
+    },
     documentAttachment: null,
   }
 }
 
 const parseStoredUserInput = (rawInput) => {
   if (!rawInput || typeof rawInput !== 'string') {
-    return { content: rawInput ?? '', forwardedEmail: null, documentAttachment: null }
+    return { content: rawInput ?? '', forwardedEmail: null, promptCard: null, documentAttachment: null }
   }
 
   const trimmed = rawInput.trim()
@@ -85,12 +127,18 @@ const parseStoredUserInput = (rawInput) => {
         return {
           content: parsed.content ?? '',
           forwardedEmail: null,
+          promptCard: parsed.prompt_card ?? parsed.promptCard ?? null,
           documentAttachment: parsed.document_attachment ?? parsed.documentAttachment ?? null,
         }
       }
     } catch {
       // Fall through to legacy/plain-text parsing.
     }
+  }
+
+  const dashboardEmailRecommendation = parseDashboardEmailRecommendationInput(rawInput)
+  if (dashboardEmailRecommendation) {
+    return dashboardEmailRecommendation
   }
 
   const legacyInstruction = parseLegacyInstructionInput(rawInput)
@@ -112,19 +160,20 @@ const parseStoredUserInput = (rawInput) => {
         subject: subject || '(tanpa subjek)',
         date,
       },
+      promptCard: null,
       documentAttachment: null,
     }
   }
 
   if (!trimmed.startsWith('Kirim email ini sekarang:')) {
-    return { content: rawInput, forwardedEmail: null, documentAttachment: null }
+    return { content: rawInput, forwardedEmail: null, promptCard: null, documentAttachment: null }
   }
 
   const to = trimmed.match(/^To:\s*(.+)$/m)?.[1]?.trim()
   const subject = trimmed.match(/^Subject:\s*(.+)$/m)?.[1]?.trim()
 
   if (!to && !subject) {
-    return { content: 'Kirim email sekarang', forwardedEmail: null, documentAttachment: null }
+    return { content: 'Kirim email sekarang', forwardedEmail: null, promptCard: null, documentAttachment: null }
   }
 
   return {
@@ -134,6 +183,7 @@ const parseStoredUserInput = (rawInput) => {
       subject ? `Subject: ${subject}` : null,
     ].filter(Boolean).join('\n'),
     forwardedEmail: null,
+    promptCard: null,
     documentAttachment: null,
   }
 }
@@ -206,6 +256,7 @@ export const sessionApi = {
               content: parsedInput.content,
               type: 'HumanMessage',
               forwardedEmail: parsedInput.forwardedEmail,
+              promptCard: parsedInput.promptCard,
               documentAttachment: parsedInput.documentAttachment,
             },
             created_at: row.created_at,
