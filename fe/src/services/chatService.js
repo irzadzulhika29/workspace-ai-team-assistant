@@ -152,10 +152,14 @@ export const chatApi = {
       throw new Error('Google access token tidak tersedia. Silakan login dengan Google terlebih dahulu.');
     }
 
-    const message = `Kirim email ini sekarang:
-To: ${emailDraft.to}
-Subject: ${emailDraft.subject}
-Message: ${emailDraft.message}`;
+    const bodyHtml = emailDraft.body_html || emailDraft.message || emailDraft.body_text || '';
+    const message = `KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: ${emailDraft.to}
+
+---
+SUBJECT: ${emailDraft.subject}
+
+${bodyHtml}
+---`;
 
     return post(urls.getSupervisor, {
       action: "send_email",
@@ -180,12 +184,13 @@ Message: ${emailDraft.message}`;
   regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
+    const currentBody = emailDraft.body_html || emailDraft.message || emailDraft.body_text || '';
     const message = `Buat ulang draft email ini dengan perbaikan berikut: "${improvementText}"
 
 Draft email saat ini:
 To: ${emailDraft.to}
 Subject: ${emailDraft.subject}
-Message: ${emailDraft.message}
+Message: ${currentBody}
 
 Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
 

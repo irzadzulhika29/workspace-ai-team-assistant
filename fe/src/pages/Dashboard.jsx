@@ -343,13 +343,16 @@ const buildEmailActionPrompt = (action, email) => {
   const basePrompt = String(action?.prompt || "").trim();
   const emailDetails = buildEmailDetails(email);
   const contextBlock = `Konteks email lengkap:\n${emailDetails}`;
+  const formatInstruction =
+    "DRAFT SAJA. Jangan kirim email dan jangan meminta konfirmasi pengiriman. WAJIB gunakan Communication Agent dengan Get Email Skills/create_email.md sebelum menulis draft final. Body draft harus HTML rapi dengan inline CSS, bukan Markdown/plain text.";
 
   if (!basePrompt) {
-    return `Buatkan draft balasan profesional untuk email berikut.\n\n${contextBlock}`;
+    return `Buatkan draft balasan profesional untuk email berikut.\n\n${formatInstruction}\n\n${contextBlock}`;
   }
 
-  if (basePrompt.includes(emailDetails)) return basePrompt;
-  return `${basePrompt}\n\n${contextBlock}`;
+  if (/Konteks email lengkap:/i.test(basePrompt)) return `${basePrompt}\n\n${formatInstruction}`;
+  if (basePrompt.includes(emailDetails)) return `${basePrompt}\n\n${formatInstruction}`;
+  return `${basePrompt}\n\n${formatInstruction}\n\n${contextBlock}`;
 };
 
 const createEmailPromptCard = (action, email, briefing) => ({

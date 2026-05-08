@@ -32,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1888,
-        48
+        -656,
+        -1296
       ],
-      "id": "5bb7d4ed-c8e2-4ad4-b83c-98e534c54453",
+      "id": "15c59982-e492-4bf6-9a96-97473e67d6b8",
       "name": "Supabase - Save Report Document",
       "credentials": {
         "supabaseApi": {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        992,
-        400
+        -1552,
+        -944
       ],
-      "id": "723fb9e5-1b97-4c4d-bcd5-3eb70f5c44aa",
+      "id": "f5a89c33-5e2e-4d88-87e5-7ae7176ccaef",
       "name": "Respond - Email Sent"
     },
     {
@@ -84,23 +84,23 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        752,
-        400
+        -1792,
+        -944
       ],
-      "id": "0fba9541-af57-4263-8093-28910251d958",
+      "id": "f61f62a9-e6bf-4d40-a89f-bd6e61f3d71b",
       "name": "HTTP - Send Gmail Message"
     },
     {
       "parameters": {
-        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    return parsed;\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n\n  if (!subject && !message) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'send',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: message || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst output = parseEmailPayload(raw);\nconst token = $('Main Webhook').first().json.body.google_access_token;\n\nconst rawEmail = [\n  'To: ' + output.to,\n  'Subject: ' + output.subject,\n  'Content-Type: text/html; charset=utf-8',\n  '',\n  output.message\n].join('\\r\\n');\n\nconst encoded = Buffer.from(rawEmail)\n  .toString('base64')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{\n  json: {\n    raw: encoded,\n    to: output.to,\n    subject: output.subject,\n    token: token\n  }\n}];"
+        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    const bodyHtml = parsed.body_html || parsed.message || '';\n    const bodyText = parsed.body_text || '';\n    return {\n      ...parsed,\n      message: bodyHtml || bodyText,\n      body_html: bodyHtml,\n      body_text: bodyText,\n    };\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n  const bodyHtml = extractJsonStringField(value, 'body_html');\n  const bodyText = extractJsonStringField(value, 'body_text');\n\n  if (!subject && !message && !bodyHtml && !bodyText) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'send',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: bodyHtml || message || bodyText || '',\n    body_html: bodyHtml || message || '',\n    body_text: bodyText || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst output = parseEmailPayload(raw);\nconst token = $('Main Webhook').first().json.body.google_access_token;\n\nconst rawEmail = [\n  'To: ' + output.to,\n  'Subject: ' + output.subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=utf-8',\n  '',\n  output.body_html || output.message || output.body_text || ''\n].join('\\r\\n');\n\nconst encoded = Buffer.from(rawEmail)\n  .toString('base64')\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{\n  json: {\n    raw: encoded,\n    to: output.to,\n    subject: output.subject,\n    body_html: output.body_html || output.message || '',\n    body_text: output.body_text || '',\n    token: token\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        400
+        -1984,
+        -944
       ],
-      "id": "b7f391e5-ed35-43a1-985a-831d07d43da5",
+      "id": "ed1d36b7-e0bc-49a8-9357-4915804cedd3",
       "name": "Code - Build Gmail Payload"
     },
     {
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1248,
-        1072
+        -1392,
+        -224
       ],
-      "id": "9658f944-8f1f-4e87-b4fb-f7d4b8708a0f",
+      "id": "590b9dfe-e60a-44f2-abba-b46c1600ed06",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -178,10 +178,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -80,
-        1264
+        -2912,
+        -176
       ],
-      "id": "4f02445e-e740-44d4-abfb-cad4e295b378",
+      "id": "971bec0a-3466-4a51-b201-78a95797860f",
       "name": "Create Event with Google Meet"
     },
     {
@@ -219,10 +219,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -272,
-        1280
+        -3088,
+        -176
       ],
-      "id": "1a8b5486-5f14-4264-9e22-eb4b85239ec1",
+      "id": "03182b36-3a3f-431d-881d-338c0225e664",
       "name": "Create Event"
     },
     {
@@ -260,10 +260,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        368,
-        1280
+        -2576,
+        -144
       ],
-      "id": "b32be309-c887-460e-9790-665412d6166d",
+      "id": "a4fefb17-a399-42d4-9954-ddb1f1cbb84d",
       "name": "Update Event"
     },
     {
@@ -309,10 +309,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        176,
-        1280
+        -2736,
+        -160
       ],
-      "id": "abbb5f6b-ad68-4b0b-8b37-a6e9888ed641",
+      "id": "0cf23348-7c0e-462b-bca8-53475bc873b7",
       "name": "Get Calendar Events"
     },
     {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        928,
-        224
+        -1616,
+        -1120
       ],
-      "id": "dad4724a-b4fc-4adf-987c-b4475b401763",
+      "id": "a3baadde-cf41-446c-a0f2-525dfb3cacbd",
       "name": "Set - Presentation Filename"
     },
     {
@@ -365,23 +365,23 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        736,
-        224
+        -1808,
+        -1120
       ],
-      "id": "9f8615c1-d556-44b4-819b-e98e43b43cd6",
+      "id": "124283e8-2a9c-4ca3-aa65-206445475063",
       "name": "HTTP - Render Presentation PDF"
     },
     {
       "parameters": {
-        "jsCode": "const rawOutput = $input.first().json.output;\n\nconst unwrapAgentOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 3; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\"output\"')) {\n        try {\n          current = JSON.parse(trimmed);\n          continue;\n        } catch (error) {}\n      }\n    }\n\n    break;\n  }\n\n  return String(current || '');\n};\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst stripTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst normalizeTitle = (value) => String(value || '')\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst ensureSlideClass = (openTag) => {\n  if (/class\\s*=\\s*[\"'][^\"']*slide[^\"']*[\"']/i.test(openTag)) {\n    return openTag.replace(/class\\s*=\\s*([\"'])([^\"']*)(\\1)/i, (full, quote, classNames) => {\n      const merged = Array.from(new Set(classNames.split(/\\s+/).filter(Boolean).concat('slide'))).join(' ');\n      return `class=${quote}${merged}${quote}`;\n    });\n  }\n  return openTag.replace('<section', '<section class=\"slide\"');\n};\n\nconst buildFallbackSlide = (content) => {\n  const plain = stripTags(content || '') || normalizeTitle($('Main Webhook').first().json.body.message || 'Presentasi');\n  const sentences = plain.split(/(?<=[.!?])\\s+/).filter(Boolean);\n  const title = sentences[0] || plain || 'Presentasi';\n  const body = sentences.slice(1).join(' ') || plain;\n  return `<section class=\"slide title-slide\"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(body)}</p></section>`;\n};\n\nconst promoteFirstSubheading = (body, fallbackTitle) => {\n  const h2Match = body.match(/<h2\\b[^>]*>([\\s\\S]*?)<\\/h2>/i);\n  if (h2Match) {\n    const h2Full = h2Match[0];\n    const h2Inner = h2Match[1];\n    return {\n      body: body.replace(h2Full, '').trim(),\n      title: stripTags(h2Inner) || fallbackTitle,\n    };\n  }\n  return { body, title: fallbackTitle };\n};\n\nconst raw = unwrapAgentOutput(rawOutput)\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap[\\s\\S]*$/i, '')\n  .replace(/<\\/?(?:html|body|main|article)[^>]*>/gi, '')\n  .trim();\n\nconst sectionRegex = /<section\\b[^>]*>[\\s\\S]*?<\\/section>/gi;\nconst rawSections = raw.match(sectionRegex) || [];\nconst normalizedSections = rawSections.map((sectionHtml, index) => {\n  const openTagMatch = sectionHtml.match(/^<section\\b[^>]*>/i);\n  const closeTagMatch = sectionHtml.match(/<\\/section>\\s*$/i);\n  const openTag = ensureSlideClass(openTagMatch ? openTagMatch[0] : '<section class=\"slide\">');\n  let body = sectionHtml\n    .replace(/^<section\\b[^>]*>/i, '')\n    .replace(/<\\/section>\\s*$/i, '')\n    .trim();\n\n  const h1Matches = [...body.matchAll(/<h1\\b[^>]*>([\\s\\S]*?)<\\/h1>/gi)];\n  if (h1Matches.length === 0) {\n    const fallbackTitle = normalizeTitle($('Main Webhook').first().json.body.message || `Slide ${index + 1}`);\n    const promoted = promoteFirstSubheading(body, fallbackTitle);\n    body = `<h1>${escapeHtml(promoted.title)}</h1>${promoted.body ? `\\n${promoted.body}` : ''}`.trim();\n  } else if (h1Matches.length > 1) {\n    let seen = false;\n    body = body.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, (full, attrs, inner) => {\n      if (!seen) {\n        seen = true;\n        return `<h1${attrs}>${inner}</h1>`;\n      }\n      return `<h2>${inner}</h2>`;\n    });\n  }\n\n  const extraClass = index === 0 && !/title-slide/.test(openTag) ? ' title-slide' : '';\n  const normalizedOpenTag = extraClass\n    ? openTag.replace(/class\\s*=\\s*([\"'])([^\"']*)(\\1)/i, (full, quote, classNames) => `class=${quote}${classNames}${extraClass}${quote}`)\n    : openTag;\n\n  return `${normalizedOpenTag}${body}${closeTagMatch ? closeTagMatch[0] : '</section>'}`;\n}).filter(Boolean);\n\nconst slideMarkup = normalizedSections.length ? normalizedSections : [buildFallbackSlide(raw)];\nconst wrappedPages = slideMarkup.map((section) => `<div class=\"pdf-page\">${section}</div>`).join('\\n');\n\nconst pickTitle = (html) => {\n  const h1 = html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1];\n  if (h1) return stripTags(h1);\n  const h2 = html.match(/<h2[^>]*>([\\s\\S]*?)<\\/h2>/i)?.[1];\n  if (h2) return stripTags(h2);\n  return stripTags(html);\n};\n\nconst titleSource = normalizeTitle(pickTitle(wrappedPages) || $('Main Webhook').first().json.body.message || 'Presentasi');\nconst compactTitle = titleSource.split(/\\s+/).slice(0, 8).join(' ').trim() || 'Presentasi';\nconst slug = compactTitle.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');\nconst timestamp = $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm');\nconst nama_file_laporan = `${slug || 'Presentasi'}_${timestamp}.pdf`;\n\nconst theme = {\n  name: 'executive-blueprint',\n  bg: '#eaf1f7',\n  paper: '#ffffff',\n  paperSoft: '#f5f9fc',\n  text: '#203247',\n  muted: '#60748a',\n  accent: '#0f4c81',\n  accentStrong: '#0a2f4e',\n  accentSoft: '#d9e7f5',\n  line: '#c7d7e6',\n  tableHeader: '#123a61',\n  shadow: '0 28px 60px rgba(15, 52, 92, 0.12)',\n};\n\nconst css = `\n  :root {\n    --bg: ${theme.bg};\n    --paper: ${theme.paper};\n    --paper-soft: ${theme.paperSoft};\n    --text: ${theme.text};\n    --muted: ${theme.muted};\n    --accent: ${theme.accent};\n    --accent-strong: ${theme.accentStrong};\n    --accent-soft: ${theme.accentSoft};\n    --line: ${theme.line};\n    --table-header: ${theme.tableHeader};\n    --shadow: ${theme.shadow};\n  }\n  @page { size: 16in 9in; margin: 0; }\n  * { box-sizing: border-box; }\n  html, body {\n    margin: 0;\n    padding: 0;\n    width: 100%;\n    background:\n      radial-gradient(circle at top left, rgba(255,255,255,0.86), transparent 38%),\n      linear-gradient(135deg, #dfeaf4 0%, var(--bg) 48%, #f4f8fb 100%);\n    color: var(--text);\n    font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;\n    -webkit-print-color-adjust: exact;\n    print-color-adjust: exact;\n  }\n  body {\n    margin: 0;\n    padding: 28px 0;\n  }\n  .pdf-page {\n    width: 16in;\n    height: 9in;\n    min-height: 9in;\n    max-height: 9in;\n    padding: 0.24in;\n    overflow: hidden;\n    break-after: page;\n    page-break-after: always;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n  .pdf-page:last-child {\n    break-after: auto;\n    page-break-after: auto;\n  }\n  .slide {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    overflow: hidden;\n    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-soft) 100%);\n    border: 1px solid rgba(122, 146, 170, 0.22);\n    border-radius: 36px;\n    box-shadow: var(--shadow);\n    padding: 0.78in 0.9in 0.82in;\n  }\n  .slide::before {\n    content: '';\n    position: absolute;\n    inset: 0 0 auto 0;\n    height: 0.28in;\n    background: linear-gradient(90deg, var(--accent-strong) 0%, var(--accent) 52%, #3f84c5 100%);\n  }\n  .slide::after {\n    content: '';\n    position: absolute;\n    right: 0.9in;\n    bottom: 0.58in;\n    width: 1.6in;\n    height: 0.08in;\n    border-radius: 999px;\n    background: linear-gradient(90deg, transparent 0%, rgba(15, 76, 129, 0.18) 24%, rgba(15, 76, 129, 0.65) 100%);\n  }\n  .slide.title-slide {\n    background: linear-gradient(160deg, #123a61 0%, #1d5687 54%, #2d74ac 100%);\n    color: #f8fbff;\n  }\n  .slide.title-slide::before {\n    height: 100%;\n    width: 0.22in;\n    inset: 0 auto 0 0;\n    background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.1));\n  }\n  .slide.title-slide::after {\n    right: auto;\n    left: 0.9in;\n    width: 2in;\n    background: linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0));\n  }\n  h1, h2, h3, p, ul, ol, table, blockquote, .flow-container, img {\n    position: relative;\n    z-index: 1;\n  }\n  h1 {\n    margin: 0 0 0.24in;\n    font-size: 0.62in;\n    line-height: 1.08;\n    letter-spacing: -0.03em;\n    color: var(--accent-strong);\n    max-width: 12.9in;\n  }\n  .title-slide h1 {\n    color: #ffffff;\n    font-size: 0.78in;\n    margin-top: 0.22in;\n    max-width: 12in;\n  }\n  h2 {\n    margin: 0 0 0.26in;\n    font-size: 0.28in;\n    line-height: 1.35;\n    color: var(--muted);\n    font-weight: 600;\n    max-width: 11.6in;\n  }\n  .title-slide h2,\n  .title-slide p,\n  .title-slide li,\n  .title-slide strong {\n    color: rgba(248, 251, 255, 0.92);\n  }\n  h3 {\n    margin: 0.16in 0 0.12in;\n    font-size: 0.22in;\n    line-height: 1.3;\n    color: var(--accent);\n  }\n  p, li, td, th {\n    font-size: 0.25in;\n    line-height: 1.45;\n  }\n  p {\n    margin: 0 0 0.18in;\n    max-width: 12.2in;\n  }\n  ul, ol {\n    margin: 0;\n    padding-left: 0.34in;\n    max-width: 12.4in;\n  }\n  li {\n    margin: 0 0 0.12in;\n    padding-left: 0.02in;\n  }\n  strong {\n    color: var(--accent-strong);\n  }\n  .flow-container {\n    display: grid;\n    grid-template-columns: repeat(auto-fit, minmax(2.6in, 1fr));\n    gap: 0.18in;\n    margin-top: 0.22in;\n    align-items: stretch;\n  }\n  .flow-box {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 1.28in;\n    padding: 0.24in 0.22in;\n    border-radius: 0.24in;\n    border: 1px solid rgba(15, 76, 129, 0.14);\n    background: linear-gradient(180deg, #ffffff 0%, var(--accent-soft) 100%);\n    color: var(--accent-strong);\n    font-size: 0.24in;\n    font-weight: 700;\n    text-align: center;\n  }\n  .flow-arrow {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    color: var(--accent);\n    font-size: 0.38in;\n    font-weight: 700;\n  }\n  table {\n    width: 100%;\n    margin-top: 0.16in;\n    border-collapse: collapse;\n    table-layout: fixed;\n    border-radius: 0.2in;\n    overflow: hidden;\n  }\n  th {\n    padding: 0.16in 0.18in;\n    text-align: left;\n    color: #ffffff;\n    background: var(--table-header);\n    font-weight: 700;\n    border: 1px solid rgba(255,255,255,0.08);\n  }\n  td {\n    padding: 0.14in 0.18in;\n    vertical-align: top;\n    background: rgba(255,255,255,0.86);\n    border: 1px solid var(--line);\n  }\n  tr:nth-child(even) td {\n    background: rgba(217, 231, 245, 0.36);\n  }\n  blockquote {\n    margin: 0.18in 0;\n    padding: 0.22in 0.26in;\n    border-left: 0.08in solid var(--accent);\n    background: rgba(217, 231, 245, 0.44);\n    color: var(--accent-strong);\n    border-radius: 0 0.16in 0.16in 0;\n  }\n  img {\n    display: block;\n    max-width: 100%;\n    max-height: 4.8in;\n    margin-top: 0.18in;\n    object-fit: contain;\n    border-radius: 0.18in;\n  }\n`;\n\nconst html = `<!DOCTYPE html>\n<html lang=\"id\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>${escapeHtml(compactTitle)}</title>\n  <style>${css}</style>\n</head>\n<body data-theme=\"${theme.name}\">\n${wrappedPages}\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    output: wrappedPages,\n    html,\n    nama_file_laporan,\n    presentation_title: compactTitle,\n    presentation_theme: theme.name,\n    slide_count: slideMarkup.length,\n  },\n}];\n"
+        "jsCode": "const rawOutput = $input.first().json.output;\n\nconst unwrapAgentOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 3; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\"output\"')) {\n        try {\n          current = JSON.parse(trimmed);\n          continue;\n        } catch (error) {}\n      }\n    }\n\n    break;\n  }\n\n  return String(current || '');\n};\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst stripTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst normalizeTitle = (value) => String(value || '')\n  .replace(/\\\\n/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst ensureSlideClass = (openTag) => {\n  if (/class\\s*=\\s*[\"'][^\"']*slide[^\"']*[\"']/i.test(openTag)) {\n    return openTag.replace(/class\\s*=\\s*([\"'])([^\"']*)(\\1)/i, (full, quote, classNames) => {\n      const merged = Array.from(new Set(classNames.split(/\\s+/).filter(Boolean).concat('slide'))).join(' ');\n      return `class=${quote}${merged}${quote}`;\n    });\n  }\n  return openTag.replace('<section', '<section class=\"slide\"');\n};\n\nconst buildFallbackSlide = (content) => {\n  const plain = stripTags(content || '') || normalizeTitle($('Main Webhook').first().json.body.message || 'Presentasi');\n  const sentences = plain.split(/(?<=[.!?])\\s+/).filter(Boolean);\n  const title = sentences[0] || plain || 'Presentasi';\n  const body = sentences.slice(1).join(' ') || plain;\n  return `<section class=\"slide title-slide\"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(body)}</p></section>`;\n};\n\nconst promoteFirstSubheading = (body, fallbackTitle) => {\n  const h2Match = body.match(/<h2\\b[^>]*>([\\s\\S]*?)<\\/h2>/i);\n  if (h2Match) {\n    const h2Full = h2Match[0];\n    const h2Inner = h2Match[1];\n    return {\n      body: body.replace(h2Full, '').trim(),\n      title: stripTags(h2Inner) || fallbackTitle,\n    };\n  }\n  return { body, title: fallbackTitle };\n};\n\nconst raw = unwrapAgentOutput(rawOutput)\n  .replace(/```html/gi, '')\n  .replace(/```/g, '')\n  .replace(/Presentasi Anda sudah siap[\\s\\S]*$/i, '')\n  .replace(/<\\/?(?:html|body|main|article)[^>]*>/gi, '')\n  .trim();\n\nconst sectionRegex = /<section\\b[^>]*>[\\s\\S]*?<\\/section>/gi;\nconst rawSections = raw.match(sectionRegex) || [];\nconst normalizedSections = rawSections.map((sectionHtml, index) => {\n  const openTagMatch = sectionHtml.match(/^<section\\b[^>]*>/i);\n  const closeTagMatch = sectionHtml.match(/<\\/section>\\s*$/i);\n  const openTag = ensureSlideClass(openTagMatch ? openTagMatch[0] : '<section class=\"slide\">');\n  let body = sectionHtml\n    .replace(/^<section\\b[^>]*>/i, '')\n    .replace(/<\\/section>\\s*$/i, '')\n    .trim();\n\n  const h1Matches = [...body.matchAll(/<h1\\b[^>]*>([\\s\\S]*?)<\\/h1>/gi)];\n  if (h1Matches.length === 0) {\n    const fallbackTitle = normalizeTitle($('Main Webhook').first().json.body.message || `Slide ${index + 1}`);\n    const promoted = promoteFirstSubheading(body, fallbackTitle);\n    body = `<h1>${escapeHtml(promoted.title)}</h1>${promoted.body ? `\\n${promoted.body}` : ''}`.trim();\n  } else if (h1Matches.length > 1) {\n    let seen = false;\n    body = body.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, (full, attrs, inner) => {\n      if (!seen) {\n        seen = true;\n        return `<h1${attrs}>${inner}</h1>`;\n      }\n      return `<h2>${inner}</h2>`;\n    });\n  }\n\n  const extraClass = index === 0 && !/title-slide/.test(openTag) ? ' title-slide' : '';\n  const normalizedOpenTag = extraClass\n    ? openTag.replace(/class\\s*=\\s*([\"'])([^\"']*)(\\1)/i, (full, quote, classNames) => `class=${quote}${classNames}${extraClass}${quote}`)\n    : openTag;\n\n  return `${normalizedOpenTag}${body}${closeTagMatch ? closeTagMatch[0] : '</section>'}`;\n}).filter(Boolean);\n\nconst slideMarkup = normalizedSections.length ? normalizedSections : [buildFallbackSlide(raw)];\nconst wrappedPages = slideMarkup.map((section) => `<div class=\"pdf-page\">${section}</div>`).join('\\n');\n\nconst pickTitle = (html) => {\n  const h1 = html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1];\n  if (h1) return stripTags(h1);\n  const h2 = html.match(/<h2[^>]*>([\\s\\S]*?)<\\/h2>/i)?.[1];\n  if (h2) return stripTags(h2);\n  return stripTags(html);\n};\n\nconst titleSource = normalizeTitle(pickTitle(wrappedPages) || $('Main Webhook').first().json.body.message || 'Presentasi');\nconst compactTitle = titleSource.split(/\\s+/).slice(0, 8).join(' ').trim() || 'Presentasi';\nconst slug = compactTitle.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/-+/g, '-');\nconst timestamp = $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm');\nconst nama_file_laporan = `${slug || 'Presentasi'}_${timestamp}.pdf`;\n\nconst theme = {\n  name: 'clean-workspace-slides',\n  paper: '#ffffff',\n  paperSoft: '#f7fafc',\n  text: '#1f2937',\n  muted: '#64748b',\n  accent: '#2563eb',\n  accentStrong: '#1e3a8a',\n  line: '#dbe3ef',\n  tableHeader: '#1e3a8a',\n};\n\nconst css = `\n  :root {\n    --paper: ${theme.paper};\n    --paper-soft: ${theme.paperSoft};\n    --text: ${theme.text};\n    --muted: ${theme.muted};\n    --accent: ${theme.accent};\n    --accent-strong: ${theme.accentStrong};\n    --line: ${theme.line};\n    --table-header: ${theme.tableHeader};\n  }\n  @page { size: 16in 9in; margin: 0; }\n  * { box-sizing: border-box; }\n  html, body {\n    margin: 0;\n    padding: 0;\n    width: 100%;\n    background: #ffffff;\n    color: var(--text);\n    font-family: 'Segoe UI', Arial, sans-serif;\n    -webkit-print-color-adjust: exact;\n    print-color-adjust: exact;\n  }\n  body { margin: 0; padding: 0; }\n  .pdf-page {\n    width: 16in;\n    height: 9in;\n    min-height: 9in;\n    max-height: 9in;\n    padding: 0.35in;\n    overflow: hidden;\n    break-after: page;\n    page-break-after: always;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n  .pdf-page:last-child {\n    break-after: auto;\n    page-break-after: auto;\n  }\n  .slide {\n    position: relative;\n    width: 100%;\n    height: 100%;\n    overflow: hidden;\n    background: var(--paper);\n    border: 1px solid var(--line);\n    border-radius: 10px;\n    padding: 0.68in 0.78in 0.72in;\n  }\n  .slide::before {\n    content: '';\n    position: absolute;\n    inset: 0 0 auto 0;\n    height: 0.12in;\n    background: var(--accent);\n  }\n  .slide.title-slide {\n    background: var(--accent-strong);\n    color: #ffffff;\n  }\n  h1, h2, h3, p, ul, ol, table, blockquote, .flow-container, img {\n    position: relative;\n    z-index: 1;\n  }\n  h1 {\n    margin: 0 0 0.22in;\n    font-size: 0.56in;\n    line-height: 1.08;\n    letter-spacing: 0;\n    color: var(--accent-strong);\n    max-width: 12.6in;\n  }\n  .title-slide h1 {\n    color: #ffffff;\n    font-size: 0.7in;\n    margin-top: 0.18in;\n  }\n  h2 {\n    margin: 0 0 0.22in;\n    font-size: 0.26in;\n    line-height: 1.35;\n    color: var(--muted);\n    font-weight: 600;\n  }\n  .title-slide h2,\n  .title-slide p,\n  .title-slide li,\n  .title-slide strong {\n    color: #eef4ff;\n  }\n  h3 {\n    margin: 0.14in 0 0.1in;\n    font-size: 0.21in;\n    line-height: 1.3;\n    color: var(--accent);\n  }\n  p, li, td, th {\n    font-size: 0.24in;\n    line-height: 1.42;\n  }\n  p {\n    margin: 0 0 0.16in;\n    max-width: 12in;\n  }\n  ul, ol {\n    margin: 0;\n    padding-left: 0.32in;\n    max-width: 12.2in;\n  }\n  li {\n    margin: 0 0 0.1in;\n    padding-left: 0.02in;\n  }\n  strong { color: var(--accent-strong); }\n  .flow-container {\n    display: grid;\n    grid-template-columns: repeat(auto-fit, minmax(2.5in, 1fr));\n    gap: 0.16in;\n    margin-top: 0.2in;\n  }\n  .flow-box {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 1.18in;\n    padding: 0.2in;\n    border-radius: 8px;\n    border: 1px solid var(--line);\n    background: var(--paper-soft);\n    color: var(--accent-strong);\n    font-size: 0.23in;\n    font-weight: 700;\n    text-align: center;\n  }\n  .flow-arrow {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    color: var(--accent);\n    font-size: 0.34in;\n    font-weight: 700;\n  }\n  table {\n    width: 100%;\n    margin-top: 0.14in;\n    border-collapse: collapse;\n    table-layout: fixed;\n  }\n  th {\n    padding: 0.14in 0.16in;\n    text-align: left;\n    color: #ffffff;\n    background: var(--table-header);\n    font-weight: 700;\n    border: 1px solid var(--table-header);\n  }\n  td {\n    padding: 0.13in 0.16in;\n    vertical-align: top;\n    background: #ffffff;\n    border: 1px solid var(--line);\n  }\n  tr:nth-child(even) td { background: var(--paper-soft); }\n  blockquote {\n    margin: 0.16in 0;\n    padding: 0.18in 0.22in;\n    border-left: 0.06in solid var(--accent);\n    background: var(--paper-soft);\n    color: var(--accent-strong);\n  }\n  img {\n    display: block;\n    max-width: 100%;\n    max-height: 4.7in;\n    margin-top: 0.16in;\n    object-fit: contain;\n  }\n`;\n\nconst html = `<!DOCTYPE html>\n<html lang=\"id\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>${escapeHtml(compactTitle)}</title>\n  <style>${css}</style>\n</head>\n<body data-theme=\"${theme.name}\">\n${wrappedPages}\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    output: wrappedPages,\n    html,\n    nama_file_laporan,\n    presentation_title: compactTitle,\n    presentation_theme: theme.name,\n    slide_count: slideMarkup.length,\n  },\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        224
+        -1984,
+        -1120
       ],
-      "id": "30d525be-94b7-459e-968e-993796b66530",
+      "id": "9ac1928a-5b35-4ab8-8d89-5207d7a48ba5",
       "name": "Code - Prepare Presentation HTML"
     },
     {
@@ -393,10 +393,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1632,
-        1136
+        -912,
+        -208
       ],
-      "id": "05601c45-f061-4638-92e7-09c8ce9e252f",
+      "id": "3c72bc05-8e87-43ab-a8b3-731cf8d67e6d",
       "name": "Get Email Skills"
     },
     {
@@ -409,10 +409,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        720,
-        48
+        -1824,
+        -1296
       ],
-      "id": "37d8446b-2985-441f-a5d1-ebdaf3d57709",
+      "id": "4b01f120-d591-4d44-a7dd-d2f125c9d89f",
       "name": "Markdown - Report To HTML"
     },
     {
@@ -426,42 +426,42 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        224,
-        896
+        -2320,
+        -448
       ],
-      "id": "f1135e5c-34dd-4152-9d16-ced6c1c34cf5",
+      "id": "0e12106a-15ee-467e-9b08-d120dddd5938",
       "name": "Report Agent"
     },
     {
       "parameters": {
-        "toolDescription": "Gunakan agent ini untuk SEMUA tugas email atau komunikasi tertulis resmi. Panggil tool ini jika pengguna meminta membuat draft email, membalas email, forward email, atau mengirim email. Jika input pengguna sudah berbentuk instruksi final seperti `KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: ...` beserta SUBJECT dan body email lengkap, kamu WAJIB memanggil tool ini agar hasilnya menjadi JSON dengan `action: send`, bukan mengulang instruksi tersebut sebagai teks biasa.",
+        "toolDescription": "Gunakan agent ini untuk SEMUA tugas email atau komunikasi tertulis resmi. Panggil tool ini jika pengguna meminta membuat draft email, membalas email, forward email, atau mengirim email. Jika input pengguna sudah berbentuk instruksi final seperti `KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: ...` beserta SUBJECT dan body email lengkap, kamu WAJIB memanggil tool ini agar hasilnya menjadi JSON dengan `action: send`, bukan mengulang instruksi tersebut sebagai teks biasa. Untuk permintaan draft/reply draft dari dashboard atau rekomendasi email, hasil harus JSON action: draft, bukan send dan bukan teks konfirmasi pengiriman. Jika model mencoba menjawab tanpa memanggil Get Email Skills, tetap wajib gunakan fallback create_email.md yang ada di system prompt.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta.\n\nATURAN WAJIB PENGGUNAAN TOOL:\nSebelum menghasilkan JSON action draft atau send untuk tugas email apa pun, kamu WAJIB memanggil tool Get Email Skills tepat satu kali.\nGunakan hasil Get Email Skills sebagai aturan format utama untuk subject dan body email.\nJangan membuat isi email final dari pengetahuan sendiri sebelum Get Email Skills dipanggil.\nAturan ini berlaku untuk draft email, kirim email, balas email, forward email, undangan, follow-up, pengumuman, dan komunikasi resmi via email.\nJika user meminta kirim email tetapi alamat tujuan belum ada, tanyakan alamat tujuan terlebih dahulu tanpa memanggil tool.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- Field \"message\" SELALU dalam format HTML sesuai hasil Get Email Skills\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON"
+          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta.\n\nATURAN WAJIB PENGGUNAAN TOOL:\nSebelum menghasilkan JSON action draft atau send untuk tugas email apa pun, kamu WAJIB memanggil tool Get Email Skills tepat satu kali.\nGunakan hasil Get Email Skills sebagai aturan format utama untuk subject dan body email.\nJangan membuat isi email final dari pengetahuan sendiri sebelum Get Email Skills dipanggil.\nAturan ini berlaku untuk draft email, kirim email, balas email, forward email, undangan, follow-up, pengumuman, dan komunikasi resmi via email.\nJika user meminta kirim email tetapi alamat tujuan belum ada, tanyakan alamat tujuan terlebih dahulu tanpa memanggil tool.\nJika user meminta draft/reply draft/balasan email dari dashboard, briefing, rekomendasi, atau insight email, itu adalah DRAFT SAJA. Jangan mengirim, jangan menawarkan \"akan dikirim\", dan jangan meminta konfirmasi pengiriman.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT, termasuk draft balasan dari dashboard/rekomendasi email:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft, tetapi action tetap \"draft\" kecuali user eksplisit meminta kirim/send\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- HANYA gunakan action \"send\" jika input eksplisit berisi perintah kirim/send, misalnya \"KIRIMKAN SEKARANG\", \"kirim email\", atau \"send email\". Kata draft, buat balasan, rekomendasi, follow-up, atau reply draft selalu action \"draft\".\n- Field \"message\" dan \"body_html\" SELALU berisi HTML rapi sesuai hasil Get Email Skills\n- Field \"body_text\" wajib berisi versi plain text singkat agar draft tetap bisa direview tanpa HTML\n- Jika sender_profile memuat user_name, tanda tangan WAJIB: Hormat saya, user_name, lalu user_job_title jika ada. Jangan pernah menandatangani sebagai Communication Agent.\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON\n\nFALLBACK WAJIB JIKA GET EMAIL SKILLS TIDAK TERPANGGIL:\n- Tetap ikuti kontrak create_email.md.\n- Body email harus HTML, bukan Markdown/plain text.\n- Jangan sertakan tag <html>, <head>, atau <body>; cukup konten HTML email.\n- Gunakan inline CSS pada wrapper, paragraf, heading, tabel, list, dan footer.\n- Gunakan wrapper utama: <div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #1a1a1a; max-width: 640px; line-height: 1.6;\">.\n- Untuk meeting/tender/proposal, gunakan paragraf pembuka, tabel detail jika ada tanggal/waktu/topik, section heading, list poin tindak lanjut, dan footer pengirim.\n- Subject tetap teks biasa.\n- Footer wajib memakai user_name dan user_job_title dari sender_profile jika konteks tersedia; jangan pakai footer generik seperti Communication Agent, Spesialis Komunikasi Tertulis, AI Assistant, atau nama agent internal jika data user ada.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1472,
-        864
+        -1072,
+        -480
       ],
-      "id": "92479a9b-7eb7-4e69-8f2e-3e2f4d6ff153",
+      "id": "222a96cd-f02b-42ee-86fb-99e4934347db",
       "name": "Communication Agent"
     },
     {
       "parameters": {
-        "toolDescription": "Panggil tool ini HANYA JIKA pengguna meminta pembuatan presentasi, slide, atau PPT. Tool ini akan memberikan aturan format HTML wajib untuk slide.",
+        "toolDescription": "Panggil tool ini HANYA JIKA pengguna meminta pembuatan presentasi, slide, slides, PPT, deck, PDF slides, atau presentation PDF. Tool ini akan memberikan aturan format HTML wajib untuk slide.",
         "url": "=https://raw.githubusercontent.com/irzadzulhika29/workspace-ai-team-assistant/refs/heads/main/n8n/workflow/skills/create_ppt.md",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        832,
-        1152
+        -1712,
+        -192
       ],
-      "id": "911c671b-262b-48f6-8102-ad8cd5b02cb9",
+      "id": "c24adfe9-4e7e-4251-b92b-37c9899a9329",
       "name": "Get PPT Format"
     },
     {
@@ -473,27 +473,27 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        688,
-        1152
+        -1856,
+        -192
       ],
-      "id": "89da90ec-5cec-4242-bf2f-69b0407f33ed",
+      "id": "d65618ff-9afe-4f32-ab2a-f52fe9c5833d",
       "name": "Get Report Format"
     },
     {
       "parameters": {
-        "toolDescription": "Gunakan agent ini untuk membuat dokumen PDF atau presentasi PDF. Jenis output yang didukung: laporan formal, proposal, artikel, MOM/notulen, dan presentasi. Saat dipanggil, agent ini wajib memilih format dokumen yang sesuai dengan intent pengguna, lalu mengikuti skill format yang relevan.\n",
+        "toolDescription": "Gunakan agent ini untuk membuat dokumen PDF atau presentasi PDF. Jenis output yang didukung: laporan formal, proposal, artikel, MOM/notulen, dan presentasi. Saat dipanggil, agent ini wajib memilih format dokumen yang sesuai dengan intent pengguna, lalu mengikuti skill format yang relevan.\n\nSYARAT MUTLAK PEMANGGILAN TOOL: Saat memanggil agent ini, Supervisor WAJIB menyalin dan memasukkan seluruh teks/data/notulensi/tabel yang ingin dijadikan dokumen atau presentasi ke dalam parameter 'Prompt__User_Message_'. DILARANG KERAS mengirim input kosong, hanya judul tugas, atau hanya instruksi seperti \"buatkan pdf slides\" tanpa bahan mentahnya. Jika pengguna meminta presentasi, slide, slides, PPT, deck, PDF slides, atau presentation PDF, agent ini WAJIB memprosesnya sebagai presentasi PDF melalui skill PPT.\n Untuk presentasi/PPT/slides, panggil Get PPT Format; jika tool call terlewat, fallback create_ppt.md di system prompt tetap wajib dipatuhi.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "=Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nIDENTITAS DAN TUGAS:\nTugasmu adalah menghasilkan dokumen yang terasa matang, terstruktur, dan siap dipakai oleh pengguna. Jenis dokumen yang kamu tangani: laporan formal, proposal, artikel, notulen rapat (MOM), dan presentasi slide (PPT).\n\nPRINSIP KUALITAS UTAMA:\n1. Tentukan dulu tujuan dokumen dan siapa pembacanya.\n2. Pilih struktur yang paling cocok untuk jenis dokumen tersebut.\n3. Susun isi dari yang paling penting ke yang paling berguna untuk pembaca.\n4. Jaga agar nada penulisan konsisten, profesional, dan sesuai konteks.\n5. Pastikan hasil akhir terasa utuh, bukan sekadar template yang diisi setengah jadi.\n\nAUDIENCE DAN GAYA TULIS:\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n- Jika konteksnya eksekutif atau manajerial, prioritaskan ringkasan, keputusan, implikasi, dan tindak lanjut.\n- Jika konteksnya operasional, prioritaskan kronologi, data, status, dan action items.\n- Jika konteksnya informatif seperti artikel, prioritaskan alur baca yang natural dan mudah diikuti.\n- Hindari filler, basa-basi, metafora, dan hiasan bahasa yang tidak menambah isi.\n\nPROTOKOL WAJIB SEBELUM MENULIS:\nLANGKAH 1 — Identifikasi jenis dokumen secara spesifik:\n- Laporan formal\n- Proposal\n- Artikel\n- MOM / Notulen rapat\n- Presentasi / Slide / PPT\n\nLANGKAH 2 — Panggil tool format yang sesuai:\n- Laporan formal / Proposal / Artikel / MOM  →  panggil tool [Get Report Format]\n- Presentasi / Slide / PPT                   →  panggil tool [Get PPT Format]\n\nLANGKAH 3 — Setelah tool dipanggil, pilih SATU template yang paling tepat untuk jenis dokumen tersebut.\nJangan mencampur struktur proposal dengan laporan, jangan mencampur notulen dengan artikel, dan jangan memakai struktur generik yang sama untuk semua dokumen.\n\nLANGKAH 4 — Susun isi dengan prioritas berikut:\n- lengkap secukupnya\n- jelas untuk pembaca sasaran\n- rapi secara hierarki\n- padat tanpa kehilangan poin penting\n\nATURAN KONTEN:\n- GUNAKAN HANYA informasi yang secara eksplisit diberikan pengguna.\n- Dilarang mengarang fakta, angka, nama, tanggal, atau keputusan yang tidak disebutkan.\n- Jangan menambahkan opini, rekomendasi, atau analisis jika memang tidak diminta atau tidak didukung data.\n- Jika informasi belum cukup, jangan memaksa menulis. Tanyakan kebutuhan spesifik sesuai jenis dokumennya.\n\nATURAN KELENGKAPAN DAN HIERARKI:\n- Untuk dokumen teks, struktur harus mengikuti jenis dokumen yang dipilih.\n- Setiap section harus punya fungsi yang jelas, bukan sekadar memenuhi template.\n- Jika data sedikit, ringkas struktur agar tetap proporsional.\n- Jika data padat, kelompokkan menjadi subbagian yang mudah dipindai.\n- Untuk presentasi, setiap slide harus membawa satu ide utama yang jelas.\n\nBATAS OUTPUT:\n- PRESENTASI: Maksimal 10 slide. Setiap slide maksimal 5 poin atau 2 paragraf pendek. Tidak ada slide kosong atau slide penutup tanpa isi bermakna.\n- DOKUMEN TEKS: Maksimal 500 kata untuk isi utama (tidak termasuk judul dan header). Rangkum jika informasi terlalu banyak.\n- PRIORITAS: Kesesuaian struktur, kejelasan isi, dan keterbacaan lebih penting daripada panjang dokumen.\n\nATURAN KHUSUS UNTUK PRESENTASI:\n- Output presentasi HARUS langsung dimulai dengan <section class=\"slide\"> pertama.\n- Jangan bungkus slide dengan markdown code block, tag <html>, tag <body>, atau narasi pengantar apa pun.\n- Setiap slide HARUS punya tepat satu <h1>. Jika ide berganti, buka <section class=\"slide\"> baru, bukan menambah <h1> kedua dalam slide yang sama.\n- Semua elemen isi selain kalimat penutup wajib harus berada di dalam <section class=\"slide\">.\n- Gunakan HTML yang bersih dan final agar node sesudahmu hanya perlu validasi ringan, bukan memperbaiki ulang struktur slide.\n- Kalimat penutup wajib hanya boleh muncul SATU kali dan diletakkan setelah seluruh slide selesai.\n\nKONTRAK OUTPUT:\n- Untuk laporan / proposal / artikel / MOM: hasilkan Markdown.\n- Untuk presentasi / slide / PPT: hasilkan HTML sesuai instruksi tool [Get PPT Format].\n- Setelah isi dokumen selesai, tutup respons dengan kalimat penutup PERSIS seperti yang tertulis di tool format yang kamu panggil.\n- Jangan mengubah, menyingkat, atau menambah teks sesudah kalimat penutup wajib itu.\n\nPERINGATAN:\nMembuat dokumen tanpa memanggil tool format adalah kesalahan kritis. Jika tool tidak mengembalikan hasil, beri tahu pengguna dan minta mereka mencoba ulang."
+          "systemMessage": "=Kamu adalah Document Agent — Spesialis Pembuatan Dokumen dan Presentasi.\n\nIDENTITAS DAN TUGAS:\nTugasmu adalah menghasilkan dokumen yang terasa matang, terstruktur, dan siap dipakai oleh pengguna. Jenis dokumen yang kamu tangani: laporan formal, proposal, artikel, notulen rapat (MOM), dan presentasi slide (PPT).\n\nPRINSIP KUALITAS UTAMA:\n1. Tentukan dulu tujuan dokumen dan siapa pembacanya.\n2. Pilih struktur yang paling cocok untuk jenis dokumen tersebut.\n3. Susun isi dari yang paling penting ke yang paling berguna untuk pembaca.\n4. Jaga agar nada penulisan konsisten, profesional, dan sesuai konteks.\n5. Pastikan hasil akhir terasa utuh, bukan sekadar template yang diisi setengah jadi.\n\nAUDIENCE DAN GAYA TULIS:\n- Gunakan bahasa Indonesia yang formal, baku, dan profesional.\n- Jika konteksnya eksekutif atau manajerial, prioritaskan ringkasan, keputusan, implikasi, dan tindak lanjut.\n- Jika konteksnya operasional, prioritaskan kronologi, data, status, dan action items.\n- Jika konteksnya informatif seperti artikel, prioritaskan alur baca yang natural dan mudah diikuti.\n- Hindari filler, basa-basi, metafora, dan hiasan bahasa yang tidak menambah isi.\n\nPROTOKOL WAJIB SEBELUM MENULIS:\nLANGKAH 1 — Identifikasi jenis dokumen secara spesifik:\n- Laporan formal\n- Proposal\n- Artikel\n- MOM / Notulen rapat\n- Presentasi / Slide / PPT\n\nLANGKAH 2 — Panggil tool format yang sesuai:\n- Laporan formal / Proposal / Artikel / MOM  →  panggil tool [Get Report Format]\n- Presentasi / Slide / PPT                   →  panggil tool [Get PPT Format]\n\nLANGKAH 3 — Setelah tool dipanggil, pilih SATU template yang paling tepat untuk jenis dokumen tersebut.\nJangan mencampur struktur proposal dengan laporan, jangan mencampur notulen dengan artikel, dan jangan memakai struktur generik yang sama untuk semua dokumen.\n\nLANGKAH 4 — Susun isi dengan prioritas berikut:\n- lengkap secukupnya\n- jelas untuk pembaca sasaran\n- rapi secara hierarki\n- padat tanpa kehilangan poin penting\n\nATURAN KONTEN:\n- GUNAKAN HANYA informasi yang secara eksplisit diberikan pengguna.\n- Dilarang mengarang fakta, angka, nama, tanggal, atau keputusan yang tidak disebutkan.\n- Jangan menambahkan opini, rekomendasi, atau analisis jika memang tidak diminta atau tidak didukung data.\n- Jika informasi belum cukup, jangan memaksa menulis. Tanyakan kebutuhan spesifik sesuai jenis dokumennya.\n\nATURAN KELENGKAPAN DAN HIERARKI:\n- Untuk dokumen teks, struktur harus mengikuti jenis dokumen yang dipilih.\n- Setiap section harus punya fungsi yang jelas, bukan sekadar memenuhi template.\n- Jika data sedikit, ringkas struktur agar tetap proporsional.\n- Jika data padat, kelompokkan menjadi subbagian yang mudah dipindai.\n- Untuk presentasi, setiap slide harus membawa satu ide utama yang jelas.\n\nBATAS OUTPUT:\n- PRESENTASI: Maksimal 10 slide. Setiap slide maksimal 5 poin atau 2 paragraf pendek. Tidak ada slide kosong atau slide penutup tanpa isi bermakna.\n- DOKUMEN TEKS: Maksimal 500 kata untuk isi utama (tidak termasuk judul dan header). Rangkum jika informasi terlalu banyak.\n- PRIORITAS: Kesesuaian struktur, kejelasan isi, dan keterbacaan lebih penting daripada panjang dokumen.\n\nATURAN KHUSUS UNTUK PRESENTASI:\n- Output presentasi HARUS langsung dimulai dengan <section class=\"slide\"> pertama.\n- Jangan bungkus slide dengan markdown code block, tag <html>, tag <body>, atau narasi pengantar apa pun.\n- Setiap slide HARUS punya tepat satu <h1>. Jika ide berganti, buka <section class=\"slide\"> baru, bukan menambah <h1> kedua dalam slide yang sama.\n- Semua elemen isi selain kalimat penutup wajib harus berada di dalam <section class=\"slide\">.\n- Gunakan HTML yang bersih dan final agar node sesudahmu hanya perlu validasi ringan, bukan memperbaiki ulang struktur slide.\n- Kalimat penutup wajib hanya boleh muncul SATU kali dan diletakkan setelah seluruh slide selesai.\n\nKONTRAK OUTPUT:\n- Untuk laporan / proposal / artikel / MOM: hasilkan Markdown.\n- Untuk presentasi / slide / PPT: hasilkan HTML sesuai instruksi tool [Get PPT Format].\n- Setelah isi dokumen selesai, tutup respons dengan kalimat penutup PERSIS seperti yang tertulis di tool format yang kamu panggil.\n- Jangan mengubah, menyingkat, atau menambah teks sesudah kalimat penutup wajib itu.\n\nPERINGATAN:\nMembuat dokumen tanpa memanggil tool format adalah kesalahan kritis. Jika tool tidak mengembalikan hasil, beri tahu pengguna dan minta mereka mencoba ulang.\n\nFALLBACK WAJIB JIKA GET PPT FORMAT TIDAK TERPANGGIL:\n- Tetap ikuti kontrak create_ppt.md.\n- Output presentasi harus langsung dimulai dengan <section class=\"slide\">.\n- Setiap slide wajib berbentuk <section class=\"slide\">...</section>.\n- Setiap slide wajib punya tepat satu <h1>.\n- Maksimal 10 slide, maksimal 5 bullet per slide.\n- Jangan pakai markdown code block, <html>, <head>, <body>, atau narasi pembuka.\n- Tutup respons dengan kalimat persis: \"Presentasi Anda sudah siap. Silakan klik tombol 'Unduh Presentasi (PDF)' untuk menyimpannya.\"\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        608,
-        896
+        -1936,
+        -448
       ],
-      "id": "ecbb66ca-3c59-4133-8bbc-5a6ac96d7695",
+      "id": "978231b6-c404-495a-b697-33b97c9497d0",
       "name": "Document Agent"
     },
     {
@@ -507,10 +507,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1120,
-        816
+        -3664,
+        -528
       ],
-      "id": "46d25e2c-c2a6-4fe2-a98f-0bdeee982f4c",
+      "id": "e9c2e9f0-ca35-436d-b6d9-7934653c5930",
       "name": "Knowledge Agent"
     },
     {
@@ -524,10 +524,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -128,
-        896
+        -3008,
+        -528
       ],
-      "id": "7326842d-b20c-4af7-86fc-e6ccefe26a8a",
+      "id": "505f4203-9422-40c7-bce7-2494d991ece7",
       "name": "Scheduler Agent"
     },
     {
@@ -540,10 +540,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1088,
-        880
+        -1456,
+        -464
       ],
-      "id": "6f5a68b6-c17c-4483-9ffe-2ec20763623a",
+      "id": "09b0038c-5310-492a-afb3-b656cffbb3ac",
       "name": "Task Agent"
     },
     {
@@ -554,10 +554,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        -752,
-        176
+        -3296,
+        -1168
       ],
-      "id": "b04424f1-b4cf-432a-9572-a58363f91699",
+      "id": "27cd5528-74e8-4b69-9edf-6c9b8ef7a66e",
       "name": "Extract - PDF Text",
       "credentials": {
         "mistralCloudApi": {
@@ -573,10 +573,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        48
+        -1984,
+        -1296
       ],
-      "id": "61c74fe0-f034-46d4-b94b-2356898e9109",
+      "id": "7ee5dc65-c111-49f6-a395-2a656080c5cd",
       "name": "Code - Convert Markdown Tables"
     },
     {
@@ -588,10 +588,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2128,
-        48
+        -416,
+        -1296
       ],
-      "id": "3def2ed1-3dae-4b14-ac8b-37ff7d6a5819",
+      "id": "d8ba4854-7f89-4047-99ce-3227245bacd9",
       "name": "Respond - Report PDF Ready"
     },
     {
@@ -611,10 +611,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1168,
-        48
+        -1376,
+        -1296
       ],
-      "id": "8b4b8111-a5a7-4151-8b04-a32b88bc54c9",
+      "id": "a76c1ab9-f2ec-45bf-8f6f-fa3d78452844",
       "name": "Set - Report Filename"
     },
     {
@@ -642,10 +642,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1584,
-        48
+        -960,
+        -1296
       ],
-      "id": "8a9b87a2-b258-477d-8e4b-efd43a7af992",
+      "id": "d9bfcb8d-d1b2-4dbf-8d68-d3392ee0951c",
       "name": "HTTP - Upload Report PDF"
     },
     {
@@ -663,10 +663,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1376,
-        48
+        -1168,
+        -1296
       ],
-      "id": "c73aca53-dbbe-40a4-808a-d14cc2953bb7",
+      "id": "99856e72-a186-4aea-9e9e-c21c8833cc8c",
       "name": "HTTP - Download Report PDF"
     },
     {
@@ -696,10 +696,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        960,
-        48
+        -1584,
+        -1296
       ],
-      "id": "fc0de1d1-f88b-497d-b09b-ea2f755fdd0d",
+      "id": "132e5bb1-ca2d-4089-82d2-132047c44eb1",
       "name": "HTTP - Render Report PDF"
     },
     {
@@ -719,10 +719,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        336
+        -3088,
+        -1008
       ],
-      "id": "3ecfc6d5-8f51-4b13-aeb8-4260dcc696b3",
+      "id": "a0e8c9ac-45bc-4655-8f90-3e38fbde27d0",
       "name": "Set - Prompt From CSV Data"
     },
     {
@@ -742,10 +742,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        -16
+        -3088,
+        -1360
       ],
-      "id": "40d9160f-89e5-4058-be39-022fc40ddc4d",
+      "id": "38d4cf05-b660-4884-bc14-e7eb275e9e1f",
       "name": "Set - Prompt From Image OCR"
     },
     {
@@ -758,16 +758,18 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        -752,
-        -16
+        -3296,
+        -1360
       ],
-      "id": "ee451f11-cc48-456b-9d0a-17bd9ab6f8b0",
+      "id": "84f45f47-b893-4d0d-97a1-8a30268cdc28",
       "name": "OCR - Extract Image Text"
     },
     {
       "parameters": {
         "operation": "update",
         "tableId": "chat_sessions",
+        "filterType": "manual",
+        "matchType": "allFilters",
         "filters": {
           "conditions": [
             {
@@ -779,6 +781,11 @@
               "keyName": "user_id",
               "condition": "eq",
               "keyValue": "={{ $('Main Webhook').item.json.body.user_id }}"
+            },
+            {
+              "keyName": "judul",
+              "condition": "eq",
+              "keyValue": "Obrolan Baru"
             }
           ]
         },
@@ -794,10 +801,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -288,
-        -240
+        -2832,
+        -1584
       ],
-      "id": "dbb01599-afa0-4b8b-9c45-9c115f1cac9f",
+      "id": "27014772-2e8f-4094-bb94-fba86621c715",
       "name": "Supabase - Update Chat Title",
       "credentials": {
         "supabaseApi": {
@@ -833,10 +840,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -832,
-        -224
+        -3376,
+        -1568
       ],
-      "id": "302ba757-f506-4429-8f54-1331814fa1ca",
+      "id": "f350a104-b832-4168-885e-94256cd6fad3",
       "name": "IF - Is New Chat"
     },
     {
@@ -863,10 +870,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -912,
-        1088
+        -3728,
+        -256
       ],
-      "id": "6996de38-66cb-4a08-9ad9-bab6791c24a6",
+      "id": "c870ef55-d84e-456e-a72f-6c69bcb4640c",
       "name": "Pinecone - Retrieve Context",
       "credentials": {
         "pineconeApi": {
@@ -892,10 +899,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -752,
-        512
+        -3296,
+        -832
       ],
-      "id": "95849e82-9ae2-4143-b099-5832a681a054",
+      "id": "7e107909-949a-40a1-b550-fb4a26659d6a",
       "name": "Set - Prompt From User"
     },
     {
@@ -915,10 +922,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        176
+        -3088,
+        -1168
       ],
-      "id": "3f2a8dad-36ac-4e3f-b1e4-7dd616fe1723",
+      "id": "558d0358-d6fa-4389-a880-820eb78fc6f5",
       "name": "Set - Prompt From PDF Text"
     },
     {
@@ -948,10 +955,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1168,
-        496
+        -3712,
+        -848
       ],
-      "id": "4cd1d0b6-2ecb-44ce-a118-866128da9103",
+      "id": "3861d203-741f-4851-ad63-d5e843005d2d",
       "name": "IF - Has File Attachment"
     },
     {
@@ -974,10 +981,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1024,
-        -224
+        -3568,
+        -1568
       ],
-      "id": "a2dff240-2354-476d-a8c8-f3c14dd37234",
+      "id": "0324bbaf-53ad-4aaf-a963-b887a3044a21",
       "name": "Supabase - Get Chat Session",
       "credentials": {
         "supabaseApi": {
@@ -1002,10 +1009,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -592,
-        -240
+        -3136,
+        -1584
       ],
-      "id": "b9775c70-73df-495b-8837-cc95246b659a",
+      "id": "b67602f0-c8c5-42ab-8cc4-66d2cd2ae750",
       "name": "LLM - Generate Chat Title"
     },
     {
@@ -1017,10 +1024,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -112,
-        704
+        -2656,
+        -640
       ],
-      "id": "cab590e1-c6ae-41f6-97a7-9249a36b4b9e",
+      "id": "f4ecf8d7-2451-457d-9dc0-bb26e042bec9",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1039,10 +1046,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1376,
-        496
+        -3920,
+        -848
       ],
-      "id": "ca0c6b4a-c233-4da0-8261-504ff5fa667d",
+      "id": "5ee6d8a6-8792-48ab-bf02-f8275ea627bb",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1051,17 +1058,17 @@
         "promptType": "define",
         "text": "={{ $json.PromptFinal }}",
         "options": {
-          "systemMessage": "=Kamu adalah AI Supervisor untuk tim internal perusahaan.\n\nTUGAS SATU-SATUNYA:\n1. Memahami maksud pengguna.\n2. Menentukan apakah pertanyaan harus dijawab langsung atau didelegasikan.\n3. Mendelegasikan tugas ke agen spesialis yang paling tepat.\n4. Jika diperlukan, mengorkestrasi urutan kerja ANTAR agen secara berantai.\n5. Meneruskan hasil agen kepada pengguna TANPA mengubah isi.\n\nKamu BUKAN agen ahli domain.\nKamu BUKAN sumber kebenaran untuk SOP, Jira, Google Calendar, email, atau pembuatan dokumen.\nJangan menjawab sendiri hal-hal yang seharusnya dikerjakan agen spesialis.\n\n─────────────────────────────────────────\nDAFTAR AGEN & FUNGSI RESMINYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nFungsi:\n- Menjawab pertanyaan yang jawabannya harus diambil dari dokumen internal perusahaan.\n- Topik: kebijakan internal, SOP, onboarding, payroll, cuti, aturan perusahaan, prosedur resmi.\n\nGunakan saat pengguna menanyakan:\n- aturan\n- kebijakan\n- SOP\n- prosedur\n- ketentuan\n- onboarding\n- payroll\n- cuti\n- peraturan perusahaan\n\nCatatan:\n- Supervisor DILARANG menjawab topik ini dari pengetahuan sendiri.\n- Semua pertanyaan SOP/kebijakan WAJIB ke Knowledge_Agent.\n\n[2] Scheduler_Agent\nFungsi:\n- Mengelola Google Calendar.\n- Membuat jadwal, melihat agenda, mengecek jadwal, membuat meeting, serta membantu update atau reschedule event.\n\nGunakan saat pengguna meminta:\n- jadwalkan\n- buat meeting\n- buat acara\n- cek jadwal\n- agenda\n- rapat\n- Google Meet\n- ubah jadwal\n- reschedule\n- pindahkan meeting\n\nWaktu saat ini:\n{{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} WIB\n\nCatatan penting:\n- Untuk update atau reschedule, pengguna WAJIB menyebut event target dengan jelas.\n- Minimal harus ada konteks pembeda seperti nama event, tanggal, jam, peserta, atau detail lain yang cukup untuk mengidentifikasi event target.\n- Jika target belum jelas, arahkan Scheduler_Agent untuk mencari kandidat event yang relevan terlebih dahulu.\n- Jika tidak ada event yang benar-benar cocok, Scheduler_Agent harus menampilkan event yang paling mendekati dan meminta konfirmasi pengguna event mana yang dimaksud.\n\n[3] Task_Agent\nFungsi:\n- Mengambil dan membaca data task/issue dari Jira.\n- Melihat daftar issue.\n- Mengecek backlog.\n- Mengecek status task.\n- Mengambil data progress proyek dari Jira.\n\nGunakan saat pengguna meminta:\n- lihat issue Jira\n- status task\n- backlog\n- sprint\n- progress proyek\n- daftar issue\n- task Jira\n\nCatatan penting:\n- Anggap Task_Agent berfokus pada PENGAMBILAN DATA Jira.\n- Jangan asumsikan Task_Agent bisa membuat tiket, assign task, atau mengubah issue kecuali memang tool yang tersedia mendukung itu.\n- Jika pengguna meminta rekap dari data Jira, Task_Agent mengambil datanya terlebih dahulu. Setelah itu hasilnya dapat diteruskan ke Report_Agent.\n\n[4] Document_Agent\nFungsi:\n- Membuat dokumen/file deliverable.\n- Membuat laporan formal, proposal, artikel, MOM, presentasi, slide, atau output yang harus menjadi file/PDF.\n\nGunakan saat pengguna meminta:\n- buatkan laporan formal\n- buat proposal\n- buat presentasi\n- buat slide\n- buat PPT\n- notulen\n- MOM\n- artikel\n- dokumen resmi\n- ekspor PDF\n- jadikan PDF\n- simpan sebagai PDF\n\nCatatan:\n- Document_Agent dipakai untuk OUTPUT BERUPA DOKUMEN/FILE.\n- Jika user meminta file/PDF dari data yang sudah ada, data itu harus dirapikan dulu jika perlu, lalu baru diteruskan ke Document_Agent.\n\n[5] Report_Agent\nFungsi:\n- Merapikan dan merangkum data yang SUDAH ADA menjadi rekap terstruktur dalam teks biasa di chat.\n- Membuat ringkasan, tabel rekap, dan laporan operasional berbasis data mentah yang diberikan.\n- TIDAK membuat file PDF.\n- TIDAK mencari data sendiri.\n\nGunakan saat pengguna meminta:\n- rekap\n- rangkum\n- ringkasan\n- tabel ringkasan\n- rekap progres\n- rangkum percakapan\n- buat tabel rekap\n\nCatatan penting:\n- Report_Agent hanya boleh dipanggil jika bahan mentahnya SUDAH tersedia.\n- Supervisor WAJIB menyertakan seluruh data yang ingin diringkas di dalam input ke Report_Agent.\n- Jika data belum ada dan harus diambil dulu dari Jira atau sumber lain, panggil agen sumber datanya terlebih dahulu.\n\n[6] Communication_Agent\nFungsi:\n- Membuat draft komunikasi tertulis untuk dikirim ke orang lain.\n- Membuat draft email, pengumuman, pesan pemberitahuan, surat, atau komunikasi resmi.\n- Dapat langsung mengirim email jika diminta.\n\nGunakan saat pengguna meminta:\n- buatkan email\n- draft email\n- tulis pengumuman\n- buat surat\n- kirim email\n- beritahu tim\n- notifikasi ke\n\n─────────────────────────────────────────\nATURAN ROUTING WAJIB\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG TANPA AGEN\nJawab langsung HANYA jika pengguna:\n- menyapa,\n- melakukan chit-chat,\n- bertanya hal umum yang tidak termasuk domain agen,\n- atau meminta bantuan ringan yang tidak membutuhkan tool/agen spesialis.\n\nJika bisa dijawab langsung, jawab singkat, ramah, dan profesional.\n\nATURAN 2 — JANGAN MENGAKU SEBAGAI AGEN AHLI\nSupervisor tidak boleh berpura-pura menjadi ahli SOP, Jira, Calendar, atau dokumen.\nJika domainnya milik agen lain, delegasikan.\n\nATURAN 3 — SOP / KEBIJAKAN WAJIB KE Knowledge_Agent\nUntuk semua pertanyaan tentang aturan perusahaan, SOP, kebijakan internal, payroll, cuti, onboarding, dan prosedur resmi:\n- JANGAN jawab sendiri.\n- WAJIB delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Task_Agent, Report_Agent, dan Document_Agent\nGunakan logika berikut:\n\nA. Jika pengguna membutuhkan DATA dari Jira\n→ panggil Task_Agent terlebih dahulu.\n\nB. Jika pengguna membutuhkan REKAP / RINGKASAN dari data yang sudah ada\n→ panggil Report_Agent.\n\nC. Jika pengguna membutuhkan FILE / PDF / DOKUMEN / PPT\n→ panggil Document_Agent.\n\nUrutan berantai yang benar:\n- Data Jira saja → Task_Agent\n- Data Jira + rekap → Task_Agent lalu Report_Agent\n- Data Jira + rekap + PDF/dokumen → Task_Agent lalu Report_Agent lalu Document_Agent\n\nATURAN 5 — MULTI-STEP ORCHESTRATION DIPERBOLEHKAN JIKA SATU TUJUAN\nJika satu permintaan pengguna membutuhkan beberapa tahap berurutan untuk mencapai SATU tujuan akhir, kamu BOLEH memanggil lebih dari satu agen secara berantai.\n\nContoh yang BENAR:\n- \"Tolong rekap progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent\n\n- \"Buatkan laporan PDF dari progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent lalu Document_Agent\n\nYang dimaksud \"satu tugas\" di sini adalah satu outcome akhir yang memang membutuhkan beberapa tahap.\nJangan membatasi diri ke satu agen jika hasil akhir memang mustahil dicapai tanpa tahap berurutan.\n\nATURAN 6 — JIKA MEMANG DUA PERMINTAAN TERPISAH, BOLEH DUA CABANG\nJika pengguna secara eksplisit meminta dua pekerjaan berbeda sekaligus, kamu boleh menjalankan dua jalur terpisah.\n\nContoh:\n- \"Buatkan draft email dan jadwalkan meeting\"\nIni adalah dua tugas berbeda:\n→ Communication_Agent\n→ Scheduler_Agent\n\nATURAN 7 — KHUSUS REQUEST UPDATE / RESCHEDULE CALENDAR\nJika pengguna meminta update atau reschedule event calendar:\n- Supervisor WAJIB memastikan permintaan menyebut event target dengan cukup jelas.\n- Jika detail target belum cukup jelas, Supervisor WAJIB mengarahkan Scheduler_Agent untuk mencari event kandidat terlebih dahulu.\n- Jika tidak ditemukan event yang benar-benar cocok, hasil yang diharapkan adalah pertanyaan konfirmasi yang menampilkan event paling mendekati, bukan tindakan langsung.\n- Jika ada lebih dari satu kandidat mirip, minta pengguna memilih event yang benar sebelum melanjutkan.\n\nATURAN 8 — DELEGASI KE Report_Agent WAJIB MENYERTAKAN DATA LENGKAP\nJika kamu memanggil Report_Agent:\n- WAJIB sertakan seluruh data, teks, tabel, atau hasil agen sebelumnya yang akan diringkas.\n- DILARANG mengirim instruksi kosong seperti:\n  \"buatkan rekap\"\n  \"rangkum ini\"\n  \"buat tabel ringkasan\"\ntanpa isi datanya.\n\nATURAN 9 — JANGAN KIRIM DATA MENTAH KE Document_Agent JIKA MASIH BERANTAKAN\nJika pengguna meminta dokumen/PDF dari data operasional mentah (misalnya data Jira, hasil percakapan, tabel kasar):\n- rapikan dulu dengan Report_Agent bila perlu,\n- lalu kirim hasil yang sudah rapi ke Document_Agent.\n\nATURAN 10 — PASS-THROUGH HASIL AGEN\nJika kamu sudah menerima hasil dari agen mana pun, tampilkan hasil itu kepada pengguna secara UTUH dan MENTAH.\nDILARANG:\n- memparafrase,\n- memotong,\n- merangkum ulang,\n- mengubah format,\n- menambahkan kalimat pengantar/penutup,\n- merusak tabel Markdown.\n\nSalin 100% output agen apa adanya.\n\nATURAN 10B — KHUSUS Document_Agent\nJika Document_Agent mengembalikan output berupa kode HTML/Markdown beserta frasa:\n- \"Unduh Dokumen (PDF)\"\natau\n- \"Unduh Presentasi (PDF)\"\nmaka kamu WAJIB:\n1. Salin SELURUH output Document_Agent mulai dari karakter pertama hingga karakter terakhir — termasuk SEMUA kode HTML.\n2. DILARANG KERAS meringkas, memotong, atau menghapus kode HTML.\n3. DILARANG hanya menulis kalimat penutupnya saja tanpa HTML-nya.\n4. Output-mu HARUS dimulai dengan konten HTML (<section> atau ```html) jika Document_Agent menghasilkan HTML.\n5. Ini INSTRUKSI MUTLAK: bahkan jika output sangat panjang, TETAP salin seluruhnya verbatim.\n\nATURAN 10C — KHUSUS Communication_Agent\nJika Communication_Agent mengembalikan JSON dengan field \"action\",\nkamu WAJIB meneruskan JSON itu secara UTUH dan MENTAH.\nDILARANG:\n- mengubah JSON menjadi kalimat biasa,\n- menambahkan teks sebelum/sesudah JSON,\n- menaruhnya dalam markdown code block.\n\nContoh BENAR:\n{\"action\":\"send\",\"to\":\"user@email.com\",\"subject\":\"...\",\"message\":\"...\"}\n\nContoh SALAH:\n\"Email berhasil dikirim.\"\n\"The email has been sent successfully.\"\n\nATURAN 11 — PENGIRIMAN EMAIL SETELAH DRAFT DISETUJUI\nJika pengguna menyetujui draft email dan memberikan alamat tujuan, kamu WAJIB membangun input ke Communication_Agent dengan format PERSIS berikut:\n\nKIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\n\nDILARANG menulis:\n- \"gunakan draft sebelumnya\"\n- \"kirim email yang tadi\"\n- \"pakai isi email sebelumnya\"\n\nCommunication_Agent tidak memiliki memori draft. Isi email WAJIB disertakan penuh secara fisik.\n\nATURAN 12 — JIKA INFORMASI TIDAK CUKUP UNTUK MEMANGGIL AGEN\nJika pengguna meminta tindakan tetapi detail minimum belum cukup, kamu boleh meminta klarifikasi singkat.\nContoh:\n- jadwalkan meeting tetapi belum ada tanggal/jam\n- kirim email tetapi belum ada alamat tujuan\n- buat dokumen tetapi kontennya belum ada\n\nATURAN 13 — PRIORITAS PEMILIHAN AGEN\nGunakan prioritas ini saat ada potensi tumpang tindih:\n1. Knowledge_Agent untuk fakta/SOP internal\n2. Scheduler_Agent untuk Calendar\n3. Task_Agent untuk data Jira\n4. Report_Agent untuk rekap dari data yang sudah ada\n5. Document_Agent untuk file/PDF/PPT\n6. Communication_Agent untuk email/pesan resmi\n\nATURAN 14 — OUTPUT FINAL SUPERVISOR\nKecuali saat menjawab langsung tanpa agen, output final supervisor harus berupa salah satu dari berikut:\n- hasil mentah agen,\n- hasil mentah gabungan agent chain tahap akhir,\n- atau pertanyaan klarifikasi singkat jika data minimum belum cukup.\n\nJangan menambahkan narasi tambahan di luar itu.",
+          "systemMessage": "=Kamu adalah AI Supervisor untuk tim internal perusahaan.\n\nTUGAS SATU-SATUNYA:\n1. Memahami maksud pengguna.\n2. Menentukan apakah pertanyaan harus dijawab langsung atau didelegasikan.\n3. Mendelegasikan tugas ke agen spesialis yang paling tepat.\n4. Jika diperlukan, mengorkestrasi urutan kerja ANTAR agen secara berantai.\n5. Meneruskan hasil agen kepada pengguna TANPA mengubah isi.\n\nKamu BUKAN agen ahli domain.\nKamu BUKAN sumber kebenaran untuk SOP, Jira, Google Calendar, email, atau pembuatan dokumen.\nJangan menjawab sendiri hal-hal yang seharusnya dikerjakan agen spesialis.\n\n─────────────────────────────────────────\nDAFTAR AGEN & FUNGSI RESMINYA\n─────────────────────────────────────────\n\n[1] Knowledge_Agent\nFungsi:\n- Menjawab pertanyaan yang jawabannya harus diambil dari dokumen internal perusahaan.\n- Topik: kebijakan internal, SOP, onboarding, payroll, cuti, aturan perusahaan, prosedur resmi.\n\nGunakan saat pengguna menanyakan:\n- aturan\n- kebijakan\n- SOP\n- prosedur\n- ketentuan\n- onboarding\n- payroll\n- cuti\n- peraturan perusahaan\n\nCatatan:\n- Supervisor DILARANG menjawab topik ini dari pengetahuan sendiri.\n- Semua pertanyaan SOP/kebijakan WAJIB ke Knowledge_Agent.\n\n[2] Scheduler_Agent\nFungsi:\n- Mengelola Google Calendar.\n- Membuat jadwal, melihat agenda, mengecek jadwal, membuat meeting, serta membantu update atau reschedule event.\n\nGunakan saat pengguna meminta:\n- jadwalkan\n- buat meeting\n- buat acara\n- cek jadwal\n- agenda\n- rapat\n- Google Meet\n- ubah jadwal\n- reschedule\n- pindahkan meeting\n\nWaktu saat ini:\n{{ $now.setZone('Asia/Jakarta').toFormat('EEEE, dd MMMM yyyy HH:mm') }} WIB\n\nCatatan penting:\n- Untuk update atau reschedule, pengguna WAJIB menyebut event target dengan jelas.\n- Minimal harus ada konteks pembeda seperti nama event, tanggal, jam, peserta, atau detail lain yang cukup untuk mengidentifikasi event target.\n- Jika target belum jelas, arahkan Scheduler_Agent untuk mencari kandidat event yang relevan terlebih dahulu.\n- Jika tidak ada event yang benar-benar cocok, Scheduler_Agent harus menampilkan event yang paling mendekati dan meminta konfirmasi pengguna event mana yang dimaksud.\n\n[3] Task_Agent\nFungsi:\n- Mengambil dan membaca data task/issue dari Jira.\n- Melihat daftar issue.\n- Mengecek backlog.\n- Mengecek status task.\n- Mengambil data progress proyek dari Jira.\n\nGunakan saat pengguna meminta:\n- lihat issue Jira\n- status task\n- backlog\n- sprint\n- progress proyek\n- daftar issue\n- task Jira\n\nCatatan penting:\n- Anggap Task_Agent berfokus pada PENGAMBILAN DATA Jira.\n- Jangan asumsikan Task_Agent bisa membuat tiket, assign task, atau mengubah issue kecuali memang tool yang tersedia mendukung itu.\n- Jika pengguna meminta rekap dari data Jira, Task_Agent mengambil datanya terlebih dahulu. Setelah itu hasilnya dapat diteruskan ke Report_Agent.\n\n[4] Document_Agent\nFungsi:\n- Membuat dokumen/file deliverable.\n- Membuat laporan formal, proposal, artikel, MOM, presentasi, slide, atau output yang harus menjadi file/PDF.\n\nGunakan saat pengguna meminta:\n- buatkan laporan formal\n- buat proposal\n- buat presentasi\n- buat slide\n- buat PPT\n- buat deck\n- buat slides\n- buat PDF slides\n- notulen\n- MOM\n- artikel\n- dokumen resmi\n- ekspor PDF\n- jadikan PDF\n- simpan sebagai PDF\n\nCatatan:\n- Document_Agent dipakai untuk OUTPUT BERUPA DOKUMEN/FILE.\n- Jika user meminta file/PDF dari data yang sudah ada, data itu harus dirapikan dulu jika perlu, lalu baru diteruskan ke Document_Agent.\n\n[5] Report_Agent\nFungsi:\n- Merapikan dan merangkum data yang SUDAH ADA menjadi rekap terstruktur dalam teks biasa di chat.\n- Membuat ringkasan, tabel rekap, dan laporan operasional berbasis data mentah yang diberikan.\n- TIDAK membuat file PDF.\n- TIDAK mencari data sendiri.\n\nGunakan saat pengguna meminta:\n- rekap\n- rangkum\n- ringkasan\n- tabel ringkasan\n- rekap progres\n- rangkum percakapan\n- buat tabel rekap\n\nCatatan penting:\n- Report_Agent hanya boleh dipanggil jika bahan mentahnya SUDAH tersedia.\n- Supervisor WAJIB menyertakan seluruh data yang ingin diringkas di dalam input ke Report_Agent.\n- Jika data belum ada dan harus diambil dulu dari Jira atau sumber lain, panggil agen sumber datanya terlebih dahulu.\n\n[6] Communication_Agent\nFungsi:\n- Membuat draft komunikasi tertulis untuk dikirim ke orang lain.\n- Membuat draft email, pengumuman, pesan pemberitahuan, surat, atau komunikasi resmi.\n- Dapat langsung mengirim email jika diminta.\n\nGunakan saat pengguna meminta:\n- buatkan email\n- draft email\n- tulis pengumuman\n- buat surat\n- kirim email\n- beritahu tim\n- notifikasi ke\n\n─────────────────────────────────────────\nATURAN ROUTING WAJIB\n─────────────────────────────────────────\n\nATURAN 1 — JAWAB LANGSUNG TANPA AGEN\nJawab langsung HANYA jika pengguna:\n- menyapa,\n- melakukan chit-chat,\n- bertanya hal umum yang tidak termasuk domain agen,\n- atau meminta bantuan ringan yang tidak membutuhkan tool/agen spesialis.\n\nJika bisa dijawab langsung, jawab singkat, ramah, dan profesional.\n\nATURAN 2 — JANGAN MENGAKU SEBAGAI AGEN AHLI\nSupervisor tidak boleh berpura-pura menjadi ahli SOP, Jira, Calendar, atau dokumen.\nJika domainnya milik agen lain, delegasikan.\n\nATURAN 3 — SOP / KEBIJAKAN WAJIB KE Knowledge_Agent\nUntuk semua pertanyaan tentang aturan perusahaan, SOP, kebijakan internal, payroll, cuti, onboarding, dan prosedur resmi:\n- JANGAN jawab sendiri.\n- WAJIB delegasikan ke Knowledge_Agent.\n\nATURAN 4 — BEDAKAN Task_Agent, Report_Agent, dan Document_Agent\nGunakan logika berikut:\n\nA. Jika pengguna membutuhkan DATA dari Jira\n→ panggil Task_Agent terlebih dahulu.\n\nB. Jika pengguna membutuhkan REKAP / RINGKASAN dari data yang sudah ada\n→ panggil Report_Agent.\n\nC. Jika pengguna membutuhkan FILE / PDF / DOKUMEN / PPT\n→ panggil Document_Agent.\n\nC1. Jika pengguna menyebut slide, slides, presentasi, PPT, deck, atau PDF slides, Supervisor WAJIB menulis instruksi eksplisit ke Document_Agent: \"Buat sebagai PRESENTASI/PPT, gunakan Get PPT Format, hasilkan <section class=\\\"slide\\\">, dan tutup dengan Unduh Presentasi (PDF).\" Jangan arahkan permintaan ini ke laporan/dokumen biasa.\n\nUrutan berantai yang benar:\n- Data Jira saja → Task_Agent\n- Data Jira + rekap → Task_Agent lalu Report_Agent\n- Data Jira + rekap + PDF/dokumen → Task_Agent lalu Report_Agent lalu Document_Agent\n\nATURAN 5 — MULTI-STEP ORCHESTRATION DIPERBOLEHKAN JIKA SATU TUJUAN\nJika satu permintaan pengguna membutuhkan beberapa tahap berurutan untuk mencapai SATU tujuan akhir, kamu BOLEH memanggil lebih dari satu agen secara berantai.\n\nContoh yang BENAR:\n- \"Tolong rekap progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent\n\n- \"Buatkan laporan PDF dari progres Jira minggu ini\"\n  → Task_Agent lalu Report_Agent lalu Document_Agent\n\nYang dimaksud \"satu tugas\" di sini adalah satu outcome akhir yang memang membutuhkan beberapa tahap.\nJangan membatasi diri ke satu agen jika hasil akhir memang mustahil dicapai tanpa tahap berurutan.\n\nATURAN 6 — JIKA MEMANG DUA PERMINTAAN TERPISAH, BOLEH DUA CABANG\nJika pengguna secara eksplisit meminta dua pekerjaan berbeda sekaligus, kamu boleh menjalankan dua jalur terpisah.\n\nContoh:\n- \"Buatkan draft email dan jadwalkan meeting\"\nIni adalah dua tugas berbeda:\n→ Communication_Agent\n→ Scheduler_Agent\n\nATURAN 7 — KHUSUS REQUEST UPDATE / RESCHEDULE CALENDAR\nJika pengguna meminta update atau reschedule event calendar:\n- Supervisor WAJIB memastikan permintaan menyebut event target dengan cukup jelas.\n- Jika detail target belum cukup jelas, Supervisor WAJIB mengarahkan Scheduler_Agent untuk mencari event kandidat terlebih dahulu.\n- Jika tidak ditemukan event yang benar-benar cocok, hasil yang diharapkan adalah pertanyaan konfirmasi yang menampilkan event paling mendekati, bukan tindakan langsung.\n- Jika ada lebih dari satu kandidat mirip, minta pengguna memilih event yang benar sebelum melanjutkan.\n\nATURAN 8 — DELEGASI KE Report_Agent WAJIB MENYERTAKAN DATA LENGKAP\nJika kamu memanggil Report_Agent:\n- WAJIB sertakan seluruh data, teks, tabel, atau hasil agen sebelumnya yang akan diringkas.\n- DILARANG mengirim instruksi kosong seperti:\n  \"buatkan rekap\"\n  \"rangkum ini\"\n  \"buat tabel ringkasan\"\ntanpa isi datanya.\n\nATURAN 9 — JANGAN KIRIM DATA MENTAH KE Document_Agent JIKA MASIH BERANTAKAN\nJika pengguna meminta dokumen/PDF dari data operasional mentah (misalnya data Jira, hasil percakapan, tabel kasar):\n- rapikan dulu dengan Report_Agent bila perlu,\n- lalu kirim hasil yang sudah rapi ke Document_Agent.\n\nATURAN 10 — PASS-THROUGH HASIL AGEN\nJika kamu sudah menerima hasil dari agen mana pun, tampilkan hasil itu kepada pengguna secara UTUH dan MENTAH.\nDILARANG:\n- memparafrase,\n- memotong,\n- merangkum ulang,\n- mengubah format,\n- menambahkan kalimat pengantar/penutup,\n- merusak tabel Markdown.\n\nSalin 100% output agen apa adanya.\n\nATURAN 10B — KHUSUS Document_Agent\nJika Document_Agent mengembalikan output berupa kode HTML/Markdown beserta frasa:\n- \"Unduh Dokumen (PDF)\"\natau\n- \"Unduh Presentasi (PDF)\"\nmaka kamu WAJIB:\n1. Salin SELURUH output Document_Agent mulai dari karakter pertama hingga karakter terakhir — termasuk SEMUA kode HTML.\n2. DILARANG KERAS meringkas, memotong, atau menghapus kode HTML.\n3. DILARANG hanya menulis kalimat penutupnya saja tanpa HTML-nya.\n4. Output-mu HARUS dimulai dengan konten HTML (<section> atau ```html) jika Document_Agent menghasilkan HTML.\n5. Ini INSTRUKSI MUTLAK: bahkan jika output sangat panjang, TETAP salin seluruhnya verbatim.\n\nATURAN 10C — KHUSUS Communication_Agent\nUntuk request dari dashboard/briefing/rekomendasi email yang meminta draft atau balasan, Supervisor WAJIB mengirim instruksi eksplisit ke Communication_Agent: \"DRAFT SAJA, jangan kirim email, return JSON action draft\".\nJika Communication_Agent mengembalikan JSON dengan field \"action\",\nkamu WAJIB meneruskan JSON itu secara UTUH dan MENTAH.\nDILARANG:\n- mengubah JSON menjadi kalimat biasa,\n- menambahkan teks sebelum/sesudah JSON,\n- menaruhnya dalam markdown code block.\n\nContoh BENAR:\n{\"action\":\"send\",\"to\":\"user@email.com\",\"subject\":\"...\",\"message\":\"...\"}\n\nContoh SALAH:\n\"Email berhasil dikirim.\"\n\"The email has been sent successfully.\"\n\nATURAN 11 — PENGIRIMAN EMAIL SETELAH DRAFT DISETUJUI\nJika pengguna menyetujui draft email dan memberikan alamat tujuan, kamu WAJIB membangun input ke Communication_Agent dengan format PERSIS berikut:\n\nKIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: [email penerima]\n\n---\nSUBJECT: [subjek email dari draft]\n\n[seluruh isi body email dari draft, copy verbatim tanpa perubahan apapun]\n---\n\nDILARANG menulis:\n- \"gunakan draft sebelumnya\"\n- \"kirim email yang tadi\"\n- \"pakai isi email sebelumnya\"\n\nCommunication_Agent tidak memiliki memori draft. Isi email WAJIB disertakan penuh secara fisik.\n\nATURAN 12 — JIKA INFORMASI TIDAK CUKUP UNTUK MEMANGGIL AGEN\nJika pengguna meminta tindakan tetapi detail minimum belum cukup, kamu boleh meminta klarifikasi singkat.\nContoh:\n- jadwalkan meeting tetapi belum ada tanggal/jam\n- kirim email tetapi belum ada alamat tujuan\n- buat dokumen tetapi kontennya belum ada\n\nATURAN 13 — PRIORITAS PEMILIHAN AGEN\nGunakan prioritas ini saat ada potensi tumpang tindih:\n1. Knowledge_Agent untuk fakta/SOP internal\n2. Scheduler_Agent untuk Calendar\n3. Task_Agent untuk data Jira\n4. Report_Agent untuk rekap dari data yang sudah ada\n5. Document_Agent untuk file/PDF/PPT\n6. Communication_Agent untuk email/pesan resmi\n\nATURAN 14 — OUTPUT FINAL SUPERVISOR\nKecuali saat menjawab langsung tanpa agen, output final supervisor harus berupa salah satu dari berikut:\n- hasil mentah agen,\n- hasil mentah gabungan agent chain tahap akhir,\n- atau pertanyaan klarifikasi singkat jika data minimum belum cukup.\n\nJangan menambahkan narasi tambahan di luar itu.",
           "returnIntermediateSteps": true
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -176,
-        512
+        -2720,
+        -832
       ],
-      "id": "9dfa7223-9c9c-4851-9b07-46098908098f",
+      "id": "20effcd5-3906-47f5-9cee-6696d9c388ba",
       "name": "Supervisor Agent"
     },
     {
@@ -1073,10 +1080,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        576,
-        560
+        -1968,
+        -784
       ],
-      "id": "6f657597-e18f-4521-9908-4c50e37102dc",
+      "id": "6ad0f36e-5b4d-4b2c-87e7-eabb55b4eec8",
       "name": "Respond - Chat Output"
     },
     {
@@ -1110,10 +1117,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        784,
-        560
+        -1760,
+        -784
       ],
-      "id": "400c93b9-e24c-432d-a14f-079daee3dac0",
+      "id": "89dc2f94-788f-412f-8574-2214802a53a7",
       "name": "Supabase - Log Chat Response",
       "credentials": {
         "supabaseApi": {
@@ -1137,10 +1144,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1152,
-        224
+        -1392,
+        -1120
       ],
-      "id": "4aa01a42-b37c-4331-9ffc-477e9f29c70a",
+      "id": "ca5df367-7437-42c9-92e2-e8e99b757b7b",
       "name": "HTTP - Download Presentation PDF"
     },
     {
@@ -1174,10 +1181,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1632,
-        224
+        -912,
+        -1120
       ],
-      "id": "2047975d-0c6f-47ca-bcdf-4c0f8e490a32",
+      "id": "42d2ff19-5dc0-418c-a30d-153cefc7e201",
       "name": "Supabase - Save Presentation Document",
       "credentials": {
         "supabaseApi": {
@@ -1195,10 +1202,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1856,
-        224
+        -688,
+        -1120
       ],
-      "id": "c5ec6507-f8bd-4220-9b17-fbc028aa6ea7",
+      "id": "da058226-753a-4fa9-ba14-7dc52ec62445",
       "name": "Respond - Presentation PDF Ready"
     },
     {
@@ -1226,10 +1233,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1408,
-        224
+        -1136,
+        -1120
       ],
-      "id": "81ca4df6-b1d4-469d-92cd-76fd1691769f",
+      "id": "da0bcf92-2ee1-4ad5-802f-f334819489e2",
       "name": "HTTP - Upload Presentation PDF"
     },
     {
@@ -1263,10 +1270,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2160,
-        224
+        -384,
+        -1120
       ],
-      "id": "381f2d5c-3480-46cc-98d5-3793e5185357",
+      "id": "809d30cf-470d-4167-942b-c7d85b00f796",
       "name": "Supabase - Log Presentation PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1277,15 +1284,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// This node normalizes supervisor pass-through so downstream routing sees\n// the original specialist output instead of a paraphrased wrapper.\n// It also recovers mistaken pass-through email-send templates\n// into the JSON shape expected by Route Output Type.\n\nconst inputJson = $input.first().json;\nconst supervisorOutput = String(inputJson.output || '');\nconst getOriginalPrompt = () => {\n  try {\n    return $('Set - Prompt From User').first().json?.PromptFinal || '';\n  } catch (error) {\n    return '';\n  }\n};\n\nconst originalPrompt = getOriginalPrompt();\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst parseSendTemplate = (text) => {\n  if (typeof text !== 'string' || !/KIRIMKAN\\s+SEKARANG/i.test(text)) {\n    return null;\n  }\n\n  const normalized = text.replace(/\\r/g, '').trim();\n  const match = normalized.match(/KIRIMKAN\\s+SEKARANG\\s+email\\s+lengkap\\s+dibawah\\s+ini\\s+ke\\s+alamat:\\s*([^\\n]+)\\n+---\\n*SUBJECT:\\s*([^\\n]+)\\n+([\\s\\S]+?)\\n*---\\s*$/i);\n\n  if (!match) {\n    return null;\n  }\n\n  return {\n    action: 'send',\n    to: match[1].trim(),\n    subject: match[2].trim(),\n    message: match[3].trim(),\n  };\n};\n\nconst extractStepOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\\\"output\\\"')) {\n        const parsed = tryParseJson(trimmed);\n        if (parsed !== null) {\n          current = parsed;\n          continue;\n        }\n      }\n    }\n    break;\n  }\n  return String(current || '');\n};\n\nconst normalizeEmailOutput = (value) => {\n  let current = value;\n\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object') {\n      if (current.Communication_Agent_response?.content) {\n        current = current.Communication_Agent_response.content;\n        continue;\n      }\n      if (current.output !== undefined) {\n        current = current.output;\n        continue;\n      }\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n      const parsed = tryParseJson(trimmed);\n      if (parsed !== null) {\n        current = parsed;\n        continue;\n      }\n      current = trimmed;\n    }\n\n    break;\n  }\n\n  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {\n    const action = typeof current.action === 'string' ? current.action.trim().toLowerCase() : '';\n    if (action === 'send' || action === 'draft') {\n      return JSON.stringify(current);\n    }\n  }\n\n  if (typeof current === 'string') {\n    const trimmed = current.trim();\n    const parsed = tryParseJson(trimmed);\n    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {\n      const action = typeof parsed.action === 'string' ? parsed.action.trim().toLowerCase() : '';\n      if (action === 'send' || action === 'draft') {\n        return JSON.stringify(parsed);\n      }\n    }\n  }\n\n  return null;\n};\n\nconst pickEmailObservation = () => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const normalized =\n      normalizeEmailOutput(step?.observation) ||\n      normalizeEmailOutput(step?.output);\n\n    if (normalized) {\n      return normalized;\n    }\n  }\n  return null;\n};\n\nconst recoveredSend = parseSendTemplate(supervisorOutput) || parseSendTemplate(originalPrompt);\nif (recoveredSend) {\n  return [{\n    json: {\n      ...inputJson,\n      output: JSON.stringify(recoveredSend),\n      _recovered_send: true,\n    },\n  }];\n}\n\nconst normalizedEmailOutput = normalizeEmailOutput(inputJson.output) || pickEmailObservation();\nif (normalizedEmailOutput) {\n  return [{\n    json: {\n      ...inputJson,\n      output: normalizedEmailOutput,\n      _normalized_email_output: true,\n    },\n  }];\n}\n\nconst documentObservation = (() => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const observation = extractStepOutput(step?.observation || step?.output || '');\n    if (!observation) continue;\n\n    const hasPresentationMarkup = /<section\\b[^>]*class=[\\\"'][^\\\"']*slide/i.test(observation);\n    const hasDocumentSignal = observation.includes('Unduh Dokumen (PDF)') || observation.includes('Unduh Presentasi (PDF)');\n    const isSubstantial = observation.length > 120;\n\n    if ((hasPresentationMarkup || hasDocumentSignal) && isSubstantial) {\n      return observation.trim();\n    }\n  }\n  return '';\n})();\n\nconst trimmedSupervisor = supervisorOutput.trim();\nconst hasHTML = /<(section|div)\\b/i.test(supervisorOutput) || supervisorOutput.includes('```html');\nconst startsWithDocumentMarkup = /^(<section\\b|<div\\b|```html)/i.test(trimmedSupervisor);\nconst isPPTSignal = supervisorOutput.includes('Unduh Presentasi (PDF)');\nconst isPDFSignal = supervisorOutput.includes('Unduh Dokumen (PDF)');\nconst hasConflictingSignals = isPPTSignal && isPDFSignal;\nconst hasSupervisorNarration = /(Berikut hasil|Saya akan buatkan|Slide presentasi sudah siap|Laporan Anda sudah siap! Silakan unduh)/i.test(trimmedSupervisor);\nconst shouldUseDocumentObservation = Boolean(documentObservation) && (( !hasHTML && (isPPTSignal || isPDFSignal)) || (hasHTML && !startsWithDocumentMarkup) || hasConflictingSignals || hasSupervisorNarration);\n\nif (shouldUseDocumentObservation) {\n  return [{\n    json: {\n      ...inputJson,\n      output: documentObservation,\n      _recovered: true,\n    },\n  }];\n}\n\nreturn [{ json: inputJson }];"
+        "jsCode": "// This node normalizes supervisor pass-through so downstream routing sees\n// the original specialist output instead of a paraphrased wrapper.\n// It also recovers mistaken pass-through email-send templates\n// into the JSON shape expected by Route Output Type.\n\nconst inputJson = $input.first().json;\nconst supervisorOutput = String(inputJson.output || '');\nconst getOriginalPrompt = () => {\n  try {\n    return $('Set - Prompt From User').first().json?.PromptFinal || '';\n  } catch (error) {\n    return '';\n  }\n};\n\nconst originalPrompt = getOriginalPrompt();\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst parseSendTemplate = (text) => {\n  if (typeof text !== 'string' || !/KIRIMKAN\\s+SEKARANG/i.test(text)) {\n    return null;\n  }\n\n  const normalized = text.replace(/\\r/g, '').trim();\n  const match = normalized.match(/KIRIMKAN\\s+SEKARANG\\s+email\\s+lengkap\\s+dibawah\\s+ini\\s+ke\\s+alamat:\\s*([^\\n]+)\\n+---\\n*SUBJECT:\\s*([^\\n]+)\\n+([\\s\\S]+?)\\n*---\\s*$/i);\n\n  if (!match) {\n    return null;\n  }\n\n  return {\n    action: 'send',\n    to: match[1].trim(),\n    subject: match[2].trim(),\n    message: match[3].trim(),\n  };\n};\n\nconst extractStepOutput = (value) => {\n  let current = value;\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n    if (current && typeof current === 'object' && current.output !== undefined) {\n      current = current.output;\n      continue;\n    }\n    if (typeof current === 'string') {\n      const trimmed = current.trim();\n      if ((trimmed.startsWith('[') || trimmed.startsWith('{')) && trimmed.includes('\\\"output\\\"')) {\n        const parsed = tryParseJson(trimmed);\n        if (parsed !== null) {\n          current = parsed;\n          continue;\n        }\n      }\n    }\n    break;\n  }\n  return String(current || '');\n};\n\nconst normalizeEmailOutput = (value) => {\n  let current = value;\n\n  for (let i = 0; i < 4; i += 1) {\n    if (Array.isArray(current) && current[0]?.output !== undefined) {\n      current = current[0].output;\n      continue;\n    }\n\n    if (current && typeof current === 'object') {\n      if (current.Communication_Agent_response?.content) {\n        current = current.Communication_Agent_response.content;\n        continue;\n      }\n      if (current.output !== undefined) {\n        current = current.output;\n        continue;\n      }\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim().replace(/^\\`\\`\\`(?:json)?\\s*/i, '').replace(/\\s*\\`\\`\\`$/, '').trim();\n      const parsed = tryParseJson(trimmed);\n      if (parsed !== null) {\n        current = parsed;\n        continue;\n      }\n      current = trimmed;\n    }\n\n    break;\n  }\n\n  if (typeof current === 'object' && current !== null && !Array.isArray(current)) {\n    const action = typeof current.action === 'string' ? current.action.trim().toLowerCase() : '';\n    if (action === 'send' || action === 'draft') {\n      return JSON.stringify(current);\n    }\n  }\n\n  if (typeof current === 'string') {\n    const trimmed = current.trim();\n    const parsed = tryParseJson(trimmed);\n    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {\n      const action = typeof parsed.action === 'string' ? parsed.action.trim().toLowerCase() : '';\n      if (action === 'send' || action === 'draft') {\n        return JSON.stringify(parsed);\n      }\n    }\n  }\n\n  return null;\n};\n\nconst pickEmailObservation = () => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const normalized =\n      normalizeEmailOutput(step?.observation) ||\n      normalizeEmailOutput(step?.output);\n\n    if (normalized) {\n      return normalized;\n    }\n  }\n  return null;\n};\n\nconst recoveredSend = parseSendTemplate(supervisorOutput) || parseSendTemplate(originalPrompt);\nif (recoveredSend) {\n  return [{\n    json: {\n      ...inputJson,\n      output: JSON.stringify(recoveredSend),\n      _recovered_send: true,\n    },\n  }];\n}\n\nconst normalizedEmailOutput = normalizeEmailOutput(inputJson.output) || pickEmailObservation();\nif (normalizedEmailOutput) {\n  return [{\n    json: {\n      ...inputJson,\n      output: normalizedEmailOutput,\n      _normalized_email_output: true,\n    },\n  }];\n}\n\nconst documentObservation = (() => {\n  const steps = inputJson.intermediateSteps || [];\n  for (const step of steps) {\n    const observation = extractStepOutput(step?.observation || step?.output || '');\n    if (!observation) continue;\n\n    const hasPresentationMarkup = /<section\\b[^>]*class=[\\\"'][^\\\"']*slide/i.test(observation);\n    const hasDocumentSignal = observation.includes('Unduh Dokumen (PDF)') || observation.includes('Unduh Presentasi (PDF)');\n    const isSubstantial = observation.length > 120;\n\n    if ((hasPresentationMarkup || hasDocumentSignal) && isSubstantial) {\n      return observation.trim();\n    }\n  }\n  return '';\n})();\n\nconst normalizePlainTextOutput = (value) => {\n  let current = value;\n\n  for (let i = 0; i < 5; i += 1) {\n    if (Array.isArray(current)) {\n      if (current.length === 1 && current[0]?.output !== undefined) {\n        current = current[0].output;\n        continue;\n      }\n      if (current.length === 1 && typeof current[0] === 'string') {\n        current = current[0];\n        continue;\n      }\n    }\n\n    if (current && typeof current === 'object') {\n      if (typeof current.output === 'string') {\n        current = current.output;\n        continue;\n      }\n      if (typeof current.content === 'string') {\n        current = current.content;\n        continue;\n      }\n      if (typeof current.message === 'string') {\n        current = current.message;\n        continue;\n      }\n    }\n\n    if (typeof current === 'string') {\n      const trimmed = current.trim().replace(/^\\`\\`\\`(?:markdown|md|text)?\\s*/i, '').replace(/\\s*\\`\\`\\`$/, '').trim();\n      const parsed = tryParseJson(trimmed);\n      if (parsed !== null && parsed !== current) {\n        current = parsed;\n        continue;\n      }\n      return trimmed;\n    }\n\n    break;\n  }\n\n  return typeof current === 'string' ? current.trim() : '';\n};\n\nconst pickPlainTextObservation = () => {\n  const plainTextTools = new Set(['Report_Agent', 'Knowledge_Agent', 'Scheduler_Agent', 'Task_Agent']);\n  const steps = inputJson.intermediateSteps || [];\n\n  for (const step of steps) {\n    const toolName = String(step?.action?.tool || step?.tool || '').trim();\n    if (!plainTextTools.has(toolName)) continue;\n\n    const candidates = [\n      step?.observation,\n      step?.output,\n      step?.response,\n      step?.result,\n    ];\n\n    for (const candidate of candidates) {\n      const text = normalizePlainTextOutput(candidate);\n      if (!text) continue;\n      if (/^\\s*[{[]/.test(text)) continue;\n      if (/Unduh\\s+(Dokumen|Presentasi)\\s+\\(PDF\\)/i.test(text)) continue;\n      if (/^Email dengan subjek\\s+/i.test(text)) continue;\n      return text;\n    }\n  }\n\n  return '';\n};\n\nconst plainTextObservation = pickPlainTextObservation();\nconst trimmedSupervisor = supervisorOutput.trim();\nconst hasHTML = /<(section|div)\\b/i.test(supervisorOutput) || supervisorOutput.includes('```html');\nconst startsWithDocumentMarkup = /^(<section\\b|<div\\b|\\`\\`\\`html)/i.test(trimmedSupervisor);\nconst isPPTSignal = supervisorOutput.includes('Unduh Presentasi (PDF)');\nconst isPDFSignal = supervisorOutput.includes('Unduh Dokumen (PDF)');\nconst hasConflictingSignals = isPPTSignal && isPDFSignal;\nconst hasSupervisorNarration = /(Berikut hasil|Saya akan buatkan|Slide presentasi sudah siap|Laporan Anda sudah siap! Silakan unduh)/i.test(trimmedSupervisor);\nconst shouldUseDocumentObservation = Boolean(documentObservation) && ((!hasHTML && (isPPTSignal || isPDFSignal)) || (hasHTML && !startsWithDocumentMarkup) || hasConflictingSignals || hasSupervisorNarration);\nconst hasMeaningfulSupervisorOutput = trimmedSupervisor && trimmedSupervisor !== 'null' && trimmedSupervisor !== 'undefined';\n\nif (shouldUseDocumentObservation) {\n  return [{\n    json: {\n      ...inputJson,\n      output: documentObservation,\n      _recovered: true,\n    },\n  }];\n}\n\nif (!hasMeaningfulSupervisorOutput && plainTextObservation) {\n  return [{\n    json: {\n      ...inputJson,\n      output: plainTextObservation,\n      _recovered_plain_text: true,\n    },\n  }];\n}\n\nreturn [{ json: inputJson }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        512
+        -2368,
+        -832
       ],
-      "id": "81180adb-0352-4d6f-b6db-f004bf2f008e",
+      "id": "4edbd83d-2ec0-4afa-911d-b4d607942aa2",
       "name": "Code - Extract Final Output"
     },
     {
@@ -1319,10 +1326,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2352,
-        48
+        -192,
+        -1296
       ],
-      "id": "199585de-4f4e-4a10-8e9b-97951ccbed7f",
+      "id": "c55c8267-9c33-489e-b0b7-06289cdcc4ac",
       "name": "Supabase - Log Report PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1333,15 +1340,15 @@
     },
     {
       "parameters": {
-        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    return parsed;\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n\n  if (!subject && !message) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'draft',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: message || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst draft = parseEmailPayload(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
+        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    const bodyHtml = parsed.body_html || parsed.message || '';\n    const bodyText = parsed.body_text || '';\n    return {\n      ...parsed,\n      message: bodyHtml || bodyText,\n      body_html: bodyHtml,\n      body_text: bodyText,\n    };\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n  const bodyHtml = extractJsonStringField(value, 'body_html');\n  const bodyText = extractJsonStringField(value, 'body_text');\n\n  if (!subject && !message && !bodyHtml && !bodyText) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'draft',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: bodyHtml || message || bodyText || '',\n    body_html: bodyHtml || message || '',\n    body_text: bodyText || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst draft = parseEmailPayload(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst extractSenderProfile = (prompt) => {\n  const userName = prompt.match(/^\\s*-\\s*user_name:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userJobTitle = prompt.match(/^\\s*-\\s*user_job_title:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userEmail = prompt.match(/^\\s*-\\s*user_email:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  return { userName, userJobTitle, userEmail };\n};\n\nconst stripHtmlTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst buildSignatureHtml = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return [\n    '<p style=\"margin-top: 24px;\">',\n    'Hormat saya,<br>',\n    '<strong>' + escapeHtml(userName) + '</strong>',\n    userJobTitle ? '<br><span style=\"color: #555;\">' + escapeHtml(userJobTitle) + '</span>' : '',\n    '</p>',\n  ].join('');\n};\n\nconst buildSignatureText = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return ['Hormat saya,', userName, userJobTitle].filter(Boolean).join('\\n');\n};\n\nconst replaceGenericHtmlSignature = (html, profile) => {\n  if (!profile.userName || !html) return html;\n  const signature = buildSignatureHtml(profile);\n  const genericSignaturePattern = /<p\\b[^>]*>\\s*Hormat\\s+saya,?\\s*(?:<br\\s*\\/?>\\s*)+(?:<strong[^>]*>\\s*)?(?:Communication\\s+Agent|AI\\s+Assistant|Assistant)(?:\\s*<\\/strong>)?\\s*(?:<br\\s*\\/?>\\s*(?:<span[^>]*>\\s*)?(?:Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant)(?:\\s*<\\/span>)?)?\\s*<\\/p>/i;\n  if (genericSignaturePattern.test(html)) {\n    return html.replace(genericSignaturePattern, signature);\n  }\n\n  const genericTextPattern = /Hormat\\s+saya,?\\s*(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<strong[^>]*>)?Communication\\s+Agent(?:<\\/strong>)?\\s*(?:(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<span[^>]*>)?Spesialis\\s+Komunikasi\\s+Tertulis(?:<\\/span>)?)?/i;\n  if (genericTextPattern.test(html)) {\n    return html.replace(genericTextPattern, signature);\n  }\n\n  return html;\n};\n\nconst replaceGenericTextSignature = (text, profile) => {\n  if (!profile.userName || !text) return text;\n  return String(text).replace(\n    /Hormat\\s+saya,?\\s*[\\r\\n]+\\s*(Communication\\s+Agent|AI\\s+Assistant|Assistant)\\s*(?:[\\r\\n]+\\s*(Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant))?/i,\n    buildSignatureText(profile),\n  );\n};\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst senderProfile = extractSenderProfile(originalPrompt);\n\ndraft.message = draft.body_html || draft.message || draft.body_text || '';\ndraft.body_html = replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile);\ndraft.message = replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile);\ndraft.body_text = replaceGenericTextSignature(draft.body_text || stripHtmlTags(draft.message), senderProfile);\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        544,
-        736
+        -2000,
+        -608
       ],
-      "id": "44a4ed5e-5d17-4439-a101-082edc399fd2",
+      "id": "141fa621-ec38-4478-910c-f9e5dc1b3736",
       "name": "Code - Format Draft Email Response"
     },
     {
@@ -1353,10 +1360,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        784,
-        736
+        -1760,
+        -608
       ],
-      "id": "293d0857-a929-4482-9145-d40338915406",
+      "id": "7e5c95e2-2616-454e-b517-f7bddb0c937b",
       "name": "Respond - Draft Email"
     },
     {
@@ -1390,10 +1397,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1232,
-        400
+        -1312,
+        -944
       ],
-      "id": "fc6a705e-1de3-4246-ada8-b978d5290dfe",
+      "id": "40a7df02-e3ca-4911-9dc5-5b22fa93e15f",
       "name": "Supabase - Log Email Sent Response",
       "credentials": {
         "supabaseApi": {
@@ -1433,10 +1440,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1008,
-        736
+        -1536,
+        -608
       ],
-      "id": "f982f25c-d829-4038-85ee-5084ab3fa752",
+      "id": "5d50e632-d1b8-4768-9e3b-29e844071edd",
       "name": "Supabase - Log Draft Email Response",
       "credentials": {
         "supabaseApi": {
@@ -1453,10 +1460,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        400,
-        1680
+        -2464,
+        256
       ],
-      "id": "028a9fc0-bf68-47da-b67a-cdd4204fb640",
+      "id": "dd7c6a85-354b-40b5-af29-322f14b66aa1",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -1543,10 +1550,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -1008,
-        288
+        -3552,
+        -1056
       ],
-      "id": "309520f0-cfdd-4dd4-9bd4-a8336e2639d0",
+      "id": "7e86a58c-ac31-4eb9-a3b4-469726ff409b",
       "name": "Switch - Attachment Type"
     },
     {
@@ -1557,10 +1564,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -752,
-        336
+        -3296,
+        -1008
       ],
-      "id": "3776a47d-6a94-4bb8-9e78-c05e2c9a4ef7",
+      "id": "0e770702-8c49-4a9a-bd16-7ffaf635f746",
       "name": "Extract - CSV Rows"
     },
     {
@@ -1672,10 +1679,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        320,
-        368
+        -2224,
+        -976
       ],
-      "id": "2de5a99a-5e24-4c11-8f8f-dc14e7837326",
+      "id": "68098d27-e32d-4edc-ac80-62708cd829a1",
       "name": "Switch - Output Type"
     },
     {
@@ -1687,10 +1694,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -832,
-        1296
+        -3808,
+        -64
       ],
-      "id": "e0dc707e-5b9f-4da8-9553-db753abfbde0",
+      "id": "0a21c146-e35f-4215-8022-0bab9380b5c4",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
@@ -1712,10 +1719,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        592,
-        1680
+        -2240,
+        256
       ],
-      "id": "6fd62e94-7cbb-4f7a-8bc2-4aa5e61ebb23",
+      "id": "e1fb8628-ba97-4f99-9d3c-9c7fd3ba68e1",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -2282,11 +2289,6 @@
       "ai_languageModel": [
         [
           {
-            "node": "Document Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
             "node": "LLM - Generate Chat Title",
             "type": "ai_languageModel",
             "index": 0
@@ -2303,11 +2305,6 @@
           },
           {
             "node": "Report Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Task Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -2415,6 +2412,16 @@
       "ai_languageModel": [
         [
           {
+            "node": "Task Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Document Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
             "node": "Supervisor Agent",
             "type": "ai_languageModel",
             "index": 0
@@ -2432,7 +2439,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9b46ca01-0c6d-4c7b-b437-4936cc152417",
+  "versionId": "a21b99a4-1045-43cd-ae95-b0800bcea609",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

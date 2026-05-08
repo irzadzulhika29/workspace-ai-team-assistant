@@ -349,6 +349,10 @@ router.post('/sessions', requireAuth, async (req, res) => {
 // Get all chat sessions
 router.get('/sessions', requireAuth, async (req, res) => {
   try {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     const { chat_type } = req.query;
     const userId = req.user.id;
     const filters = [`user_id=eq.${encodeFilterValue(userId)}`];
