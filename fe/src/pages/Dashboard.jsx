@@ -711,6 +711,14 @@ const TopBar = ({
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const withNewSupervisorSession = useCallback(
+    (state = {}) => ({
+      ...(state && typeof state === "object" ? state : {}),
+      forceNewSession: true,
+      navigationSource: "dashboard",
+    }),
+    [],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [nextEvents, setNextEvents] = useState([]);
   const [jiraIssues, setJiraIssues] = useState([]);
@@ -1228,7 +1236,7 @@ export default function Dashboard() {
                 </ActionLink>
                 <ActionLink
                   to="/chat/supervisor"
-                  state={{
+                  state={withNewSupervisorSession({
                     domain: "jira",
                     intent: "generate_report",
                     templatePrompt: "Buatkan laporan progres Jira hari ini",
@@ -1238,7 +1246,7 @@ export default function Dashboard() {
                           summary: jiraSummary,
                           issues: jiraIssues.slice(0, 10),
                         },
-                  }}
+                  })}
                 >
                   Buat Report
                 </ActionLink>
@@ -1309,7 +1317,7 @@ export default function Dashboard() {
                 <ActionLink
                   to="/chat/supervisor"
                   primary
-                  state={createAgendaActionState(
+                  state={withNewSupervisorSession(createAgendaActionState(
                     {
                       label: "Buat Agenda",
                       intent: "prepare_meeting",
@@ -1325,7 +1333,7 @@ export default function Dashboard() {
                     },
                     activeAgenda,
                     calendarBriefing,
-                  )}
+                  ))}
                 >
                   Buat Agenda
                 </ActionLink>
@@ -1393,10 +1401,12 @@ export default function Dashboard() {
                               navigate(
                                 "/chat/supervisor",
                                 {
-                                  state: createAgendaActionState(
+                                  state: withNewSupervisorSession(
+                                    createAgendaActionState(
                                     action,
                                     activeAgenda,
                                     calendarBriefing,
+                                  ),
                                   ),
                                 },
                               )
@@ -1427,7 +1437,7 @@ export default function Dashboard() {
                 <ActionLink
                   to="/chat/supervisor"
                   primary
-                  state={
+                  state={withNewSupervisorSession(
                     focusedEmail && focusedEmailAction
                       ? createEmailActionState(
                           focusedEmailAction,
@@ -1444,8 +1454,8 @@ export default function Dashboard() {
                                 emails: visibleEmails.slice(0, 5),
                               }
                             : { emails: visibleEmails.slice(0, 5) },
-                        }
-                  }
+                        },
+                  )}
                 >
                   Draft Reply
                 </ActionLink>
@@ -1490,10 +1500,12 @@ export default function Dashboard() {
                         className="w-full rounded-xl border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                         onClick={() =>
                           navigate("/chat/supervisor", {
-                            state: createEmailActionState(
-                              focusedEmailAction,
-                              focusedEmail,
-                              emailBriefing,
+                            state: withNewSupervisorSession(
+                              createEmailActionState(
+                                focusedEmailAction,
+                                focusedEmail,
+                                emailBriefing,
+                              ),
                             ),
                           })
                         }
@@ -1554,13 +1566,13 @@ export default function Dashboard() {
                 </ActionLink>
                 <ActionLink
                   to="/chat/supervisor"
-                  state={{
+                  state={withNewSupervisorSession({
                     domain: "operations",
                     intent: "token_review",
                     templatePrompt:
                       "Tolong rangkum penggunaan token dan berikan rekomendasi efisiensi.",
                     context: { tokenSummary, tokenSeries },
-                  }}
+                  })}
                 >
                   Minta Analisis
                 </ActionLink>

@@ -22,6 +22,7 @@ function Layout() {
   const { open, collapsed, close } = useSidebar()
   const isDashboardRoute = location.pathname === '/'
   const isJiraRoute = location.pathname === '/workspace/jira'
+  const isFileWorkspaceRoute = location.pathname === '/workspace/files'
   const isSupervisorRoute = location.pathname === '/chat/supervisor'
 
   return (
@@ -43,14 +44,16 @@ function Layout() {
         {/* Mobile top header */}
         <MobileHeader />
 
-        <div className="flex-1 p-3 pt-0 md:p-6 md:pt-6">
+        <div className="flex-1 bg-[#f8f9fd] p-3 pt-0 md:p-6 md:pt-6">
           <div
             className={
-              isDashboardRoute || isJiraRoute
+              isDashboardRoute || isFileWorkspaceRoute
                 ? 'min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100dvh-2.5rem)]'
+                : isJiraRoute
+                  ? 'min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100dvh-2.5rem)]'
                 : isSupervisorRoute
-                  ? 'h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl bg-white shadow-sm md:h-[calc(100dvh-2.5rem)]'
-                : 'min-h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl bg-white shadow-sm md:min-h-[calc(100dvh-2.5rem)]'
+                  ? 'h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl md:h-[calc(100dvh-2.5rem)]'
+                : 'min-h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl md:min-h-[calc(100dvh-2.5rem)]'
             }
           >
             <Routes>

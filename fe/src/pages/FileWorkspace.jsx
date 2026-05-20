@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
   AlertCircle,
-  ArrowRight,
-  Bot,
+  ChevronDown,
+  ChevronUp,
   CalendarDays,
   Download,
   Eye,
   FileText,
   FolderOpen,
+  Search,
   Sparkles,
   Trash2,
   Upload,
@@ -60,26 +61,23 @@ const formatDateLabel = (value) => {
   }
 }
 
-// Unused helper - removed to fix linting
-// const formatDateTimeLabel = (value) => {
-//   if (!value) return 'Belum tersedia'
-//   try {
-//     return new Date(value).toLocaleString('id-ID', {
-//       day: '2-digit',
-//       month: 'short',
-//       year: 'numeric',
-//       hour: '2-digit',
-//       minute: '2-digit',
-//     })
-//   } catch {
-//     return 'Belum tersedia'
-//   }
-// }
+
 
 const getDocumentBadge = (doc) => {
   const type = doc.documentType || 'uncategorized'
   return type.replace(/[_-]/g, ' ')
 }
+
+const GENERATED_CATEGORIES = new Set(['generated', 'report', 'presentation', 'output'])
+
+const normalizeCategoryGroup = (kategori) => {
+  const normalized = String(kategori || '').trim().toLowerCase()
+  if (GENERATED_CATEGORIES.has(normalized)) return 'generated'
+  return 'uploaded'
+}
+
+const isGeneratedDocument = (doc) =>
+  normalizeCategoryGroup(doc?.categoryGroup || doc?.kategori) === 'generated'
 
 const getDocumentSnippet = (doc) => {
   const metadata = doc.metadata || {}
@@ -89,14 +87,14 @@ const getDocumentSnippet = (doc) => {
     metadata.description ||
     metadata.snippet ||
     metadata.preview ||
-    (doc.kategori === 'generated'
+    (isGeneratedDocument(doc)
       ? 'Dokumen hasil generate AI. Buka panel detail untuk preview, metadata, dan tindakan lanjutan.'
       : 'Dokumen yang diunggah ke workspace. Gunakan panel detail untuk preview dan tanyakan isi dokumen ke AI.')
   )
 }
 
 const getDocumentTone = (doc) => {
-  if (doc.kategori === 'generated') {
+  if (isGeneratedDocument(doc)) {
     return {
       accent: 'border-cyan-200 bg-cyan-50 text-cyan-800',
       iconWrap: 'bg-cyan-50 text-cyan-700',
@@ -127,6 +125,7 @@ export default function FileWorkspace() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [documentToDelete, setDocumentToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isDetailExpanded, setIsDetailExpanded] = useState(true)
 
   const loadDokumen = useCallback(async () => {
     try {
@@ -149,12 +148,14 @@ export default function FileWorkspace() {
           source: 'supabase',
           createdAt: doc.created_at,
           kategori: doc.kategori || 'uploaded',
+          categoryGroup: normalizeCategoryGroup(doc.kategori),
           documentType: doc.document_type || 'uncategorized',
           metadata: doc.metadata || {},
         })
       }
 
       setSupabaseDocs(documents)
+      setSelectedDocument(null)
     } catch (err) {
       console.error('Gagal memuat dokumen dari Supabase:', err)
       setFetchError(err.message)
@@ -175,20 +176,19 @@ export default function FileWorkspace() {
   const allDocuments = useMemo(() => supabaseDocs, [supabaseDocs])
 
   const generatedDocuments = useMemo(
-    () => allDocuments.filter((doc) => doc.kategori === 'generated'),
+    () => allDocuments.filter((doc) => doc.categoryGroup === 'generated'),
     [allDocuments],
   )
 
   const uploadedDocuments = useMemo(
-    () => allDocuments.filter((doc) => doc.kategori !== 'generated'),
+    () => allDocuments.filter((doc) => doc.categoryGroup !== 'generated'),
     [allDocuments],
   )
 
-  const filteredDocuments = useMemo(() => {
-    if (activeTab === 'generated') return generatedDocuments
-    if (activeTab === 'uploaded') return uploadedDocuments
-    return allDocuments
-  }, [activeTab, generatedDocuments, uploadedDocuments, allDocuments])
+  const recentDocuments = useMemo(
+    () => allDocuments.slice(0, 4),
+    [allDocuments],
+  )
 
   useEffect(() => {
     if (allDocuments.length === 0) {
@@ -197,15 +197,13 @@ export default function FileWorkspace() {
     }
 
     setSelectedDocument((current) => {
-      if (current && allDocuments.some((doc) => doc.id === current.id)) {
+      if (!current) return null
+      if (allDocuments.some((doc) => doc.id === current.id)) {
         return allDocuments.find((doc) => doc.id === current.id) || current
       }
-
-      if (generatedDocuments.length > 0) return generatedDocuments[0]
-      if (uploadedDocuments.length > 0) return uploadedDocuments[0]
-      return allDocuments[0]
+      return null
     })
-  }, [allDocuments, generatedDocuments, uploadedDocuments])
+  }, [allDocuments])
 
   useEffect(() => {
     if (activeTab === 'generated' && generatedDocuments.length === 0 && uploadedDocuments.length > 0) {
@@ -228,6 +226,7 @@ export default function FileWorkspace() {
 
   const handleSelectDocument = useCallback((document) => {
     setSelectedDocument(document)
+    setIsDetailExpanded(true)
 
     if (typeof window !== 'undefined' && window.innerWidth < 1280) {
       window.requestAnimationFrame(() => {
@@ -272,89 +271,89 @@ export default function FileWorkspace() {
     setDocumentToDelete(null)
   }, [])
 
-  const selectedTone = getDocumentTone(selectedDocument || { kategori: 'generated' })
-
   return (
-    <div className="relative h-full overflow-hidden bg-neutral-50 px-5 py-6 md:px-8 md:py-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top_left,_rgba(255,217,206,0.75),_transparent_55%)]" />
-      <div className="pointer-events-none absolute right-0 top-16 h-56 w-56 rounded-full bg-primary-100/55 blur-3xl" />
-
-      <div className="relative mx-auto flex h-full max-w-7xl gap-6 overflow-hidden">
-        <section className="flex min-w-0 flex-1 flex-col">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary-600">
-                Documents Workspace
-              </p>
-              <h1 className="mt-2 text-3xl font-bold font-headline tracking-tight text-neutral-900 md:text-4xl">
-                Documents
-              </h1>
-              <p className="mt-3 text-sm leading-7 text-neutral-500">
-                Kelola dokumen generated dan uploaded dalam satu workspace. Pilih file untuk membuka detail, unduh cepat, atau lanjut tanya isi dokumen dengan AI.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Total File</p>
-                <p className="mt-1 text-sm font-semibold text-neutral-900">{allDocuments.length} dokumen</p>
-              </div>
-            </div>
+    <div className="h-full overflow-y-auto">
+      <div>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="relative w-full max-w-xl">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
+            <input
+              readOnly
+              value=""
+              placeholder="Search"
+              className="h-12 w-full rounded-full border border-neutral-300 bg-[#e9eaed] pl-12 pr-4 text-sm text-neutral-700 outline-none"
+            />
           </div>
+          <div className="hidden text-right md:block">
+            <p className="text-sm font-semibold text-neutral-800">Irza</p>
+            <p className="text-xs text-neutral-600">Admin</p>
+          </div>
+        </div>
 
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="inline-flex w-fit rounded-2xl border border-neutral-200 bg-white p-1 shadow-sm">
+        <section className="mb-5 overflow-hidden rounded-3xl border border-black/10 bg-[linear-gradient(90deg,#ff5a3f_0%,#55251d_42%,#141414_100%)] px-5 py-5 text-white">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl font-bold font-headline text-white leading-tight">Document</h1>
+              <p className="mt-2 text-md leading-relaxed text-white/95 ">
+                Kelola dokumen generated dan uploaded dalam satu workspace untuk download dan tanya isi dokumen dengan AI.
+              </p>
+            </div>
+            <div className="inline-flex rounded-2xl border border-white/80 bg-white p-1">
               {[
-                { key: 'generated', label: `Generated (${generatedDocuments.length})` },
-                { key: 'uploaded', label: `Uploaded (${uploadedDocuments.length})` },
+                { key: 'generated', label: 'Generated' },
+                { key: 'uploaded', label: 'Uploaded' },
               ].map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                  className={`rounded-xl px-8 py-2.5 text-sm font-medium transition ${
                     activeTab === tab.key
-                      ? 'bg-primary-50 text-primary-700 shadow-[0_1px_4px_rgba(25,28,29,0.08)]'
-                      : 'text-neutral-500 hover:text-neutral-900'
+                      ? 'bg-[#ff5a3f] text-white'
+                      : 'text-[#ff5a3f]'
                   }`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setUploadModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow-sm transition-colors hover:border-primary-200 hover:bg-primary-50"
-              >
-                <Upload size={16} className="text-primary-500" />
-                Upload File
-              </button>
-              <button
-                onClick={handleCreateDocument}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(232,67,34,0.22)] transition-colors hover:bg-primary-600"
-              >
-                <Sparkles size={16} />
-                Buat Dokumen
-              </button>
-            </div>
           </div>
+        </section>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_470px]">
+          <section className="min-w-0 rounded-3xl border border-neutral-300 bg-white">
+            <div className="flex items-center justify-between border-b border-neutral-300 px-6 py-4">
+              <h2 className="text-4xl font-semibold text-neutral-700">Dokumen Terbaru</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setUploadModalOpen(true)}
+                  className="inline-flex h-9 items-center justify-center rounded-lg border border-[#ff6a52] px-3 text-[#ff6a52]"
+                >
+                  <Upload size={14} />
+                </button>
+                <button
+                  onClick={handleCreateDocument}
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[#ff5a3f] px-4 text-sm font-semibold text-white"
+                >
+                  Buat Document
+                </button>
+              </div>
+            </div>
 
           {fetchError ? (
-            <div className="mb-5 flex items-center gap-2 rounded-2xl border border-error/20 bg-red-50 px-4 py-3 text-sm text-error">
+            <div className="flex items-center gap-2 rounded-2xl  bg-red-50 px-4 py-3 text-sm text-error">
               <AlertCircle size={16} className="flex-shrink-0" />
               <span>Gagal memuat dokumen dari database: {fetchError}</span>
             </div>
           ) : null}
 
-          <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-7 p-4">
             {isLoading ? (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="skeleton h-56 rounded-[1.4rem]" />
                 ))}
               </div>
-            ) : filteredDocuments.length === 0 ? (
+            ) : allDocuments.length === 0 ? (
               <div className="panel flex min-h-[320px] items-center justify-center border border-neutral-200 p-8 text-center">
                 <div>
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400">
@@ -367,8 +366,10 @@ export default function FileWorkspace() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {filteredDocuments.map((doc) => {
+              <>
+                <div className="rounded-2xl bg-[#ffedea] p-4">
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {recentDocuments.map((doc) => {
                   const tone = getDocumentTone(doc)
                   const isSelected = selectedDocument?.id === doc.id
                   const badgeLabel = getDocumentBadge(doc)
@@ -377,182 +378,131 @@ export default function FileWorkspace() {
                     <button
                       key={doc.id}
                       onClick={() => handleSelectDocument(doc)}
-                      className={`group relative flex min-h-[250px] flex-col overflow-hidden rounded-[1.4rem] border bg-white p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                        isSelected ? 'border-primary-300 ring-2 ring-primary-100' : 'border-neutral-200'
+                      className={`group relative flex min-h-[250px] flex-col overflow-hidden rounded-lg border bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                        isSelected ? 'border-[#ff5a3f] ring-2 ring-[#ff5a3f]/20' : 'border-neutral-200'
                       }`}
                     >
-                      {isSelected ? <div className={`absolute inset-y-0 left-0 w-1 ${tone.sideLine}`} /> : null}
-
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tone.iconWrap}`}>
-                          {doc.kategori === 'generated' ? <Sparkles size={20} /> : <FileText size={20} />}
-                        </div>
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-600">
-                            {badgeLabel}
-                          </span>
-                          <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${tone.accent}`}>
-                            {tone.label}
-                          </span>
+                      <div className="mb-2 flex min-h-[150px] items-center justify-center rounded border border-neutral-200 bg-[#f8f8f8]">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${tone.iconWrap}`}>
+                          {isGeneratedDocument(doc) ? <Sparkles size={18} /> : <FileText size={18} />}
                         </div>
                       </div>
 
-                      <h3 className="line-clamp-2 text-xl font-semibold font-headline leading-tight text-neutral-900 transition-colors group-hover:text-primary-700">
+                      <h3 className="line-clamp-1 text-sm font-semibold text-neutral-900">
                         {doc.name}
                       </h3>
-                      <p className="mt-3 line-clamp-3 text-xs leading-6 text-neutral-500">
-                        {getDocumentSnippet(doc)}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between gap-3 border-t border-neutral-200 pt-4 text-xs text-neutral-500">
+                      <div className="mt-2 flex items-center justify-between text-xs text-neutral-500">
                         <span className="inline-flex items-center gap-1.5">
-                          <CalendarDays size={13} />
+                          <CalendarDays size={11} />
                           {formatDateLabel(doc.createdAt)}
                         </span>
-                        <span className={`inline-flex items-center gap-1.5 font-medium ${tone.metaTone}`}>
-                          <Eye size={13} />
-                          Pilih dokumen
-                        </span>
+                        <span className="rounded bg-neutral-100 px-2 py-0.5">{badgeLabel}</span>
                       </div>
                     </button>
                   )
-                })}
-              </div>
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-4 text-4xl font-semibold text-neutral-700">
+                    {activeTab === 'generated' ? 'Dokumen Generated' : 'Dokumen Terupload'}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {(activeTab === 'generated' ? generatedDocuments : uploadedDocuments).map((doc) => {
+                      const isSelected = selectedDocument?.id === doc.id
+                      return (
+                        <button
+                          key={doc.id}
+                          onClick={() => handleSelectDocument(doc)}
+                          className={`rounded-lg border bg-white p-3 text-left ${
+                            isSelected ? 'border-[#ff5a3f] ring-2 ring-[#ff5a3f]/20' : 'border-neutral-200'
+                          }`}
+                        >
+                          <div className="mb-2 flex min-h-[150px] items-center justify-center rounded border border-neutral-200 bg-[#f8f8f8]">
+                            {isGeneratedDocument(doc) ? (
+                              <Sparkles size={18} className="text-[#ff5a3f]" />
+                            ) : (
+                              <FileText size={18} className="text-blue-500" />
+                            )}
+                          </div>
+                          <p className="line-clamp-1 text-sm font-semibold text-neutral-900">{doc.name}</p>
+                          <p className="mt-1 text-xs text-neutral-500">{formatDateLabel(doc.createdAt)}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </div>
+          </section>
 
-          <div ref={mobileDetailRef} className="mt-6 xl:hidden">
-            <div className="overflow-hidden rounded-[1.4rem] border border-neutral-200 bg-white shadow-sm">
-              {selectedDocument ? (
-                <>
-                  <div className="border-b border-neutral-200 px-5 py-5">
-                    <div className="mb-3 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-600">
-                        {getDocumentBadge(selectedDocument)}
-                      </span>
-                      <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${selectedTone.accent}`}>
-                        {selectedDocument.kategori === 'generated' ? 'Generated' : 'Uploaded'}
-                      </span>
-                    </div>
-                    <h2 className="text-xl font-semibold font-headline leading-tight text-neutral-900">
-                      {selectedDocument.name}
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-neutral-500">
-                      {getDocumentSnippet(selectedDocument)}
-                    </p>
-                  </div>
-
-                  <div className="space-y-5 px-5 py-5">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Created</p>
-                        <p className="mt-1 font-medium text-neutral-900">{formatDateLabel(selectedDocument.createdAt)}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Category</p>
-                        <p className="mt-1 font-medium text-neutral-900">{selectedDocument.kategori}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <a
-                        href={selectedDocument.downloadUrl}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
-                      >
-                        <Download size={15} />
-                        Download
-                      </a>
-                      <a
-                        href={selectedDocument.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
-                      >
-                        <Eye size={15} />
-                        Lihat File
-                      </a>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="p-6 text-center">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400">
-                    <FolderOpen size={24} />
-                  </div>
-                  <h2 className="text-lg font-semibold font-headline text-neutral-900">Pilih dokumen</h2>
-                  <p className="mt-2 text-sm leading-6 text-neutral-500">
-                    Ketuk salah satu file uploaded atau generated untuk membuka detail dan tindakan lanjut.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <aside className="hidden w-[380px] flex-shrink-0 xl:flex">
-          <div className="panel sticky top-0 flex h-[calc(100vh-8rem)] w-full flex-col overflow-hidden border border-neutral-200">
+          <aside ref={mobileDetailRef} className="min-w-0 rounded-3xl border border-neutral-300 bg-[#efefef] xl:sticky xl:top-4 xl:h-[calc(100vh-2rem)] xl:overflow-hidden">
             {selectedDocument ? (
               <>
-                <div className="border-b border-neutral-200 bg-white px-6 py-5">
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-600">
-                      {getDocumentBadge(selectedDocument)}
-                    </span>
-                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${selectedTone.accent}`}>
-                      {selectedDocument.kategori === 'generated' ? 'Generated' : 'Uploaded'}
-                    </span>
+                <div className="bg-[#ff5a3f] px-5 py-3.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="line-clamp-1 text-[1.15rem] font-semibold text-white">{selectedDocument.name}</h2>
+                    <button
+                      onClick={() => setIsDetailExpanded((prev) => !prev)}
+                      className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/40 bg-white/10 text-white hover:bg-white/20"
+                      aria-label={isDetailExpanded ? 'Collapse detail' : 'Expand detail'}
+                      title={isDetailExpanded ? 'Collapse detail' : 'Expand detail'}
+                    >
+                      {isDetailExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
                   </div>
-                  <h2 className="text-2xl font-semibold font-headline leading-tight text-neutral-900">
-                    {selectedDocument.name}
-                  </h2>
                 </div>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-5">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-4 p-4 xl:h-[calc(100%-72px)] xl:overflow-y-auto">
+                  <div className={`${isDetailExpanded ? 'block' : 'hidden'} space-y-4`}>
+                  <div className="grid grid-cols-2 gap-y-4 text-sm">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Created</p>
-                      <p className="mt-1 font-medium text-neutral-900">{formatDateLabel(selectedDocument.createdAt)}</p>
+                      <p className="text-[11px] font-semibold text-neutral-700">Created</p>
+                      <p className="mt-0.5 text-sm text-neutral-800">{formatDateLabel(selectedDocument.createdAt)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Author</p>
-                      <p className="mt-1 flex items-center gap-2 font-medium text-neutral-900">
-                        {selectedDocument.kategori === 'generated' ? <Bot size={14} className="text-primary-500" /> : <Upload size={14} className="text-emerald-600" />}
-                        {selectedDocument.kategori === 'generated' ? 'Sahara AI' : 'Workspace User'}
-                      </p>
+                      <p className="text-[11px] font-semibold text-neutral-700">Author</p>
+                      <p className="mt-0.5 text-sm text-neutral-800">{selectedDocument.categoryGroup === 'generated' ? 'Sahara AI' : 'Workspace User'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Category</p>
-                      <p className="mt-1 font-medium text-neutral-900">{selectedDocument.kategori}</p>
+                      <p className="text-[11px] font-semibold text-neutral-700">Category</p>
+                      <p className="mt-0.5 text-sm text-neutral-800">{selectedDocument.kategori}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Source</p>
-                      <p className="mt-1 font-medium text-neutral-900">{selectedDocument.source}</p>
+                      <p className="text-[11px] font-semibold text-neutral-700">Source</p>
+                      <p className="mt-0.5 text-sm text-neutral-800">1 Link</p>
                     </div>
                   </div>
 
-                  <div className="my-6 border-t border-neutral-200" />
+                  <div>
+                    <p className="text-base font-semibold text-neutral-700">Summary Preview</p>
+                    <div className="mt-2 rounded-2xl bg-[#dcdcdc] p-4 text-sm text-neutral-700">
+                      <p className="line-clamp-4 leading-6">{getDocumentSnippet(selectedDocument)}</p>
+                      <a href={selectedDocument.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-semibold text-[#ff5a3f]">
+                        Open full document →
+                      </a>
+                    </div>
+                  </div>
 
-                  <div className="mt-6 flex gap-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <a
                       href={selectedDocument.downloadUrl}
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#ff5a3f] px-3 py-2.5 text-xs font-semibold text-white"
                     >
-                      <Download size={15} />
+                      <Download size={13} />
                       Download
                     </a>
                     <a
                       href={selectedDocument.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-xs font-semibold text-neutral-700"
                     >
-                      <Eye size={15} />
+                      <Eye size={13} />
                       Lihat File
                     </a>
                   </div>
@@ -560,39 +510,37 @@ export default function FileWorkspace() {
                   <div className="mt-3">
                     <button
                       onClick={() => handleDeleteClick(selectedDocument)}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-semibold text-red-600"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={13} />
                       Hapus Dokumen
                     </button>
                   </div>
 
-                  {selectedDocument.kategori === 'generated' ? (
-                    <div className="mt-6 rounded-2xl border border-primary-100 bg-primary-50 p-4">
-                      <p className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary-700">
-                        <Sparkles size={15} />
-                        Ask Supervisor
-                      </p>
-                      <p className="text-xs leading-6 text-primary-700/90">
-                        Dokumen generated belum memakai panel chat dokumen. Gunakan Supervisor untuk revisi, tindak lanjut, atau permintaan dokumen lanjutan.
-                      </p>
-                      <button
-                        onClick={handleCreateDocument}
-                        className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-primary-700 hover:text-primary-800"
-                      >
-                        Buka Supervisor
-                        <ArrowRight size={13} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  </div>
+                  {!isDetailExpanded ? (
+                  <div className="p-4">
+                    <button
+                      onClick={() => setIsDetailExpanded(true)}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-xs font-semibold text-neutral-700"
+                    >
+                      <ChevronDown size={14} />
+                      Expand Detail Dokumen
+                    </button>
+                  </div>
+                  ) : null}
+
+                  <div className="overflow-hidden rounded-2xl bg-[linear-gradient(180deg,#f15a3f_0%,#6b3d35_100%)] p-4 text-white">
+                    <p className="text-xl font-bold">Tanya AI</p>
+                    <p className="mt-0.5 text-xs text-white/90">Tanya ai untuk dokumen kamu</p>
+                    <div className="mt-3 overflow-hidden rounded-xl bg-white">
                       <DocumentChat document={selectedDocument} />
                     </div>
-                  )}
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="flex h-full items-center justify-center p-8 text-center">
+              <div className="flex h-full min-h-[320px] items-center justify-center p-8 text-center">
                 <div>
                   <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400">
                     <FolderOpen size={24} />
@@ -604,8 +552,8 @@ export default function FileWorkspace() {
                 </div>
               </div>
             )}
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
 
       {uploadModalOpen ? (

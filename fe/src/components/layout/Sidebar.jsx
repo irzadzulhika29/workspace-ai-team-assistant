@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, Plug, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import { Button, NavItem } from '@/components/ui'
@@ -16,7 +16,6 @@ const navItems = [
   { to: '/workspace/email',  icon: Mail,            label: 'Email'             },
   { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
   { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
-  { to: '/integrations',     icon: Plug,            label: 'Integrations'      },
   { to: '/settings',         icon: Settings,        label: 'Settings'          },
 ]
 

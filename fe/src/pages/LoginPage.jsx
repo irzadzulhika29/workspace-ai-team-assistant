@@ -2,13 +2,11 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
-  Bot,
   Bug,
   Calendar,
   CheckCircle2,
   FileText,
   Mail,
-  ShieldCheck,
   Sparkles,
   Users,
   Workflow,
@@ -24,12 +22,6 @@ import {
 } from '@/components/ui'
 import { useAuth } from '../context/AuthContext'
 import { urls } from '../services/api'
-
-const assurances = [
-  'Satu login untuk semua workspace',
-  'Riwayat dan dokumen mengikuti akun Anda',
-  'Integrasi Google aktif setelah autentikasi',
-]
 
 const orbitAgents = [
   {
@@ -234,29 +226,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="mt-8 space-y-4 rounded-[28px] border border-dashed border-neutral-200 bg-neutral-50/80 p-5">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-primary-500" />
-                  <p className="text-sm font-semibold text-neutral-900">
-                    Trust and access
-                  </p>
-                </div>
-                <p className="text-sm leading-6 text-neutral-600">
-                  Akun Google yang Anda gunakan akan menjadi identitas untuk sesi, dokumen,
-                  integrasi, dan jejak kerja di dalam workspace.
-                </p>
-                <div className="space-y-3">
-                  {assurances.map((item) => (
-                    <div key={item} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-700">
-                        <CheckCircle2 size={12} />
-                      </span>
-                      <p className="text-sm leading-6 text-neutral-700">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+          
               <div className="mt-auto pt-8">
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant="success" className="rounded-full px-4 py-2 text-xs">
@@ -303,65 +273,6 @@ export default function LoginPage() {
                   {orbitAgents.map((agent) => (
                     <OrbitCard key={agent.title} {...agent} />
                   ))}
-
-                  <div className="absolute left-1/2 top-1/2 w-full max-w-[320px] -translate-x-1/2 -translate-y-1/2">
-                    <Card className="overflow-hidden rounded-[32px] border-primary-200/60 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.28)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-stat shadow-stat">
-                              <Bot className="h-7 w-7 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-base font-bold text-neutral-900">
-                                Supervisor Agent
-                              </p>
-                              <p className="mt-1 text-xs text-neutral-500">
-                                Routes context, tasks, and outputs
-                              </p>
-                            </div>
-                          </div>
-                          <Badge variant="success" className="rounded-full px-3 py-1">
-                            Active
-                          </Badge>
-                        </div>
-
-                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                          <div className="rounded-2xl bg-neutral-50 p-3">
-                            <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-400">
-                              Email
-                            </p>
-                            <p className="mt-2 text-lg font-bold text-neutral-900">05</p>
-                            <p className="text-xs text-neutral-500">needs reply</p>
-                          </div>
-                          <div className="rounded-2xl bg-neutral-50 p-3">
-                            <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-400">
-                              Calendar
-                            </p>
-                            <p className="mt-2 text-lg font-bold text-neutral-900">03</p>
-                            <p className="text-xs text-neutral-500">prep moments</p>
-                          </div>
-                          <div className="rounded-2xl bg-neutral-50 p-3">
-                            <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-400">
-                              Jira
-                            </p>
-                            <p className="mt-2 text-lg font-bold text-neutral-900">04</p>
-                            <p className="text-xs text-neutral-500">blockers flagged</p>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 rounded-[24px] border border-primary-100 bg-primary-50 p-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary-600">
-                            Insight strip
-                          </p>
-                          <p className="mt-2 text-sm font-medium leading-6 text-primary-900">
-                            12 issues aktif, 5 email butuh balasan, dan 3 meeting hari ini perlu
-                            persiapan singkat.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
                 </div>
               </div>
 

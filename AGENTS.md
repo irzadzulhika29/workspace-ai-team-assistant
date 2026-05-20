@@ -1,100 +1,90 @@
-# AGENTS.md
+# AI Team Assistant
 
-This file provides guidance to AI agents when working with code in this repository.
+## Project Snapshot
+Full-stack workspace monorepo (npm workspaces): React SPA (`fe/`) + Express backend (`be/`). AI orchestration via n8n webhooks. PostgreSQL (Prisma) for auth/tokens, Supabase REST for chat/documents/analytics. Pure JavaScript — no TypeScript. Sub-folder AGENTS.md files provide detailed guidance for each package.
 
-## Commands
+## Root Setup Commands
 
 ```bash
-# Development
-npm run dev              # Start both frontend (port 5173) & backend (port 3001)
+npm install              # Install all workspace dependencies
+npm run dev              # Start frontend (port 5173) + backend (port 3001)
 npm run dev:fe           # Frontend only
-npm run dev:be           # Backend only (nodemon)
-
-# Build & lint
-npm run build            # Vite production build
-npm run lint             # ESLint with zero warnings tolerance (--max-warnings 0)
-
-# Database (Prisma)
+npm run dev:be           # Backend only (nodemon, auto-regenerates Prisma)
+npm run build            # Vite production build (frontend only)
+npm run lint             # Lint both workspaces (ESLint --max-warnings 0)
 npm run prisma:generate  # Regenerate Prisma client after schema changes
-npm run prisma:migrate   # Apply new migrations (dev)
-npm run prisma:studio    # Visual DB browser
+npm run prisma:migrate   # Apply new Prisma migrations (dev)
+npm run prisma:studio    # Visual DB browser for PostgreSQL
 ```
 
-**Important**: There are no automated tests in this project. Manual testing is required.
+**No automated tests.** Manual testing only. Husky pre-commit hook enforces `eslint --fix --max-warnings 0` on staged `*.{js,jsx}` files.
 
-## Architecture Overview
+## Universal Conventions
+- Use `@/` path alias in frontend imports (configured in `fe/jsconfig.json`)
+- ESM modules (`"type": "module"`) in both workspaces
+- React 18 JSX transform — no need to `import React` in JSX files
+- ESLint config at root `.eslintrc.json`: `eslint:recommended` + `plugin:react/recommended` + `plugin:react-hooks/recommended`
+- No Prettier configured — style consistency enforced only by ESLint
+- Commit format: free-form, keep messages descriptive
 
-This is a **full-stack workspace monorepo**: a React SPA in `fe/` plus an Express backend in `be/`, coordinated from the root workspace.
+## Security & Secrets
+- `.env` is gitignored — never commit secrets
+- `.env.production` contains production secrets (committed intentionally for deployment)
+- Backend uses `SUPABASE_SERVICE_ROLE_KEY` server-side, frontend uses `VITE_SUPABASE_ANON_KEY` client-side
+- Jira API tokens stored encrypted in Prisma via `be/server/utils/encryption.js`
 
-### How the system fits together
+## Architecture Diagram
 
 ```
-Browser (React) → n8n webhooks (AI agents)
-                → Express backend (auth, session history, Google APIs)
-                → Supabase (chat history storage via REST)
+Browser (React SPA) → n8n webhooks (AI orchestrator)
+                    → Express backend (auth, Google APIs, Jira proxy, Supabase proxy)
+                    → Supabase REST API (chat sessions, messages, documents, analytics)
+                    → PostgreSQL via Prisma (users, tokens, integrations)
 ```
 
-- **n8n** is the AI orchestration layer. All chat messages go to n8n webhooks, not directly to an LLM. The `fe/src/services/api.js` module manages dynamic webhook URL construction based on environment (`prod`/`dev`) and mode (`publish`/`test`), stored in `localStorage`.
-- **Express** (`be/server/`) handles Google OAuth 2.0 via Passport.js, stores tokens in PostgreSQL via Prisma, and acts as a proxy for Google APIs (Sheets, Drive, Calendar) so n8n can call them on behalf of the authenticated user.
-- **Supabase** stores chat sessions (`chat_sessions`) and message histories (`n8n_chat_histories`). The frontend calls Supabase indirectly through the Express backend (`/api/sessions/*`).
+## JIT Index
 
-### Key frontend patterns
+### Package Structure
+- **Frontend**: `fe/` → [fe/AGENTS.md](fe/AGENTS.md)
+- **Backend**: `be/` → [be/AGENTS.md](be/AGENTS.md)
+- **Design System**: `design-system/` → [design-system/AGENTS.md](design-system/AGENTS.md)
+- **n8n Workflows**: `n8n/` → [n8n/AGENTS.md](n8n/AGENTS.md)
+- **Deployment**: `deploy/` → [deploy/AGENTS.md](deploy/AGENTS.md)
 
-**State management**: Zustand (`fe/src/store/chatStore.js`). Chat messages are persisted to `sessionStorage` (per-tab, not localStorage). Session UUIDs are also per-tab.
+### Quick Find Commands
+```bash
+# Find React component definitions
+rg -n "export (default )?function|export const" fe/src/components
 
-**Service layer** (`fe/src/services/`):
-- `api.js` — barrel module + webhook URL builder + session ID management
-- `chatService.js` — sends messages to Supervisor (supports file attachments) and Knowledge agents
-- `sessionService.js` — CRUD for chat sessions and history retrieval with filtering of n8n internal tool traces
-- `briefingService.js` — AI briefing dashboard service for fetching and refreshing domain-specific briefings (Jira, Calendar, Email)
-- `fileService.js`, `calendarService.js`, `jiraService.js`, `emailService.js`, `integrationService.js`, `tokenUsageService.js` — feature-specific services
+# Find API route handlers
+rg -n "router\.(get|post|put|delete|patch)" be/server/routes
 
-**Chat history filtering**: `sessionService.ambilRiwayatChat()` strips n8n/LangChain internal messages (tool calls, empty messages, `[{"output"...}]` JSON blobs) before rendering. It also injects PDF document URLs into AI messages that contain download triggers.
+# Find Zustand stores
+rg -n "create\(" fe/src/store
 
-**Routing** (`fe/src/App.jsx`):
-- `/` → Dashboard
-- `/chat/supervisor` → SupervisorChat (general AI assistant)
-- `/chat/knowledge` → KnowledgeChat (RAG-based)
-- `/workspace/files`, `/workspace/calendar`, `/workspace/jira` → feature pages
-- `/integrations` → third-party integration hub
+# Find service function definitions
+rg -n "export (const|function)" fe/src/services
 
-### Backend structure (`be/server/`)
+# Find all references to a function
+rg -n "functionName" fe/src be/server
+```
 
-- `be/server/index.js` — Express app entry, mounts all routes
-- `be/server/routes/google.js` — Google API proxy endpoints (Sheets, Drive, Calendar); authenticated either by user session or `x-n8n-api-key` header for n8n-originated requests
-- `be/server/middleware/auth.js` — session auth guard
-- Token refresh is handled automatically via `googleapis` `tokens` event; new tokens are persisted to `GoogleToken` table
+## Routes Overview
 
-### Database (PostgreSQL via Prisma + Supabase)
+| Route | Page | File |
+|---|---|---|
+| `/` | Dashboard (AI briefings, widgets) | `fe/src/pages/Dashboard.jsx` |
+| `/chat/supervisor` | Multi-agent chat | `fe/src/pages/SupervisorChat.jsx` |
+| `/workspace/files` | Document workspace | `fe/src/pages/FileWorkspace.jsx` |
+| `/workspace/calendar` | Google Calendar | `fe/src/pages/CalendarPage.jsx` |
+| `/workspace/jira` | Jira issue viewer | `fe/src/pages/JiraPage.jsx` |
+| `/workspace/email` | Gmail inbox + Magic Reply | `fe/src/pages/EmailPage.jsx` |
+| `/monitoring/tokens` | Token usage analytics | `fe/src/pages/TokenMonitorPage.jsx` |
+| `/integrations` | Google OAuth + Jira setup | `fe/src/pages/IntegrationsPage.jsx` |
+| `/debug/auth` | Auth debug tool | `fe/src/pages/DebugAuthPage.jsx` |
 
-Two separate databases are in use:
-1. **PostgreSQL** (Prisma-managed): `User`, `GoogleToken`, and `JiraIntegration` tables for OAuth and integrations
-2. **Supabase** (REST API, accessed via `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`): `chat_sessions`, `chat_messages`, `dokumen`, `execution_token_usage`, and `dashboard_summary_snapshots` tables for chat persistence, analytics, and AI briefings
-
-**Critical**: Backend uses `SUPABASE_SERVICE_ROLE_KEY` for server-side Supabase operations, not the anon key. Frontend uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` but calls Supabase indirectly through Express endpoints (`/api/sessions/*`).
-
-### n8n workflow
-
-The workflow JSON lives in `n8n/workflow/`. Agent skill documentation is in `n8n/workflow/skills/` (Markdown files describing what each skill does: email, PowerPoint, reports).
-
-The production n8n instance is at `https://workflow.jagr.id`. For local development, set `VITE_N8N_ENV=dev` and `VITE_N8N_DEV_URL` to your ngrok URL, or switch via the Settings modal in the UI.
-
-## Environment Variables
-
-Frontend (`.env`, prefixed `VITE_`):
-- `VITE_N8N_ENV` — `prod` or `dev`
-- `VITE_N8N_MODE` — `publish` or `test`
-- `VITE_N8N_PROD_URL` / `VITE_N8N_DEV_URL` — n8n base URLs
-- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — Supabase connection
-- `VITE_BACKEND_URL` — Express backend URL (default: `http://localhost:3001`)
-
-Backend (`.env`):
-- `DATABASE_URL` — PostgreSQL connection string
-- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
-- `N8N_API_URL`, `N8N_API_KEY` — for n8n credential management and inbound requests
-- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — Supabase connection (service role key for backend)
-- `SESSION_SECRET`, `FRONTEND_URL`, `PORT` (default: 3001)
-
-Workspace note:
-- Root `.env` is the shared source of truth for local/runtime configuration
-- Production container env still comes from root-level deployment config such as `.env.production`
+## Definition of Done
+- ESLint passes with `--max-warnings 0` on both workspaces
+- Frontend builds successfully (`npm run build`)
+- Manual verification of changed features in browser
+- No `.env` or credential files committed

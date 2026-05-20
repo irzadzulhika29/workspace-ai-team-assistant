@@ -150,7 +150,7 @@ export default function DocumentChat({ document }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask about this document..."
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="flex-1 resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-neutral-900 caret-neutral-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={2}
             disabled={loading}
           />

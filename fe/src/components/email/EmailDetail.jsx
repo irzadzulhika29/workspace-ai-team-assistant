@@ -1,40 +1,19 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Star, Mail, MailOpen, Download, Sparkles, FileText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Star, Mail, MailOpen, Download, FileText } from 'lucide-react';
 import { useEmailStore } from '../../store/emailStore';
 import { generateDraftFromWebhook } from '../../services/emailWebhookService';
 import DOMPurify from 'dompurify';
-
-const EMAIL_ADDRESS_RE = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i;
-
-const parseEmailHeader = (value) => {
-  const raw = value || '';
-  const emailMatch = raw.match(EMAIL_ADDRESS_RE);
-  const address = emailMatch?.[1] || '';
-  const name = raw
-    .replace(EMAIL_ADDRESS_RE, '')
-    .replace(/[<>"()]/g, '')
-    .trim();
-
-  return {
-    raw,
-    name: name || address || raw,
-    address,
-    label: address ? `${name || address} <${address}>` : raw,
-  };
-};
 
 /**
  * EmailDetail Component - Display full email content
  */
 export default function EmailDetail({ onDraftCreated }) {
   const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar, fetchDrafts } = useEmailStore();
-  const navigate = useNavigate();
   const [generatingDraft, setGeneratingDraft] = useState(false);
 
   if (!selectedEmail && !loadingDetail) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
+      <div className="flex h-full min-h-0 max-h-full flex-1 items-center justify-center overflow-hidden rounded-2xl bg-gray-50 text-gray-500">
         <div className="text-center">
           <Mail className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium">Select an email to read</p>
@@ -46,7 +25,8 @@ export default function EmailDetail({ onDraftCreated }) {
 
   if (loadingDetail) {
     return (
-      <div className="flex-1 bg-white p-6 overflow-y-auto">
+      <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white">
+        <div className="flex-1 overflow-y-auto p-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
@@ -57,6 +37,7 @@ export default function EmailDetail({ onDraftCreated }) {
             <div className="h-3 bg-gray-200 rounded"></div>
             <div className="h-3 bg-gray-200 rounded w-5/6"></div>
           </div>
+        </div>
         </div>
       </div>
     );
@@ -144,58 +125,8 @@ export default function EmailDetail({ onDraftCreated }) {
     }
   };
 
-  /**
-   * Handle Magic Button - Generate AI reply
-   */
-  const handleMagicReply = () => {
-    const sender = parseEmailHeader(email.from);
-    const recipient = parseEmailHeader(email.to);
-    const subject = email.subject || '(No subject)';
-    const emailDate = email.date || email.internalDate;
-
-    // Format email context for AI
-    const emailContext = `
-Email dari: ${sender.label}
-Kepada: ${recipient.label}
-Subject: ${subject}
-Tanggal: ${emailDate}
-
-Isi Email:
-${email.body || email.htmlBody || '(No content)'}
-    `.trim();
-
-    // Create prompt for AI
-    const prompt = `Buatkan draft email balasan berdasarkan email berikut:
-
-${emailContext}
-
-Tolong buatkan balasan yang profesional dan sesuai konteks.`;
-
-    // Navigate to Supervisor Chat with auto-send and draft creation flag
-    navigate('/chat/supervisor', {
-      state: {
-        autoSendMessage: prompt,
-        createDraft: true,
-        emailContext: {
-          from: email.from,
-          fromName: sender.name,
-          fromEmail: sender.address,
-          to: email.to,
-          toName: recipient.name,
-          toEmail: recipient.address,
-          subject,
-          date: emailDate,
-          messageId: email.id,
-          originalSubject: subject,
-          replyTo: sender.address,
-          snippet: email.snippet
-        }
-      }
-    });
-  };
-
   return (
-    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+    <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white">
       {/* Header */}
       <div className="border-b border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -219,16 +150,6 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
               <span className="text-sm font-medium">
                 {generatingDraft ? 'Generating...' : 'Draft Reply'}
               </span>
-            </button>
-
-            {/* Magic Button - AI Reply */}
-            <button
-              onClick={handleMagicReply}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-              title="Generate AI reply"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">Magic Reply</span>
             </button>
 
             <div className="w-px h-6 bg-gray-300"></div>
@@ -291,42 +212,44 @@ Tolong buatkan balasan yang profesional dan sesuai konteks.`;
         </div>
       </div>
 
-      {/* Email Body */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {renderEmailBody()}
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* Email Body */}
+        <div className="p-6">
+          {renderEmailBody()}
+        </div>
 
-      {/* Attachments */}
-      {email.attachments && email.attachments.length > 0 && (
-        <div className="border-t border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
-            Attachments ({email.attachments.length})
-          </h3>
-          <div className="space-y-2">
-            {email.attachments.map((attachment, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Download className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {attachment.filename}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {(attachment.size / 1024).toFixed(1)} KB
+        {/* Attachments */}
+        {email.attachments && email.attachments.length > 0 && (
+          <div className="border-t border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Attachments ({email.attachments.length})
+            </h3>
+            <div className="space-y-2">
+              {email.attachments.map((attachment, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Download className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {attachment.filename}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {(attachment.size / 1024).toFixed(1)} KB
+                      </div>
                     </div>
                   </div>
+                  <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    Download
+                  </button>
                 </div>
-                <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                  Download
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

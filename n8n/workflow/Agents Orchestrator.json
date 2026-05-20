@@ -8,11 +8,11 @@
           "fieldValues": [
             {
               "fieldId": "nama_file",
-              "fieldValue": "=Laporan_Jira_{{ $now.setZone('Asia/Jakarta').toFormat('yyyy-MM-dd_HH-mm') }}.pdf"
+              "fieldValue": "={{ $('HTTP - Download Report PDF').item.json.nama_file_laporan || $('Set - Report Filename').item.json.nama_file_laporan }}"
             },
             {
               "fieldId": "kategori",
-              "fieldValue": "generated"
+              "fieldValue": "report"
             },
             {
               "fieldId": "file_url",
@@ -32,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -656,
-        -1296
+        1904,
+        48
       ],
-      "id": "15c59982-e492-4bf6-9a96-97473e67d6b8",
+      "id": "80d18b4f-b7cc-495b-9386-2ab17726a252",
       "name": "Supabase - Save Report Document",
       "credentials": {
         "supabaseApi": {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -1552,
-        -944
+        1008,
+        400
       ],
-      "id": "f5a89c33-5e2e-4d88-87e5-7ae7176ccaef",
+      "id": "e82a6e1e-6f06-45c5-9a77-475e1ae6521f",
       "name": "Respond - Email Sent"
     },
     {
@@ -84,10 +84,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1792,
-        -944
+        768,
+        400
       ],
-      "id": "f61f62a9-e6bf-4d40-a89f-bd6e61f3d71b",
+      "id": "15bb6899-b93d-4265-a73a-07c2f35b7fe2",
       "name": "HTTP - Send Gmail Message"
     },
     {
@@ -97,10 +97,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1984,
-        -944
+        576,
+        400
       ],
-      "id": "ed1d36b7-e0bc-49a8-9357-4915804cedd3",
+      "id": "e69ab448-ba1d-4c27-8855-3dbcfdeafe40",
       "name": "Code - Build Gmail Payload"
     },
     {
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1392,
-        -224
+        1168,
+        1120
       ],
-      "id": "590b9dfe-e60a-44f2-abba-b46c1600ed06",
+      "id": "a97d428f-2ede-41b8-bec0-6e878effe037",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -178,10 +178,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -2912,
-        -176
+        -368,
+        1168
       ],
-      "id": "971bec0a-3466-4a51-b201-78a95797860f",
+      "id": "016e1d07-ffde-4ab9-a9bf-61a709273647",
       "name": "Create Event with Google Meet"
     },
     {
@@ -219,10 +219,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -3088,
-        -176
+        -544,
+        1168
       ],
-      "id": "03182b36-3a3f-431d-881d-338c0225e664",
+      "id": "dc56e197-278b-4172-b0a9-6760744e902f",
       "name": "Create Event"
     },
     {
@@ -260,10 +260,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -2576,
-        -144
+        -32,
+        1200
       ],
-      "id": "a4fefb17-a399-42d4-9954-ddb1f1cbb84d",
+      "id": "8cf919ea-2fd4-433f-8fd1-dcb8b8983d08",
       "name": "Update Event"
     },
     {
@@ -309,10 +309,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -2736,
-        -160
+        -192,
+        1184
       ],
-      "id": "0cf23348-7c0e-462b-bca8-53475bc873b7",
+      "id": "a38e1755-7bf8-493e-aebe-62c30b1bed2b",
       "name": "Get Calendar Events"
     },
     {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1616,
-        -1120
+        944,
+        224
       ],
-      "id": "a3baadde-cf41-446c-a0f2-525dfb3cacbd",
+      "id": "6b5b8d3e-53b6-4ccd-8749-5b2c6d57a805",
       "name": "Set - Presentation Filename"
     },
     {
@@ -365,10 +365,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1808,
-        -1120
+        752,
+        224
       ],
-      "id": "124283e8-2a9c-4ca3-aa65-206445475063",
+      "id": "f289d75e-53de-4a67-aa06-842a453da354",
       "name": "HTTP - Render Presentation PDF"
     },
     {
@@ -378,10 +378,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1984,
-        -1120
+        576,
+        224
       ],
-      "id": "9ac1928a-5b35-4ab8-8d89-5207d7a48ba5",
+      "id": "617e6581-e1da-4431-b912-54866279fbad",
       "name": "Code - Prepare Presentation HTML"
     },
     {
@@ -393,10 +393,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -912,
-        -208
+        1648,
+        1136
       ],
-      "id": "3c72bc05-8e87-43ab-a8b3-731cf8d67e6d",
+      "id": "d8df6801-c064-420a-b1e6-36eca10b4c9e",
       "name": "Get Email Skills"
     },
     {
@@ -409,10 +409,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        -1824,
-        -1296
+        736,
+        48
       ],
-      "id": "4b01f120-d591-4d44-a7dd-d2f125c9d89f",
+      "id": "c8a66b66-53ce-4f25-a006-7584e54f491a",
       "name": "Markdown - Report To HTML"
     },
     {
@@ -426,10 +426,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -2320,
-        -448
+        240,
+        896
       ],
-      "id": "0e12106a-15ee-467e-9b08-d120dddd5938",
+      "id": "f11daa28-65b0-4286-b00d-4e68d25a2cac",
       "name": "Report Agent"
     },
     {
@@ -443,10 +443,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1072,
-        -480
+        1488,
+        864
       ],
-      "id": "222a96cd-f02b-42ee-86fb-99e4934347db",
+      "id": "51aabb58-2d83-48d1-a8c5-40142f9cb769",
       "name": "Communication Agent"
     },
     {
@@ -458,10 +458,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1712,
-        -192
+        848,
+        1152
       ],
-      "id": "c24adfe9-4e7e-4251-b92b-37c9899a9329",
+      "id": "5bd1c400-460d-4ccb-8e39-d8108b456736",
       "name": "Get PPT Format"
     },
     {
@@ -473,10 +473,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1856,
-        -192
+        704,
+        1152
       ],
-      "id": "d65618ff-9afe-4f32-ab2a-f52fe9c5833d",
+      "id": "01cce6eb-b65a-4fe5-a4bf-f60b6db66ee1",
       "name": "Get Report Format"
     },
     {
@@ -490,10 +490,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1936,
-        -448
+        624,
+        896
       ],
-      "id": "978231b6-c404-495a-b697-33b97c9497d0",
+      "id": "9d01bb45-e798-4f17-811e-76e44789e32b",
       "name": "Document Agent"
     },
     {
@@ -507,10 +507,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -3664,
-        -528
+        -1120,
+        816
       ],
-      "id": "e9c2e9f0-ca35-436d-b6d9-7934653c5930",
+      "id": "0fba0d28-31bd-40e2-af10-1490a89ee2ce",
       "name": "Knowledge Agent"
     },
     {
@@ -524,10 +524,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -3008,
-        -528
+        -464,
+        816
       ],
-      "id": "505f4203-9422-40c7-bce7-2494d991ece7",
+      "id": "1a09e810-d1de-4b83-8ecb-6c9c0619e354",
       "name": "Scheduler Agent"
     },
     {
@@ -540,10 +540,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1456,
-        -464
+        1104,
+        880
       ],
-      "id": "09b0038c-5310-492a-afb3-b656cffbb3ac",
+      "id": "244808ce-9a56-4363-bc6b-44f590413b22",
       "name": "Task Agent"
     },
     {
@@ -554,10 +554,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        -3296,
-        -1168
+        -752,
+        176
       ],
-      "id": "27cd5528-74e8-4b69-9edf-6c9b8ef7a66e",
+      "id": "ffe907f4-5e4a-458a-ad0c-33d28f0d86ed",
       "name": "Extract - PDF Text",
       "credentials": {
         "mistralCloudApi": {
@@ -573,10 +573,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1984,
-        -1296
+        576,
+        48
       ],
-      "id": "7ee5dc65-c111-49f6-a395-2a656080c5cd",
+      "id": "0f1087d0-a13d-46d0-a881-b8581edb7866",
       "name": "Code - Convert Markdown Tables"
     },
     {
@@ -588,10 +588,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -416,
-        -1296
+        2144,
+        48
       ],
-      "id": "d8ba4854-7f89-4047-99ce-3227245bacd9",
+      "id": "6ace742e-483c-4dd2-a70b-6c6f9abbd73b",
       "name": "Respond - Report PDF Ready"
     },
     {
@@ -611,10 +611,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1376,
-        -1296
+        1184,
+        48
       ],
-      "id": "a76c1ab9-f2ec-45bf-8f6f-fa3d78452844",
+      "id": "92cf45ae-8c40-4ae9-9f04-5656d99027af",
       "name": "Set - Report Filename"
     },
     {
@@ -642,10 +642,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -960,
-        -1296
+        1600,
+        48
       ],
-      "id": "d9bfcb8d-d1b2-4dbf-8d68-d3392ee0951c",
+      "id": "14d90685-29d7-4ff6-850b-f0df801046dd",
       "name": "HTTP - Upload Report PDF"
     },
     {
@@ -663,10 +663,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1168,
-        -1296
+        1392,
+        48
       ],
-      "id": "99856e72-a186-4aea-9e9e-c21c8833cc8c",
+      "id": "182d6439-f1fc-49c1-920a-fc387f93f44f",
       "name": "HTTP - Download Report PDF"
     },
     {
@@ -696,10 +696,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1584,
-        -1296
+        976,
+        48
       ],
-      "id": "132e5bb1-ca2d-4089-82d2-132047c44eb1",
+      "id": "6147e52c-dc1b-44f4-bfb3-1f34cfa265ed",
       "name": "HTTP - Render Report PDF"
     },
     {
@@ -719,10 +719,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3088,
-        -1008
+        -544,
+        336
       ],
-      "id": "a0e8c9ac-45bc-4655-8f90-3e38fbde27d0",
+      "id": "ef1aa825-26ab-4101-ac5b-1c876592ee8c",
       "name": "Set - Prompt From CSV Data"
     },
     {
@@ -742,10 +742,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3088,
-        -1360
+        -544,
+        -16
       ],
-      "id": "38d4cf05-b660-4884-bc14-e7eb275e9e1f",
+      "id": "2cfc8197-7f56-49b4-98b4-3e85c063a46f",
       "name": "Set - Prompt From Image OCR"
     },
     {
@@ -758,17 +758,16 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        -3296,
-        -1360
+        -752,
+        -16
       ],
-      "id": "84f45f47-b893-4d0d-97a1-8a30268cdc28",
+      "id": "9a429f20-12a5-4c1b-83c9-e120890a4b61",
       "name": "OCR - Extract Image Text"
     },
     {
       "parameters": {
         "operation": "update",
         "tableId": "chat_sessions",
-        "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
@@ -801,10 +800,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -2832,
-        -1584
+        -288,
+        -240
       ],
-      "id": "27014772-2e8f-4094-bb94-fba86621c715",
+      "id": "5fd61747-5348-4b34-a900-7dbef28a48e2",
       "name": "Supabase - Update Chat Title",
       "credentials": {
         "supabaseApi": {
@@ -840,10 +839,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -3376,
-        -1568
+        -832,
+        -224
       ],
-      "id": "f350a104-b832-4168-885e-94256cd6fad3",
+      "id": "95648112-891b-41f1-bfad-2a3aa97a4c14",
       "name": "IF - Is New Chat"
     },
     {
@@ -870,10 +869,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -3728,
-        -256
+        -1184,
+        1088
       ],
-      "id": "c870ef55-d84e-456e-a72f-6c69bcb4640c",
+      "id": "e8959e98-f8aa-43e7-a325-03483c644e10",
       "name": "Pinecone - Retrieve Context",
       "credentials": {
         "pineconeApi": {
@@ -899,10 +898,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3296,
-        -832
+        -752,
+        512
       ],
-      "id": "7e107909-949a-40a1-b550-fb4a26659d6a",
+      "id": "5d57f5f6-8eac-423c-8d25-3853131b88c2",
       "name": "Set - Prompt From User"
     },
     {
@@ -922,10 +921,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3088,
-        -1168
+        -544,
+        176
       ],
-      "id": "558d0358-d6fa-4389-a880-820eb78fc6f5",
+      "id": "c1b22a7f-043b-4881-91f3-42d64b35afbc",
       "name": "Set - Prompt From PDF Text"
     },
     {
@@ -955,10 +954,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -3712,
-        -848
+        -1168,
+        496
       ],
-      "id": "3861d203-741f-4851-ad63-d5e843005d2d",
+      "id": "a99e7cfa-4fdb-4239-8db9-a920f1e5b37e",
       "name": "IF - Has File Attachment"
     },
     {
@@ -981,10 +980,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -3568,
-        -1568
+        -1024,
+        -224
       ],
-      "id": "0324bbaf-53ad-4aaf-a963-b887a3044a21",
+      "id": "e5192309-f766-4ef4-b2ed-1d5e0fe1a681",
       "name": "Supabase - Get Chat Session",
       "credentials": {
         "supabaseApi": {
@@ -1009,10 +1008,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -3136,
-        -1584
+        -592,
+        -240
       ],
-      "id": "b67602f0-c8c5-42ab-8cc4-66d2cd2ae750",
+      "id": "d8c760f6-e993-4207-8963-8f717cba7c14",
       "name": "LLM - Generate Chat Title"
     },
     {
@@ -1024,10 +1023,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -2656,
-        -640
+        -112,
+        704
       ],
-      "id": "f4ecf8d7-2451-457d-9dc0-bb26e042bec9",
+      "id": "35636cb6-8270-49cb-b1b4-84eeecee9eb0",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1046,10 +1045,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -3920,
-        -848
+        -1376,
+        496
       ],
-      "id": "5ee6d8a6-8792-48ab-bf02-f8275ea627bb",
+      "id": "a77d8867-35d7-4302-854d-9b99493764c4",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1065,10 +1064,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2720,
-        -832
+        -176,
+        512
       ],
-      "id": "20effcd5-3906-47f5-9cee-6696d9c388ba",
+      "id": "2b64baab-1d7e-489e-adaa-78c1780d93b5",
       "name": "Supervisor Agent"
     },
     {
@@ -1080,10 +1079,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -1968,
-        -784
+        592,
+        560
       ],
-      "id": "6ad0f36e-5b4d-4b2c-87e7-eabb55b4eec8",
+      "id": "5ae0fb69-ea67-44b1-9bd1-9071c51240b7",
       "name": "Respond - Chat Output"
     },
     {
@@ -1117,10 +1116,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1760,
-        -784
+        800,
+        560
       ],
-      "id": "89dc2f94-788f-412f-8574-2214802a53a7",
+      "id": "9cb992e1-bc26-4fa5-937c-992a337a17a2",
       "name": "Supabase - Log Chat Response",
       "credentials": {
         "supabaseApi": {
@@ -1144,10 +1143,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1392,
-        -1120
+        1168,
+        224
       ],
-      "id": "ca5df367-7437-42c9-92e2-e8e99b757b7b",
+      "id": "e576ca8e-2938-4bd4-a686-124ab5b0213f",
       "name": "HTTP - Download Presentation PDF"
     },
     {
@@ -1181,10 +1180,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -912,
-        -1120
+        1648,
+        224
       ],
-      "id": "42d2ff19-5dc0-418c-a30d-153cefc7e201",
+      "id": "318c7faa-9112-4877-b5d9-7cd785031f64",
       "name": "Supabase - Save Presentation Document",
       "credentials": {
         "supabaseApi": {
@@ -1202,10 +1201,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -688,
-        -1120
+        1872,
+        224
       ],
-      "id": "da058226-753a-4fa9-ba14-7dc52ec62445",
+      "id": "8fcd3351-e2d0-446e-9aec-2e18d5f49c54",
       "name": "Respond - Presentation PDF Ready"
     },
     {
@@ -1233,10 +1232,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1136,
-        -1120
+        1424,
+        224
       ],
-      "id": "da0bcf92-2ee1-4ad5-802f-f334819489e2",
+      "id": "1e4048ce-f99d-442f-94ef-9f87b317763c",
       "name": "HTTP - Upload Presentation PDF"
     },
     {
@@ -1270,10 +1269,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -384,
-        -1120
+        2176,
+        224
       ],
-      "id": "809d30cf-470d-4167-942b-c7d85b00f796",
+      "id": "b6973777-fb75-44e6-8059-24588ae70933",
       "name": "Supabase - Log Presentation PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1289,10 +1288,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2368,
-        -832
+        192,
+        512
       ],
-      "id": "4edbd83d-2ec0-4afa-911d-b4d607942aa2",
+      "id": "f5c5b300-4102-46aa-b695-b14adda14fe9",
       "name": "Code - Extract Final Output"
     },
     {
@@ -1326,10 +1325,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -192,
-        -1296
+        2368,
+        48
       ],
-      "id": "c55c8267-9c33-489e-b0b7-06289cdcc4ac",
+      "id": "ee300d6f-c6aa-4c90-a59e-574e6d489a07",
       "name": "Supabase - Log Report PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1345,10 +1344,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2000,
-        -608
+        560,
+        736
       ],
-      "id": "141fa621-ec38-4478-910c-f9e5dc1b3736",
+      "id": "3c32f103-0e98-40fa-80c8-9f95ed82ee72",
       "name": "Code - Format Draft Email Response"
     },
     {
@@ -1360,10 +1359,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -1760,
-        -608
+        800,
+        736
       ],
-      "id": "7e5c95e2-2616-454e-b517-f7bddb0c937b",
+      "id": "e43d48a6-f845-41f1-b769-6aff5c65d6b0",
       "name": "Respond - Draft Email"
     },
     {
@@ -1397,10 +1396,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1312,
-        -944
+        1248,
+        400
       ],
-      "id": "40a7df02-e3ca-4911-9dc5-5b22fa93e15f",
+      "id": "4ee63cd9-6d87-43fb-b690-e9b7d8911633",
       "name": "Supabase - Log Email Sent Response",
       "credentials": {
         "supabaseApi": {
@@ -1440,10 +1439,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1536,
-        -608
+        1024,
+        736
       ],
-      "id": "5d50e632-d1b8-4768-9e3b-29e844071edd",
+      "id": "ed22eb2d-ce98-4337-ab5a-ccbae59be39e",
       "name": "Supabase - Log Draft Email Response",
       "credentials": {
         "supabaseApi": {
@@ -1460,10 +1459,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -2464,
-        256
+        96,
+        1600
       ],
-      "id": "dd7c6a85-354b-40b5-af29-322f14b66aa1",
+      "id": "3b5c35d5-c33f-45b3-93e1-c77df4ed393e",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -1550,10 +1549,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -3552,
-        -1056
+        -1008,
+        288
       ],
-      "id": "7e86a58c-ac31-4eb9-a3b4-469726ff409b",
+      "id": "70647cbf-ca8f-4efc-9d50-d3785566d53d",
       "name": "Switch - Attachment Type"
     },
     {
@@ -1564,10 +1563,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -3296,
-        -1008
+        -752,
+        336
       ],
-      "id": "0e770702-8c49-4a9a-bd16-7ffaf635f746",
+      "id": "b9a8712d-b139-4164-9bc3-2ea812c6b0c2",
       "name": "Extract - CSV Rows"
     },
     {
@@ -1679,10 +1678,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -2224,
-        -976
+        336,
+        368
       ],
-      "id": "68098d27-e32d-4edc-ac80-62708cd829a1",
+      "id": "c28b51d3-207c-42c8-9eac-4ecb32b81ae5",
       "name": "Switch - Output Type"
     },
     {
@@ -1694,10 +1693,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -3808,
-        -64
+        -1264,
+        1280
       ],
-      "id": "0a21c146-e35f-4215-8022-0bab9380b5c4",
+      "id": "8e3dba24-f403-410c-8b27-16754f639dca",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
@@ -1719,10 +1718,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2240,
-        256
+        320,
+        1600
       ],
-      "id": "e1fb8628-ba97-4f99-9d3c-9c7fd3ba68e1",
+      "id": "7a8c9ac4-b2c3-46cc-bf90-8a5f035d425f",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -2299,11 +2298,6 @@
             "index": 0
           },
           {
-            "node": "Scheduler Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
             "node": "Report Agent",
             "type": "ai_languageModel",
             "index": 0
@@ -2430,6 +2424,11 @@
             "node": "Communication Agent",
             "type": "ai_languageModel",
             "index": 0
+          },
+          {
+            "node": "Scheduler Agent",
+            "type": "ai_languageModel",
+            "index": 0
           }
         ]
       ]
@@ -2439,7 +2438,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a21b99a4-1045-43cd-ae95-b0800bcea609",
+  "versionId": "efda1493-32c6-493e-9b0b-6a13ed06a902",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

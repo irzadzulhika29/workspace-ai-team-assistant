@@ -9,7 +9,6 @@ import { sessionApi } from '../services/sessionService'
 import ChatBubble from '../components/chat/ChatBubble'
 import MessageInput from '../components/chat/MessageInput'
 import AgentStatusIndicator from '../components/chat/AgentStatusIndicator'
-import SkeletonLoader from '../components/ui/SkeletonLoader'
 import { useAutoScroll } from '../hooks/useAutoScroll'
 import { getReplyContent, normalizeResponsePayload } from '../utils/chatResponse'
 
@@ -24,6 +23,7 @@ export default function SupervisorChat() {
   const location = useLocation();
   const autoSendProcessed = useRef(false);
   const pendingPromptOverrideRef = useRef(null);
+  const processedDashboardNavKeyRef = useRef(null);
 
   // Reset autoSendProcessed when location changes
   useEffect(() => {
@@ -325,6 +325,46 @@ export default function SupervisorChat() {
     }
   }, [clearSupervisor, setActiveSupervisorSession, syncSupervisorSessions])
 
+  useEffect(() => {
+    const shouldForceNewSession =
+      location.state?.forceNewSession === true &&
+      location.state?.navigationSource === 'dashboard'
+
+    if (!shouldForceNewSession) return
+    if (processedDashboardNavKeyRef.current === location.key) return
+
+    processedDashboardNavKeyRef.current = location.key
+
+    const createFreshSession = async () => {
+      setCreatingSession(true)
+      setError(null)
+
+      try {
+        const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
+
+        if (!newSession) {
+          throw new Error('Gagal membuat sesi chat baru.')
+        }
+
+        setActiveSupervisorSession(newSession.id)
+        clearSupervisor()
+        await syncSupervisorSessions(newSession.id)
+      } catch (err) {
+        setError(err.message || 'Gagal membuat sesi chat baru.')
+      } finally {
+        setCreatingSession(false)
+      }
+    }
+
+    createFreshSession()
+  }, [
+    clearSupervisor,
+    location.key,
+    location.state,
+    setActiveSupervisorSession,
+    syncSupervisorSessions,
+  ])
+
   // Handle auto-send from navigation state (Magic Button from Email, Calendar, or Draft Revision)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
@@ -489,9 +529,8 @@ Silakan berikan instruksi revisi untuk draft ini.`;
         ))}
 
         {loading && (
-          <div className="space-y-2">
+          <div>
             <AgentStatusIndicator agentName={agentLabel} />
-            <SkeletonLoader variant="message" lines={3} />
           </div>
         )}
 

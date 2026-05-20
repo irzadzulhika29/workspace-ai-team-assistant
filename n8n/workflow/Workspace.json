@@ -398,8 +398,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1600,
-        -1104
+        -1520,
+        -1152
       ],
       "id": "975e53c5-231f-4036-931f-6fa69dae4416",
       "name": "Get Email Format"
@@ -679,7 +679,7 @@
             {
               "name": "prompt",
               "type": "string",
-              "value": "=Kamu adalah Email Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 unread email teratas.\n2. Buat ringkasan email itu tentang apa agar user tidak perlu membuka semua email yang tidak penting.\n3. Bedakan email yang tampak penting dengan email yang tampak seperti promosi, newsletter, atau notifikasi biasa.\n4. Berikan rekomendasi follow-up singkat.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"email\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_unread\": number,\n    \"fetched_email_count\": number\n  }\n}\n\nATURAN:\n- Gunakan subject, from, snippet, dan body ringkas untuk menilai isi email.\n- Jangan menyalin body email panjang apa adanya.\n- Jika email tampak seperti iklan, promo, newsletter, atau notifikasi massal, sebutkan sebagai low-value update.\n- Jika email tampak butuh tindakan, follow-up, atau perhatian cepat, naikkan prioritas.\n- Jangan mengarang isi yang tidak ada di data.\n- Jika request gagal atau email kosong, tetap return JSON dengan status partial atau failed.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}"
+              "value": "=Kamu adalah Email Briefing Agent.\n\nTugas:\n1. Analisis maksimal 5 unread email teratas.\n2. Buat overview ringkas dari 5 unread email.\n3. Buat tepat 3 findings paling penting.\n4. Buat recommended action yang actionable.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"email\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\", \"string\"],\n  \"recommended_actions\": [\n    {\n      \"id\": \"string\",\n      \"label\": \"string\",\n      \"reason\": \"string\",\n      \"source_email_id\": \"string\",\n      \"source_thread_id\": \"string\",\n      \"source_from\": \"string\",\n      \"priority\": \"high | medium | low\",\n      \"is_reply_candidate\": true\n    }\n  ],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_unread\": number,\n    \"fetched_email_count\": number\n  }\n}\n\nATURAN PENTING:\n- summary_points harus tepat 3 butir.\n- recommended_actions maksimal 3 butir.\n- Jika action butuh balasan cepat dan pengirim adalah company/individu nyata (bukan no-reply/notifikasi/promo/newsletter), set is_reply_candidate=true.\n- Jika pengirim terlihat otomatis atau email promosi/newsletter/notifikasi massal, set is_reply_candidate=false.\n- Untuk action dengan is_reply_candidate=true, source_email_id wajib terisi dari email yang relevan.\n- Jangan menyalin body email panjang apa adanya.\n- Jangan mengarang isi yang tidak ada di data.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}"
             }
           ]
         },
@@ -696,7 +696,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    user_id: parsed.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
+        "jsCode": "const raw = String($json.output || $json.text || $json.response || $json.content || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst normalizeRecommendedActions = (value) => {\n  if (!Array.isArray(value)) return [];\n\n  return value\n    .slice(0, 3)\n    .map((item, index) => {\n      if (typeof item === 'string') {\n        return {\n          id: `action-${index + 1}`,\n          label: item,\n          reason: item,\n          source_email_id: '',\n          source_thread_id: '',\n          source_from: '',\n          priority: 'medium',\n          is_reply_candidate: false,\n        };\n      }\n\n      return {\n        id: item?.id || `action-${index + 1}`,\n        label: item?.label || item?.reason || '',\n        reason: item?.reason || item?.label || '',\n        source_email_id: item?.source_email_id || '',\n        source_thread_id: item?.source_thread_id || '',\n        source_from: item?.source_from || '',\n        priority: item?.priority || 'medium',\n        is_reply_candidate: Boolean(item?.is_reply_candidate && item?.source_email_id),\n      };\n    });\n};\n\nconst summaryPoints = Array.isArray(parsed.summary_points)\n  ? parsed.summary_points.slice(0, 3)\n  : [];\n\nconst recommendations = Array.isArray(parsed.recommendations)\n  ? parsed.recommendations.slice(0, 3)\n  : [];\n\nconst recommendedActions = normalizeRecommendedActions(parsed.recommended_actions);\n\nreturn [{\n  json: {\n    success: true,\n    user_id: parsed.user_id || '',\n    generated_at: new Date().toISOString(),\n    summary: {\n      domain: 'email',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan email belum tersedia',\n      summary_points: summaryPoints,\n      recommendations,\n      recommended_actions: recommendedActions,\n      source_metrics: parsed.source_metrics || {},\n    }\n  }\n}];"
       },
       "name": "Parse Email Summary",
       "type": "n8n-nodes-base.code",
@@ -874,7 +874,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Calendar Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Calendar Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Calendar Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'calendar',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan kalender belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || fallbackMetrics,\n    },\n  }\n}];"
+        "jsCode": "const raw = String($json.output || $json.text || $json.response || $json.content || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Calendar Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Calendar Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Calendar Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'calendar',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan kalender belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || fallbackMetrics,\n    },\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -978,7 +978,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const source = $json || {};\nconst rawIssues = Array.isArray(source.issues)\n  ? source.issues\n  : Array.isArray(source.items)\n    ? source.items\n    : Array.isArray(source.data)\n      ? source.data\n      : [];\n\nconst getField = (issue, ...keys) => {\n  for (const key of keys) {\n    const value = key.split('.').reduce((acc, part) => acc?.[part], issue);\n    if (value !== undefined && value !== null && value !== '') return value;\n  }\n  return '';\n};\n\nconst normalizeText = (value) => String(value || '').trim().toLowerCase();\nconst includesKeyword = (value, keywords) => {\n  const normalized = normalizeText(value);\n  return keywords.some((keyword) => normalized.includes(keyword));\n};\nconst highPriorityKeywords = ['highest', 'high', 'critical', 'urgent'];\nconst blockedKeywords = ['blocked', 'blocker', 'waiting', 'stuck'];\n\nconst formatters = {\n  dateOnly: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric'\n  }),\n  dateTime: new Intl.DateTimeFormat('id-ID', {\n    timeZone: 'Asia/Jakarta',\n    day: '2-digit',\n    month: 'short',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit'\n  })\n};\n\nconst formatDate = (value, mode = 'dateOnly') => {\n  if (!value) return '-';\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return String(value);\n  return formatters[mode].format(parsed);\n};\n\nconst getStatusCategoryKey = (issue) => {\n  const directKey = normalizeText(getField(issue, 'fields.status.statusCategory.key', 'status.statusCategory.key', 'statusCategory.key'));\n  if (directKey) return directKey;\n  const categoryName = normalizeText(getField(issue, 'fields.status.statusCategory.name', 'status.statusCategory.name', 'statusCategory.name'));\n  if (categoryName.includes('progress')) return 'indeterminate';\n  if (categoryName.includes('done')) return 'done';\n  return 'new';\n};\n\nconst isOverdueDate = (value) => {\n  if (!value) return false;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return false;\n  const today = new Date();\n  today.setHours(0, 0, 0, 0);\n  parsed.setHours(0, 0, 0, 0);\n  return parsed < today;\n};\n\nconst isDateToday = (value) => {\n  if (!value) return false;\n  const parsed = new Date(value);\n  if (Number.isNaN(parsed.getTime())) return false;\n  return formatters.dateOnly.format(parsed) === formatters.dateOnly.format(new Date());\n};\n\nconst normalizedIssues = rawIssues.map((issue, index) => {\n  const issueKey = getField(issue, 'key', 'id', 'issueKey') || `ISSUE-${index + 1}`;\n  const summary = getField(issue, 'fields.summary', 'summary', 'title') || 'Tanpa judul issue';\n  const status = getField(issue, 'fields.status.name', 'status.name', 'status', 'state') || 'Unknown';\n  const statusCategoryKey = getStatusCategoryKey(issue);\n  const assignee = getField(issue, 'fields.assignee.displayName', 'assignee.displayName', 'assignee.name', 'assignee') || 'Belum ditugaskan';\n  const priority = getField(issue, 'fields.priority.name', 'priority.name', 'priority') || 'Tanpa prioritas';\n  const updatedAt = getField(issue, 'fields.updated', 'updated', 'updatedAt');\n  const createdAt = getField(issue, 'fields.created', 'created', 'createdAt');\n  const dueDate = getField(issue, 'fields.duedate', 'duedate', 'dueDate');\n  const projectName = getField(issue, 'fields.project.name', 'project.name', 'project') || 'Project tidak diketahui';\n  const issueType = getField(issue, 'fields.issuetype.name', 'issuetype.name', 'issueType') || 'Issue';\n  const reporter = getField(issue, 'fields.reporter.displayName', 'reporter.displayName', 'reporter.name', 'reporter') || 'Tidak diketahui';\n  const labels = Array.isArray(issue?.fields?.labels) ? issue.fields.labels : [];\n  const isDone = statusCategoryKey === 'done';\n  const isUnassigned = !getField(issue, 'fields.assignee.displayName', 'assignee.displayName', 'assignee.name', 'assignee');\n  const isHighPriority = includesKeyword(priority, highPriorityKeywords);\n  const isBlocked = includesKeyword(status, blockedKeywords) || labels.some((label) => includesKeyword(label, blockedKeywords));\n  const isOverdue = !isDone && isOverdueDate(dueDate);\n  const isUpdatedToday = isDateToday(updatedAt);\n  const urgencyScore = (isOverdue ? 100 : 0) + (isBlocked ? 80 : 0) + (isHighPriority ? 50 : 0) + (statusCategoryKey === 'indeterminate' ? 25 : 0) + (isUnassigned ? 15 : 0);\n\n  return {\n    key: issueKey,\n    summary,\n    status,\n    status_category_key: statusCategoryKey,\n    assignee,\n    priority,\n    updated_at: updatedAt,\n    updated_label: formatDate(updatedAt, 'dateTime'),\n    created_at: createdAt,\n    created_label: formatDate(createdAt, 'dateOnly'),\n    due_date: dueDate,\n    due_label: dueDate ? formatDate(dueDate, 'dateOnly') : null,\n    project_name: projectName,\n    issue_type: issueType,\n    reporter,\n    labels,\n    is_done: isDone,\n    is_unassigned: isUnassigned,\n    is_high_priority: isHighPriority,\n    is_blocked: isBlocked,\n    is_overdue: isOverdue,\n    is_updated_today: isUpdatedToday,\n    urgency_score: urgencyScore\n  };\n});\n\nconst todoIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'new');\nconst inProgressIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'indeterminate');\nconst doneIssues = normalizedIssues.filter((issue) => issue.status_category_key === 'done');\nconst blockedIssues = normalizedIssues.filter((issue) => issue.is_blocked);\nconst highPriorityIssues = normalizedIssues.filter((issue) => issue.is_high_priority);\nconst unassignedIssues = normalizedIssues.filter((issue) => issue.is_unassigned);\nconst overdueIssues = normalizedIssues.filter((issue) => issue.is_overdue);\nconst updatedTodayIssues = normalizedIssues.filter((issue) => issue.is_updated_today);\nconst noDueDateInProgress = inProgressIssues.filter((issue) => !issue.due_date);\n\nconst assigneeCounts = normalizedIssues.reduce((acc, issue) => {\n  if (issue.is_unassigned) return acc;\n  acc[issue.assignee] = (acc[issue.assignee] || 0) + 1;\n  return acc;\n}, {});\n\nconst topAssignees = Object.entries(assigneeCounts)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 5)\n  .map(([name, issueCount]) => ({ name, issue_count: issueCount }));\n\nconst watchIssues = [...normalizedIssues]\n  .sort((a, b) => {\n    if (b.urgency_score !== a.urgency_score) return b.urgency_score - a.urgency_score;\n    return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime();\n  })\n  .slice(0, 8)\n  .map((issue) => ({\n    key: issue.key,\n    summary: issue.summary,\n    status: issue.status,\n    status_category_key: issue.status_category_key,\n    assignee: issue.assignee,\n    priority: issue.priority,\n    updated_label: issue.updated_label,\n    due_label: issue.due_label,\n    project_name: issue.project_name,\n    issue_type: issue.issue_type,\n    flags: {\n      is_overdue: issue.is_overdue,\n      is_blocked: issue.is_blocked,\n      is_high_priority: issue.is_high_priority,\n      is_unassigned: issue.is_unassigned\n    }\n  }));\n\nreturn [{\n  json: {\n    user_id: $('Prepare Jira Summary Request Data').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Request Data').first().json.generated_at || new Date().toISOString(),\n    jira_scope: {\n      jql: $('Prepare Jira Summary Request Data').first().json.jira_jql || '',\n      max_results: $('Prepare Jira Summary Request Data').first().json.jira_max_results || normalizedIssues.length\n    },\n    watch_issues: watchIssues,\n    source_metrics: {\n      total_issues: normalizedIssues.length,\n      todo_count: todoIssues.length,\n      in_progress_count: inProgressIssues.length,\n      done_count: doneIssues.length,\n      blocked_count: blockedIssues.length,\n      high_priority_count: highPriorityIssues.length,\n      unassigned_count: unassignedIssues.length,\n      overdue_count: overdueIssues.length,\n      updated_today_count: updatedTodayIssues.length,\n      no_due_date_in_progress_count: noDueDateInProgress.length,\n      top_assignees: topAssignees\n    }\n  }\n}];"
+        "jsCode": "const source = $json || {};\nconst rawIssues = Array.isArray(source.issues)\n  ? source.issues\n  : Array.isArray(source.items)\n    ? source.items\n    : Array.isArray(source.data)\n      ? source.data\n      : [];\n\nconst getField = (issue, ...keys) => {\n  for (const key of keys) {\n    const value = key.split('.').reduce((acc, part) => acc?.[part], issue);\n    if (value !== undefined && value !== null && value !== '') return value;\n  }\n  return '';\n};\n\nconst normalizeText = (v) => String(v || '').trim().toLowerCase();\nconst hasAny = (value, keywords) => keywords.some((k) => normalizeText(value).includes(k));\n\nconst norm = rawIssues.map((issue, index) => {\n  const key = getField(issue, 'key', 'id', 'issueKey') || `ISSUE-${index + 1}`;\n  const statusCategory = normalizeText(getField(issue, 'fields.status.statusCategory.key', 'status.statusCategory.key')) || 'new';\n  const status = getField(issue, 'fields.status.name', 'status.name', 'status') || 'Unknown';\n  const priority = getField(issue, 'fields.priority.name', 'priority.name', 'priority') || 'Tanpa prioritas';\n  const assignee = getField(issue, 'fields.assignee.displayName', 'assignee.displayName') || 'Belum ditugaskan';\n  const dueDate = getField(issue, 'fields.duedate', 'duedate', 'dueDate');\n  const labels = Array.isArray(issue?.fields?.labels) ? issue.fields.labels : [];\n\n  const isDone = statusCategory === 'done';\n  const isUnassigned = assignee === 'Belum ditugaskan';\n  const isOverdue = !isDone && dueDate && new Date(dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);\n  const isHighPriority = hasAny(priority, ['highest', 'high', 'critical', 'urgent']);\n  const isBlocked = hasAny(status, ['blocked', 'blocker', 'waiting', 'stuck']) || labels.some((l) => hasAny(l, ['blocked', 'blocker']));\n\n  const score = (isOverdue ? 100 : 0) + (isBlocked ? 80 : 0) + (isHighPriority ? 50 : 0) + (isUnassigned ? 20 : 0) + (statusCategory === 'indeterminate' ? 10 : 0);\n\n  return {\n    key,\n    summary: getField(issue, 'fields.summary', 'summary', 'title') || 'Tanpa judul issue',\n    status,\n    status_category_key: statusCategory,\n    priority,\n    assignee,\n    is_overdue: Boolean(isOverdue),\n    is_unassigned: Boolean(isUnassigned),\n    is_high_priority: Boolean(isHighPriority),\n    is_blocked: Boolean(isBlocked),\n    score,\n  };\n});\n\nconst todo = norm.filter((i) => i.status_category_key === 'new').length;\nconst inProgress = norm.filter((i) => i.status_category_key === 'indeterminate').length;\nconst done = norm.filter((i) => i.status_category_key === 'done').length;\nconst unassigned = norm.filter((i) => i.is_unassigned).length;\nconst overdue = norm.filter((i) => i.is_overdue).length;\nconst highPriority = norm.filter((i) => i.is_high_priority).length;\n\nconst focusIssues = [...norm]\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 3)\n  .map(({ score, ...rest }) => rest);\n\nreturn [{\n  json: {\n    user_id: $('Prepare Jira Summary Request Data').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Request Data').first().json.generated_at || new Date().toISOString(),\n    source_metrics: {\n      total_issues: norm.length,\n      todo_count: todo,\n      in_progress_count: inProgress,\n      done_count: done,\n      unassigned_count: unassigned,\n      overdue_count: overdue,\n      high_priority_count: highPriority,\n    },\n    focus_issues: focusIssues,\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -997,7 +997,7 @@
               "id": "2d95d6ad-9584-4e09-adf8-0988d772efeb",
               "name": "prompt",
               "type": "string",
-              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis ringkasan operasional Jira yang sudah dinormalisasi.\n2. Buat insight singkat untuk panel AI summary di Jira Workspace.\n3. Sorot progres, beban issue aktif, issue yang overdue, issue tanpa assignee, dan issue prioritas tinggi.\n4. Berikan rekomendasi tindak lanjut singkat berbentuk poin.\n5. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"done_count\": number,\n    \"blocked_count\": number,\n    \"high_priority_count\": number,\n    \"unassigned_count\": number,\n    \"overdue_count\": number,\n    \"updated_today_count\": number,\n    \"no_due_date_in_progress_count\": number\n  }\n}\n\nATURAN:\n- Summary harus siap dipakai sebagai AI insight card, bukan sekadar mengulang semua issue satu per satu.\n- Fokus pada kondisi operasional yang paling penting untuk leader atau project owner.\n- Prioritaskan overdue, blocked, unassigned, high priority, dan issue aktif yang belum punya due date.\n- Gunakan `watch_issues` sebagai bukti/detail utama jika menyebut issue tertentu.\n- Jangan mengarang sprint, blocker resmi, owner, atau deadline jika tidak ada di data.\n- Jika data kosong, tetap return JSON valid dengan status partial dan rekomendasi yang relevan.\n- summary_points maksimal 4 butir.\n- recommendations maksimal 3 butir.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}"
+              "value": "=Kamu adalah Jira Insight Agent.\n\nTugas:\n- Buat ringkasan operasional Jira yang ringkas dan bisa langsung ditampilkan di kartu AI Insight.\n- Fokus pada kondisi paling penting: progres, issue aktif, unassigned, overdue, dan prioritas tinggi.\n- Berikan output hemat token dan langsung actionable.\n\nWAJIB RETURN JSON VALID SAJA:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\", \"string\", \"string\"],\n  \"recommendations\": [\"string\", \"string\", \"string\"]\n}\n\nATURAN:\n- headline maksimal 1 kalimat.\n- summary_points tepat 3 butir (jika data kurang, isi dengan temuan paling relevan yang tersedia).\n- recommendations tepat 3 butir, kalimat tindakan singkat.\n- Jangan ulang angka metrik berlebihan jika tidak perlu.\n- Jangan output markdown/codeblock/teks di luar JSON.\n\nDATA INPUT:\n{{ JSON.stringify({ source_metrics: $json.source_metrics, focus_issues: $json.focus_issues }, null, 2) }}"
             }
           ]
         },
@@ -1016,12 +1016,17 @@
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.prompt }}",
-        "options": {
-          "systemMessage": "=Kamu adalah Jira Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
-        }
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Kamu adalah Jira Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+            }
+          ]
+        },
+        "batching": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
       "position": [
         -1424,
         -2160
@@ -1031,7 +1036,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Jira Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Jira Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'jira',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan Jira belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 4) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: parsed.source_metrics || fallbackMetrics\n    }\n  }\n}];"
+        "jsCode": "const raw = String($json.output || $json.text || $json.response || $json.content || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst fallbackMetrics = $('Prepare Jira Summary Context').first().json.source_metrics || {};\n\nreturn [{\n  json: {\n    success: true,\n    user_id: $('Prepare Jira Summary Context').first().json.user_id || '',\n    generated_at: $('Prepare Jira Summary Context').first().json.generated_at || new Date().toISOString(),\n    summary: {\n      domain: 'jira',\n      status: parsed.status || 'partial',\n      priority: parsed.priority || 'medium',\n      headline: parsed.headline || 'Ringkasan Jira belum tersedia',\n      summary_points: Array.isArray(parsed.summary_points) ? parsed.summary_points.slice(0, 3) : [],\n      recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : [],\n      source_metrics: fallbackMetrics\n    }\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1178,12 +1183,17 @@
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.prompt }}",
-        "options": {
-          "systemMessage": "=Kamu adalah Email Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
-        }
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Kamu adalah Email Briefing Agent yang hanya boleh menjawab dengan JSON valid tanpa markdown, tanpa code block, dan tanpa penjelasan tambahan."
+            }
+          ]
+        },
+        "batching": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
       "position": [
         16,
         -784
@@ -1208,7 +1218,32 @@
       "credentials": {
         "openAiApi": {
           "id": "0rW2Paz5Jham8Eqn",
-          "name": "OpenAi account 6"
+          "name": "AC API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1264,
+        192
+      ],
+      "id": "e2ff065f-0c60-4385-9f4d-a74296016e95",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WaEzDilNiOo3c09Y",
+          "name": "FreeModel"
         }
       }
     }
@@ -1290,33 +1325,7 @@
     },
     "Groq Chat Model1": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Draft & Send Email",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Email Summary Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Jira Summary Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Get Email Format": {
@@ -1790,13 +1799,44 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Email Summary Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Draft & Send Email",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Jira Summary Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ba8998b4-3f89-47f1-93d0-31c1e4dfe5b0",
+  "versionId": "f88e9bad-cd60-43cd-94bd-3b063ce7753f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"
