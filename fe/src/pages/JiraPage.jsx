@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Button, Input } from "@/components/ui";
 import {
   AlertCircle,
   Bug,
@@ -13,6 +14,7 @@ import {
   BookOpen,
   RefreshCw,
   Search,
+  SquarePen,
   Sparkles,
   UserRound,
 } from "lucide-react";
@@ -382,54 +384,75 @@ const ProgressMetricCard = ({ value, completed, inProgress, total }) => (
   </div>
 );
 
-const JiraHeaderSection = ({ lastSyncedAt, loading, onSync }) => (
-  <section className="rounded-[30px]  text-slate-900 ">
+const JiraHeaderSection = ({ loading, onSync, searchQuery, onSearchChange }) => (
+  <section>
     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-      <div className=" max-w-2xl">
-        <div className="flex gap-3 items-center">
-          <BookOpen size={36} className="text-[#ff623d]" />
-          <h1 className="text-lg font-bold text-red-500 leading-tight md:text-3xl">
+      <div className="min-w-[280px]">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center rounded-2xl text-[#ff623d]">
+            <BookOpen className="h-10 w-10" />
+          </div>
+          <h1 className="text-[2rem] font-bold leading-tight text-[#ff623d]">
             Jira Workspace
           </h1>
         </div>
-        <p className="text-sm my-3 text-slate-600">
-          Kelola dan pantau semua issue Jira Anda dalam satu tempat
+        <p className="mt-1 text-sm text-slate-500">
+          Kelola dan pantau semua issue Jira Anda dalam satu tempat.
         </p>
       </div>
 
-      <div className="rounded-2xl overflow-hidden bg-[#f8f9fd] p-3 shadow-sm xl:min-w-[520px]">
-        {lastSyncedAt ? (
-          <p className="flex items-center gap-2 text-sm font-medium text-slate-600">
-            Terakhir sinkron: {formatDate(lastSyncedAt)}
-          </p>
-        ) : null}
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            onClick={onSync}
-            disabled={loading}
-            className="inline-flex border border-slate-300 min-w-[160px] items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-
-          <Link
-            to="/chat/supervisor"
-            state={{
-              domain: "jira",
-              intent: "create_ticket",
-              templatePrompt:
-                "Buat tiket Jira baru berdasarkan kebutuhan saya.",
-            }}
-            className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-full bg-[#ff623d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#ff744f]"
-          >
-            Create Issue
-          </Link>
+      <form onSubmit={(event) => event.preventDefault()} className="w-full max-w-[540px]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Cari issue atau project..."
+            className="h-auto w-full rounded-2xl bg-white px-4 py-4 pl-14 pr-16 text-sm text-slate-700 placeholder:text-slate-400"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500">
+            Ctrl K
+          </span>
         </div>
+      </form>
+
+      <div className="flex items-center gap-3">
+        <Button
+          onClick={onSync}
+          disabled={loading}
+          variant="outline"
+          size="sm"
+          className="gap-2 rounded-2xl text-sm"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <span>Refresh</span>
+        </Button>
+
+        <Link
+          to="/chat/supervisor"
+          state={{
+            domain: "jira",
+            intent: "create_ticket",
+            templatePrompt:
+              "Buat tiket Jira baru berdasarkan kebutuhan saya.",
+          }}
+          className="inline-flex items-center gap-2 rounded-2xl bg-[#ff623d] px-4 py-2 text-sm text-white hover:bg-[#ff744f]"
+        >
+          <SquarePen className="h-4 w-4" />
+          <span>Compose</span>
+        </Link>
       </div>
     </div>
   </section>
 );
+
+const JiraLastSynced = ({ lastSyncedAt }) =>
+  lastSyncedAt ? (
+    <p className="text-sm text-slate-500">
+      Terakhir sinkron: {formatDate(lastSyncedAt)}
+    </p>
+  ) : null;
 
 const JiraMetricsSection = ({ metrics }) => (
   <section className="grid grid-cols-1 gap-4 xl:grid-cols-4">
@@ -741,6 +764,7 @@ export default function JiraPage() {
   const [error, setError] = useState("");
   const [summaryError, setSummaryError] = useState("");
   const [lastSyncedAt, setLastSyncedAt] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadIssues = useCallback(async () => {
     setLoading(true);
@@ -820,35 +844,13 @@ export default function JiraPage() {
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
       <div className="space-y-5">
-        <section className="flex flex-col gap-3 rounded-[24px] bg-transparent py-1 md:flex-row md:items-center md:justify-between">
-          <div className="border shadow-md  rounded-[22px] relative w-full max-w-[560px]">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="Search"
-              className="h-12 w-full rounded-full bg-white pl-14 pr-4 text-base text-slate-700 outline-none transition-colors placeholder:text-slate-400"
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f9c7d9] to-[#c7b9ff] text-sm font-semibold text-white">
-              IA
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-semibold text-slate-900">Irza</p>
-              <p className="text-xs text-slate-500">Admin</p>
-            </div>
-          </div>
-        </section>
-
         <JiraHeaderSection
-          lastSyncedAt={lastSyncedAt}
           loading={loading}
           onSync={handleRefreshAll}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
+        <JiraLastSynced lastSyncedAt={lastSyncedAt} />
         {error ? (
           <div className="mt-5 flex items-start gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
             <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
