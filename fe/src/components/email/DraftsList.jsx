@@ -222,7 +222,7 @@ export default function DraftsList({ onRevise }) {
 
   if (loading && !drafts) {
     return (
-      <div className="p-6">
+      <div className="h-full overflow-y-auto p-6">
         <div className="animate-pulse space-y-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="bg-gray-200 rounded-lg h-48"></div>
@@ -234,7 +234,7 @@ export default function DraftsList({ onRevise }) {
 
   if (!drafts || drafts.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
+      <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center p-6 text-gray-500">
         <div className="text-center">
           <Mail className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium">No drafts yet</p>

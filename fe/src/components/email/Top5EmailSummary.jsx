@@ -59,19 +59,11 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
 
   const loadCachedSummary = () => {
     try {
-      const cached = localStorage.getItem(STORAGE_KEY);
+      const cached = sessionStorage.getItem(STORAGE_KEY);
       if (!cached) return null;
 
       const parsed = JSON.parse(cached);
-      const cacheAge = Date.now() - parsed.timestamp;
-      const oneHour = 60 * 60 * 1000;
-
-      if (cacheAge < oneHour) {
-        return parsed.data;
-      }
-
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
+      return parsed.data;
     } catch (err) {
       console.error('Error loading cached summary:', err);
       return null;
@@ -80,7 +72,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
 
   const saveSummaryToCache = (data) => {
     try {
-      localStorage.setItem(
+      sessionStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
           data,
@@ -231,7 +223,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
   }
 
   return (
-    <div className="h-full rounded-[24px] bg-white p-5">
+    <div className="flex h-full flex-col rounded-[24px] bg-white p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff4ef] text-[#ff623d]">
@@ -243,7 +235,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
         </div>
       </div>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-5 flex-1 space-y-5 overflow-y-auto">
         <div className="relative rounded-[28px]">
           <div className="rounded-[20px] border border-[#ff623d] bg-[#fff4ef] p-3">
             <div className="flex gap-3">
