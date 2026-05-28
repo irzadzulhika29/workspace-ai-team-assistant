@@ -44,7 +44,7 @@
             },
             {
               "fieldId": "file_url",
-              "fieldValue": "=\"https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/public/dokumen_sop/{{ $('Upload Document').item.json.body.file_name }}\""
+              "fieldValue": "={{ \"https://tynmnezmkrjuygdkdsfe.supabase.co/storage/v1/object/public/\" + ($json.Key || (\"dokumen_sop/\" + $('Upload Document').item.json.body.file_name)) }}"
             },
             {
               "fieldId": "session_id",
@@ -301,8 +301,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        624,
-        832
+        640,
+        880
       ],
       "id": "3ed59e0a-5905-4621-8b3f-d85f2bf5a080",
       "name": "Groq Chat Model",
@@ -330,7 +330,32 @@
       "credentials": {
         "openAiApi": {
           "id": "0rW2Paz5Jham8Eqn",
-          "name": "OpenAi account 6"
+          "name": "AC API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini/gemini-2.0-flash-lite",
+          "mode": "list",
+          "cachedResultName": "gemini/gemini-2.0-flash-lite"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        912
+      ],
+      "id": "09d6c702-d953-4247-8561-b54e89332f38",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0rW2Paz5Jham8Eqn",
+          "name": "AC API"
         }
       }
     }
@@ -481,13 +506,7 @@
     },
     "Groq Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Classify Document Type",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Embeddings OpenAI": {
@@ -500,13 +519,24 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify Document Type",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "df07c189-7610-4000-9bc8-914b100dfbc3",
+  "versionId": "377cb959-abf1-4599-95bd-cefc557f7c86",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

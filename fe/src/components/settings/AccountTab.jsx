@@ -24,28 +24,30 @@ export default function AccountTab({
         </p>
       </div>
 
-      {/* Google Account Section */}
-      <GoogleAccountSection
-        googleAccount={googleAccount}
-        isGoogleConnecting={isGoogleConnecting}
-        onConnect={onGoogleConnect}
-        onDisconnect={onGoogleDisconnect}
-      />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {/* Google Account Section */}
+        <GoogleAccountSection
+          googleAccount={googleAccount}
+          isGoogleConnecting={isGoogleConnecting}
+          onConnect={onGoogleConnect}
+          onDisconnect={onGoogleDisconnect}
+        />
 
-      {/* Jira Settings Section */}
-      <JiraSettingsSection />
+        {/* Jira Settings Section */}
+        <JiraSettingsSection />
+      </div>
+
+      {/* Integration List Section */}
+      <IntegrationListSection
+        integrationItems={integrationItems}
+        connectedStates={connectedStates}
+      />
 
       {/* Webhook Environment Section */}
       <WebhookEnvironmentSection
         webhookMode={webhookMode}
         webhookUrl={webhookUrl}
         onModeChange={onWebhookEnvironmentChange}
-      />
-
-      {/* Integration List Section */}
-      <IntegrationListSection
-        integrationItems={integrationItems}
-        connectedStates={connectedStates}
       />
     </div>
   );

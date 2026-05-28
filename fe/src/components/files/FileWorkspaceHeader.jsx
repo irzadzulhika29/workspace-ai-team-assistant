@@ -17,7 +17,7 @@ export default function FileWorkspaceHeader({
               <FileText className="h-10 w-10" />
             </div>
             <h1 className="text-[2rem] font-bold leading-tight text-[#ff623d]">
-              Document
+              Document Workspace
             </h1>
           </div>
           <p className="mt-1 text-sm text-slate-500">
@@ -45,29 +45,21 @@ export default function FileWorkspaceHeader({
         <div className="flex items-center gap-3">
           <Button
             onClick={onOpenGenerated}
-            variant={activeTab === 'generated' ? 'default' : 'outline'}
+            variant="default"
             size="sm"
-            className={`gap-2 rounded-2xl text-sm ${
-              activeTab === 'generated'
-                ? 'bg-[#ff623d] text-white hover:bg-[#ff744f]'
-                : ''
-            }`}
+            className="gap-2 rounded-2xl bg-[#ff623d] text-sm text-white hover:bg-[#ff744f]"
           >
             <SquarePen className="h-4 w-4" />
-            <span>Generated</span>
+            <span>Create</span>
           </Button>
           <Button
             onClick={onOpenUploaded}
-            variant={activeTab === 'uploaded' ? 'default' : 'outline'}
+            variant="default"
             size="sm"
-            className={`gap-2 rounded-2xl text-sm ${
-              activeTab === 'uploaded'
-                ? 'bg-[#ff623d] text-white hover:bg-[#ff744f]'
-                : ''
-            }`}
+            className="gap-2 rounded-2xl bg-[#ff623d] text-sm text-white hover:bg-[#ff744f]"
           >
             <Upload className="h-4 w-4" />
-            <span>Uploaded</span>
+            <span>Upload</span>
           </Button>
         </div>
       </div>

@@ -14,6 +14,8 @@ Jangan gunakan skill ini untuk slide atau presentasi.
 2. Pilih SATU template di bawah ini. Jangan mencampur struktur antar-template.
 3. Gunakan hanya informasi yang secara eksplisit diberikan pengguna.
 4. Jika data belum cukup untuk jenis dokumen yang dipilih, minta klarifikasi spesifik sebelum mulai menulis.
+5. Jika pengguna memberi contoh yang bercampur atau memuat dua format berbeda, prioritaskan jenis dokumen yang diminta secara eksplisit oleh pengguna.
+6. Saat sudah memutuskan jenis dokumen, langsung mulai dari heading Markdown dokumen. DILARANG menulis alasan pemilihan format, narasi seperti "Pengguna meminta...", "Saya akan memilih...", "Jika Anda menginginkan format lain...", atau kalimat pengantar sebelum heading pertama.
 
 ## Template per Jenis Dokumen
 
@@ -108,6 +110,8 @@ Jika informasi belum cukup, jangan membuat dokumen setengah jadi. Tanyakan kebut
 - proposal: tujuan, ruang lingkup, target hasil, timeline, anggaran
 - MOM: tanggal rapat, peserta, agenda, keputusan, tindak lanjut
 - artikel: topik, sudut pandang, pembaca sasaran, poin utama
+
+Jika input memuat format campuran tetapi informasi inti tetap cukup untuk satu jenis dokumen yang diminta pengguna, JANGAN bertanya atau menulis klarifikasi di dalam dokumen. Pilih format yang diminta pengguna dan hasilkan dokumennya langsung.
 
 ## Kalimat Penutup Wajib (TIDAK BOLEH DIUBAH)
 

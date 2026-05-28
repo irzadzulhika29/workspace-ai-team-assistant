@@ -66,12 +66,6 @@ export default function ProfileTab({
               <p className="text-lg font-semibold text-slate-900">
                 {profileForm.name || 'Workspace User'}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
-                {profileForm.role || 'Role belum diatur'}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">
-                Foto profil mengikuti akun Google yang terhubung.
-              </p>
             </div>
           </div>
 
@@ -109,37 +103,6 @@ export default function ProfileTab({
             </p>
           </div>
 
-          {/* Company */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-              Company
-            </label>
-            <input
-              type="text"
-              value={profileForm.company}
-              onChange={(e) => onProfileChange('company', e.target.value)}
-              disabled={!isProfileEditing}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 transition-colors"
-              placeholder="Enter your company name"
-            />
-          </div>
-
-          {/* Role */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-              Role
-            </label>
-            <input
-              type="text"
-              value={profileForm.role}
-              onChange={(e) => onProfileChange('role', e.target.value)}
-              disabled={!isProfileEditing}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 transition-colors"
-              placeholder="Enter your role"
-            />
-          </div>
 
           {/* Action Buttons */}
           {isProfileEditing && (

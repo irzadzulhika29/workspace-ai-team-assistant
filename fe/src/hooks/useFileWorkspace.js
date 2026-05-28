@@ -10,7 +10,7 @@ export function useFileWorkspace() {
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState(null)
   const [selectedDocument, setSelectedDocument] = useState(null)
-  const [activeTab, setActiveTab] = useState('generated')
+  const [activeTab, setActiveTab] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -74,7 +74,11 @@ export function useFileWorkspace() {
     [filteredDocuments],
   )
 
-  const visibleDocuments = activeTab === 'generated' ? generatedDocuments : uploadedDocuments
+  const visibleDocuments = useMemo(() => {
+    if (activeTab === 'generated') return generatedDocuments
+    if (activeTab === 'uploaded') return uploadedDocuments
+    return filteredDocuments
+  }, [activeTab, filteredDocuments, generatedDocuments, uploadedDocuments])
 
   useEffect(() => {
     if (filteredDocuments.length === 0) {
@@ -91,15 +95,16 @@ export function useFileWorkspace() {
     })
   }, [filteredDocuments])
 
-  useEffect(() => {
-    if (activeTab === 'generated' && generatedDocuments.length === 0 && uploadedDocuments.length > 0) {
-      setActiveTab('uploaded')
-    }
+  const handleSelectDocument = useCallback((document) => {
+    setSelectedDocument(document)
+    setIsDetailExpanded(true)
 
-    if (activeTab === 'uploaded' && uploadedDocuments.length === 0 && generatedDocuments.length > 0) {
-      setActiveTab('generated')
+    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+      window.requestAnimationFrame(() => {
+        mobileDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
     }
-  }, [activeTab, generatedDocuments.length, uploadedDocuments.length])
+  }, [])
 
   const handleCreateDocument = useCallback(() => {
     setActiveTab('generated')
@@ -111,17 +116,6 @@ export function useFileWorkspace() {
       },
     })
   }, [navigate])
-
-  const handleSelectDocument = useCallback((document) => {
-    setSelectedDocument(document)
-    setIsDetailExpanded(true)
-
-    if (typeof window !== 'undefined' && window.innerWidth < 1280) {
-      window.requestAnimationFrame(() => {
-        mobileDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
-    }
-  }, [])
 
   const handleUploaded = useCallback(() => {
     setUploadModalOpen(false)

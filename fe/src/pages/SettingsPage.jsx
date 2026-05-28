@@ -21,6 +21,7 @@ const integrationItems = [
     label: "Email",
     description: "Sinkronisasi email masuk dan keluar",
     icon: Mail,
+    iconSrc: "/email.png",
     accent: "bg-blue-50 text-blue-600",
   },
   {
@@ -28,6 +29,7 @@ const integrationItems = [
     label: "Google Calendar",
     description: "Sinkronisasi jadwal dan event",
     icon: Calendar,
+    iconSrc: "/google-calendar.png",
     accent: "bg-green-50 text-green-600",
   },
   {
@@ -35,6 +37,7 @@ const integrationItems = [
     label: "Jira",
     description: "Akses project, issue, dan sprint",
     icon: ShieldCheck,
+    iconSrc: "/jira.png",
     accent: "bg-cyan-50 text-cyan-600",
   },
 ];

@@ -66,12 +66,32 @@ export default function FileWorkspace() {
                 >
                   <Upload size={14} />
                 </button>
-                <button
-                  onClick={handleCreateDocument}
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[#ff5a3f] px-4 text-sm font-semibold text-white"
-                >
-                  Buat Document
-                </button>
+                <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-1">
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className={`inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-semibold ${
+                      activeTab === 'all' ? 'bg-[#ff5a3f] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('uploaded')}
+                    className={`inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-semibold ${
+                      activeTab === 'uploaded' ? 'bg-[#ff5a3f] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Uploaded
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('generated')}
+                    className={`inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-semibold ${
+                      activeTab === 'generated' ? 'bg-[#ff5a3f] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Generated
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -114,7 +134,13 @@ export default function FileWorkspace() {
                   </div>
 
                   <DocumentSection
-                    title={activeTab === 'generated' ? 'Dokumen Generated' : 'Dokumen Terupload'}
+                    title={
+                      activeTab === 'generated'
+                        ? 'Dokumen Generated'
+                        : activeTab === 'uploaded'
+                          ? 'Dokumen Terupload'
+                          : 'Semua Dokumen'
+                    }
                     documents={visibleDocuments}
                     selectedDocument={selectedDocument}
                     onSelectDocument={handleSelectDocument}
