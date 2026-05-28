@@ -947,7 +947,7 @@ export default function CalendarPage() {
         />
       </section>
 
-      <section className="mt-4 gap-4 flex min-h-0 flex-1 overflow-hidden rounded-[24px]">
+      <section className="mt-4 flex min-h-0 flex-1 overflow-hidden rounded-[24px]">
         <div className="hidden h-full min-h-0 w-80 flex-shrink-0 lg:block">
           <SummaryPanel
             summaryRef={summaryPanelRef}

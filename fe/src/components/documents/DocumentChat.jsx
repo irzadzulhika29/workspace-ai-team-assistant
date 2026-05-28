@@ -75,7 +75,7 @@ export default function DocumentChat({ document }) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full min-h-[24rem] flex-col">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
         <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function DocumentChat({ document }) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div className="custom-scrollbar flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {messages.map((msg, index) => (
           <div
             key={index}
