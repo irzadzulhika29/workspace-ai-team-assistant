@@ -103,6 +103,7 @@ Catatan:
 - Fokus pada fakta, konteks, keputusan, dan struktur yang relevan dengan jenis dokumen.
 - Jangan gunakan HTML.
 - Jangan membuat bagian yang tidak didukung data.
+- `sender_profile` adalah metadata sistem, bukan konten dokumen. Jangan tampilkan nama, jabatan, email, footer `Prepared by`, tanda tangan, atau identitas pembuat dokumen kecuali pengguna secara eksplisit memintanya.
 
 ## Aturan Saat Data Tidak Cukup
 Jika informasi belum cukup, jangan membuat dokumen setengah jadi. Tanyakan kebutuhan spesifik sesuai jenis dokumen, misalnya:
