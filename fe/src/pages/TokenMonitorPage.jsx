@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Activity, BarChart3, Cpu, RefreshCw, TimerReset, Workflow } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Activity, BarChart3, Cpu, RefreshCw, Search, TimerReset, Workflow } from 'lucide-react'
 import {
   Alert,
   Badge,
@@ -9,8 +9,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Cell,
+  Column,
   EmptyState,
-  StatCard,
+  ResizableTableContainer,
+  Row,
+  Table,
+  TableBody,
+  TableHeader,
 } from '@/components/ui'
 import { tokenUsageApi } from '../services/tokenUsageService'
 
@@ -35,6 +41,45 @@ const formatExecutionTime = (ms) => {
   if (!ms || ms <= 0) return '-'
   if (ms < 1000) return `${ms}ms`
   return `${(ms / 1000).toFixed(2)}s`
+}
+
+const compareValues = (firstValue, secondValue, direction) => {
+  const firstNumber = Number(firstValue)
+  const secondNumber = Number(secondValue)
+
+  let result = 0
+
+  if (!Number.isNaN(firstNumber) && !Number.isNaN(secondNumber)) {
+    result = firstNumber - secondNumber
+  } else {
+    result = String(firstValue || '').localeCompare(String(secondValue || ''), 'id', {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  }
+
+  return direction === 'descending' ? result * -1 : result
+}
+
+const getSortableValue = (row, column) => {
+  switch (column) {
+    case 'workflow':
+      return row.workflow_name || row.workflow_id || ''
+    case 'model':
+      return row.llm_model || ''
+    case 'input':
+      return row.input_tokens || 0
+    case 'completion':
+      return row.completion_tokens || 0
+    case 'total':
+      return (row.input_tokens || 0) + (row.completion_tokens || 0)
+    case 'duration':
+      return row.execution_time || 0
+    case 'updated':
+      return row.timestamp ? new Date(row.timestamp).getTime() : 0
+    default:
+      return row.execution_id || ''
+  }
 }
 
 const summaryCards = (summary) => [
@@ -80,6 +125,11 @@ export default function TokenMonitorPage() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: 'updated',
+    direction: 'descending',
+  })
 
   const loadTokenUsage = useCallback(async () => {
     setLoading(true)
@@ -107,144 +157,223 @@ export default function TokenMonitorPage() {
     loadTokenUsage()
   }, [loadTokenUsage])
 
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const filteredRows = normalizedQuery
+    ? rows.filter((row) => {
+      const searchable = [
+        row.execution_id,
+        row.workflow_name,
+        row.workflow_id,
+        row.llm_model,
+        row.timestamp,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      return searchable.includes(normalizedQuery)
+    })
+    : rows
+
+  const sortedRows = useMemo(() => {
+    return [...filteredRows].sort((firstRow, secondRow) => compareValues(
+      getSortableValue(firstRow, sortDescriptor.column),
+      getSortableValue(secondRow, sortDescriptor.column),
+      sortDescriptor.direction
+    ))
+  }, [filteredRows, sortDescriptor])
+
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar p-5 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <p className="mb-2 text-[11px] font-mono uppercase tracking-[0.2em] text-neutral-400">
-              Token Monitoring Workspace
+    <div className="flex h-full min-h-0 flex-col">
+      <section>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-[280px]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center rounded-2xl text-[#ff623d]">
+                <BarChart3 className="h-10 w-10" />
+              </div>
+              <h1 className="text-[2rem] font-bold leading-tight text-[#ff623d]">
+                Token Monitoring
+              </h1>
+            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              Pantau penggunaan token model LLM per workflow dari telemetry Supabase.
             </p>
-            <h1 className="flex items-center gap-2 text-2xl font-semibold leading-tight text-neutral-900 md:text-3xl">
-              <BarChart3 size={24} className="text-primary-500" />
-              Monitoring Penggunaan Token
-            </h1>
-            <p className="mt-2 text-sm text-neutral-500">
-              Ringkasan penggunaan model LLM per eksekusi workflow dari data Supabase.
-            </p>
-            {summary.latestTimestamp && (
-              <p className="mt-1 text-xs text-neutral-400">
-                Data terbaru: {formatDateTime(summary.latestTimestamp)}
-              </p>
-            )}
           </div>
 
-          <Button
-            onClick={loadTokenUsage}
-            disabled={loading}
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-xl"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            {loading ? 'Memuat...' : 'Refresh Data'}
-          </Button>
+          <form onSubmit={(event) => event.preventDefault()} className="w-full max-w-[540px]">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Cari workflow, execution ID, atau model..."
+                className="h-auto w-full rounded-2xl bg-white px-4 py-4 pl-14 pr-16 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#ff623d]/20"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500">
+                Ctrl K
+              </span>
+            </div>
+          </form>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={loadTokenUsage}
+              disabled={loading}
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-2xl text-sm"
+            >
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Memuat...' : 'Refresh'}
+            </Button>
+          </div>
         </div>
 
+        {summary.latestTimestamp && (
+          <p className="mt-3 text-sm text-slate-500">
+            Data terbaru: {formatDateTime(summary.latestTimestamp)}
+          </p>
+        )}
+
         {error && (
-          <Alert variant="error" title="Gagal memuat token usage" className="mb-5">
+          <Alert variant="error" title="Gagal memuat token usage" className="mt-4">
             {error}
           </Alert>
         )}
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
-          {summaryCards(summary).map(({ key, label, value, icon: Icon, caption }) => (
-            <StatCard
-              key={key}
-              label={label}
-              value={value}
-              caption={caption}
-              trendIcon={<Icon className="h-4 w-4" />}
-            />
-          ))}
-        </div>
+      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {summaryCards(summary).map(({ key, label, value, icon: Icon, caption }) => (
+          <div
+            key={key}
+            className="rounded-[20px] bg-white px-5 py-6 text-left shadow-md"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff4ef] text-[#ff623d]">
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className="text-[1.05rem] font-medium text-slate-700">{label}</p>
+            </div>
+            <p className="mt-4 text-[3rem] font-semibold leading-none text-slate-900">
+              {value}
+            </p>
+            <p className="mt-3 text-sm text-slate-500">{caption}</p>
+          </div>
+        ))}
+      </section>
 
-        <Card className="rounded-2xl">
+      <section className="mt-4 flex min-h-0 flex-1 overflow-hidden rounded-[24px]">
+        <Card className="flex min-h-0 flex-1 flex-col rounded-[20px] border-0 bg-white shadow-md">
           <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <CardDescription className="mt-0 text-xs font-semibold uppercase tracking-wider text-neutral-500">
                 Log Eksekusi
               </CardDescription>
               <CardTitle className="mt-1 text-sm md:text-base">
-                100 data token terbaru
+                {sortedRows.length} dari {rows.length} data token terbaru
               </CardTitle>
             </div>
             <Badge variant="outline" className="w-fit rounded-full px-3 py-1.5 text-xs">
               Total tokens: {formatNumber(summary.totalTokens)}
             </Badge>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="min-h-0 flex-1 space-y-3 overflow-y-auto">
             {loading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <div key={idx} className="skeleton h-24 rounded-xl" />
+              <div className="space-y-2 rounded-[18px] border border-slate-200 p-3">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="skeleton h-12 rounded-xl" />
                 ))}
               </div>
-            ) : rows.length === 0 ? (
+            ) : sortedRows.length === 0 ? (
               <EmptyState
                 icon={<BarChart3 size={28} />}
-                title="Belum ada data token yang masuk."
-                description="Endpoint backend sudah siap. Kirim log eksekusi dari n8n agar data mulai tampil."
+                title={rows.length === 0 ? 'Belum ada data token yang masuk.' : 'Tidak ada data yang cocok.'}
+                description={rows.length === 0
+                  ? 'Endpoint backend sudah siap. Kirim log eksekusi dari n8n agar data mulai tampil.'
+                  : 'Coba ubah kata kunci pencarian untuk melihat eksekusi token lainnya.'}
               />
             ) : (
-              rows.map((row) => {
-                const totalTokens = (row.input_tokens || 0) + (row.completion_tokens || 0)
-
-                return (
-                  <Card
-                    key={row.id || `${row.execution_id}-${row.timestamp}`}
-                    className="rounded-xl border-neutral-200 bg-white shadow-none hover:border-primary-200 hover:shadow-sm"
+              <ResizableTableContainer className="overflow-hidden rounded-[18px] border border-slate-200">
+                <div className="overflow-x-auto">
+                  <Table
+                    aria-label="Token usage execution table"
+                    sortDescriptor={sortDescriptor}
+                    onSortChange={setSortDescriptor}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0">
-                          <p className="break-all font-mono text-[11px] tracking-wide text-primary-500">
-                            {row.execution_id}
-                          </p>
-                          <h3 className="mt-1 break-words text-sm font-semibold text-neutral-900 md:text-base">
-                            {row.workflow_name || 'Tanpa nama workflow'}
-                          </h3>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                            <Badge variant="outline">{row.workflow_id}</Badge>
-                            <Badge variant="info">{row.llm_model}</Badge>
-                            {row.execution_time && (
-                              <Badge variant="success">
-                                ⏱ {formatExecutionTime(row.execution_time)}
-                              </Badge>
-                            )}
-                            <span>{formatDateTime(row.timestamp)}</span>
-                          </div>
-                        </div>
+                    <TableHeader>
+                      <Column id="workflow" isRowHeader allowsSorting>
+                        Workflow
+                      </Column>
+                      <Column id="model" allowsSorting>
+                        Model
+                      </Column>
+                      <Column id="input" allowsSorting>
+                        Input
+                      </Column>
+                      <Column id="completion" allowsSorting>
+                        Completion
+                      </Column>
+                      <Column id="total" allowsSorting>
+                        Total
+                      </Column>
+                      <Column id="duration" allowsSorting>
+                        Durasi
+                      </Column>
+                      <Column id="updated" allowsSorting>
+                        Update
+                      </Column>
+                    </TableHeader>
+                    <TableBody items={sortedRows}>
+                      {(row) => {
+                        const totalTokens = (row.input_tokens || 0) + (row.completion_tokens || 0)
 
-                        <div className="grid grid-cols-3 gap-2 lg:min-w-[300px]">
-                          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2">
-                            <p className="text-[11px] text-neutral-500">Input</p>
-                            <p className="mt-1 text-sm font-semibold text-neutral-900">
+                        return (
+                          <Row id={row.id || `${row.execution_id}-${row.timestamp}`}>
+                            <Cell>
+                              <div className="min-w-[220px]">
+                                <p className="text-sm font-semibold text-slate-900">
+                                  {row.workflow_name || 'Tanpa nama workflow'}
+                                </p>
+                                <p className="mt-1 truncate text-xs text-slate-500">
+                                  {row.workflow_id || row.execution_id}
+                                </p>
+                              </div>
+                            </Cell>
+                            <Cell>
+                              <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                {row.llm_model || '-'}
+                              </span>
+                            </Cell>
+                            <Cell className="text-sm text-slate-700">
                               {formatNumber(row.input_tokens)}
-                            </p>
-                          </div>
-                          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2">
-                            <p className="text-[11px] text-neutral-500">Completion</p>
-                            <p className="mt-1 text-sm font-semibold text-neutral-900">
+                            </Cell>
+                            <Cell className="text-sm text-slate-700">
                               {formatNumber(row.completion_tokens)}
-                            </p>
-                          </div>
-                          <div className="rounded-xl border border-primary-100 bg-primary-50 px-3 py-2">
-                            <p className="text-[11px] text-primary-600">Total</p>
-                            <p className="mt-1 text-sm font-semibold text-primary-700">
+                            </Cell>
+                            <Cell className="text-sm font-semibold text-slate-900">
                               {formatNumber(totalTokens)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })
+                            </Cell>
+                            <Cell className="text-sm text-slate-700">
+                              {formatExecutionTime(row.execution_time)}
+                            </Cell>
+                            <Cell>
+                              <div className="min-w-[120px] text-sm text-slate-700">
+                                {formatDateTime(row.timestamp)}
+                              </div>
+                            </Cell>
+                          </Row>
+                        )
+                      }}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ResizableTableContainer>
             )}
           </CardContent>
         </Card>
-      </div>
+      </section>
     </div>
   )
 }

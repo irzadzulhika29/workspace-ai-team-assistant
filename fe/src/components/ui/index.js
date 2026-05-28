@@ -14,6 +14,7 @@ export * from "./nav-item";
 export * from "./progress-bar";
 export * from "./sidebar";
 export * from "./stat-card";
+export * from "./table";
 export * from "./tabs";
 export * from "./token-usage";
 
