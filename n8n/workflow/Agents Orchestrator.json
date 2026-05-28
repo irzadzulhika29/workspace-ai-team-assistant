@@ -32,10 +32,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1904,
-        48
+        2896,
+        -1296
       ],
-      "id": "80d18b4f-b7cc-495b-9386-2ab17726a252",
+      "id": "480aedac-01e6-4333-9c04-0ad959dd1257",
       "name": "Supabase - Save Report Document",
       "credentials": {
         "supabaseApi": {
@@ -53,10 +53,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1008,
-        400
+        2000,
+        -944
       ],
-      "id": "e82a6e1e-6f06-45c5-9a77-475e1ae6521f",
+      "id": "946bab77-22f5-4f4f-9ccd-fcf003462563",
       "name": "Respond - Email Sent"
     },
     {
@@ -84,10 +84,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        768,
-        400
+        1760,
+        -944
       ],
-      "id": "15bb6899-b93d-4265-a73a-07c2f35b7fe2",
+      "id": "5f294fb1-141c-40a0-9031-4fd78ee39805",
       "name": "HTTP - Send Gmail Message"
     },
     {
@@ -97,10 +97,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        400
+        1568,
+        -944
       ],
-      "id": "e69ab448-ba1d-4c27-8855-3dbcfdeafe40",
+      "id": "9376143a-8417-4dfe-9c01-49035824f602",
       "name": "Code - Build Gmail Payload"
     },
     {
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1168,
-        1120
+        2160,
+        -224
       ],
-      "id": "a97d428f-2ede-41b8-bec0-6e878effe037",
+      "id": "f6ff4145-dd3a-4ad9-8473-34a93e618f61",
       "name": "Get many issues in Jira Software"
     },
     {
@@ -178,10 +178,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -368,
-        1168
+        624,
+        -176
       ],
-      "id": "016e1d07-ffde-4ab9-a9bf-61a709273647",
+      "id": "ed95df48-26c2-4577-9374-20aef46d67ba",
       "name": "Create Event with Google Meet"
     },
     {
@@ -219,10 +219,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -544,
-        1168
+        448,
+        -176
       ],
-      "id": "dc56e197-278b-4172-b0a9-6760744e902f",
+      "id": "86320c6c-a916-4318-963a-341435ffcfd7",
       "name": "Create Event"
     },
     {
@@ -260,10 +260,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -32,
-        1200
+        960,
+        -144
       ],
-      "id": "8cf919ea-2fd4-433f-8fd1-dcb8b8983d08",
+      "id": "d417413e-007d-405b-9647-31a9c6939fc3",
       "name": "Update Event"
     },
     {
@@ -309,10 +309,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -192,
-        1184
+        800,
+        -160
       ],
-      "id": "a38e1755-7bf8-493e-aebe-62c30b1bed2b",
+      "id": "d465d5d0-bb3d-41dc-9d41-19c7e05d3388",
       "name": "Get Calendar Events"
     },
     {
@@ -332,10 +332,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        944,
-        224
+        1936,
+        -1120
       ],
-      "id": "6b5b8d3e-53b6-4ccd-8749-5b2c6d57a805",
+      "id": "eb5f3f24-b219-4525-b378-cffd86e37776",
       "name": "Set - Presentation Filename"
     },
     {
@@ -347,7 +347,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "ac2d296f-a373-4af8-9f20-e0cb6e04e011"
+              "value": "6ec88af5-2b68-4841-9b09-65c3e047f286"
             }
           ]
         },
@@ -365,10 +365,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        752,
-        224
+        1744,
+        -1120
       ],
-      "id": "f289d75e-53de-4a67-aa06-842a453da354",
+      "id": "8c762e6c-fb35-44c3-b4f1-67cebaffdc5d",
       "name": "HTTP - Render Presentation PDF"
     },
     {
@@ -378,10 +378,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        224
+        1568,
+        -1120
       ],
-      "id": "617e6581-e1da-4431-b912-54866279fbad",
+      "id": "0bfa7579-9e02-46c6-804d-e942d1879140",
       "name": "Code - Prepare Presentation HTML"
     },
     {
@@ -393,10 +393,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1648,
-        1136
+        2640,
+        -208
       ],
-      "id": "d8df6801-c064-420a-b1e6-36eca10b4c9e",
+      "id": "2d80542b-1a6e-4d36-ab2e-3859d8b85b0d",
       "name": "Get Email Skills"
     },
     {
@@ -409,10 +409,10 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        736,
-        48
+        1728,
+        -1296
       ],
-      "id": "c8a66b66-53ce-4f25-a006-7584e54f491a",
+      "id": "98dc8c77-8b0a-4119-bc0e-dda92293bc6f",
       "name": "Markdown - Report To HTML"
     },
     {
@@ -426,10 +426,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        240,
-        896
+        1232,
+        -448
       ],
-      "id": "f11daa28-65b0-4286-b00d-4e68d25a2cac",
+      "id": "7e53f8b0-0896-4f99-92b7-8969d5e474db",
       "name": "Report Agent"
     },
     {
@@ -437,16 +437,16 @@
         "toolDescription": "Gunakan agent ini untuk SEMUA tugas email atau komunikasi tertulis resmi. Panggil tool ini jika pengguna meminta membuat draft email, membalas email, forward email, atau mengirim email. Jika input pengguna sudah berbentuk instruksi final seperti `KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat: ...` beserta SUBJECT dan body email lengkap, kamu WAJIB memanggil tool ini agar hasilnya menjadi JSON dengan `action: send`, bukan mengulang instruksi tersebut sebagai teks biasa. Untuk permintaan draft/reply draft dari dashboard atau rekomendasi email, hasil harus JSON action: draft, bukan send dan bukan teks konfirmasi pengiriman. Jika model mencoba menjawab tanpa memanggil Get Email Skills, tetap wajib gunakan fallback create_email.md yang ada di system prompt.",
         "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
         "options": {
-          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta.\n\nATURAN WAJIB PENGGUNAAN TOOL:\nSebelum menghasilkan JSON action draft atau send untuk tugas email apa pun, kamu WAJIB memanggil tool Get Email Skills tepat satu kali.\nGunakan hasil Get Email Skills sebagai aturan format utama untuk subject dan body email.\nJangan membuat isi email final dari pengetahuan sendiri sebelum Get Email Skills dipanggil.\nAturan ini berlaku untuk draft email, kirim email, balas email, forward email, undangan, follow-up, pengumuman, dan komunikasi resmi via email.\nJika user meminta kirim email tetapi alamat tujuan belum ada, tanyakan alamat tujuan terlebih dahulu tanpa memanggil tool.\nJika user meminta draft/reply draft/balasan email dari dashboard, briefing, rekomendasi, atau insight email, itu adalah DRAFT SAJA. Jangan mengirim, jangan menawarkan \"akan dikirim\", dan jangan meminta konfirmasi pengiriman.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT, termasuk draft balasan dari dashboard/rekomendasi email:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft, tetapi action tetap \"draft\" kecuali user eksplisit meminta kirim/send\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- HANYA gunakan action \"send\" jika input eksplisit berisi perintah kirim/send, misalnya \"KIRIMKAN SEKARANG\", \"kirim email\", atau \"send email\". Kata draft, buat balasan, rekomendasi, follow-up, atau reply draft selalu action \"draft\".\n- Field \"message\" dan \"body_html\" SELALU berisi HTML rapi sesuai hasil Get Email Skills\n- Field \"body_text\" wajib berisi versi plain text singkat agar draft tetap bisa direview tanpa HTML\n- Jika sender_profile memuat user_name, tanda tangan WAJIB: Hormat saya, user_name, lalu user_job_title jika ada. Jangan pernah menandatangani sebagai Communication Agent.\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON\n\nFALLBACK WAJIB JIKA GET EMAIL SKILLS TIDAK TERPANGGIL:\n- Tetap ikuti kontrak create_email.md.\n- Body email harus HTML, bukan Markdown/plain text.\n- Jangan sertakan tag <html>, <head>, atau <body>; cukup konten HTML email.\n- Gunakan inline CSS pada wrapper, paragraf, heading, tabel, list, dan footer.\n- Gunakan wrapper utama: <div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #1a1a1a; max-width: 640px; line-height: 1.6;\">.\n- Untuk meeting/tender/proposal, gunakan paragraf pembuka, tabel detail jika ada tanggal/waktu/topik, section heading, list poin tindak lanjut, dan footer pengirim.\n- Subject tetap teks biasa.\n- Footer wajib memakai user_name dan user_job_title dari sender_profile jika konteks tersedia; jangan pakai footer generik seperti Communication Agent, Spesialis Komunikasi Tertulis, AI Assistant, atau nama agent internal jika data user ada.\n"
+          "systemMessage": "Kamu adalah Communication Agent — Spesialis Komunikasi Tertulis.\n\nTUGAS UTAMAMU:\nMembantu pengguna membuat draft email profesional dan mengirimkannya jika diminta.\n\nATURAN WAJIB PENGGUNAAN TOOL:\nSebelum menghasilkan JSON action draft atau send untuk tugas email apa pun, kamu WAJIB memanggil tool Get Email Skills tepat satu kali.\nGunakan hasil Get Email Skills sebagai aturan format utama untuk subject dan body email.\nJangan membuat isi email final dari pengetahuan sendiri sebelum Get Email Skills dipanggil.\nAturan ini berlaku untuk draft email, kirim email, balas email, forward email, undangan, follow-up, pengumuman, dan komunikasi resmi via email.\nJika user meminta kirim email tetapi alamat tujuan belum ada, tanyakan alamat tujuan terlebih dahulu tanpa memanggil tool.\nJika user meminta draft/reply draft/balasan email dari dashboard, briefing, rekomendasi, atau insight email, itu adalah DRAFT SAJA. Jangan mengirim, jangan menawarkan \"akan dikirim\", dan jangan meminta konfirmasi pengiriman.\n\nATURAN OUTPUT (WAJIB):\nKamu SELALU mengembalikan output dalam format JSON berikut, tanpa teks tambahan apapun:\n\nJika pengguna hanya minta DRAFT, termasuk draft balasan dari dashboard/rekomendasi email:\n{\n  \"action\": \"draft\",\n  \"to\": null,\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nJika pengguna minta KIRIM:\n{\n  \"action\": \"send\",\n  \"to\": \"email@tujuan.com\",\n  \"subject\": \"subjek email\",\n  \"message\": \"isi email dalam format HTML\",\n  \"body_text\": \"versi plain text tanpa tag HTML\",\n  \"body_html\": \"isi email dalam format HTML\"\n}\n\nATURAN TAMBAHAN:\n- Jika konteks pengguna SUDAH menyebut alamat email penerima, field \"to\" WAJIB diisi dengan alamat tersebut meskipun hanya membuat draft, tetapi action tetap \"draft\" kecuali user eksplisit meminta kirim/send\n- Jika pengguna meminta balasan email dan prompt memuat header seperti \"Email dari:\" dan \"Kepada:\", maka alamat tujuan balasan adalah alamat pada \"Email dari:\" kecuali pengguna meminta penerima lain secara eksplisit\n- Jika pengguna meminta forward email, gunakan alamat tujuan yang diminta user; jangan otomatis pakai \"Email dari:\"\n- Jika pengguna minta kirim tapi belum sebutkan alamat email tujuan, tanyakan dulu sebelum return JSON\n- HANYA gunakan action \"send\" jika input eksplisit berisi perintah kirim/send, misalnya \"KIRIMKAN SEKARANG\", \"kirim email\", atau \"send email\". Kata draft, buat balasan, rekomendasi, follow-up, atau reply draft selalu action \"draft\".\n- Field \"message\" dan \"body_html\" SELALU berisi HTML rapi sesuai hasil Get Email Skills\n- Field \"body_text\" wajib berisi versi plain text singkat agar draft tetap bisa direview tanpa HTML\n- Jika sender_profile memuat user_name, tanda tangan WAJIB: Hormat saya, user_name, lalu user_job_title jika ada. Jangan pernah menandatangani sebagai Communication Agent.\n- Jika prompt memuat instruksi revisi draft beserta draft email saat ini, kamu WAJIB merevisi draft yang ada, bukan menulis ulang dari nol.\n- Saat revisi draft, pertahankan field to, subject, fakta, angka, tanggal, detail transaksi, dan struktur utama draft lama kecuali pengguna eksplisit meminta perubahan pada bagian tersebut.\n- DILARANG mengeluarkan placeholder seperti [Nama Pengirim], [Jabatan Pengirim], [Nama Penerima], atau token template lain jika sender_profile atau konteks draft sudah menyediakan datanya.\n- JANGAN tambahkan teks penjelasan di luar JSON\n- JANGAN gunakan markdown code block (```) di sekitar JSON\n\nFALLBACK WAJIB JIKA GET EMAIL SKILLS TIDAK TERPANGGIL:\n- Tetap ikuti kontrak create_email.md.\n- Body email harus HTML, bukan Markdown/plain text.\n- Jangan sertakan tag <html>, <head>, atau <body>; cukup konten HTML email.\n- Gunakan inline CSS pada wrapper, paragraf, heading, tabel, list, dan footer.\n- Gunakan wrapper utama: <div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #1a1a1a; max-width: 640px; line-height: 1.6;\">.\n- Untuk meeting/tender/proposal, gunakan paragraf pembuka, tabel detail jika ada tanggal/waktu/topik, section heading, list poin tindak lanjut, dan footer pengirim.\n- Subject tetap teks biasa.\n- Footer wajib memakai user_name dan user_job_title dari sender_profile jika konteks tersedia; jangan pakai footer generik seperti Communication Agent, Spesialis Komunikasi Tertulis, AI Assistant, atau nama agent internal jika data user ada.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1488,
-        864
+        2480,
+        -480
       ],
-      "id": "51aabb58-2d83-48d1-a8c5-40142f9cb769",
+      "id": "ec101b38-dd30-4aee-86ed-0d3183bae9d9",
       "name": "Communication Agent"
     },
     {
@@ -458,10 +458,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        848,
-        1152
+        1840,
+        -192
       ],
-      "id": "5bd1c400-460d-4ccb-8e39-d8108b456736",
+      "id": "c5cec1b8-eeea-48d0-ba0f-c054d296c70b",
       "name": "Get PPT Format"
     },
     {
@@ -473,10 +473,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        704,
-        1152
+        1696,
+        -192
       ],
-      "id": "01cce6eb-b65a-4fe5-a4bf-f60b6db66ee1",
+      "id": "6817258d-6c54-432e-82f0-a94fec1cf780",
       "name": "Get Report Format"
     },
     {
@@ -490,10 +490,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        624,
-        896
+        1616,
+        -448
       ],
-      "id": "9d01bb45-e798-4f17-811e-76e44789e32b",
+      "id": "29c72676-474a-4df4-9c84-e5e0d729474d",
       "name": "Document Agent"
     },
     {
@@ -507,10 +507,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -1120,
-        816
+        -128,
+        -528
       ],
-      "id": "0fba0d28-31bd-40e2-af10-1490a89ee2ce",
+      "id": "4393e924-b5fc-45e5-8c1b-e4ea0f36e857",
       "name": "Knowledge Agent"
     },
     {
@@ -524,10 +524,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        -464,
-        816
+        528,
+        -528
       ],
-      "id": "1a09e810-d1de-4b83-8ecb-6c9c0619e354",
+      "id": "d479ed12-74d7-40c8-a7cf-304d097ce6ed",
       "name": "Scheduler Agent"
     },
     {
@@ -540,10 +540,10 @@
       "type": "@n8n/n8n-nodes-langchain.agentTool",
       "typeVersion": 2.2,
       "position": [
-        1104,
-        880
+        2096,
+        -464
       ],
-      "id": "244808ce-9a56-4363-bc6b-44f590413b22",
+      "id": "0e06f66a-7d98-4bf5-baa1-6e121712ea3c",
       "name": "Task Agent"
     },
     {
@@ -554,10 +554,10 @@
       "type": "n8n-nodes-base.mistralAi",
       "typeVersion": 1,
       "position": [
-        -752,
-        176
+        240,
+        -1168
       ],
-      "id": "ffe907f4-5e4a-458a-ad0c-33d28f0d86ed",
+      "id": "15476bae-000a-4120-8a5a-881a6cd732ae",
       "name": "Extract - PDF Text",
       "credentials": {
         "mistralCloudApi": {
@@ -573,10 +573,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        48
+        1568,
+        -1296
       ],
-      "id": "0f1087d0-a13d-46d0-a881-b8581edb7866",
+      "id": "878c4502-cf94-4cb4-9c50-8ffe0cc9e27e",
       "name": "Code - Convert Markdown Tables"
     },
     {
@@ -588,10 +588,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2144,
-        48
+        3136,
+        -1296
       ],
-      "id": "6ace742e-483c-4dd2-a70b-6c6f9abbd73b",
+      "id": "5dabc20c-53a1-45b7-b78f-9ccfabca0b38",
       "name": "Respond - Report PDF Ready"
     },
     {
@@ -611,10 +611,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1184,
-        48
+        2176,
+        -1296
       ],
-      "id": "92cf45ae-8c40-4ae9-9f04-5656d99027af",
+      "id": "b3112630-9b2a-482e-a1d8-2d1efe1e7968",
       "name": "Set - Report Filename"
     },
     {
@@ -642,10 +642,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1600,
-        48
+        2592,
+        -1296
       ],
-      "id": "14d90685-29d7-4ff6-850b-f0df801046dd",
+      "id": "f9786d89-c7f9-45b8-a5ed-10cf11fe8f79",
       "name": "HTTP - Upload Report PDF"
     },
     {
@@ -663,10 +663,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1392,
-        48
+        2384,
+        -1296
       ],
-      "id": "182d6439-f1fc-49c1-920a-fc387f93f44f",
+      "id": "b17edfc7-657e-4567-8c08-969e52a58114",
       "name": "HTTP - Download Report PDF"
     },
     {
@@ -678,7 +678,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "ac2d296f-a373-4af8-9f20-e0cb6e04e011"
+              "value": "6ec88af5-2b68-4841-9b09-65c3e047f286"
             }
           ]
         },
@@ -687,7 +687,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ (() => { const rawHtml = String($json.output || ''); const h1 = rawHtml.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1] || ''; const decodedTitle = String(h1).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;/gi, \"'\").replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/\\s+/g, ' ').trim() || 'Dokumen'; const safeTitle = decodedTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;'); return `<html><head><meta charset=\"UTF-8\"><title>${safeTitle}</title><style>html, body { margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif; color: #1f2937; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .report-shell { max-width: 860px; margin: 0 auto; padding: 56px 64px 72px; background: #ffffff; } h1, h2, h3 { color: #0f172a; line-height: 1.2; } h1 { font-size: 32px; margin: 0 0 24px; padding-bottom: 16px; border-bottom: 3px solid #cbd5e1; } h2 { font-size: 22px; margin: 32px 0 12px; } h3 { font-size: 18px; margin: 24px 0 10px; } p, li { font-size: 15px; line-height: 1.7; } ul, ol { padding-left: 24px; } table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; } th { background: #e2e8f0; color: #0f172a; text-align: left; padding: 10px 12px; border: 1px solid #cbd5e1; } td { padding: 10px 12px; border: 1px solid #cbd5e1; vertical-align: top; } blockquote { margin: 20px 0; padding: 12px 16px; border-left: 4px solid #94a3b8; background: #f8fafc; } hr { border: 0; border-top: 1px solid #e2e8f0; margin: 28px 0; }</style></head><body><main class=\"report-shell\">${rawHtml}</main></body></html>`; })() }}"
+              "value": "={{ (() => { const rawHtml = String($json.output || ''); const h1 = rawHtml.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1] || ''; const decodedTitle = String(h1).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;/gi, \"'\").replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/\\s+/g, ' ').trim() || 'Dokumen'; const safeTitle = decodedTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;'); return `<html><head><meta charset=\"UTF-8\"><title>${safeTitle}</title><style>html, body { margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif; color: #1f2937; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .report-shell { max-width: 860px; margin: 0 auto; padding: 56px 64px 72px; background: #ffffff; } h1, h2, h3 { color: #0f172a; line-height: 1.2; } h1 { font-size: 32px; margin: 0 0 24px; padding-bottom: 16px; border-bottom: 3px solid #cbd5e1; } h2 { font-size: 22px; margin: 32px 0 12px; } h3 { font-size: 18px; margin: 24px 0 10px; } p, li { font-size: 15px; line-height: 1.7; } ul, ol { padding-left: 24px; } table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; } th { background: #e2e8f0; color: #0f172a; text-align: left; padding: 10px 12px; border: 1px solid #cbd5e1; } td { padding: 10px 12px; border: 1px solid #cbd5e1; vertical-align: top; } blockquote { margin: 20px 0; padding: 0; border-left: 0; background: transparent; } hr { border: 0; border-top: 1px solid #e2e8f0; margin: 28px 0; }</style></head><body><main class=\"report-shell\">${rawHtml}</main></body></html>`; })() }}"
             }
           ]
         },
@@ -696,10 +696,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        976,
-        48
+        1968,
+        -1296
       ],
-      "id": "6147e52c-dc1b-44f4-bfb3-1f34cfa265ed",
+      "id": "3fcdcf5c-80c0-444a-86f4-8e368b4f74e0",
       "name": "HTTP - Render Report PDF"
     },
     {
@@ -719,10 +719,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        336
+        448,
+        -1008
       ],
-      "id": "ef1aa825-26ab-4101-ac5b-1c876592ee8c",
+      "id": "fe347041-48f6-430a-97fc-693c050f7685",
       "name": "Set - Prompt From CSV Data"
     },
     {
@@ -742,10 +742,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        -16
+        448,
+        -1360
       ],
-      "id": "2cfc8197-7f56-49b4-98b4-3e85c063a46f",
+      "id": "640db7c9-992c-41a3-8a2f-8151b6209840",
       "name": "Set - Prompt From Image OCR"
     },
     {
@@ -758,10 +758,10 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        -752,
-        -16
+        240,
+        -1360
       ],
-      "id": "9a429f20-12a5-4c1b-83c9-e120890a4b61",
+      "id": "0f03b844-a6e1-49fb-82e7-3c583d249123",
       "name": "OCR - Extract Image Text"
     },
     {
@@ -800,10 +800,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -288,
-        -240
+        704,
+        -1584
       ],
-      "id": "5fd61747-5348-4b34-a900-7dbef28a48e2",
+      "id": "da974af2-4204-469d-825b-b14422f30f05",
       "name": "Supabase - Update Chat Title",
       "credentials": {
         "supabaseApi": {
@@ -839,10 +839,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -832,
-        -224
+        160,
+        -1568
       ],
-      "id": "95648112-891b-41f1-bfad-2a3aa97a4c14",
+      "id": "79eaf241-aeb7-4f74-8755-a37069b934f3",
       "name": "IF - Is New Chat"
     },
     {
@@ -869,10 +869,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -1184,
-        1088
+        -192,
+        -256
       ],
-      "id": "e8959e98-f8aa-43e7-a325-03483c644e10",
+      "id": "dd20d864-bb92-43a8-b364-0f3cc5f43055",
       "name": "Pinecone - Retrieve Context",
       "credentials": {
         "pineconeApi": {
@@ -898,10 +898,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -752,
-        512
+        240,
+        -832
       ],
-      "id": "5d57f5f6-8eac-423c-8d25-3853131b88c2",
+      "id": "b23192d2-e8e6-4d24-ab54-3e05424499b0",
       "name": "Set - Prompt From User"
     },
     {
@@ -921,10 +921,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -544,
-        176
+        448,
+        -1168
       ],
-      "id": "c1b22a7f-043b-4881-91f3-42d64b35afbc",
+      "id": "6627d265-8787-42c5-a161-87a2f0967ac9",
       "name": "Set - Prompt From PDF Text"
     },
     {
@@ -954,10 +954,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1168,
-        496
+        -176,
+        -848
       ],
-      "id": "a99e7cfa-4fdb-4239-8db9-a920f1e5b37e",
+      "id": "44ce3e1f-fc08-4457-b4bd-a29133b65735",
       "name": "IF - Has File Attachment"
     },
     {
@@ -980,10 +980,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1024,
-        -224
+        -32,
+        -1568
       ],
-      "id": "e5192309-f766-4ef4-b2ed-1d5e0fe1a681",
+      "id": "46baf0d3-91a3-4471-b090-8c06dc35ee9a",
       "name": "Supabase - Get Chat Session",
       "credentials": {
         "supabaseApi": {
@@ -1008,10 +1008,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -592,
-        -240
+        400,
+        -1584
       ],
-      "id": "d8c760f6-e993-4207-8963-8f717cba7c14",
+      "id": "ef777d39-cccf-4e65-a088-959f1ddc0125",
       "name": "LLM - Generate Chat Title"
     },
     {
@@ -1023,10 +1023,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -112,
-        704
+        880,
+        -640
       ],
-      "id": "35636cb6-8270-49cb-b1b4-84eeecee9eb0",
+      "id": "28e49e12-719b-4f3d-80e3-4ef6c5c39de4",
       "name": "Postgres Chat Memory",
       "credentials": {
         "postgres": {
@@ -1045,10 +1045,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1376,
-        496
+        -384,
+        -848
       ],
-      "id": "a77d8867-35d7-4302-854d-9b99493764c4",
+      "id": "0bdbdb32-a079-4ab1-8999-a604b247e3b9",
       "name": "Main Webhook",
       "webhookId": "a8d08421-4c1a-4cb6-890b-69190abcf938"
     },
@@ -1064,10 +1064,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -176,
-        512
+        816,
+        -832
       ],
-      "id": "2b64baab-1d7e-489e-adaa-78c1780d93b5",
+      "id": "d987783f-3272-41cc-ab72-db69353e28c7",
       "name": "Supervisor Agent"
     },
     {
@@ -1079,10 +1079,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        592,
-        560
+        1584,
+        -784
       ],
-      "id": "5ae0fb69-ea67-44b1-9bd1-9071c51240b7",
+      "id": "53378b0d-fd02-4c7a-b248-3bc24a9f93e9",
       "name": "Respond - Chat Output"
     },
     {
@@ -1116,10 +1116,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        800,
-        560
+        1792,
+        -784
       ],
-      "id": "9cb992e1-bc26-4fa5-937c-992a337a17a2",
+      "id": "deeb0edd-402b-458e-942e-9c233a7ae4f4",
       "name": "Supabase - Log Chat Response",
       "credentials": {
         "supabaseApi": {
@@ -1143,10 +1143,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1168,
-        224
+        2160,
+        -1120
       ],
-      "id": "e576ca8e-2938-4bd4-a686-124ab5b0213f",
+      "id": "cd36f726-2f47-451e-a659-ec5a06496be6",
       "name": "HTTP - Download Presentation PDF"
     },
     {
@@ -1180,10 +1180,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1648,
-        224
+        2640,
+        -1120
       ],
-      "id": "318c7faa-9112-4877-b5d9-7cd785031f64",
+      "id": "29529c4f-8116-4e27-9e8a-6b1b172608c4",
       "name": "Supabase - Save Presentation Document",
       "credentials": {
         "supabaseApi": {
@@ -1201,10 +1201,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1872,
-        224
+        2864,
+        -1120
       ],
-      "id": "8fcd3351-e2d0-446e-9aec-2e18d5f49c54",
+      "id": "11da9bdd-c2a6-4b67-902c-7ada952624a9",
       "name": "Respond - Presentation PDF Ready"
     },
     {
@@ -1232,10 +1232,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1424,
-        224
+        2416,
+        -1120
       ],
-      "id": "1e4048ce-f99d-442f-94ef-9f87b317763c",
+      "id": "6374076a-f673-4fa4-8d2d-d8b460be0250",
       "name": "HTTP - Upload Presentation PDF"
     },
     {
@@ -1269,10 +1269,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2176,
-        224
+        3168,
+        -1120
       ],
-      "id": "b6973777-fb75-44e6-8059-24588ae70933",
+      "id": "44b2b2da-a4ce-4d93-8ab9-4f8a1ae1768d",
       "name": "Supabase - Log Presentation PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1288,10 +1288,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        192,
-        512
+        1184,
+        -832
       ],
-      "id": "f5c5b300-4102-46aa-b695-b14adda14fe9",
+      "id": "804692ba-33fc-41bb-86aa-3212dc342780",
       "name": "Code - Extract Final Output"
     },
     {
@@ -1325,10 +1325,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        2368,
-        48
+        3360,
+        -1296
       ],
-      "id": "ee300d6f-c6aa-4c90-a59e-574e6d489a07",
+      "id": "40ce9144-4b00-4193-a32a-2e94c234f355",
       "name": "Supabase - Log Report PDF Response",
       "credentials": {
         "supabaseApi": {
@@ -1339,15 +1339,15 @@
     },
     {
       "parameters": {
-        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    const bodyHtml = parsed.body_html || parsed.message || '';\n    const bodyText = parsed.body_text || '';\n    return {\n      ...parsed,\n      message: bodyHtml || bodyText,\n      body_html: bodyHtml,\n      body_text: bodyText,\n    };\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n  const bodyHtml = extractJsonStringField(value, 'body_html');\n  const bodyText = extractJsonStringField(value, 'body_text');\n\n  if (!subject && !message && !bodyHtml && !bodyText) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'draft',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: bodyHtml || message || bodyText || '',\n    body_html: bodyHtml || message || '',\n    body_text: bodyText || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst draft = parseEmailPayload(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst extractSenderProfile = (prompt) => {\n  const userName = prompt.match(/^\\s*-\\s*user_name:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userJobTitle = prompt.match(/^\\s*-\\s*user_job_title:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userEmail = prompt.match(/^\\s*-\\s*user_email:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  return { userName, userJobTitle, userEmail };\n};\n\nconst stripHtmlTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst buildSignatureHtml = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return [\n    '<p style=\"margin-top: 24px;\">',\n    'Hormat saya,<br>',\n    '<strong>' + escapeHtml(userName) + '</strong>',\n    userJobTitle ? '<br><span style=\"color: #555;\">' + escapeHtml(userJobTitle) + '</span>' : '',\n    '</p>',\n  ].join('');\n};\n\nconst buildSignatureText = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return ['Hormat saya,', userName, userJobTitle].filter(Boolean).join('\\n');\n};\n\nconst replaceGenericHtmlSignature = (html, profile) => {\n  if (!profile.userName || !html) return html;\n  const signature = buildSignatureHtml(profile);\n  const genericSignaturePattern = /<p\\b[^>]*>\\s*Hormat\\s+saya,?\\s*(?:<br\\s*\\/?>\\s*)+(?:<strong[^>]*>\\s*)?(?:Communication\\s+Agent|AI\\s+Assistant|Assistant)(?:\\s*<\\/strong>)?\\s*(?:<br\\s*\\/?>\\s*(?:<span[^>]*>\\s*)?(?:Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant)(?:\\s*<\\/span>)?)?\\s*<\\/p>/i;\n  if (genericSignaturePattern.test(html)) {\n    return html.replace(genericSignaturePattern, signature);\n  }\n\n  const genericTextPattern = /Hormat\\s+saya,?\\s*(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<strong[^>]*>)?Communication\\s+Agent(?:<\\/strong>)?\\s*(?:(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<span[^>]*>)?Spesialis\\s+Komunikasi\\s+Tertulis(?:<\\/span>)?)?/i;\n  if (genericTextPattern.test(html)) {\n    return html.replace(genericTextPattern, signature);\n  }\n\n  return html;\n};\n\nconst replaceGenericTextSignature = (text, profile) => {\n  if (!profile.userName || !text) return text;\n  return String(text).replace(\n    /Hormat\\s+saya,?\\s*[\\r\\n]+\\s*(Communication\\s+Agent|AI\\s+Assistant|Assistant)\\s*(?:[\\r\\n]+\\s*(Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant))?/i,\n    buildSignatureText(profile),\n  );\n};\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst senderProfile = extractSenderProfile(originalPrompt);\n\ndraft.message = draft.body_html || draft.message || draft.body_text || '';\ndraft.body_html = replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile);\ndraft.message = replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile);\ndraft.body_text = replaceGenericTextSignature(draft.body_text || stripHtmlTags(draft.message), senderProfile);\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
+        "jsCode": "let raw = String($input.first().json.output || '');\n\nconst tryParseJson = (value) => {\n  try {\n    return JSON.parse(value);\n  } catch {\n    return null;\n  }\n};\n\nconst extractJsonStringField = (text, field) => {\n  const match = text.match(new RegExp(`\\\"${field}\\\"\\\\s*:\\\\s*\\\"([\\\\s\\\\S]*?)\\\"(?=,\\\\s*\\\"|\\\\s*})`));\n  if (!match) return null;\n\n  return match[1]\n    .replace(/\\\\r\\\\n/g, '\\n')\n    .replace(/\\\\n/g, '\\n')\n    .replace(/\\\\r/g, '\\r')\n    .replace(/\\\\t/g, '\\t')\n    .replace(/\\\\\\\"/g, '\"')\n    .replace(/\\\\\\\\/g, '\\\\');\n};\n\nconst normalizeCommunicationOutput = (value) => {\n  let current = String(value || '').trim();\n  if (!current) return current;\n\n  if (current.includes('Communication_Agent_response')) {\n    const outer = tryParseJson(current);\n    const nested = outer?.Communication_Agent_response?.content;\n    if (typeof nested === 'string') {\n      current = nested;\n    }\n  }\n\n  const nestedParsed = tryParseJson(current);\n  if (Array.isArray(nestedParsed) && nestedParsed[0]?.output !== undefined) {\n    current = String(nestedParsed[0].output || '');\n  } else if (nestedParsed && typeof nestedParsed === 'object' && nestedParsed.output !== undefined) {\n    current = String(nestedParsed.output || '');\n  }\n\n  return current.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '').trim();\n};\n\nconst parseEmailPayload = (value) => {\n  const parsed = tryParseJson(value);\n  if (parsed && typeof parsed === 'object') {\n    const bodyHtml = parsed.body_html || parsed.message || '';\n    const bodyText = parsed.body_text || '';\n    return {\n      ...parsed,\n      message: bodyHtml || bodyText,\n      body_html: bodyHtml,\n      body_text: bodyText,\n    };\n  }\n\n  const action = extractJsonStringField(value, 'action');\n  const to = extractJsonStringField(value, 'to');\n  const subject = extractJsonStringField(value, 'subject');\n  const message = extractJsonStringField(value, 'message');\n  const bodyHtml = extractJsonStringField(value, 'body_html');\n  const bodyText = extractJsonStringField(value, 'body_text');\n\n  if (!subject && !message && !bodyHtml && !bodyText) {\n    throw new Error('Gagal mem-parse payload email dari Communication Agent');\n  }\n\n  return {\n    action: action || 'draft',\n    to,\n    subject: subject || '(tanpa subjek)',\n    message: bodyHtml || message || bodyText || '',\n    body_html: bodyHtml || message || '',\n    body_text: bodyText || '',\n  };\n};\n\nraw = normalizeCommunicationOutput(raw);\n\nconst draft = parseEmailPayload(raw);\nconst originalPrompt = $('Set - Prompt From User').first().json.PromptFinal || '';\n\nconst decodeHtml = (value) => String(value || '')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/&amp;/gi, '&')\n  .replace(/&quot;/gi, '\"')\n  .replace(/&#39;/gi, \"'\")\n  .replace(/&lt;/gi, '<')\n  .replace(/&gt;/gi, '>');\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst extractSenderProfile = (prompt) => {\n  const userName = prompt.match(/^\\s*-\\s*user_name:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userJobTitle = prompt.match(/^\\s*-\\s*user_job_title:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  const userEmail = prompt.match(/^\\s*-\\s*user_email:\\s*(.+)$/mi)?.[1]?.trim() || '';\n  return { userName, userJobTitle, userEmail };\n};\n\nconst stripHtmlTags = (value) => decodeHtml(String(value || '').replace(/<[^>]+>/g, ' '))\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst buildSignatureHtml = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return [\n    '<p style=\"margin-top: 24px;\">',\n    'Hormat saya,<br>',\n    '<strong>' + escapeHtml(userName) + '</strong>',\n    userJobTitle ? '<br><span style=\"color: #555;\">' + escapeHtml(userJobTitle) + '</span>' : '',\n    '</p>',\n  ].join('');\n};\n\nconst buildSignatureText = ({ userName, userJobTitle }) => {\n  if (!userName) return '';\n  return ['Hormat saya,', userName, userJobTitle].filter(Boolean).join('\\n');\n};\n\nconst replaceGenericHtmlSignature = (html, profile) => {\n  if (!profile.userName || !html) return html;\n  const signature = buildSignatureHtml(profile);\n  const genericSignaturePattern = /<p\\b[^>]*>\\s*Hormat\\s+saya,?\\s*(?:<br\\s*\\/?>\\s*)+(?:<strong[^>]*>\\s*)?(?:Communication\\s+Agent|AI\\s+Assistant|Assistant)(?:\\s*<\\/strong>)?\\s*(?:<br\\s*\\/?>\\s*(?:<span[^>]*>\\s*)?(?:Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant)(?:\\s*<\\/span>)?)?\\s*<\\/p>/i;\n  if (genericSignaturePattern.test(html)) {\n    return html.replace(genericSignaturePattern, signature);\n  }\n\n  const genericTextPattern = /Hormat\\s+saya,?\\s*(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<strong[^>]*>)?Communication\\s+Agent(?:<\\/strong>)?\\s*(?:(?:<br\\s*\\/?|\\n|\\r|\\s)+\\s*(?:<span[^>]*>)?Spesialis\\s+Komunikasi\\s+Tertulis(?:<\\/span>)?)?/i;\n  if (genericTextPattern.test(html)) {\n    return html.replace(genericTextPattern, signature);\n  }\n\n  return html;\n};\n\nconst replaceGenericTextSignature = (text, profile) => {\n  if (!profile.userName || !text) return text;\n  return String(text).replace(\n    /Hormat\\s+saya,?\\s*[\\r\\n]+\\s*(Communication\\s+Agent|AI\\s+Assistant|Assistant)\\s*(?:[\\r\\n]+\\s*(Spesialis\\s+Komunikasi\\s+Tertulis|AI\\s+Assistant|Assistant))?/i,\n    buildSignatureText(profile),\n  );\n};\n\nconst replacePlaceholderHtmlSignature = (html, profile) => {\n  if (!html) return html;\n\n  let updated = String(html);\n  if (profile.userName) {\n    updated = updated.replace(/\\[\\s*Nama\\s+Pengirim\\s*\\]/gi, escapeHtml(profile.userName));\n  }\n  if (profile.userJobTitle) {\n    updated = updated.replace(/\\[\\s*Jabatan\\s+Pengirim\\s*\\]/gi, escapeHtml(profile.userJobTitle));\n  } else {\n    updated = updated.replace(/<br\\s*\\/?>(\\s*)\\[\\s*Jabatan\\s+Pengirim\\s*\\]/gi, '');\n    updated = updated.replace(/\\[\\s*Jabatan\\s+Pengirim\\s*\\]/gi, '');\n  }\n\n  return updated;\n};\n\nconst replacePlaceholderTextSignature = (text, profile) => {\n  if (!text) return text;\n\n  let updated = String(text);\n  if (profile.userName) {\n    updated = updated.replace(/\\[\\s*Nama\\s+Pengirim\\s*\\]/gi, profile.userName);\n  }\n  if (profile.userJobTitle) {\n    updated = updated.replace(/\\[\\s*Jabatan\\s+Pengirim\\s*\\]/gi, profile.userJobTitle);\n  } else {\n    updated = updated.replace(/^[ \\t]*\\[\\s*Jabatan\\s+Pengirim\\s*\\][ \\t]*\\r?\\n?/gim, '');\n    updated = updated.replace(/\\[\\s*Jabatan\\s+Pengirim\\s*\\]/gi, '');\n  }\n\n  return updated;\n};\n\nconst extractEmail = (label) => {\n  const escapedLabel = label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const match = originalPrompt.match(new RegExp(`${escapedLabel}\\\\s*:\\\\s*([^\\\\n]+)`, 'i'));\n  return match?.[1]?.trim() || null;\n};\n\nconst isReplyRequest = /draft email balasan|balas email|email balasan/i.test(originalPrompt);\nconst explicitRecipient = extractEmail('Kepada');\nconst originalSender = extractEmail('Email dari');\n\nif (!draft.to) {\n  if (isReplyRequest && originalSender) {\n    draft.to = originalSender;\n  } else if (explicitRecipient) {\n    draft.to = explicitRecipient;\n  }\n}\n\nconst senderProfile = extractSenderProfile(originalPrompt);\n\ndraft.message = draft.body_html || draft.message || draft.body_text || '';\ndraft.body_html = replacePlaceholderHtmlSignature(replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile), senderProfile);\ndraft.message = replacePlaceholderHtmlSignature(replaceGenericHtmlSignature(draft.body_html || draft.message, senderProfile), senderProfile);\ndraft.body_text = replacePlaceholderTextSignature(replaceGenericTextSignature(draft.body_text || stripHtmlTags(draft.message), senderProfile), senderProfile);\n\nconst subject = draft.subject || '(tanpa subjek)';\nconst recipient = draft.to || 'belum ditentukan';\nconst needsRecipientHint = draft.to ? '' : ' dengan menyebut alamat tujuan jika belum ada';\n\nreturn [{\n  json: {\n    output: `Draft email sudah siap.\\n\\nSubjek: ${subject}\\nPenerima: ${recipient}\\n\\nSilakan review draftnya. Jika sudah sesuai, minta saya kirimkan email ini${needsRecipientHint}.`,\n    action_results: {\n      email_draft: draft,\n    },\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        736
+        1552,
+        -608
       ],
-      "id": "3c32f103-0e98-40fa-80c8-9f95ed82ee72",
+      "id": "0732dc2f-69b7-4fec-ad4f-dab920aa13c8",
       "name": "Code - Format Draft Email Response"
     },
     {
@@ -1359,10 +1359,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        800,
-        736
+        1792,
+        -608
       ],
-      "id": "e43d48a6-f845-41f1-b769-6aff5c65d6b0",
+      "id": "0c589395-12cd-44af-b776-c5a66bded55f",
       "name": "Respond - Draft Email"
     },
     {
@@ -1396,10 +1396,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1248,
-        400
+        2240,
+        -944
       ],
-      "id": "4ee63cd9-6d87-43fb-b690-e9b7d8911633",
+      "id": "dfa2de40-680f-4a70-9fa9-f527bc09d464",
       "name": "Supabase - Log Email Sent Response",
       "credentials": {
         "supabaseApi": {
@@ -1439,10 +1439,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1024,
-        736
+        2016,
+        -608
       ],
-      "id": "ed22eb2d-ce98-4337-ab5a-ccbae59be39e",
+      "id": "2d7da739-071e-4316-ba32-85f5a99c30e8",
       "name": "Supabase - Log Draft Email Response",
       "credentials": {
         "supabaseApi": {
@@ -1459,10 +1459,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        96,
-        1600
+        1088,
+        256
       ],
-      "id": "3b5c35d5-c33f-45b3-93e1-c77df4ed393e",
+      "id": "895a8fa4-8b30-45bd-92ea-f22982dd1087",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
@@ -1549,10 +1549,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -1008,
-        288
+        -16,
+        -1056
       ],
-      "id": "70647cbf-ca8f-4efc-9d50-d3785566d53d",
+      "id": "6b6c8e88-685f-497c-9e51-d852da38fd3a",
       "name": "Switch - Attachment Type"
     },
     {
@@ -1563,10 +1563,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -752,
-        336
+        240,
+        -1008
       ],
-      "id": "b9a8712d-b139-4164-9bc3-2ea812c6b0c2",
+      "id": "e8d72d94-26fb-448d-a9cf-ad712fdec9b2",
       "name": "Extract - CSV Rows"
     },
     {
@@ -1678,10 +1678,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        336,
-        368
+        1328,
+        -976
       ],
-      "id": "c28b51d3-207c-42c8-9eac-4ecb32b81ae5",
+      "id": "22670635-2b00-40c7-acfc-e15699940ee2",
       "name": "Switch - Output Type"
     },
     {
@@ -1693,10 +1693,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1264,
-        1280
+        -272,
+        -64
       ],
-      "id": "8e3dba24-f403-410c-8b27-16754f639dca",
+      "id": "e8856394-9728-4251-b591-db24c2c25aef",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
@@ -1718,10 +1718,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        320,
-        1600
+        1312,
+        256
       ],
-      "id": "7a8c9ac4-b2c3-46cc-bf90-8a5f035d425f",
+      "id": "9bb58d7f-7388-41f5-b9e5-92c0b4a2f4de",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -2298,6 +2298,11 @@
             "index": 0
           },
           {
+            "node": "Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
             "node": "Report Agent",
             "type": "ai_languageModel",
             "index": 0
@@ -2416,11 +2421,6 @@
             "index": 0
           },
           {
-            "node": "Supervisor Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          },
-          {
             "node": "Communication Agent",
             "type": "ai_languageModel",
             "index": 0
@@ -2438,7 +2438,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "efda1493-32c6-493e-9b0b-6a13ed06a902",
+  "versionId": "ae769ba8-26af-42ed-9c8b-7595b31edc46",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

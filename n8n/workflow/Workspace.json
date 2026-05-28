@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1424,
-        -1312
+        592,
+        -1360
       ],
-      "id": "dbf1adb3-3e28-4b30-99a2-d46e0b34b6eb",
+      "id": "d89e3bb7-f00f-4a72-ad16-562bea939fd6",
       "name": "Prepare Draft Payload"
     },
     {
@@ -86,10 +86,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -640,
-        -1216
+        1376,
+        -1264
       ],
-      "id": "5541ace8-12ce-4109-97ff-36619c84e924",
+      "id": "110ce40d-8099-4931-975b-ddd617a15e95",
       "name": "Create Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -167,10 +167,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -640,
-        -1408
+        1376,
+        -1456
       ],
-      "id": "4101baf6-b01f-4adb-b24b-5d5a1a9359fe",
+      "id": "71f26c6c-1ee9-48d9-8902-2159bbe86d81",
       "name": "Update Draft Row",
       "credentials": {
         "supabaseApi": {
@@ -186,10 +186,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -336,
-        -1408
+        1680,
+        -1456
       ],
-      "id": "69404d4f-abdb-42f3-964d-0ca19b4f76ae",
+      "id": "27287e35-bca9-4ef8-b4e9-49bb72c6af51",
       "name": "Format Draft Response"
     },
     {
@@ -199,10 +199,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -112,
-        -1408
+        1904,
+        -1456
       ],
-      "id": "7aa173c2-a272-4abb-8dd2-81609ab9161a",
+      "id": "521997ac-67e8-438c-8cab-70fea04ed270",
       "name": "Respond to Webhook"
     },
     {
@@ -213,10 +213,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1648,
-        -1504
+        368,
+        -1552
       ],
-      "id": "3969e73f-ba00-4cdd-80d3-2aed0a1f16e5",
+      "id": "6a675f34-4bab-4194-a656-d06479813ded",
       "name": "Prepare Send Payload"
     },
     {
@@ -227,10 +227,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1120,
-        -1504
+        896,
+        -1552
       ],
-      "id": "31682eb5-c83c-4bc2-9183-5cf4c2d7a113",
+      "id": "e0244d15-2e0c-412b-92ad-ce02077b02c4",
       "name": "Prepare Sent Draft Update"
     },
     {
@@ -306,10 +306,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -640,
-        -1616
+        1376,
+        -1664
       ],
-      "id": "bc812d2e-14a1-4292-b180-7295ee4db061",
+      "id": "6cc9564a-62d7-442f-be60-64de609e5eb1",
       "name": "Mark Draft As Sent",
       "credentials": {
         "supabaseApi": {
@@ -346,10 +346,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1968,
-        -1408
+        48,
+        -1456
       ],
-      "id": "54106a0e-419f-49d4-90a1-d52cf9411861",
+      "id": "a09f0c95-8901-45c7-8886-c1fb093a209f",
       "name": "If"
     },
     {
@@ -360,10 +360,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -944,
-        256
+        1072,
+        208
       ],
-      "id": "af3f74e4-7f21-4a34-bac5-d626d2d5bb0e",
+      "id": "509c8cca-5aa5-4147-9d0d-26ceeb5146a5",
       "name": "Groq Chat Model1",
       "credentials": {
         "groqApi": {
@@ -383,10 +383,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1760,
-        -1312
+        256,
+        -1360
       ],
-      "id": "1c4a48a7-a20c-4148-81a1-99e3d5dc06a7",
+      "id": "faebf5b0-6fd6-43d4-90ac-b1b84fdda51b",
       "name": "Draft & Send Email"
     },
     {
@@ -398,10 +398,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1520,
-        -1152
+        496,
+        -1200
       ],
-      "id": "975e53c5-231f-4036-931f-6fa69dae4416",
+      "id": "e249569a-250e-4e3f-b62f-5c543383ecd8",
       "name": "Get Email Format"
     },
     {
@@ -432,10 +432,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1216,
-        -1312
+        800,
+        -1360
       ],
-      "id": "b2116204-fcd3-4596-bfb4-2e0e1ca80a94",
+      "id": "1c6f2992-1cc3-474b-846a-11c855ce9460",
       "name": "Is Revision?"
     },
     {
@@ -463,10 +463,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1424,
-        -1504
+        592,
+        -1552
       ],
-      "id": "07d1957b-deee-498e-b58c-53720b324676",
+      "id": "83b754c9-ac3f-41ac-9aeb-1d6305bbc264",
       "name": "Send Email via Gmail API"
     },
     {
@@ -479,10 +479,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2160,
-        -960
+        -160,
+        -1008
       ],
-      "id": "d4c10829-1309-4348-9f33-e2a1f3f3008b",
+      "id": "85159026-10e7-40d2-928c-3fdc0f4127c2",
       "name": "Get Email Summary",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -493,10 +493,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -832,
-        -960
+        1184,
+        -1008
       ],
-      "id": "7a6d127f-c784-4e14-aabf-440491a97244",
+      "id": "7fbf25f9-70e1-435b-a12e-d9dacb38a99b",
       "name": "Loop Over Items"
     },
     {
@@ -529,10 +529,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -640,
-        -768
+        1376,
+        -816
       ],
-      "id": "2ef328d4-f49f-4b6a-939b-c4ed6d5c4200",
+      "id": "48c84ccd-47cf-4fbb-bedb-7fce072ccf6e",
       "name": "Get Email Detail",
       "continueOnFail": true
     },
@@ -543,10 +543,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -416,
-        -768
+        1600,
+        -816
       ],
-      "id": "9203b47d-5483-49f8-960b-5e2fb43ad5e5",
+      "id": "4bf80ed0-f37b-48b9-bf1b-5e33e566a039",
       "name": "Normalize Email Detail"
     },
     {
@@ -579,10 +579,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1728,
-        -960
+        288,
+        -1008
       ],
-      "id": "986ffa59-ea9f-4e97-97c0-3ef433829a53",
+      "id": "c806f70c-b47b-494d-bc30-4b9a435adf66",
       "name": "Get Unread Email"
     },
     {
@@ -612,10 +612,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1536,
-        -960
+        480,
+        -1008
       ],
-      "id": "5507b9cd-5c86-43d0-8f3b-404d958018ff",
+      "id": "b8155244-02d3-4141-b71b-8c48ab393ee0",
       "name": "Has Unread Emails?"
     },
     {
@@ -627,10 +627,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        -1168,
-        -976
+        848,
+        -1024
       ],
-      "id": "13c1f8cf-a764-4b38-b95b-99956ba485fa",
+      "id": "03ccd55f-5971-40cf-be4e-e37be322cfdf",
       "name": "Split Out Email Messages"
     },
     {
@@ -641,10 +641,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1936,
-        -960
+        80,
+        -1008
       ],
-      "id": "431864a7-bc08-450c-900c-2f224b551d98"
+      "id": "ad4e87c5-8baf-4abc-867e-d0d8b35ab4b8"
     },
     {
       "parameters": {
@@ -654,10 +654,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -480,
-        -912
+        1536,
+        -960
       ],
-      "id": "4153c7f7-f420-415d-908f-a0ab96d3013c"
+      "id": "f4c6632e-6fd3-499a-bbb6-82cb63d9f063"
     },
     {
       "parameters": {
@@ -667,10 +667,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -496,
-        -576
+        1520,
+        -624
       ],
-      "id": "626d492a-6566-4203-94d1-18311592b31b"
+      "id": "60cdbc99-5fb0-43b4-be3f-90ad25adf49c"
     },
     {
       "parameters": {
@@ -689,10 +689,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -192,
-        -784
+        1824,
+        -832
       ],
-      "id": "7344822c-2fd7-4576-99c3-8337c1ababee"
+      "id": "cc17627b-e092-40a1-915d-2da10780cbc4"
     },
     {
       "parameters": {
@@ -702,10 +702,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        304,
-        -752
+        2320,
+        -800
       ],
-      "id": "0b02a471-1287-4e6f-a749-f54c971b7871"
+      "id": "11ea29d6-837c-4c1b-b28b-fd22846ae592"
     },
     {
       "parameters": {
@@ -715,10 +715,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        544,
-        -752
+        2560,
+        -800
       ],
-      "id": "bdbb73c7-5e34-42b3-81fd-42b711c636b0"
+      "id": "97582975-c149-4d28-a892-31f443e8e69a"
     },
     {
       "parameters": {
@@ -730,10 +730,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        768,
-        -752
+        2784,
+        -800
       ],
-      "id": "91fc191e-956c-427f-92fd-022d9fd6f1ca"
+      "id": "52704f80-bbf4-41bb-9ec6-6a112ffee7d4"
     },
     {
       "parameters": {
@@ -764,10 +764,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -1744,
-        96
+        272,
+        48
       ],
-      "id": "9158f5f0-a90b-47ad-a98c-7075fa30ef2c",
+      "id": "0185cc5b-678f-47a4-8083-2ffc53684ede",
       "name": "retrieve vector data",
       "credentials": {
         "pineconeApi": {
@@ -783,10 +783,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -1392,
-        -160
+        624,
+        -208
       ],
-      "id": "a5f4f57b-2dbe-4863-97b9-26502d82d237",
+      "id": "d71e1ffb-2e9d-4fd7-a244-2492db4d235c",
       "name": "Respond to Webhook1"
     },
     {
@@ -799,10 +799,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2560,
-        -160
+        -560,
+        -208
       ],
-      "id": "3eecad8e-68ce-4198-9a15-7088fbef56b4",
+      "id": "e23e5b8d-23c5-4299-87c5-dea8f5fccbea",
       "name": "Chat Document",
       "webhookId": "1e9639af-7d9f-4d7a-9f67-fef0b9eeef64"
     },
@@ -813,10 +813,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2176,
-        -160
+        -176,
+        -208
       ],
-      "id": "b0c49bae-3925-44d9-8989-2b2e5885a6f8",
+      "id": "8fb19f3b-94af-43ff-8120-25e0e0b37e99",
       "name": "Prepare Document Query"
     },
     {
@@ -829,10 +829,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2176,
-        -1408
+        -176,
+        -1456
       ],
-      "id": "26375883-0e35-42d7-943b-b49e5eaf01bd",
+      "id": "a4b1f2b0-e854-4d6a-995c-e39a3ebfb4b0",
       "name": "Drafting Email Webhook",
       "webhookId": "e32a147f-10a0-44bc-a306-3768e29a60fe"
     },
@@ -843,10 +843,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1904,
-        -1904
+        112,
+        -1952
       ],
-      "id": "f225c300-0b85-490f-9173-45a652c8602f",
+      "id": "628f4aa9-d620-419b-938b-aef93ad0076d",
       "name": "Prepare Calendar Summary Context"
     },
     {
@@ -866,10 +866,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1664,
-        -1904
+        352,
+        -1952
       ],
-      "id": "a67280b3-850b-4b8e-b3d1-d98d6adf0805",
+      "id": "b48280b8-f83d-4610-84ac-e4e07437e3f1",
       "name": "Build Calendar Summary Prompt"
     },
     {
@@ -879,10 +879,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1104,
-        -1904
+        912,
+        -1952
       ],
-      "id": "0567be50-6843-467c-8987-e8ae792b50f2",
+      "id": "217d7d11-ceef-4c1a-a5a2-e0c8d6fccf81",
       "name": "Parse Calendar Summary"
     },
     {
@@ -892,10 +892,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -848,
-        -1904
+        1168,
+        -1952
       ],
-      "id": "b5a7f06b-dbbd-4df6-93db-efb0841bee40",
+      "id": "cb763387-6ef3-4944-90a7-4c0f93b28c7b",
       "name": "Build Calendar Summary Response"
     },
     {
@@ -905,10 +905,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -560,
-        -1904
+        1456,
+        -1952
       ],
-      "id": "0e76dd36-e125-4f99-ae28-8c5d2a70a544",
+      "id": "ece94a94-0719-4ec0-b4db-56c678c422ab",
       "name": "Respond to Webhook2"
     },
     {
@@ -921,10 +921,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2592,
-        -2160
+        -592,
+        -2208
       ],
-      "id": "699f45b7-bae4-419b-8eec-45bbafab915d",
+      "id": "80684472-b733-4c10-b870-8dfc967d4d64",
       "name": "Get Jira Summary",
       "webhookId": "bd05bfe8-8f51-4074-82cb-77db2b851b2d"
     },
@@ -935,10 +935,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2384,
-        -2160
+        -384,
+        -2208
       ],
-      "id": "43eca0be-a1c7-4faf-bc43-42d61a8f580c",
+      "id": "4bcb258b-765d-4946-82c0-db77642dffb3",
       "name": "Prepare Jira Summary Request Data"
     },
     {
@@ -970,10 +970,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -2176,
-        -2160
+        -176,
+        -2208
       ],
-      "id": "ebda1784-7bff-4be3-bdb9-e82b378732cc",
+      "id": "a2736b75-8dd5-48a4-8cdd-4ba2e76569d8",
       "name": "Get Jira Summary Issues"
     },
     {
@@ -983,10 +983,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1952,
-        -2160
+        64,
+        -2208
       ],
-      "id": "0b88f39c-0765-4d9b-89f9-578eabebea07",
+      "id": "e0e79cb2-4989-4da8-a5e0-220f42c6aa18",
       "name": "Prepare Jira Summary Context"
     },
     {
@@ -1006,10 +1006,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1680,
-        -2160
+        336,
+        -2208
       ],
-      "id": "3aa50319-1a25-4d5f-92c4-19edf23de8b0",
+      "id": "99a8a039-28ee-4530-af7b-e93bb9058267",
       "name": "Build Jira Summary Prompt"
     },
     {
@@ -1028,10 +1028,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -1424,
-        -2160
+        592,
+        -2208
       ],
-      "id": "ec5434cf-545b-4abf-8ad2-0c5b4a28ea2d",
+      "id": "16ded877-37e0-4d87-a1e2-87c4011a1a37",
       "name": "Jira Summary Agent"
     },
     {
@@ -1041,10 +1041,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1072,
-        -2160
+        944,
+        -2208
       ],
-      "id": "a3b166b1-6370-4109-8ecf-af960d0ca75a",
+      "id": "f7b7b3e9-fb8e-41fb-a4dd-6d74062a73f1",
       "name": "Parse Jira Summary"
     },
     {
@@ -1054,10 +1054,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -880,
-        -2160
+        1136,
+        -2208
       ],
-      "id": "5f3dc4b3-8f54-4967-a7e0-04aefb16543e",
+      "id": "480c2773-2663-4778-883b-e51f4500a054",
       "name": "Build Jira Summary Response"
     },
     {
@@ -1069,10 +1069,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -624,
-        -2160
+        1392,
+        -2208
       ],
-      "id": "83587149-645d-4dbb-a36f-efbe8f16fe58",
+      "id": "cca2db0e-5d7a-4e74-ad19-ec082f8ff86d",
       "name": "Respond Jira Summary"
     },
     {
@@ -1085,10 +1085,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2352,
-        -1904
+        -352,
+        -1952
       ],
-      "id": "7e4688a1-f0bb-4cf0-bd18-fe9821c3885c",
+      "id": "cce50fb9-fd3c-46b4-9b0b-529a227ae780",
       "name": "Get Summary",
       "webhookId": "1e4383e5-8647-4454-a5e6-755cc5bccc8d"
     },
@@ -1103,10 +1103,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -1936,
-        -160
+        80,
+        -208
       ],
-      "id": "198de5ce-1edc-40c0-89e0-04ad1db6661c",
+      "id": "2805eeff-f088-4770-a8f0-3aa301b3b2ad",
       "name": "AI Agent"
     },
     {
@@ -1151,10 +1151,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -2144,
-        -1904
+        -144,
+        -1952
       ],
-      "id": "375a0644-6c20-4611-87db-abde85bac5be",
+      "id": "01c5905b-739d-4317-8b8d-cac6d5aaeba3",
       "name": "Get Top 5 Event"
     },
     {
@@ -1173,10 +1173,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -1456,
-        -1904
+        560,
+        -1952
       ],
-      "id": "30ebece0-9f33-49fc-9a3b-ba52b8abc575",
+      "id": "7ebafed2-dafa-4df1-bd61-d5d2ca465f08",
       "name": "Basic LLM Chain"
     },
     {
@@ -1195,10 +1195,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        16,
-        -784
+        2032,
+        -832
       ],
-      "id": "139f1bfe-8a68-415f-bcbd-79cf071954d9",
+      "id": "7549a00d-0972-4906-a952-063b0e94bf8a",
       "name": "Email Summary Agent"
     },
     {
@@ -1210,10 +1210,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1648,
-        304
+        368,
+        256
       ],
-      "id": "2b95ed6f-2a76-44f9-aaf5-a2a518f4535d",
+      "id": "282fcdf7-84dc-4199-b2b2-3e5994c14a5a",
       "name": "Embeddings OpenAI",
       "credentials": {
         "openAiApi": {
@@ -1235,10 +1235,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1264,
-        192
+        752,
+        144
       ],
-      "id": "e2ff065f-0c60-4385-9f4d-a74296016e95",
+      "id": "f1f96d5b-b937-43e5-a1fa-33cd1babb3c6",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -1321,11 +1321,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Groq Chat Model1": {
-      "ai_languageModel": [
-        []
       ]
     },
     "Get Email Format": {
@@ -1836,7 +1831,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f88e9bad-cd60-43cd-94bd-3b063ce7753f",
+  "versionId": "35dd403d-663f-48e5-98a2-8b9105574275",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

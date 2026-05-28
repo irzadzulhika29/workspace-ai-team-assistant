@@ -184,15 +184,34 @@ ${bodyHtml}
   regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
-    const currentBody = emailDraft.body_html || emailDraft.message || emailDraft.body_text || '';
-    const message = `Buat ulang draft email ini dengan perbaikan berikut: "${improvementText}"
+    const currentBodyHtml = emailDraft.body_html || emailDraft.message || '';
+    const currentBodyText = emailDraft.body_text || '';
+    const message = `DRAFT SAJA. Revisi draft email yang SUDAH ADA berikut ini sesuai instruksi pengguna.
 
-Draft email saat ini:
-To: ${emailDraft.to}
-Subject: ${emailDraft.subject}
-Message: ${currentBody}
+INSTRUKSI REVISI PENGGUNA:
+${improvementText}
 
-Tolong buatkan draft baru yang sudah diperbaiki sesuai instruksi di atas.`;
+ATURAN REVISI WAJIB:
+- Gunakan draft saat ini sebagai basis revisi. Jangan menulis ulang dari nol jika tidak diminta.
+- Pertahankan alamat tujuan yang sama kecuali pengguna eksplisit meminta mengganti penerima.
+- Pertahankan subject yang sama kecuali pengguna eksplisit meminta mengganti subject.
+- Pertahankan fakta, detail transaksi, angka, tanggal, dan konteks yang sudah ada kecuali pengguna eksplisit meminta perubahan.
+- Jika pengguna hanya meminta tambahan kecil, lakukan perubahan minimal pada draft yang ada.
+- Kembalikan JSON action "draft" saja, jangan kirim email.
+- Body email wajib tetap HTML rapi.
+- Gunakan sender_profile dari context workflow untuk tanda tangan. Jangan gunakan placeholder seperti [Nama Pengirim] atau [Jabatan Pengirim].
+
+DRAFT EMAIL SAAT INI:
+To: ${emailDraft.to || ''}
+Subject: ${emailDraft.subject || ''}
+
+BODY_HTML:
+${currentBodyHtml}
+
+BODY_TEXT:
+${currentBodyText}
+
+Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
 
     return post(urls.getSupervisor, {
       action: "chat",
