@@ -12,9 +12,9 @@
       "typeVersion": 2.1,
       "position": [
         -3504,
-        -624
+        128
       ],
-      "id": "ad9e4305-bdbb-4070-b64d-06d40c263fc8",
+      "id": "e1727fca-4c66-4d93-8675-012bdee3c967",
       "name": "Webhook",
       "webhookId": "78bcae28-9ec4-4e8c-acc1-cbf84e842956",
       "onError": "continueRegularOutput"
@@ -27,9 +27,9 @@
       "typeVersion": 2,
       "position": [
         -3248,
-        -624
+        128
       ],
-      "id": "f63dcec8-b3d1-463a-bd55-4a47283b7e6c",
+      "id": "0a86a82a-9804-4a18-9465-8ffb47746f7c",
       "name": "Prepare Request Data"
     },
     {
@@ -42,9 +42,9 @@
       "typeVersion": 1,
       "position": [
         -2528,
-        -400
+        352
       ],
-      "id": "05fbd517-487c-4931-8ee4-6aefdc68e328",
+      "id": "6f56f6ef-d772-4b14-9fb6-b384fcea0a44",
       "name": "Split Out Email Messages"
     },
     {
@@ -55,9 +55,9 @@
       "typeVersion": 2,
       "position": [
         -1904,
-        -448
+        304
       ],
-      "id": "21f09a0e-91c3-4763-889c-b7e61f36316d",
+      "id": "7f1fddda-3019-4c74-8675-4f43e30dfdcb",
       "name": "Aggregate Email Details"
     },
     {
@@ -68,9 +68,9 @@
       "typeVersion": 2,
       "position": [
         -2080,
-        16
+        768
       ],
-      "id": "b31a291f-c775-4aa0-bc49-7c63fa5091fd",
+      "id": "f9ad73ea-2bca-4853-94f9-ba4e8958c4ff",
       "name": "Build Empty Email Payload"
     },
     {
@@ -90,9 +90,9 @@
       "typeVersion": 3.4,
       "position": [
         -2736,
-        -864
+        -112
       ],
-      "id": "8ee988cc-a83d-4836-ad8f-bd4ad613a83e",
+      "id": "2517c0f3-c27f-41c6-b0c9-72e0fa93da70",
       "name": "Build Calendar Prompt"
     },
     {
@@ -101,7 +101,7 @@
           "assignments": [
             {
               "name": "prompt",
-              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis daftar issue Jira yang masih aktif atau belum selesai.\n2. Tentukan prioritas singkat untuk domain Jira.\n3. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"high_priority_count\": number\n  }\n}\n\nATURAN:\n- Jangan mengarang sprint, blocker, atau progres bila tidak muncul di data.\n- Jika request gagal atau data kosong, tetap return JSON dengan status partial atau failed.\n- Fokus pada issue prioritas tinggi, issue yang masih To Do, dan issue yang sedang In Progress.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
+              "value": "=Kamu adalah Jira Briefing Agent.\n\nTugas:\n1. Analisis daftar issue Jira yang masih aktif atau belum selesai.\n2. Ringkas progres pekerjaan saat ini: apa yang sedang bergerak, apa yang sudah mendekati selesai, dan apakah ada masalah yang perlu diperhatikan.\n3. Tentukan prioritas singkat untuk domain Jira.\n4. Return HANYA JSON valid.\n\nFORMAT JSON WAJIB:\n{\n  \"domain\": \"jira\",\n  \"status\": \"success | partial | failed\",\n  \"priority\": \"high | medium | low\",\n  \"headline\": \"string\",\n  \"summary_points\": [\"string\"],\n  \"recommendations\": [\"string\"],\n  \"source_metrics\": {\n    \"total_issues\": number,\n    \"todo_count\": number,\n    \"in_progress_count\": number,\n    \"high_priority_count\": number,\n    \"overdue_count\": number,\n    \"done_count\": number,\n    \"completion_rate\": number\n  }\n}\n\nATURAN:\n- Headline harus 1 kalimat singkat, maksimal sekitar 18 kata, dan tidak mengulang semua angka metric.\n- summary_points berisi tepat 2 poin singkat yang fokus pada temuan paling penting untuk dashboard.\n- Setiap summary point maksimal 1 kalimat pendek dan hindari detail teknis berlebihan seperti daftar issue panjang.\n- recommendations berisi 0 sampai 2 tindak lanjut praktis untuk supervisor/tim.\n- Jangan mengarang sprint, blocker, owner, due date, atau progres bila tidak muncul di data.\n- Jika issue terlihat stagnan, overdue, prioritas tinggi menumpuk, atau terlalu banyak To Do dibanding In Progress, sebutkan sebagai risiko.\n- Jika request gagal atau data kosong, tetap return JSON dengan status partial atau failed.\n- Fokus pada issue prioritas tinggi, issue yang masih To Do, issue yang sedang In Progress, dan indikasi masalah yang tampak dari data.\n- Gaya bahasa harus cocok untuk kartu dashboard: ringkas, manajerial, dan cepat dipindai.\n\nDATA MENTAH:\n{{ JSON.stringify($json, null, 2) }}",
               "type": "string"
             }
           ]
@@ -112,9 +112,9 @@
       "typeVersion": 3.4,
       "position": [
         -2736,
-        -624
+        128
       ],
-      "id": "791e9e3d-ffd6-4123-a82c-4cfd275cd2f5",
+      "id": "84d68cc6-5a7c-41e9-9f8a-0f534eb44035",
       "name": "Build Jira Prompt"
     },
     {
@@ -134,9 +134,9 @@
       "typeVersion": 3.4,
       "position": [
         -1648,
-        -448
+        304
       ],
-      "id": "35a435e2-3b84-4e81-9d8d-6ff0782cf99e",
+      "id": "37c57991-2358-4b26-820d-1860960c3d99",
       "name": "Build Email Prompt"
     },
     {
@@ -147,22 +147,22 @@
       "typeVersion": 2,
       "position": [
         -2192,
-        -864
+        -112
       ],
-      "id": "1a2f7f2d-6fbc-42cf-add1-b221fd280c69",
+      "id": "7f9727b3-0cea-49ad-a9c0-6bff7fcf6c0f",
       "name": "Parse Calendar Briefing"
     },
     {
       "parameters": {
-        "jsCode": "const raw = String($json.output || $json.text || $json.response || $json.content || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nreturn [\n  {\n    json: {\n      jira_briefing: {\n        domain: 'jira',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        source_metrics: parsed.source_metrics || {}\n      }\n    }\n  }\n];"
+        "jsCode": "const raw = String($json.output || $json.text || $json.response || $json.content || '').trim();\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\nlet parsed = {};\n\nif (match) {\n  try {\n    parsed = JSON.parse(match[0]);\n  } catch {\n    parsed = {};\n  }\n}\n\nconst sanitizeText = (value, fallback = '') => {\n  const normalized = String(value || '').trim().replace(/\\s+/g, ' ');\n  return normalized || fallback;\n};\n\nconst sanitizeList = (value, limit = 2) =>\n  Array.isArray(value)\n    ? value.map((item) => sanitizeText(item)).filter(Boolean).slice(0, limit)\n    : [];\n\nconst sourceMetrics =\n  parsed.source_metrics && typeof parsed.source_metrics === 'object'\n    ? parsed.source_metrics\n    : {};\n\nreturn [\n  {\n    json: {\n      jira_briefing: {\n        domain: 'jira',\n        status: parsed.status || 'partial',\n        priority: parsed.priority || 'medium',\n        headline: sanitizeText(\n          parsed.headline,\n          'Ringkasan progres Jira belum tersedia.'\n        ),\n        summary_points: sanitizeList(parsed.summary_points, 2),\n        recommendations: sanitizeList(parsed.recommendations, 2),\n        source_metrics: {\n          ...sourceMetrics,\n          recommendations: sanitizeList(parsed.recommendations, 2),\n        }\n      }\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -2192,
-        -624
+        128
       ],
-      "id": "06273eb7-4a4f-466a-b524-eba59931bc17",
+      "id": "73aa6f38-f244-4a8a-a35e-8fcf86aa1550",
       "name": "Parse Jira Briefing"
     },
     {
@@ -173,9 +173,9 @@
       "typeVersion": 2,
       "position": [
         -1072,
-        -448
+        304
       ],
-      "id": "43e61656-65d3-4a1d-a290-33ad6377bf62",
+      "id": "c04c6d1c-e942-4587-aa1f-97c97f64ab8f",
       "name": "Parse Email Briefing"
     },
     {
@@ -188,9 +188,9 @@
       "typeVersion": 3.2,
       "position": [
         -1952,
-        -704
+        48
       ],
-      "id": "33625d38-7546-4538-85cd-0d6d13a773fa",
+      "id": "9c2ae3e3-15db-45ab-a8de-772fd52b3490",
       "name": "Merge Jira + Calendar"
     },
     {
@@ -203,9 +203,9 @@
       "typeVersion": 3.2,
       "position": [
         -1680,
-        -688
+        64
       ],
-      "id": "a8e9560c-6e55-4758-86e5-32ea7e5f3723",
+      "id": "36bcd670-895a-4237-9c86-b67f4248178d",
       "name": "Merge All Briefings"
     },
     {
@@ -216,9 +216,9 @@
       "typeVersion": 2,
       "position": [
         -1328,
-        -624
+        128
       ],
-      "id": "022e32f3-5809-43db-a470-ecd28786a30f",
+      "id": "7144e699-40a3-467e-b032-61c94d172d77",
       "name": "Build Dashboard Response"
     },
     {
@@ -230,23 +230,23 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        96,
-        -752
+        112,
+        0
       ],
-      "id": "c2798404-e4f8-44fc-947f-9af2beec4e3e",
+      "id": "35634267-0b98-4285-be48-a90f1877c159",
       "name": "Respond to Webhook"
     },
     {
       "parameters": {
-        "jsCode": "const payload = $json || {};\nconst userId = String(payload.user_id || '').trim();\nconst generatedAt = payload.generated_at || new Date().toISOString();\nconst briefings = payload.briefings && typeof payload.briefings === 'object' ? payload.briefings : {};\nconst allowedPriorities = new Set(['high', 'medium', 'low']);\nconst allowedStatuses = new Set(['success', 'partial', 'failed']);\nconst rows = [];\n\nfor (const domain of ['jira', 'calendar', 'email']) {\n  const briefing = briefings[domain];\n  if (!briefing || !userId) continue;\n\n  rows.push({\n    user_id: userId,\n    domain,\n    priority: allowedPriorities.has(briefing.priority) ? briefing.priority : 'medium',\n    headline: 'Briefing metadata only',\n    summary_points: [],\n    source_metrics: briefing.source_metrics && typeof briefing.source_metrics === 'object' ? briefing.source_metrics : {},\n    generated_at: generatedAt,\n    status: allowedStatuses.has(briefing.status) ? briefing.status : 'success',\n    error_message: briefing.error_message ? String(briefing.error_message) : null,\n  });\n}\n\nreturn [{\n  json: {\n    response_payload: payload,\n    supabase_rows: rows,\n  }\n}];"
+        "jsCode": "const payload = $json || {};\nconst userId = String(payload.user_id || '').trim();\nconst generatedAt = payload.generated_at || new Date().toISOString();\nconst briefings = payload.briefings && typeof payload.briefings === 'object' ? payload.briefings : {};\nconst allowedPriorities = new Set(['high', 'medium', 'low']);\nconst allowedStatuses = new Set(['success', 'partial', 'failed']);\nconst rows = [];\n\nfor (const domain of ['jira', 'calendar', 'email']) {\n  const briefing = briefings[domain];\n  if (!briefing || !userId) continue;\n\n  rows.push({\n    user_id: userId,\n    domain,\n    priority: allowedPriorities.has(briefing.priority) ? briefing.priority : 'medium',\n    headline: String(briefing.headline || '').trim() || 'Briefing belum tersedia',\n    summary_points: Array.isArray(briefing.summary_points) ? briefing.summary_points.slice(0, 4) : [],\n    source_metrics: briefing.source_metrics && typeof briefing.source_metrics === 'object' ? briefing.source_metrics : {},\n    generated_at: generatedAt,\n    status: allowedStatuses.has(briefing.status) ? briefing.status : 'success',\n    error_message: briefing.error_message ? String(briefing.error_message) : null,\n  });\n}\n\nreturn [{\n  json: {\n    response_payload: payload,\n    supabase_rows: rows,\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         -1072,
-        -768
+        -16
       ],
-      "id": "f9649242-5425-4e3e-a896-16be17b4b213",
+      "id": "a323d755-8f89-4f19-83e3-f8e38e20c83c",
       "name": "Prepare Supabase Upsert Rows"
     },
     {
@@ -259,9 +259,9 @@
       "typeVersion": 3.2,
       "position": [
         -384,
-        -896
+        -144
       ],
-      "id": "bf44c04f-d0e0-4d9d-9037-1e032b664782",
+      "id": "e572712f-e791-40cb-b5f8-a8321b2fdfbd",
       "name": "Merge Supabase Result"
     },
     {
@@ -272,9 +272,9 @@
       "typeVersion": 2,
       "position": [
         -192,
-        -752
+        0
       ],
-      "id": "90155ad1-aaa4-4b71-b5e5-6fb29530efcc",
+      "id": "c1821170-cb8a-4860-87d9-5f59d98917f5",
       "name": "Build Final Webhook Response"
     },
     {
@@ -285,9 +285,9 @@
       "typeVersion": 3,
       "position": [
         -2304,
-        -432
+        320
       ],
-      "id": "87a56c3a-1303-4f9c-979a-096a05ad45ee",
+      "id": "52ffe4f8-c079-469b-8699-f6bb79e6f188",
       "name": "Loop Over Items"
     },
     {
@@ -337,9 +337,9 @@
       "typeVersion": 4.2,
       "position": [
         -3024,
-        -864
+        -112
       ],
-      "id": "47745bee-b51f-4f36-8906-dae80c8d9cc4",
+      "id": "eb12a446-b52a-430c-bdc0-0de12960e662",
       "name": "Get Upcoming Calendar"
     },
     {
@@ -359,9 +359,9 @@
       "typeVersion": 1.7,
       "position": [
         -2544,
-        -864
+        -112
       ],
-      "id": "c120e5d3-a768-466a-92d2-2abec5be1f02",
+      "id": "d07fd978-3403-4563-bfb5-5a1461940b27",
       "name": "Calendar Briefing Agent"
     },
     {
@@ -394,9 +394,9 @@
       "typeVersion": 4.2,
       "position": [
         -3040,
-        -624
+        128
       ],
-      "id": "42483733-e812-4f17-b2e5-5018a79eacbd",
+      "id": "5a2ec57a-ab51-4f16-b5c3-bbe16ddc5fe2",
       "name": "Get Jira Issues"
     },
     {
@@ -430,9 +430,9 @@
       "typeVersion": 4.2,
       "position": [
         -3040,
-        -400
+        352
       ],
-      "id": "123855d2-0ca5-44c8-b821-b6546f449c05",
+      "id": "01856426-9e3f-4f91-8da4-f4b3a7d0bf29",
       "name": "Get Unread Email"
     },
     {
@@ -466,9 +466,9 @@
       "typeVersion": 4.2,
       "position": [
         -2000,
-        -320
+        432
       ],
-      "id": "f6f9b6dd-8e7f-4bac-ad3b-81c580a374b8",
+      "id": "07a60c0b-9002-48f4-a448-d67e95957450",
       "name": "Get Email Detail"
     },
     {
@@ -499,9 +499,9 @@
       "typeVersion": 2.2,
       "position": [
         -864,
-        -768
+        -16
       ],
-      "id": "9d361e52-1482-400a-b0e9-256920c405c5",
+      "id": "05a64553-8e0c-462e-9fe6-4123644bae47",
       "name": "Has Supabase Rows?"
     },
     {
@@ -547,9 +547,9 @@
       "typeVersion": 4.2,
       "position": [
         -592,
-        -992
+        -240
       ],
-      "id": "8f48588f-872f-4033-910f-31196e8938eb",
+      "id": "e8817029-8fbb-460c-8f22-73d4be2ebc6b",
       "name": "Upsert Briefings To Supabase"
     },
     {
@@ -580,9 +580,9 @@
       "typeVersion": 2.2,
       "position": [
         -2832,
-        -400
+        352
       ],
-      "id": "4c004936-fb0e-45bc-b488-536247a123bb",
+      "id": "8a8db529-59ad-4ce5-8dbc-4975af615567",
       "name": "Has Unread Emails?"
     },
     {
@@ -602,9 +602,9 @@
       "typeVersion": 1.7,
       "position": [
         -2528,
-        -624
+        128
       ],
-      "id": "08671fb4-e75c-471a-b660-d95285726b90",
+      "id": "5f42b4af-a46b-40dc-a564-9c5020fc796b",
       "name": "Jira Briefing Agent"
     },
     {
@@ -624,33 +624,33 @@
       "typeVersion": 1.7,
       "position": [
         -1440,
-        -448
+        304
       ],
-      "id": "bc3df4d4-707b-4dce-9730-dfbc89fe3b41",
+      "id": "069745fc-2240-4ac8-a514-ff2eec16e3d2",
       "name": "Email Briefing Agent"
     },
     {
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt-5.4",
+          "value": "gemini/gemini-2.5-flash",
           "mode": "list",
-          "cachedResultName": "gpt-5.4"
+          "cachedResultName": "gemini/gemini-2.5-flash"
         },
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1680,
-        256
+        -1648,
+        960
       ],
-      "id": "929e7dac-c521-4ce5-ad3c-614205170bf3",
+      "id": "8a29dea0-0035-4dd8-94e8-aab14a2997ac",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "WaEzDilNiOo3c09Y",
-          "name": "OpenAi account 6"
+          "id": "0rW2Paz5Jham8Eqn",
+          "name": "AC API"
         }
       }
     },
@@ -663,14 +663,33 @@
       "typeVersion": 1,
       "position": [
         -1840,
-        256
+        1008
       ],
-      "id": "7f7c37ad-defc-4d45-a1ce-ca4c1602fc02",
+      "id": "c9e33e86-79d7-4a48-a9f6-9422df1a4b2b",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
           "id": "72ktNmVndXqjvOfZ",
           "name": "Groq"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        960
+      ],
+      "id": "0ee35969-5e04-49b8-8d61-a2fa2bfc72a8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1lHvYHS15h1jfBZh",
+          "name": "Gemini"
         }
       }
     }
@@ -1021,11 +1040,6 @@
         ]
       ]
     },
-    "Groq Chat Model": {
-      "ai_languageModel": [
-        []
-      ]
-    },
     "OpenAI Chat Model": {
       "ai_languageModel": [
         [
@@ -1035,12 +1049,18 @@
             "index": 0
           },
           {
-            "node": "Email Briefing Agent",
+            "node": "Jira Briefing Agent",
             "type": "ai_languageModel",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
           {
-            "node": "Jira Briefing Agent",
+            "node": "Email Briefing Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -1052,7 +1072,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "5ed10320-1bba-45d4-bd13-ff865c23c1fd",
+  "versionId": "df6ce158-a77d-4051-99ba-981c2ae80941",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "18ec348d97c53a01154f67f5abeb3b6f415c374f2a462f66a92bb19e64a763e8"

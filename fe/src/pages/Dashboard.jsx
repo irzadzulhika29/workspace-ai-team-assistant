@@ -198,6 +198,69 @@ const buildJiraSummary = (items) => {
   };
 };
 
+const getIssuePriorityLabel = (issue) => {
+  return (
+    issue?.fields?.priority?.name ||
+    issue?.priority?.name ||
+    issue?.priority ||
+    ""
+  );
+};
+
+const isHighPriorityIssue = (issue) => {
+  const priority = String(getIssuePriorityLabel(issue)).toLowerCase();
+  return ["highest", "high", "critical", "blocker"].some((keyword) =>
+    priority.includes(keyword),
+  );
+};
+
+const buildFallbackJiraBriefing = (issues, summary, metrics) => {
+  const safeIssues = Array.isArray(issues) ? issues : [];
+  const total = summary?.total || safeIssues.length || 0;
+  const done = summary?.done || 0;
+  const percent = summary?.percent || 0;
+  const inReview = Number(metrics?.review || 0);
+  const overdue = Number(metrics?.overdue || 0);
+  const open = Number(metrics?.open || 0);
+  const highPriority = safeIssues.filter(isHighPriorityIssue).length;
+
+  let headline = "Belum ada issue Jira yang terdeteksi untuk diringkas.";
+  if (total > 0) {
+    if (overdue > 0) {
+      headline = `Progres Jira masih berjalan, tetapi ada ${overdue} issue yang melewati target dan perlu perhatian.`;
+    } else if (highPriority > 0 && open > done) {
+      headline = `Mayoritas issue masih aktif dan ada ${highPriority} issue prioritas tinggi yang perlu dijaga momentumnya.`;
+    } else if (percent >= 70) {
+      headline = `Progress Jira terlihat sehat dengan ${percent}% issue yang sudah selesai.`;
+    } else if (inReview > 0) {
+      headline = `Progress bergerak, dengan ${inReview} issue sudah masuk tahap review atau QA.`;
+    } else {
+      headline = `Saat ini ${done} dari ${total} issue sudah selesai dan sisanya masih dalam proses pengerjaan.`;
+    }
+  }
+
+  const points = [];
+  if (total > 0) {
+    points.push(`${done} dari ${total} issue sudah selesai, sementara sisanya masih aktif dikerjakan.`);
+    if (open > 0) {
+      points.push(`${open} issue masih aktif dan perlu dipantau ritme pengerjaannya.`);
+    }
+    if (inReview > 0) {
+      points.push(`${inReview} issue sudah masuk tahap review atau QA.`);
+    }
+    if (overdue > 0) {
+      points.push(`${overdue} issue sudah melewati target waktu dan berpotensi menahan progres.`);
+    } else if (highPriority > 0) {
+      points.push(`${highPriority} issue prioritas tinggi masih terbuka dan layak diprioritaskan lebih dulu.`);
+    }
+  }
+
+  return {
+    headline,
+    summary_points: points.slice(0, 2),
+  };
+};
+
 const extractEmailHeader = (email, name) => {
   const header = email?.payload?.headers?.find(
     (item) => item.name?.toLowerCase() === name.toLowerCase(),
@@ -990,6 +1053,7 @@ export default function Dashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          ...(user?.id && { user_id: user.id, userId: user.id }),
           google_access_token: googleAccessToken,
           jira_auth_base64: jiraAuthBase64,
           jira_subdomain: jiraSubdomain,
@@ -1054,16 +1118,46 @@ export default function Dashboard() {
     if (!jiraIssues.length)
       return "Belum ada issue Jira yang terdeteksi untuk diringkas.";
 
-    const statusLines = jiraSummary.byStatus
-      .slice(0, 3)
-      .map((status) => `${status.status}: ${status.count} issue`)
-      .join(", ");
+    if (jiraMetrics.open > 0 && jiraMetrics.review === 0) {
+      return "Sebagian besar issue aktif masih berada di tahap awal dan belum banyak yang masuk review.";
+    }
 
-    return `Distribusi issue saat ini: ${statusLines}.`;
+    if (jiraMetrics.overdue > 0) {
+      return "Ada issue yang tertahan melewati target waktu dan perlu dicek kembali prioritasnya.";
+    }
+
+    return jiraSummary.percent >= 60
+      ? "Sebagian pekerjaan sudah bergerak ke tahap selesai, meski masih ada issue aktif yang perlu dijaga momentumnya."
+      : "Progress masih berjalan, tetapi porsi issue aktif masih lebih besar dibanding yang sudah selesai.";
   }, [
     jiraIssues.length,
-    jiraSummary.byStatus,
+    jiraMetrics.open,
+    jiraMetrics.overdue,
+    jiraMetrics.review,
+    jiraSummary.percent,
   ]);
+
+  const jiraBriefingContent = useMemo(() => {
+    const fallback = buildFallbackJiraBriefing(
+      jiraIssues,
+      jiraSummary,
+      jiraMetrics,
+    );
+    const briefingPoints = Array.isArray(jiraBriefing?.summary_points)
+      ? jiraBriefing.summary_points.filter(Boolean)
+      : [];
+    const fallbackPoints = Array.isArray(fallback.summary_points)
+      ? fallback.summary_points
+      : [];
+
+    return {
+      headline: jiraBriefing?.headline || fallback.headline,
+      summaryPoints: (briefingPoints.length ? briefingPoints : fallbackPoints).slice(
+        0,
+        2,
+      ),
+    };
+  }, [jiraBriefing?.headline, jiraBriefing?.summary_points, jiraIssues, jiraMetrics, jiraSummary]);
 
   const query = searchQuery.trim().toLowerCase();
 
@@ -1292,13 +1386,32 @@ export default function Dashboard() {
                 <div className="rounded-2xl bg-white/80 px-1">
                   <p className="text-[1.05rem] leading-8 text-neutral-700">
                     <span className="font-semibold text-neutral-900">
-                      {jiraSummaryText}
+                      {jiraBriefingContent.headline}
                     </span>{" "}
                     {jiraSummary.total
-                      ? `Saat ini ${jiraSummary.done} issue telah selesai dari ${jiraSummary.total} issue yang terlacak.`
+                      ? jiraSummaryText
                       : "Belum ada issue yang bisa diringkas dari Jira saat ini."}
                   </p>
                 </div>
+
+                {jiraBriefingContent.summaryPoints.length ? (
+                  <div className="rounded-[1.5rem] border border-dashed border-primary-200/80 bg-[#fff8f5] p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500/80">
+                      Key Findings
+                    </p>
+                    <div className="mt-3 space-y-3">
+                      {jiraBriefingContent.summaryPoints.map((point, index) => (
+                        <div
+                          key={`${point}-${index}`}
+                          className="flex items-start gap-3 rounded-2xl bg-white px-3.5 py-3 text-sm leading-6 text-slate-700 shadow-[0_1px_0_rgba(15,23,42,0.04)]"
+                        >
+                          <span className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#ff623d]" />
+                          <span>{point}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </>
             )}
           </DashboardShell>
