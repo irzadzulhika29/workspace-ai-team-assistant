@@ -77,13 +77,27 @@ function Layout() {
   )
 }
 
+function PublicLayout({ children }) {
+  return (
+    <div className="flex min-h-screen w-full">
+      <main className="flex min-h-screen flex-1 flex-col overflow-hidden">
+        <div className="flex-1 bg-[#f8f9fd] p-3 pt-0 md:p-6 md:pt-6">
+          <div className="min-h-[calc(100dvh-3.5rem)] overflow-hidden rounded-xl md:min-h-[calc(100dvh-2.5rem)]">
+            {children}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
           {/* Public Route */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
