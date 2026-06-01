@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import {
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Trash2,
   Upload,
@@ -12,6 +14,8 @@ import FileWorkspaceHeader from '@/components/files/FileWorkspaceHeader'
 import SelectedDocumentPanel from '@/components/files/SelectedDocumentPanel'
 import UploadZone from '@/components/files/UploadZone'
 import { useFileWorkspace } from '@/hooks/useFileWorkspace'
+
+const PAGE_SIZE = 4;
 
 export default function FileWorkspace() {
   const {
@@ -40,6 +44,26 @@ export default function FileWorkspace() {
     setUploadModalOpen,
     setIsDetailExpanded,
   } = useFileWorkspace()
+
+  const [page, setPage] = useState(1);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(visibleDocuments.length / PAGE_SIZE)), [visibleDocuments.length]);
+  const safePage = Math.min(page, totalPages);
+  const shouldPaginate = activeTab === 'all' || activeTab === 'generated';
+  const paginatedDocuments = useMemo(
+    () => visibleDocuments.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [visibleDocuments, safePage],
+  );
+  const displayedDocuments = shouldPaginate ? paginatedDocuments : visibleDocuments;
+
+  useEffect(() => {
+    setPage(1)
+  }, [activeTab, searchQuery])
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
 
   return (
     <div className="h-full overflow-y-auto">
@@ -133,18 +157,44 @@ export default function FileWorkspace() {
                     />
                   </div>
 
-                  <DocumentSection
-                    title={
-                      activeTab === 'generated'
-                        ? 'Dokumen Generated'
-                        : activeTab === 'uploaded'
-                          ? 'Dokumen Terupload'
-                          : 'Semua Dokumen'
-                    }
-                    documents={visibleDocuments}
-                    selectedDocument={selectedDocument}
-                    onSelectDocument={handleSelectDocument}
-                  />
+                  <div>
+                    <DocumentSection
+                      title={
+                        activeTab === 'generated'
+                          ? 'Dokumen Generated'
+                          : activeTab === 'uploaded'
+                            ? 'Dokumen Terupload'
+                            : 'Semua Dokumen'
+                      }
+                      documents={displayedDocuments}
+                      selectedDocument={selectedDocument}
+                      onSelectDocument={handleSelectDocument}
+                      variant={activeTab === 'generated' ? 'single-row' : 'grid'}
+                    />
+                    {shouldPaginate && totalPages > 1 && (
+                      <div className="mt-4 flex items-center justify-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          disabled={safePage <= 1}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <span className="text-sm font-medium text-slate-600">
+                          {safePage} / {totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={safePage >= totalPages}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>

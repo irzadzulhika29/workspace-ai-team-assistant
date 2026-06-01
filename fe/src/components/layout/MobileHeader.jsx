@@ -11,9 +11,7 @@ const PAGE_TITLES = {
   '/workspace/email': 'Email',
   '/workspace/jira': 'Jira',
   '/monitoring/tokens': 'Token Monitor',
-  '/integrations': 'Integrations',
   '/settings': 'Settings',
-  '/settings/integrations': 'Integrations',
 }
 
 export default function MobileHeader() {

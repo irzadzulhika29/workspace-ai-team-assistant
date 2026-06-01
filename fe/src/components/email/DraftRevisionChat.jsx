@@ -3,6 +3,7 @@ import { X, Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { urls } from '../../services/api';
+import { getAuthenticatedUser } from '../../services/authService';
 import { useEmailStore } from '../../store/emailStore';
 
 /**
@@ -65,11 +66,8 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
       console.log('Email webhook URL:', webhookUrl);
 
       // Get user ID
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const userResponse = await axios.get(`${backendUrl}/api/auth/google/status`, {
-        withCredentials: true
-      });
-      const userId = userResponse.data.userId || userResponse.data.email || 'unknown';
+      const currentUser = await getAuthenticatedUser();
+      const userId = currentUser?.id || currentUser?.email || 'unknown';
 
       // Prepare webhook payload
       const payload = {

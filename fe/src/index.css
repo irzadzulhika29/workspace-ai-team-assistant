@@ -30,6 +30,23 @@
 
   * {
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neutral-300) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-300);
+    border-radius: 9999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-500);
   }
 
   html {
@@ -109,6 +126,12 @@
 
   .message-enter {
     @apply animate-slide-up;
+  }
+
+  .paytone-one-regular {
+    font-family: 'Paytone One', sans-serif;
+    font-weight: 400;
+    font-style: normal;
   }
 
   .skeleton {

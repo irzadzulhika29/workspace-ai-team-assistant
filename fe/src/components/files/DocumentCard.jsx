@@ -8,11 +8,12 @@ import {
 
 export default function DocumentCard({ doc, isSelected, onSelect, showBadge = false, variant = 'grid' }) {
   const tone = getDocumentTone(doc)
+  const singleRowClassName = variant === 'single-row' ? 'w-[220px] flex-shrink-0' : ''
 
   return (
     <button
       onClick={() => onSelect(doc)}
-      className={`text-left ${
+      className={`${singleRowClassName} text-left ${
         variant === 'recent'
           ? `group relative flex min-h-[250px] flex-col overflow-hidden rounded-lg border bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
               isSelected ? 'border-[#ff5a3f] ring-2 ring-[#ff5a3f]/20' : 'border-neutral-200'

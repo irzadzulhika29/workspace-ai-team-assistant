@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Bell,
   CalendarDays,
   CheckCircle2,
   Clock3,
+  LockKeyhole,
   Mail,
   RefreshCw,
   Search,
@@ -14,7 +14,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { urls, tokenUsageApi } from "../services/api";
 import { calendarApi } from "../services/calendarService";
-import { jiraApi } from "../services/jiraService";
+import { JIRA_ERROR_CODES, jiraApi } from "../services/jiraService";
 import { emailApi } from "../services/emailService";
 import {
   Alert,
@@ -717,7 +717,6 @@ const TopBar = ({
   user,
   searchQuery,
   onSearchChange,
-  notificationCount,
   refreshing,
   onRefresh,
 }) => (
@@ -740,15 +739,6 @@ const TopBar = ({
       >
         <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
       </Button>
-
-      <div className="relative rounded-full border border-neutral-200 bg-white p-2 shadow-sm">
-        <Bell className="h-5 w-5 text-neutral-500" />
-        {notificationCount > 0 ? (
-          <span className="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-primary-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-            {notificationCount}
-          </span>
-        ) : null}
-      </div>
 
       <div className="flex items-center gap-3 rounded-full bg-white px-3 py-2 shadow-sm">
         <Avatar size="sm">
@@ -792,6 +782,7 @@ export default function Dashboard() {
   const [loadingTokens, setLoadingTokens] = useState(true);
   const [calendarError, setCalendarError] = useState("");
   const [jiraError, setJiraError] = useState("");
+  const [jiraNotConnected, setJiraNotConnected] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [tokenError, setTokenError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -878,13 +869,19 @@ export default function Dashboard() {
   const loadJira = useCallback(async () => {
     setLoadingJira(true);
     setJiraError("");
+    setJiraNotConnected(false);
 
     try {
       const items = await jiraApi.fetchIssues();
       setJiraIssues(Array.isArray(items) ? items : []);
     } catch (err) {
       console.error("Dashboard Jira error:", err);
-      setJiraError(err.message || "Tidak dapat mengambil progres Jira.");
+      const isNotConnected = err?.code === JIRA_ERROR_CODES.NOT_CONNECTED;
+      setJiraNotConnected(isNotConnected);
+      setJiraError(isNotConnected ? "" : err.message || "Tidak dapat mengambil progres Jira.");
+      if (isNotConnected) {
+        setJiraBriefing(null);
+      }
       setJiraIssues([]);
     } finally {
       setLoadingJira(false);
@@ -1193,8 +1190,6 @@ export default function Dashboard() {
   const emailListItems = visibleEmails.slice(0, 5);
   const leadEvent = visibleEvents[0];
   const leadEventDays = leadEvent ? getDaysUntil(leadEvent) : null;
-  const notificationCount =
-    emailBriefing?.source_metrics?.total_unread || visibleEmails.length || 0;
   const tokenSeries = useMemo(
     () => createDailyTokenSeries(tokenRows, TOKEN_LIMIT),
     [tokenRows],
@@ -1296,7 +1291,6 @@ export default function Dashboard() {
           user={user}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          notificationCount={notificationCount}
           refreshing={refreshing}
           onRefresh={handleRefreshBriefings}
         />
@@ -1324,27 +1318,33 @@ export default function Dashboard() {
           <DashboardShell
             title="Task Progress"
             actions={
-              <>
-                <ActionLink to="/workspace/jira" primary>
-                  Lihat Jira
+              jiraNotConnected ? (
+                <ActionLink to="/settings" primary>
+                  Koneksikan Jira
                 </ActionLink>
-                <ActionLink
-                  to="/chat/supervisor"
-                  state={withNewSupervisorSession({
-                    domain: "jira",
-                    intent: "generate_report",
-                    templatePrompt: "Buatkan laporan progres Jira hari ini",
-                    context: jiraBriefing
-                      ? { briefing: jiraBriefing }
-                      : {
-                          summary: jiraSummary,
-                          issues: jiraIssues.slice(0, 10),
-                        },
-                  })}
-                >
-                  Buat Report
-                </ActionLink>
-              </>
+              ) : (
+                <>
+                  <ActionLink to="/workspace/jira" primary>
+                    Lihat Jira
+                  </ActionLink>
+                  <ActionLink
+                    to="/chat/supervisor"
+                    state={withNewSupervisorSession({
+                      domain: "jira",
+                      intent: "generate_report",
+                      templatePrompt: "Buatkan laporan progres Jira hari ini",
+                      context: jiraBriefing
+                        ? { briefing: jiraBriefing }
+                        : {
+                            summary: jiraSummary,
+                            issues: jiraIssues.slice(0, 10),
+                          },
+                    })}
+                  >
+                    Buat Report
+                  </ActionLink>
+                </>
+              )
             }
           >
             {loadingJira ? (
@@ -1356,6 +1356,44 @@ export default function Dashboard() {
                 </div>
                 <div className="skeleton h-28 rounded-2xl" />
               </>
+            ) : jiraNotConnected ? (
+              <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white">
+                <div className="flex flex-col gap-4 px-6 py-8 blur-[2px] opacity-45">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-6"
+                      >
+                        <div className="h-4 w-20 rounded-full bg-slate-200" />
+                        <div className="mt-4 h-10 w-12 rounded-xl bg-slate-200" />
+                        <div className="mt-4 h-3 w-full rounded-full bg-slate-200" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-6">
+                    <div className="h-4 w-40 rounded-full bg-slate-200" />
+                    <div className="mt-4 h-3 w-full rounded-full bg-slate-200" />
+                    <div className="mt-3 h-3 w-10/12 rounded-full bg-slate-200" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white/70 px-6 text-center backdrop-blur-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4ef] text-[#ff623d]">
+                    <LockKeyhole className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-slate-950">
+                      Jira belum terkoneksi
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Hubungkan Jira di Settings agar task progress dan briefing bisa ditampilkan.
+                    </p>
+                  </div>
+                  <Button asChild variant="primary" className="rounded-xl">
+                    <Link to="/settings">Koneksikan di Settings</Link>
+                  </Button>
+                </div>
+              </div>
             ) : jiraError && !jiraBriefing ? (
               <Alert variant="error" title="Jira sync error">
                 {jiraError}
@@ -1384,7 +1422,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="rounded-2xl bg-white/80 px-1">
-                  <p className="text-[1.05rem] leading-8 text-neutral-700">
+                  <p className="text-sm leading-6 text-neutral-700">
                     <span className="font-semibold text-neutral-900">
                       {jiraBriefingContent.headline}
                     </span>{" "}

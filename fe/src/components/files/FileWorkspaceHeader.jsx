@@ -4,7 +4,6 @@ import { Button, Input } from '@/components/ui'
 export default function FileWorkspaceHeader({
   searchQuery,
   onSearchChange,
-  activeTab,
   onOpenGenerated,
   onOpenUploaded,
 }) {
@@ -47,7 +46,7 @@ export default function FileWorkspaceHeader({
             onClick={onOpenGenerated}
             variant="default"
             size="sm"
-            className="gap-2 rounded-2xl bg-[#ff623d] text-sm text-white hover:bg-[#ff744f]"
+            className="gap-2 rounded-2xl border border-[#ff623d] bg-transparent text-sm text-[#ff623d] hover:bg-[#fff0eb]"
           >
             <SquarePen className="h-4 w-4" />
             <span>Create</span>

@@ -9,12 +9,17 @@ export default function DocumentSection({
   showBadge = false,
   wrapperClassName = '',
 }) {
+  const layoutClassName =
+    variant === 'single-row'
+      ? 'flex flex-nowrap items-stretch gap-4 overflow-x-hidden'
+      : 'grid grid-cols-2 gap-4 md:grid-cols-4'
+
   return (
     <div className={wrapperClassName}>
       {title ? (
         <h3 className="mb-4 text-4xl font-semibold text-neutral-700">{title}</h3>
       ) : null}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className={layoutClassName}>
         {documents.map((doc) => (
           <DocumentCard
             key={doc.id}

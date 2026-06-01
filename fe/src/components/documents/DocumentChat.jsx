@@ -27,7 +27,7 @@ export default function DocumentChat({ document }) {
     setMessages([
       {
         role: 'assistant',
-        content: `I'm ready to answer questions about "${document.name}". What would you like to know?`
+        content: `Siap bantu soal "${document.name}". Ada yang ingin ditanyakan?`
       }
     ]);
   }, [document]);

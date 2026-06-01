@@ -7,7 +7,6 @@ import SupervisorChat from './pages/SupervisorChat'
 import FileWorkspace from './pages/FileWorkspace'
 import CalendarPage from './pages/CalendarPage'
 import JiraPage from './pages/JiraPage'
-import IntegrationsPage from './pages/IntegrationsPage'
 import TokenMonitorPage from './pages/TokenMonitorPage'
 import EmailPage from './pages/EmailPage'
 import DebugAuthPage from './pages/DebugAuthPage'
@@ -66,8 +65,8 @@ function Layout() {
               <Route path="/debug/auth" element={<DebugAuthPage />} />
               <Route path="/monitoring/tokens" element={<TokenMonitorPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/settings/integrations" element={<IntegrationsPage />} />
-              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/settings/integrations" element={<Navigate to="/settings" replace />} />
+              <Route path="/integrations" element={<Navigate to="/settings" replace />} />
               <Route path="*" element={<Dashboard />} />
             </Routes>
           </div>

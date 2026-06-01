@@ -4,6 +4,7 @@ import { useEmailStore } from '../../store/emailStore';
 import DOMPurify from 'dompurify';
 import axios from 'axios';
 import { urls } from '../../services/api';
+import { getAuthenticatedUser } from '../../services/authService';
 
 /**
  * DraftCard Component - Individual draft item
@@ -138,14 +139,10 @@ export default function DraftsList({ onRevise }) {
     if (!confirm(`Send this email to ${draft.to_email}?`)) return;
 
     try {
-      // Get user info and Google token
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-      const userResponse = await axios.get(`${backendUrl}/api/auth/google/status`, {
-        withCredentials: true
-      });
-      const userId = userResponse.data.userId || userResponse.data.email || 'unknown';
+      const currentUser = await getAuthenticatedUser();
+      const userId = currentUser?.id || currentUser?.email || 'unknown';
 
-      // Get Google token
       const tokenResponse = await axios.get(`${backendUrl}/api/google/token`, {
         withCredentials: true
       });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Star, Mail, MailOpen, Download, FileText } from 'lucide-react';
+import { ArrowLeft, Star, Sparkles, Mail, MailOpen, Download } from 'lucide-react';
 import { useEmailStore } from '../../store/emailStore';
 import { generateDraftFromWebhook } from '../../services/emailWebhookService';
 import DOMPurify from 'dompurify';
@@ -92,7 +92,7 @@ export default function EmailDetail({ onDraftCreated }) {
 
     return (
       <div 
-        className="prose max-w-none"
+        className="prose prose-sm max-w-none prose-img:max-h-48 prose-img:w-auto prose-img:object-contain"
         dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       />
     );
@@ -143,10 +143,10 @@ export default function EmailDetail({ onDraftCreated }) {
             <button
               onClick={handleDraftReply}
               disabled={generatingDraft}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ff623d] text-white hover:bg-[#ff744f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Create draft reply via AI"
             >
-              <FileText className={`w-4 h-4 ${generatingDraft ? 'animate-pulse' : ''}`} />
+              <Sparkles className={`w-4 h-4 ${generatingDraft ? 'animate-pulse' : ''}`} />
               <span className="text-sm font-medium">
                 {generatingDraft ? 'Generating...' : 'Draft Reply'}
               </span>
@@ -180,7 +180,7 @@ export default function EmailDetail({ onDraftCreated }) {
 
         {/* Email Metadata */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-sm font-semibold text-gray-900">
             {email.subject || '(No subject)'}
           </h1>
 

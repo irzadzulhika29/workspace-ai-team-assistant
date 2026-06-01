@@ -52,7 +52,11 @@ router.get('/google/token', requireAuth, async (req, res) => {
     });
 
     if (!tokens) {
-      return res.status(404).json({ error: 'No Google token found. Connect your Google account first.' });
+      return res.status(403).json({
+        error: 'Google account not connected. Connect your Google account first.',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
     }
 
     const oauth2Client = new google.auth.OAuth2(
@@ -503,7 +507,11 @@ router.get('/google/docs', requireAuth, async (req, res) => {
     });
 
     if (!tokens) {
-      return res.status(401).json({ error: 'No Google token found' });
+      return res.status(403).json({
+        error: 'Google account not connected',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
     }
 
     const oauth2Client = new google.auth.OAuth2(
@@ -540,7 +548,11 @@ router.get('/google/sheets', requireAuth, async (req, res) => {
     });
 
     if (!tokens) {
-      return res.status(401).json({ error: 'No Google token found' });
+      return res.status(403).json({
+        error: 'Google account not connected',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
     }
 
     const oauth2Client = new google.auth.OAuth2(
@@ -579,7 +591,11 @@ router.get('/google/calendar', requireAuth, async (req, res) => {
     });
 
     if (!tokens) {
-      return res.status(401).json({ error: 'No Google token found' });
+      return res.status(403).json({
+        error: 'Google account not connected',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
     }
 
     const oauth2Client = new google.auth.OAuth2(

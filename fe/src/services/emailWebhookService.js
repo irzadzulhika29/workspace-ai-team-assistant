@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { urls } from './api';
+import { getAuthenticatedUser } from './authService';
 
 /**
  * Email Webhook Service
@@ -17,21 +18,7 @@ const getWebhookUrl = () => {
  */
 const getCurrentUser = async () => {
   try {
-    const backendUrl = urls.getBackendUrl();
-    const response = await axios.get(`${backendUrl}/api/auth/google/status`, {
-      withCredentials: true
-    });
-
-    if (response.data.connected) {
-      return {
-        id: response.data.userId || response.data.email, // Use userId if available, fallback to email
-        name: response.data.name,
-        email: response.data.email,
-        picture: response.data.picture
-      };
-    }
-
-    return null;
+    return await getAuthenticatedUser();
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;

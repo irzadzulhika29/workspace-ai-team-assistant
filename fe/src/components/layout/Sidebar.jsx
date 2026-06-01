@@ -1,6 +1,8 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Bug, Settings, Plus, Loader2, Trash2, X, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, MessageSquare, FolderOpen, CalendarDays, Settings, Plus, Loader2, Trash2, X, BarChart3, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FaTasks } from 'react-icons/fa'
+import logoPng from '/logo.png'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
 import { Button, NavItem } from '@/components/ui'
@@ -14,7 +16,7 @@ const navItems = [
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
   { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
   { to: '/workspace/email',  icon: Mail,            label: 'Email'             },
-  { to: '/workspace/jira',   icon: Bug,             label: 'Jira'              },
+  { to: '/workspace/jira',   icon: FaTasks,         label: 'Jira'              },
   { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
   { to: '/settings',         icon: Settings,        label: 'Settings'          },
 ]
@@ -305,21 +307,20 @@ export default function Sidebar() {
         {/* Header */}
         <div className="relative flex items-center justify-between gap-3 border-b border-neutral-200 bg-gradient-stat px-4 py-5 text-white">
           <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${collapsed ? 'md:opacity-0 md:w-0' : 'opacity-100'}`}>
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white/95 text-primary-500 shadow-stat">
-              <MessageSquare size={14} />
+            <div className="flex bg-white/50 rounded-xl h-10 w-10 flex-shrink-0 items-center justify-center   shadow-stat">
+              <img src={logoPng} alt="AI Team Assistant" className="h-6 w-6" />
             </div>
             <div className="overflow-hidden">
-              <p className="truncate text-base font-bold font-headline leading-tight text-white">
+              <p className="truncate text-base font-bold font-paytone leading-tight text-white">
                 AI Team Assistant
               </p>
-              <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-white/80">Executive Canvas</p>
             </div>
           </div>
           
           {/* Logo only when collapsed (desktop) */}
           <div className={`pointer-events-none absolute inset-0 hidden md:flex items-center justify-center transition-all duration-300 ${collapsed ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 text-primary-500 shadow-stat">
-              <MessageSquare size={14} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 shadow-stat">
+              <img src={logoPng} alt="AI Team Assistant" className="h-6 w-6" />
             </div>
           </div>
           

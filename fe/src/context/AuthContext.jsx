@@ -1,5 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { urls } from '../services/api'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+import {
+  exchangeSupabaseSession,
+  fetchAuthStatus,
+  logoutWorkspace,
+} from '../services/authService';
+import { supabaseClient } from '../services/supabaseClient';
 
 const AuthContext = createContext({
   user: null,
@@ -7,56 +18,56 @@ const AuthContext = createContext({
   isAuthenticated: false,
   checkAuthStatus: () => {},
   logout: () => {},
-})
+});
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const backendUrl = urls.getBackendUrl()
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const checkAuthStatus = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(`${backendUrl}/api/auth/google/status`, {
-        credentials: 'include',
-      })
-      const data = await response.json()
+      let data = await fetchAuthStatus();
 
-      if (data.connected) {
+      if (!data?.authenticated) {
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        if (sessionData?.session?.access_token) {
+          await exchangeSupabaseSession(sessionData.session);
+          data = await fetchAuthStatus();
+        }
+      }
+
+      if (data?.authenticated && data.user) {
         setUser({
-          id: data.userId,
-          name: data.name,
-          email: data.email,
-          jobTitle: data.jobTitle || "",
-          picture: data.picture,
+          ...data.user,
           hasGoogleToken: Boolean(data.hasGoogleToken),
-        })
+          authProvider: data.authProvider || null,
+          emailVerified: Boolean(data.emailVerified),
+          canUseGoogleFeatures: Boolean(data.canUseGoogleFeatures),
+        });
       } else {
-        setUser(null)
+        setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error)
-      setUser(null)
+      console.error('Auth check failed:', error);
+      setUser(null);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [backendUrl])
+  }, []);
 
   const logout = useCallback(async () => {
     try {
-      await fetch(`${backendUrl}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      setUser(null)
+      await logoutWorkspace();
+      setUser(null);
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error('Logout failed:', error);
     }
-  }, [backendUrl])
+  }, []);
 
   useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
   const value = {
     user,
@@ -64,15 +75,15 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user),
     checkAuthStatus,
     logout,
-  }
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
+    throw new Error('useAuth must be used within AuthProvider');
   }
-  return context
+  return context;
 }

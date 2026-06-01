@@ -1,4 +1,4 @@
-import { User, Mail, Building2, Briefcase } from 'lucide-react';
+import { User, Mail } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
 

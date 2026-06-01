@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { urls } from './api';
+import { getAuthenticatedUser } from './authService';
 
 /**
  * Email Draft Service
@@ -14,15 +15,8 @@ const backendUrl = urls.getBackendUrl();
  */
 const getCurrentUserId = async () => {
   try {
-    const response = await axios.get(`${backendUrl}/api/auth/google/status`, {
-      withCredentials: true
-    });
-
-    if (response.data.connected && response.data.userId) {
-      return response.data.userId;
-    }
-
-    return null;
+    const user = await getAuthenticatedUser();
+    return user?.id || null;
   } catch (error) {
     console.error('Error getting current user ID:', error);
     return null;

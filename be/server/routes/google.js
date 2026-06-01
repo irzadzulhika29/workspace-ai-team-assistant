@@ -38,7 +38,9 @@ async function getGoogleClient(userId) {
   });
 
   if (!tokens) {
-    throw new Error('No Google tokens found for user');
+    const error = new Error('Google account not connected');
+    error.code = 'GOOGLE_NOT_CONNECTED';
+    throw error;
   }
 
   const oauth2Client = new google.auth.OAuth2(
@@ -78,6 +80,18 @@ async function getGoogleClient(userId) {
   return oauth2Client;
 }
 
+const respondGoogleError = (res, error, fallbackMessage) => {
+  if (error?.code === 'GOOGLE_NOT_CONNECTED') {
+    return res.status(403).json({
+      error: fallbackMessage || 'Google account not connected',
+      code: 'GOOGLE_NOT_CONNECTED',
+      requiresGoogleAuth: true,
+    });
+  }
+
+  return res.status(500).json({ error: error.message });
+};
+
 /**
  * Proxy endpoint for Google Sheets API
  * n8n can call this endpoint instead of Google Sheets directly
@@ -100,7 +114,7 @@ router.post('/sheets/spreadsheets/:spreadsheetId/values/:range', authenticateReq
     res.json(response.data);
   } catch (error) {
     console.error('Error appending to sheet:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -122,7 +136,7 @@ router.get('/sheets/spreadsheets/:spreadsheetId/values/:range', authenticateRequ
     res.json(response.data);
   } catch (error) {
     console.error('Error reading sheet:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -147,7 +161,7 @@ router.put('/sheets/spreadsheets/:spreadsheetId/values/:range', authenticateRequ
     res.json(response.data);
   } catch (error) {
     console.error('Error updating sheet:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -170,7 +184,7 @@ router.get('/drive/files', authenticateRequest, async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error listing files:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -196,7 +210,7 @@ router.get('/calendar/events', authenticateRequest, async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error listing events:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -271,7 +285,7 @@ router.get('/gmail/messages', authenticateRequest, async (req, res) => {
     });
   } catch (error) {
     console.error('Error listing Gmail messages:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -364,7 +378,7 @@ router.get('/gmail/messages/:id', authenticateRequest, async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting Gmail message:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -393,7 +407,7 @@ router.post('/gmail/messages/:id/modify', authenticateRequest, async (req, res) 
     res.json(response.data);
   } catch (error) {
     console.error('Error modifying Gmail message:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -437,7 +451,7 @@ router.post('/gmail/messages/send', authenticateRequest, async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error sending Gmail message:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 
@@ -457,7 +471,7 @@ router.get('/gmail/labels', authenticateRequest, async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error listing Gmail labels:', error);
-    res.status(500).json({ error: error.message });
+    respondGoogleError(res, error, 'Google account not connected');
   }
 });
 

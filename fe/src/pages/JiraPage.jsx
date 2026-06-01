@@ -11,13 +11,13 @@ import {
   Flag,
   FolderKanban,
   ListTodo,
-  BookOpen,
   RefreshCw,
   Search,
   SquarePen,
   Sparkles,
   UserRound,
 } from "lucide-react";
+import { FaTasks } from "react-icons/fa";
 import { jiraApi } from "../services/jiraService";
 
 const JIRA_CACHE_KEY = "jira_issues_cache_v1";
@@ -390,7 +390,7 @@ const JiraHeaderSection = ({ loading, onSync, searchQuery, onSearchChange }) => 
       <div className="min-w-[280px]">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center rounded-2xl text-[#ff623d]">
-            <BookOpen className="h-10 w-10" />
+            <FaTasks className="h-10 w-10" />
           </div>
           <h1 className="text-[2rem] font-bold leading-tight text-[#ff623d]">
             Jira Workspace

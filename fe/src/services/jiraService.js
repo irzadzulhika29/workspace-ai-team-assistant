@@ -2,6 +2,17 @@ import axios from 'axios'
 import { urls } from './api'
 import { integrationApi } from './integrationService'
 
+export const JIRA_ERROR_CODES = {
+  NOT_CONNECTED: 'JIRA_NOT_CONNECTED',
+  SESSION_EXPIRED: 'JIRA_SESSION_EXPIRED',
+}
+
+const createJiraError = (message, code) => {
+  const error = new Error(message)
+  error.code = code
+  return error
+}
+
 const pickIssuesArray = (payload) => {
   if (Array.isArray(payload)) return payload
   if (!payload || typeof payload !== 'object') return []
@@ -77,10 +88,16 @@ export const jiraApi = {
     } catch (error) {
       // Better error handling
       if (error.response?.status === 401) {
-        throw new Error('Sesi login telah berakhir. Silakan login kembali.')
+        throw createJiraError(
+          'Sesi login telah berakhir. Silakan login kembali.',
+          JIRA_ERROR_CODES.SESSION_EXPIRED
+        )
       }
       if (error.response?.status === 404) {
-        throw new Error('Jira belum terhubung. Silakan hubungkan Jira di halaman Integrasi.')
+        throw createJiraError(
+          'Jira belum terhubung. Silakan hubungkan Jira di halaman Integrasi.',
+          JIRA_ERROR_CODES.NOT_CONNECTED
+        )
       }
       if (error.response?.data?.error) {
         throw new Error(error.response.data.error)

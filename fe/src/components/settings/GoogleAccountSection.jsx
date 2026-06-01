@@ -1,61 +1,32 @@
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const primaryButtonClassName =
-  'rounded-2xl bg-[#ff623d] px-4 py-2 font-medium text-white transition-colors hover:bg-[#ff744f] disabled:cursor-not-allowed disabled:opacity-50';
-const dangerOutlineButtonClassName =
-  'rounded-2xl border border-rose-300 px-4 py-2 font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50';
+  'rounded-xl bg-[#ff623d] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#ff744f] disabled:cursor-not-allowed disabled:opacity-50';
 
 export default function GoogleAccountSection({
   googleAccount,
   isGoogleConnecting,
   onConnect,
-  onDisconnect
 }) {
   return (
-    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-start gap-3">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50">
           <img
             src="/google.png"
             alt="Google"
-            className="mt-0.5 h-8 w-8 rounded-md object-contain"
+            className="h-7 w-7 rounded-md object-contain"
           />
-          <div>
-          <h3 className="text-lg font-semibold text-gray-900">Google Account</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Connect your Google account to access Calendar and Gmail
-          </p>
-          </div>
         </div>
-        {googleAccount ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium">
-            <CheckCircle2 className="w-4 h-4" />
-            Connected
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-            <XCircle className="w-4 h-4" />
-            Not Connected
-          </div>
-        )}
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold text-gray-900">Google</h3>
+        </div>
       </div>
 
       {googleAccount ? (
-        <div className="mt-auto space-y-4">
-          <button
-            onClick={onDisconnect}
-            disabled={isGoogleConnecting}
-            className={dangerOutlineButtonClassName}
-          >
-            {isGoogleConnecting ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Disconnecting...
-              </span>
-            ) : (
-              'Disconnect '
-            )}
-          </button>
+        <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
+          <CheckCircle2 className="h-4 w-4" />
+          Connected
         </div>
       ) : (
         <button
@@ -65,11 +36,11 @@ export default function GoogleAccountSection({
         >
           {isGoogleConnecting ? (
             <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               Connecting...
             </span>
           ) : (
-            'Connect Google Account'
+            'Hubungkan'
           )}
         </button>
       )}

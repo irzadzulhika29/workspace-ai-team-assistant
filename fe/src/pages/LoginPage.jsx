@@ -1,8 +1,19 @@
-import { useEffect } from "react";
-import { Eye, KeyRound, Mail, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { urls } from "../services/api";
+import { useEffect, useState } from 'react';
+import {
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  UserRound,
+} from 'lucide-react';
+import logoPng from '/logo.png';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import {
+  signInWithEmailPassword,
+  signUpWithEmailPassword,
+} from '../services/authService';
+import { urls } from '../services/api';
 
 function GoogleMark() {
   return (
@@ -27,19 +38,21 @@ function GoogleMark() {
   );
 }
 
-
 function IllustrationPanel() {
   return (
     <div className="relative flex h-full min-h-[520px] flex-col overflow-hidden rounded-[34px] bg-[#ff623d] px-8 pb-6 pt-9 text-white lg:px-10 lg:pt-10">
       <div className="absolute inset-x-0 bottom-0 h-32 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.22),transparent_65%)]" />
+      <div className="absolute right-8 top-8 z-20 lg:right-10 lg:top-10">
+        <img src={logoPng} alt="AI Teams Assistant" className="h-14 w-14 object-contain" />
+      </div>
 
       <div className="relative z-10 max-w-[380px]">
         <h1 className="text-[2.55rem] font-bold leading-[1.08] text-white lg:text-[3rem]">
           Simplify management with our dashboard
         </h1>
         <p className="mt-5 max-w-[340px] text-sm leading-6 text-white/88 lg:text-base">
-          Simplify your e-commerce management with our user friendly admin
-          dashboard
+          Masuk dengan Google atau daftar akun workspace baru memakai email dan
+          password.
         </p>
       </div>
 
@@ -91,19 +104,131 @@ function IllustrationPanel() {
   );
 }
 
+const authErrorCopy = {
+  oauth_not_configured: 'Google OAuth belum terkonfigurasi di backend.',
+  auth_failed: 'Autentikasi Google gagal. Silakan coba lagi.',
+  google_email_mismatch:
+    'Email Google harus sama dengan email akun workspace yang sedang login.',
+};
+
+const inputWrapperClassName =
+  'flex h-14 items-center gap-3 rounded-[10px] border border-[#d9d9d9] bg-white px-4 text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-colors focus-within:border-[#ff623d]';
+
+const emptyAuthForm = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated, loading, checkAuthStatus } = useAuth();
   const backendUrl = urls.getBackendUrl();
+
+  const [mode, setMode] = useState('signin');
+  const [form, setForm] = useState(emptyAuthForm);
+  const [, setPendingEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate("/", { replace: true });
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
+  useEffect(() => {
+    const queryError = searchParams.get('error');
+    if (queryError) {
+      setError(authErrorCopy[queryError] || 'Autentikasi gagal.');
+    }
+  }, [searchParams]);
+
   const handleGoogleLogin = () => {
     window.location.href = `${backendUrl}/api/auth/google`;
+  };
+
+  const handleFormChange = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleModeChange = (nextMode) => {
+    setMode(nextMode);
+    setError('');
+    setStatusMessage('');
+  };
+
+  const handleSignIn = async () => {
+    if (!form.email || !form.password) {
+      setError('Email dan password wajib diisi.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+    setStatusMessage('');
+
+    try {
+      await signInWithEmailPassword({
+        email: form.email,
+        password: form.password,
+      });
+      await checkAuthStatus();
+      navigate('/', { replace: true });
+    } catch (requestError) {
+      setError(requestError.message || 'Gagal masuk ke workspace.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
+      setError('Nama, email, password, dan konfirmasi password wajib diisi.');
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError('Konfirmasi password tidak sama.');
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setError('Password minimal 8 karakter.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+    setStatusMessage('');
+
+    try {
+      await signUpWithEmailPassword({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+
+      setPendingEmail(form.email);
+      setMode('verify');
+      setForm((current) => ({
+        ...current,
+        password: '',
+        confirmPassword: '',
+      }));
+      setStatusMessage(
+        `Email konfirmasi sudah dikirim ke ${form.email}. Buka inbox Anda dan klik link konfirmasi sebelum sign in.`,
+      );
+    } catch (requestError) {
+      setError(requestError.message || 'Gagal membuat akun baru.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -111,82 +236,246 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative mx-auto flex max-h-[calc(100dvh-3.5rem)] min-h-[calc(100dvh-3.5rem)] max-w-[1500px] rounded-[34px] bg-white px-4  shadow-[0_22px_64px_rgba(17,24,39,0.08)] md:max-h-[calc(100dvh-2.5rem)] md:min-h-[calc(100dvh-2.5rem)] lg:px-6 lg:py-6">
+    <div className="relative mx-auto flex max-h-[calc(100dvh-3.5rem)] min-h-[calc(100dvh-3.5rem)] max-w-[1500px] rounded-[34px] bg-white px-4 shadow-[0_22px_64px_rgba(17,24,39,0.08)] md:max-h-[calc(100dvh-2.5rem)] md:min-h-[calc(100dvh-2.5rem)] lg:px-6 lg:py-6">
       <div className="pointer-events-none absolute right-[8%] top-[5%] hidden h-40 w-40 rounded-full bg-[#cdb3ff]/50 blur-[82px] lg:block" />
       <div className="relative grid min-h-0 flex-1 gap-6 lg:grid-cols-[1.03fr_0.97fr] lg:gap-8">
         <IllustrationPanel />
 
-        <section className="flex relative min-h-0 items-center justify-center px-2 py-4 lg:px-5">
+        <section className="relative flex min-h-0 items-center justify-center px-2 py-4 lg:px-5">
           <div className="w-full max-w-[500px]">
-            
-            <div className="flex items-center justify-center gap-3 text-[#ff623d]">
-              <Sparkles className="h-8 w-8" />
-              <span className="text-md font-bold">
-                AI Teams Assistant
-              </span>
+            <div className="text-2xl font-bold text-slate-800">
+              {mode === 'signin'
+                ? 'Sign in to your account'
+                : mode === 'signup'
+                  ? 'Create your workspace account'
+                  : 'Check your email'}
             </div>
-            
-            <div className="mt-4 text-2xl font-bold text-slate-800">
-              Sign in to your account
-            </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Welcome back! Please enter your details.
-            </p>
 
-
-            <form className="mt-8 space-y-5" onSubmit={(event) => event.preventDefault()}>
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-800">
-                  Email
-                </label>
-                <div className="flex h-14 items-center gap-3 rounded-[10px] border border-[#d9d9d9] bg-white px-4 text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-colors focus-within:border-[#ff623d]">
-                  <Mail className="h-5 w-5 text-slate-400" />
-                  <input
-                    type="email"
-                    placeholder="Airspace@info.com"
-                    className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-800">
-                  Password
-                </label>
-                <div className="flex h-14 items-center gap-3 rounded-[10px] border border-[#d9d9d9] bg-white px-4 text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition-colors focus-within:border-[#ff623d]">
-                  <KeyRound className="h-5 w-5 text-slate-400" />
-                  <input
-                    type="password"
-                    placeholder="************"
-                    className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
-                  />
-                  <Eye className="h-5 w-5 text-slate-700" />
-                </div>
-              </div>
-
-              <label className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  className="mt-1 h-5 w-5 rounded border-slate-300 accent-[#ff623d]"
-                  defaultChecked
-                />
-                <span>
-                  <span className="block text-sm font-semibold text-slate-800">
-                    Remember me
-                  </span>
-                  <span className="mt-1 block text-sm text-slate-500">
-                    Save my login details for next time.
-                  </span>
-                </span>
-              </label>
-
+            <div className="mt-6 inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1">
               <button
-                type="submit"
-                className="h-14 w-full rounded-[10px] bg-[#ff623d] text-base font-semibold text-white shadow-[0_12px_24px_rgba(255,98,61,0.18)] transition-colors hover:bg-[#ff744f]"
+                type="button"
+                onClick={() => handleModeChange('signin')}
+                className={`rounded-[14px] px-4 py-2 text-sm font-semibold transition ${
+                  mode === 'signin'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500'
+                }`}
               >
                 Sign In
               </button>
-            </form>
+              <button
+                type="button"
+                onClick={() => handleModeChange('signup')}
+                className={`rounded-[14px] px-4 py-2 text-sm font-semibold transition ${
+                  mode === 'signup'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500'
+                }`}
+              >
+                Register
+              </button>
+            </div>
+
+            {error ? (
+              <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
+              </div>
+            ) : null}
+
+            {statusMessage ? (
+              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {statusMessage}
+              </div>
+            ) : null}
+
+            {mode === 'verify' ? (
+              <div className="mt-8 space-y-5">
+                <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-6 text-slate-600">
+                  <p className="font-semibold text-slate-900">What to do next</p>
+                  <p className="mt-2">1. Buka inbox email yang dipakai daftar.</p>
+                  <p>2. Cari email dari Supabase Auth.</p>
+                  <p>
+                    3. Klik tombol{' '}
+                    <span className="font-semibold text-slate-900">
+                      Confirm your mail
+                    </span>
+                    .
+                  </p>
+                  <p>
+                    4. Setelah email terkonfirmasi, kembali ke halaman ini lalu
+                    sign in memakai email dan password yang baru dibuat.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('signup')}
+                    className="text-slate-500 transition-colors hover:text-slate-700"
+                  >
+                    Back to register
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('signin')}
+                    className="font-semibold text-[#ff623d] transition-colors hover:text-[#ff744f]"
+                  >
+                    Go to sign in
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                className="mt-8 space-y-5"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (mode === 'signin') {
+                    handleSignIn();
+                  } else {
+                    handleSignUp();
+                  }
+                }}
+              >
+                {mode === 'signup' ? (
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-slate-800">
+                      Full Name
+                    </label>
+                    <div className={inputWrapperClassName}>
+                      <UserRound className="h-5 w-5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={form.name}
+                        onChange={(event) => handleFormChange('name', event.target.value)}
+                        placeholder="Your full name"
+                        className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-800">
+                    Email
+                  </label>
+                  <div className={inputWrapperClassName}>
+                    <Mail className="h-5 w-5 text-slate-400" />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => handleFormChange('email', event.target.value)}
+                      placeholder="you@company.com"
+                      className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
+                    />
+                  </div>
+                </div>
+
+                {mode === 'signup' ? (
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="mb-2 block text-sm font-semibold text-slate-800">
+                        Password
+                      </label>
+                      <div className={inputWrapperClassName}>
+                        <KeyRound className="h-5 w-5 text-slate-400" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={form.password}
+                          onChange={(event) => handleFormChange('password', event.target.value)}
+                          placeholder="************"
+                          className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((current) => !current)}
+                          className="text-slate-700"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <label className="mb-2 block text-sm font-semibold text-slate-800">
+                        Confirm Password
+                      </label>
+                      <div className={inputWrapperClassName}>
+                        <KeyRound className="h-5 w-5 text-slate-400" />
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={form.confirmPassword}
+                          onChange={(event) =>
+                            handleFormChange('confirmPassword', event.target.value)
+                          }
+                          placeholder="Repeat your password"
+                          className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowConfirmPassword((current) => !current)
+                          }
+                          className="text-slate-700"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="mb-2 block text-sm font-semibold text-slate-800">
+                        Password
+                      </label>
+                      <div className={inputWrapperClassName}>
+                        <KeyRound className="h-5 w-5 text-slate-400" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={form.password}
+                          onChange={(event) => handleFormChange('password', event.target.value)}
+                          placeholder="************"
+                          className="h-full w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((current) => !current)}
+                          className="text-slate-700"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="h-14 w-full rounded-[10px] bg-[#ff623d] text-base font-semibold text-white shadow-[0_12px_24px_rgba(255,98,61,0.18)] transition-colors hover:bg-[#ff744f] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {submitting
+                    ? mode === 'signin'
+                      ? 'Signing In...'
+                      : 'Creating account...'
+                    : mode === 'signin'
+                      ? 'Sign In'
+                      : 'Create Account'}
+                </button>
+              </form>
+            )}
 
             <div className="relative my-5 flex items-center justify-center">
               <div className="absolute inset-x-0 h-px bg-[#dddddd]" />
