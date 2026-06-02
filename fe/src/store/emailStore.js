@@ -358,6 +358,27 @@ export const useEmailStore = create((set, get) => ({
   },
 
   /**
+   * Update draft fields (manual edits)
+   * @param {string} draftId - Draft ID
+   * @param {Object} updates - Fields to update (subject, to_email, body_text, etc.)
+   * @returns {Promise<Object>} Updated draft
+   */
+  updateDraft: async (draftId, updates) => {
+    try {
+      const updatedDraft = await emailDraftService.updateDraft(draftId, updates);
+
+      set(state => ({
+        drafts: state.drafts.map(d => (d.id === draftId ? updatedDraft : d))
+      }));
+
+      return updatedDraft;
+    } catch (error) {
+      console.error('Error updating draft:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Revise draft with AI
    * @param {string} draftId - Draft ID
    * @param {string} instructions - Revision instructions
