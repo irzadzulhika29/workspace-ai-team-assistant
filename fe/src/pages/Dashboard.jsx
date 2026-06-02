@@ -1349,9 +1349,9 @@ export default function Dashboard() {
           >
             {loadingJira ? (
               <>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+<div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="skeleton h-32 rounded-xl" />
+                    <div key={index} className="skeleton h-24 rounded-xl" />
                   ))}
                 </div>
                 <div className="skeleton h-28 rounded-2xl" />
@@ -1400,24 +1400,24 @@ export default function Dashboard() {
               </Alert>
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                   <StatCard
                     label="Open Project"
                     value={jiraMetrics.open}
-                    caption="Total issue aktif yang masih berjalan."
-                    trendIcon={<TrendingUp className="h-4 w-4" />}
+                    trendIcon={<TrendingUp className="h-3 w-3" />}
+                    className="!p-3"
                   />
                   <StatCard
                     label="In Review"
                     value={jiraMetrics.review}
-                    caption="Issue yang masuk tahap review atau QA."
-                    trendIcon={<CheckCircle2 className="h-4 w-4" />}
+                    trendIcon={<CheckCircle2 className="h-3 w-3" />}
+                    className="!p-3"
                   />
                   <StatCard
                     label="Overdue"
                     value={jiraMetrics.overdue}
-                    caption="Issue melewati due date dan belum selesai."
-                    trendIcon={<Clock3 className="h-4 w-4" />}
+                    trendIcon={<Clock3 className="h-3 w-3" />}
+                    className="!p-3"
                   />
                 </div>
 

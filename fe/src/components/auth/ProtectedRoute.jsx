@@ -8,10 +8,10 @@ export default function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-cyan-50">
+      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-cyan-700 animate-spin mx-auto mb-4" />
-          <p className="text-sm text-slate-600">Memuat...</p>
+          <Loader2 className="w-12 h-12 text-[#ff623d] animate-spin mx-auto mb-4" />
+          <p className="text-sm text-orange-800/70">Memuat...</p>
         </div>
       </div>
     )

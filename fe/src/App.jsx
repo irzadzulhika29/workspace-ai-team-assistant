@@ -14,7 +14,9 @@ import LoginPage from './pages/LoginPage'
 import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import LandingPage from './pages/LandingPage'
+import { Loader2 } from 'lucide-react'
 
 function Layout() {
   const location = useLocation()
@@ -90,11 +92,35 @@ function PublicLayout({ children }) {
   )
 }
 
+function RootPath() {
+  const { isAuthenticated, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-[#ff623d] animate-spin mx-auto mb-4" />
+          <p className="text-sm text-orange-800/70">Memuat...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <SidebarProvider><Layout /></SidebarProvider>
+  }
+
+  return <LandingPage />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Root path which decides based on auth */}
+          <Route path="/" element={<RootPath />} />
+
           {/* Public Route */}
           <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
 

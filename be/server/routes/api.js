@@ -626,4 +626,146 @@ router.get('/google/calendar', requireAuth, async (req, res) => {
   }
 });
 
+router.post('/google/calendar', requireAuth, async (req, res) => {
+  try {
+    const {
+      calendarId = 'primary',
+      summary,
+      description,
+      location,
+      attendees,
+      start,
+      end,
+      allDay = false,
+      timeZone,
+      addGoogleMeet = false,
+    } = req.body || {};
+
+    if (!summary?.trim()) {
+      return res.status(400).json({ error: 'Summary is required.' });
+    }
+
+    if (!start || !end) {
+      return res.status(400).json({ error: 'Start and end are required.' });
+    }
+
+    const tokens = await prisma.googleToken.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (!tokens) {
+      return res.status(403).json({
+        error: 'Google account not connected',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    const normalizedTimeZone = timeZone || 'Asia/Jakarta';
+
+    const eventResource = {
+      summary: summary.trim(),
+      ...(description ? { description } : {}),
+      ...(location ? { location } : {}),
+      ...(Array.isArray(attendees) && attendees.length
+        ? {
+            attendees: attendees
+              .filter((attendee) => attendee?.email)
+              .map((attendee) => ({ email: attendee.email })),
+          }
+        : {}),
+      ...(allDay
+        ? {
+            start: { date: start },
+            end: { date: end },
+          }
+        : {
+            start: { dateTime: start, timeZone: normalizedTimeZone },
+            end: { dateTime: end, timeZone: normalizedTimeZone },
+          }),
+    };
+
+    const response = await calendar.events.insert({
+      calendarId,
+      requestBody: eventResource,
+      ...(addGoogleMeet
+        ? {
+            conferenceDataVersion: 1,
+            requestBody: {
+              ...eventResource,
+              conferenceData: {
+                createRequest: {
+                  requestId: crypto.randomUUID(),
+                  conferenceSolutionKey: { type: 'hangoutsMeet' },
+                },
+              },
+            },
+          }
+        : {}),
+    });
+
+    res.status(201).json(response.data);
+  } catch (error) {
+    console.error('Error creating Google Calendar event:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/google/calendar/:eventId', requireAuth, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { calendarId = 'primary' } = req.query;
+
+    if (!eventId) {
+      return res.status(400).json({ error: 'Event ID is required.' });
+    }
+
+    const tokens = await prisma.googleToken.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (!tokens) {
+      return res.status(403).json({
+        error: 'Google account not connected',
+        code: 'GOOGLE_NOT_CONNECTED',
+        requiresGoogleAuth: true,
+      });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    await calendar.events.delete({
+      calendarId,
+      eventId,
+    });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error deleting Google Calendar event:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
+

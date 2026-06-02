@@ -16,6 +16,7 @@ export * from "./sidebar";
 export * from "./stat-card";
 export * from "./table";
 export * from "./tabs";
+export * from "./toaster";
 export * from "./token-usage";
 
 export { default as AgentCard } from "./AgentCard.jsx";

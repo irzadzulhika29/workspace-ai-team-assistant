@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert, Button, Input } from "@/components/ui";
+import { Alert, Button, Input, Modal, toast } from "@/components/ui";
 import {
   ArrowLeft,
   Bell,
@@ -12,15 +12,122 @@ import {
   FileText,
   ListTodo,
   MapPin,
+  Plus,
   Presentation,
   RefreshCw,
   Search,
   Sparkles,
   SquarePen,
+  Trash2,
   Users,
   Video,
 } from "lucide-react";
 import { calendarApi } from "../services/calendarService";
+
+const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta";
+const MIN_CALENDAR_PANEL_HEIGHT = 620;
+
+const formatDateTimeInputValue = (date) => {
+  const target = new Date(date);
+  if (Number.isNaN(target.getTime())) return "";
+
+  const offsetMs = target.getTimezoneOffset() * 60 * 1000;
+  return new Date(target.getTime() - offsetMs).toISOString().slice(0, 16);
+};
+
+const formatDateInputValue = (date) => {
+  const target = new Date(date);
+  if (Number.isNaN(target.getTime())) return "";
+
+  const offsetMs = target.getTimezoneOffset() * 60 * 1000;
+  return new Date(target.getTime() - offsetMs).toISOString().slice(0, 10);
+};
+
+const createDefaultAgendaForm = () => {
+  const start = new Date();
+  start.setMinutes(Math.ceil(start.getMinutes() / 30) * 30, 0, 0);
+
+  const end = new Date(start);
+  end.setHours(end.getHours() + 1);
+
+  return {
+    summary: "",
+    startDateTime: formatDateTimeInputValue(start),
+    endDateTime: formatDateTimeInputValue(end),
+    startDate: formatDateInputValue(start),
+    endDate: formatDateInputValue(start),
+    allDay: false,
+    location: "",
+    guests: "",
+    description: "",
+    addGoogleMeet: true,
+    timeZone: DEFAULT_TIMEZONE,
+  };
+};
+
+const buildCreateAgendaPayload = (form) => {
+  const attendees = form.guests
+    .split(/[\n,;]+/)
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((email) => ({ email }));
+
+  if (form.allDay) {
+    const inclusiveEnd = new Date(form.endDate);
+    inclusiveEnd.setDate(inclusiveEnd.getDate() + 1);
+
+    return {
+      summary: form.summary.trim(),
+      location: form.location.trim(),
+      description: form.description.trim(),
+      attendees,
+      allDay: true,
+      start: form.startDate,
+      end: formatDateInputValue(inclusiveEnd),
+      addGoogleMeet: false,
+    };
+  }
+
+  return {
+    summary: form.summary.trim(),
+    location: form.location.trim(),
+    description: form.description.trim(),
+    attendees,
+    allDay: false,
+    start: new Date(form.startDateTime).toISOString(),
+    end: new Date(form.endDateTime).toISOString(),
+    timeZone: form.timeZone || DEFAULT_TIMEZONE,
+    addGoogleMeet: form.addGoogleMeet,
+  };
+};
+
+const validateAgendaForm = (form) => {
+  if (!form.summary.trim()) {
+    return "Judul agenda wajib diisi.";
+  }
+
+  if (form.allDay) {
+    if (!form.startDate || !form.endDate) {
+      return "Tanggal mulai dan selesai wajib diisi.";
+    }
+
+    if (new Date(form.endDate) < new Date(form.startDate)) {
+      return "Tanggal selesai tidak boleh sebelum tanggal mulai.";
+    }
+
+    return "";
+  }
+
+  if (!form.startDateTime || !form.endDateTime) {
+    return "Waktu mulai dan selesai wajib diisi.";
+  }
+
+  if (new Date(form.endDateTime) <= new Date(form.startDateTime)) {
+    return "Waktu selesai harus setelah waktu mulai.";
+  }
+
+  return "";
+};
 
 const formatDateTime = (dateTime, fallbackDate) => {
   const value = dateTime || fallbackDate;
@@ -196,7 +303,7 @@ Waktu: ${formattedStart} - ${formattedEnd}${event.location ? `\nLokasi: ${event.
 const CalendarHeaderSection = ({
   loading,
   onRefresh,
-  onCompose,
+  onCreateAgenda,
   searchQuery,
   onSearchChange,
 }) => (
@@ -245,16 +352,242 @@ const CalendarHeaderSection = ({
           <span>Refresh</span>
         </Button>
         <Button
-          onClick={onCompose}
+          onClick={onCreateAgenda}
           size="sm"
           className="gap-2 rounded-2xl bg-[#ff623d] text-sm text-white hover:bg-[#ff744f]"
         >
-          <SquarePen className="h-4 w-4" />
-          <span>Compose</span>
+          <Plus className="h-4 w-4" />
+          <span>Tambah agenda</span>
         </Button>
       </div>
     </div>
   </section>
+);
+
+const CreateAgendaModal = ({
+  open,
+  form,
+  error,
+  submitting,
+  onClose,
+  onChange,
+  onSubmit,
+}) => (
+  <Modal
+    open={open}
+    onClose={onClose}
+    size="lg"
+    className="rounded-[28px]"
+  >
+    <Modal.Header onClose={onClose} className="pb-3">
+      <div>
+        <Modal.Title className="text-xl">Tambah agenda</Modal.Title>
+      </div>
+    </Modal.Header>
+
+    <Modal.Body className="max-h-[70vh] overflow-y-auto pb-2">
+      <div className="space-y-4">
+        {error ? (
+          <Alert variant="error" title="Agenda belum bisa dibuat">
+            {error}
+          </Alert>
+        ) : null}
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Detail utama</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Judul dan waktu agenda.
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Judul agenda
+            </label>
+            <Input
+              value={form.summary}
+              onChange={(event) => onChange("summary", event.target.value)}
+              placeholder="Tambahkan judul"
+              className="rounded-2xl"
+            />
+          </div>
+
+          <label className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={form.allDay}
+              onChange={(event) => onChange("allDay", event.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-[#ff623d] focus:ring-[#ff623d]"
+            />
+            Sepanjang hari
+          </label>
+
+          {form.allDay ? (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Tanggal mulai
+                </label>
+                <Input
+                  type="date"
+                  value={form.startDate}
+                  onChange={(event) => onChange("startDate", event.target.value)}
+                  className="rounded-2xl bg-white"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Tanggal selesai
+                </label>
+                <Input
+                  type="date"
+                  value={form.endDate}
+                  onChange={(event) => onChange("endDate", event.target.value)}
+                  className="rounded-2xl bg-white"
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Mulai
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={form.startDateTime}
+                    onChange={(event) =>
+                      onChange("startDateTime", event.target.value)
+                    }
+                    className="rounded-2xl bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Selesai
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={form.endDateTime}
+                    onChange={(event) =>
+                      onChange("endDateTime", event.target.value)
+                    }
+                    className="rounded-2xl bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Zona waktu
+                  </label>
+                  <Input
+                    value={form.timeZone}
+                    onChange={(event) => onChange("timeZone", event.target.value)}
+                    placeholder="Asia/Jakarta"
+                    className="rounded-2xl bg-white"
+                  />
+                </div>
+                <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 md:mt-7">
+                  <input
+                    type="checkbox"
+                    checked={form.addGoogleMeet}
+                    onChange={(event) =>
+                      onChange("addGoogleMeet", event.target.checked)
+                    }
+                    className="h-4 w-4 rounded border-slate-300 text-[#ff623d] focus:ring-[#ff623d]"
+                  />
+                  Tambahkan Google Meet
+                </label>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Peserta & lokasi</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Siapa yang diundang dan di mana meeting berlangsung.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Tambahkan tamu
+              </label>
+              <Input
+                value={form.guests}
+                onChange={(event) => onChange("guests", event.target.value)}
+                placeholder="email1@domain.com, email2@domain.com"
+                className="rounded-2xl bg-white"
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Pisahkan email dengan koma, titik koma, atau baris baru.
+              </p>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Lokasi
+              </label>
+              <Input
+                value={form.location}
+                onChange={(event) => onChange("location", event.target.value)}
+                placeholder="Tambahkan lokasi"
+                className="rounded-2xl bg-white"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Deskripsi</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Catatan agenda, konteks meeting, atau rundown singkat.
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Deskripsi agenda
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(event) => onChange("description", event.target.value)}
+              placeholder="Tambahkan deskripsi atau agenda meeting"
+              rows={4}
+              className="w-full rounded-[20px] border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 transition-all duration-150 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            />
+          </div>
+        </section>
+      </div>
+    </Modal.Body>
+
+    <Modal.Footer>
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-2xl"
+        onClick={onClose}
+        disabled={submitting}
+      >
+        Batal
+      </Button>
+      <Button
+        type="button"
+        className="rounded-2xl bg-[#ff623d] text-white hover:bg-[#ff744f]"
+        onClick={onSubmit}
+        disabled={submitting}
+      >
+        {submitting ? "Menyimpan..." : "Simpan agenda"}
+      </Button>
+    </Modal.Footer>
+  </Modal>
 );
 
 const MetricCard = ({ title, value, description, active = false }) => (
@@ -284,7 +617,7 @@ const SummaryPanel = ({
   return (
     <div
       ref={summaryRef}
-      className="min-h-0 self-start overflow-hidden rounded-[20px] bg-white shadow-md"
+      className="min-h-[620px] self-start overflow-hidden rounded-[20px] bg-white shadow-md"
     >
       <div className="flex h-full flex-col rounded-[24px] bg-white p-5">
         <div className="flex items-start justify-between gap-3">
@@ -404,91 +737,196 @@ const SummaryPanel = ({
   );
 };
 
-const EventListPanel = ({
-  title,
-  events,
+const DeleteConfirmModal = ({ open, event, deleting, onClose, onConfirm }) => (
+  <Modal open={open} onClose={onClose} size="sm" className="rounded-[28px]">
+    <Modal.Header onClose={onClose} className="pb-3">
+      <Modal.Title className="text-xl">Hapus agenda</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <p className="text-sm text-slate-600">
+        Apakah kamu yakin ingin menghapus agenda{" "}
+        <span className="font-semibold text-slate-900">
+          &ldquo;{event?.summary || "Tanpa judul"}&rdquo;
+        </span>?
+        Tindakan ini tidak dapat dibatalkan.
+      </p>
+    </Modal.Body>
+    <Modal.Footer>
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-2xl"
+        onClick={onClose}
+        disabled={deleting}
+      >
+        Batal
+      </Button>
+      <Button
+        type="button"
+        className="rounded-2xl bg-rose-600 text-white hover:bg-rose-700"
+        onClick={onConfirm}
+        disabled={deleting}
+      >
+        {deleting ? "Menghapus..." : "Hapus agenda"}
+      </Button>
+    </Modal.Footer>
+  </Modal>
+);
+
+const EventItem = ({ event, selectedEventId, onSelect, onDelete }) => {
+  const status = getEventStatus(event);
+  const startValue = event.start?.dateTime || event.start?.date;
+  const isSelected = selectedEventId === event.id;
+
+  return (
+    <div className="relative">
+      <button
+        key={event.id}
+        type="button"
+        onClick={() => onSelect(event)}
+        className={`w-full rounded-[18px] border p-4 text-left transition-colors ${
+          isSelected
+            ? "border-[#ff623d] bg-[#fff4ef]"
+            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+            <Clock className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1 pr-7">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">
+                  {event.summary || "Tanpa judul"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {formatShortDate(startValue)}, {formatTimeOnly(event)}
+                </p>
+              </div>
+              <span
+                className={`flex-shrink-0 rounded-full px-2 py-1 text-[11px] font-medium ${getStatusClassName(status)}`}
+              >
+                {getStatusLabel(status)}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {event.location ? (
+                <span className="rounded-xl bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                  {event.location}
+                </span>
+              ) : null}
+              {event.hangoutLink ? (
+                <span className="rounded-xl bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700">
+                  Has Meet
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        title="Hapus agenda"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(event);
+        }}
+        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+};
+
+const CombinedEventListPanel = ({
+  todayEvents,
+  upcomingEvents,
   selectedEventId,
   onSelect,
-  emptyText,
+  onDelete,
   style,
-}) => (
-  <div
-    className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
-    style={style}
-  >
-    <div className="border-b border-slate-200 px-5 py-4">
-      <h2 className="text-[1.05rem] font-semibold text-slate-900">{title}</h2>
-      <p className="mt-1 text-sm text-slate-500">
-        {events.length ? `${events.length} event tersedia` : emptyText}
-      </p>
-    </div>
+}) => {
+  const totalCount = todayEvents.length + upcomingEvents.length;
 
-    <div className="flex-1 overflow-y-auto p-4">
-      {events.length === 0 ? (
-        <div className="flex h-full min-h-[220px] items-center justify-center rounded-[18px] border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-500">
-          {emptyText}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {events.map((event) => {
-            const status = getEventStatus(event);
-            const startValue = event.start?.dateTime || event.start?.date;
-            const isSelected = selectedEventId === event.id;
+  return (
+    <div
+      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
+      style={style}
+    >
+      <div className="border-b border-slate-200 px-5 py-4">
+        <h2 className="text-[1.05rem] font-semibold text-slate-900">Agenda</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          {totalCount ? `${totalCount} event tersedia` : "Tidak ada event."}
+        </p>
+      </div>
 
-            return (
-              <button
-                key={event.id}
-                type="button"
-                onClick={() => onSelect(event)}
-                className={`w-full rounded-[18px] border p-4 text-left transition-colors ${
-                  isSelected
-                    ? "border-[#ff623d] bg-[#fff4ef]"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900">
-                          {event.summary || "Tanpa judul"}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {formatShortDate(startValue)}, {formatTimeOnly(event)}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-1 text-[11px] font-medium ${getStatusClassName(status)}`}
-                      >
-                        {getStatusLabel(status)}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {event.location ? (
-                        <span className="rounded-xl bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
-                          {event.location}
-                        </span>
-                      ) : null}
-                      {event.hangoutLink ? (
-                        <span className="rounded-xl bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-700">
-                          Has Meet
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
+      <div className="flex-1 overflow-y-auto p-4">
+        {totalCount === 0 ? (
+          <div className="flex h-full min-h-[220px] items-center justify-center rounded-[18px] border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-500">
+            Tidak ada event hari ini maupun mendatang.
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {/* Hari Ini */}
+            <div className="mb-2">
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Hari Ini
+              </p>
+              {todayEvents.length === 0 ? (
+                <div className="rounded-[14px] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-400">
+                  Tidak ada event hari ini.
                 </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
+              ) : (
+                <div className="space-y-2">
+                  {todayEvents.map((event) => (
+                    <EventItem
+                      key={event.id}
+                      event={event}
+                      selectedEventId={selectedEventId}
+                      onSelect={onSelect}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="my-3 h-px w-full bg-slate-200" />
+
+            {/* Mendatang */}
+            <div>
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Mendatang
+              </p>
+              {upcomingEvents.length === 0 ? (
+                <div className="rounded-[14px] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-400">
+                  Belum ada event mendatang.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {upcomingEvents.slice(0, 12).map((event) => (
+                    <EventItem
+                      key={event.id}
+                      event={event}
+                      selectedEventId={selectedEventId}
+                      onSelect={onSelect}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const EventDetailPanel = ({
   selectedEvent,
@@ -713,6 +1151,12 @@ export default function CalendarPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [lastSyncedAt, setLastSyncedAt] = useState("");
   const [summaryPanelHeight, setSummaryPanelHeight] = useState(null);
+  const [createAgendaOpen, setCreateAgendaOpen] = useState(false);
+  const [createAgendaForm, setCreateAgendaForm] = useState(createDefaultAgendaForm);
+  const [createAgendaError, setCreateAgendaError] = useState("");
+  const [submittingAgenda, setSubmittingAgenda] = useState(false);
+  const [deleteConfirmEvent, setDeleteConfirmEvent] = useState(null);
+  const [deletingEvent, setDeletingEvent] = useState(false);
   const summaryPanelRef = useRef(null);
 
   const loadEvents = useCallback(async () => {
@@ -743,7 +1187,9 @@ export default function CalendarPage() {
     if (!node) return undefined;
 
     const syncHeight = () => {
-      setSummaryPanelHeight(node.offsetHeight || null);
+      setSummaryPanelHeight(
+        Math.max(node.offsetHeight || 0, MIN_CALENDAR_PANEL_HEIGHT),
+      );
     };
 
     syncHeight();
@@ -820,7 +1266,6 @@ export default function CalendarPage() {
   );
 
   const hasConflicts = Boolean(aiSummary?.source_metrics?.has_conflict);
-  const desktopListsEmpty = todayEvents.length === 0 && upcomingEvents.length === 0;
 
   const metrics = useMemo(() => {
     const withMeetCount = filteredEvents.filter((event) => event.hangoutLink).length;
@@ -881,12 +1326,92 @@ export default function CalendarPage() {
   };
 
   const handleCompose = () => {
-    navigate("/chat/supervisor", {
-      state: {
-        autoSendMessage: "Bantu saya menyiapkan agenda atau rencana meeting baru dari Calendar Workspace.",
-        preFillOnly: true,
-      },
-    });
+    setCreateAgendaError("");
+    setCreateAgendaForm(createDefaultAgendaForm());
+    setCreateAgendaOpen(true);
+  };
+
+  const handleAgendaFieldChange = (field, value) => {
+    setCreateAgendaForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleCreateAgendaClose = () => {
+    if (submittingAgenda) return;
+
+    setCreateAgendaOpen(false);
+    setCreateAgendaError("");
+  };
+
+  const handleCreateAgendaSubmit = async () => {
+    const validationError = validateAgendaForm(createAgendaForm);
+    if (validationError) {
+      setCreateAgendaError(validationError);
+      return;
+    }
+
+    setSubmittingAgenda(true);
+    setCreateAgendaError("");
+
+    try {
+      const createdEvent = await calendarApi.createCalendarEvent(
+        buildCreateAgendaPayload(createAgendaForm),
+      );
+
+      await loadEvents();
+      setCreateAgendaOpen(false);
+      setCreateAgendaForm(createDefaultAgendaForm());
+      toast.success("Agenda berhasil ditambahkan ke Google Calendar.");
+
+      if (createdEvent?.id) {
+        setSelectedEvent(createdEvent);
+      }
+    } catch (err) {
+      setCreateAgendaError(
+        err.response?.data?.error ||
+          err.message ||
+          "Agenda belum bisa dibuat.",
+      );
+    } finally {
+      setSubmittingAgenda(false);
+    }
+  };
+
+  const handleDeleteRequest = (event) => {
+    setDeleteConfirmEvent(event);
+  };
+
+  const handleDeleteClose = () => {
+    if (deletingEvent) return;
+    setDeleteConfirmEvent(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmEvent) return;
+
+    setDeletingEvent(true);
+    try {
+      await calendarApi.deleteCalendarEvent(deleteConfirmEvent.id);
+
+      if (selectedEvent?.id === deleteConfirmEvent.id) {
+        setSelectedEvent(null);
+        setShowMobileDetail(false);
+      }
+
+      setDeleteConfirmEvent(null);
+      await loadEvents();
+      toast.success("Agenda berhasil dihapus dari Google Calendar.");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.error ||
+          err.message ||
+          "Agenda gagal dihapus."
+      );
+    } finally {
+      setDeletingEvent(false);
+    }
   };
 
   const sharedPanelStyle = summaryPanelHeight
@@ -898,7 +1423,7 @@ export default function CalendarPage() {
       <CalendarHeaderSection
         loading={loading}
         onRefresh={loadEvents}
-        onCompose={handleCompose}
+        onCreateAgenda={handleCompose}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
@@ -975,27 +1500,14 @@ export default function CalendarPage() {
               />
             </div>
 
-            <div
-              className={`grid min-h-0 flex-1 gap-4 ${
-                desktopListsEmpty ? "lg:auto-rows-fr" : "lg:grid-rows-2"
-              }`}
-              style={desktopListsEmpty ? undefined : sharedPanelStyle}
-            >
-              <EventListPanel
-                title="Hari Ini"
-                events={todayEvents}
+            <div className="min-h-0 flex-1" style={sharedPanelStyle}>
+              <CombinedEventListPanel
+                todayEvents={todayEvents}
+                upcomingEvents={upcomingEvents}
                 selectedEventId={selectedEvent?.id}
                 onSelect={handleEventSelect}
-                emptyText="Tidak ada event hari ini."
-                style={desktopListsEmpty ? sharedPanelStyle : undefined}
-              />
-              <EventListPanel
-                title="Mendatang"
-                events={upcomingEvents.slice(0, 12)}
-                selectedEventId={selectedEvent?.id}
-                onSelect={handleEventSelect}
-                emptyText="Belum ada event mendatang."
-                style={desktopListsEmpty ? sharedPanelStyle : undefined}
+                onDelete={handleDeleteRequest}
+                style={sharedPanelStyle}
               />
             </div>
           </div>
@@ -1017,6 +1529,24 @@ export default function CalendarPage() {
           )}
         </div>
       </section>
+
+      <CreateAgendaModal
+        open={createAgendaOpen}
+        form={createAgendaForm}
+        error={createAgendaError}
+        submitting={submittingAgenda}
+        onClose={handleCreateAgendaClose}
+        onChange={handleAgendaFieldChange}
+        onSubmit={handleCreateAgendaSubmit}
+      />
+
+      <DeleteConfirmModal
+        open={Boolean(deleteConfirmEvent)}
+        event={deleteConfirmEvent}
+        deleting={deletingEvent}
+        onClose={handleDeleteClose}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

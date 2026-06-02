@@ -61,4 +61,30 @@ export const calendarApi = {
       aiSummary: summaryResponse?.data?.summary || null
     }
   },
+
+  createCalendarEvent: async (payload) => {
+    const response = await axios.post(
+      `${urls.getBackendUrl()}/api/google/calendar`,
+      payload,
+      {
+        withCredentials: true,
+        timeout: 15_000,
+      }
+    )
+
+    return response.data
+  },
+
+  deleteCalendarEvent: async (eventId, calendarId = 'primary') => {
+    const response = await axios.delete(
+      `${urls.getBackendUrl()}/api/google/calendar/${encodeURIComponent(eventId)}`,
+      {
+        params: { calendarId },
+        withCredentials: true,
+        timeout: 15_000,
+      }
+    )
+
+    return response.data
+  },
 }

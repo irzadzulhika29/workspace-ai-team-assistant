@@ -21,6 +21,7 @@
     "react-aria-components": "^1.17.0",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
+    "react-hot-toast": "^2.6.0",
     "react-markdown": "^9.1.0",
     "react-router-dom": "^6.23.1",
     "rehype-raw": "^7.0.0",
