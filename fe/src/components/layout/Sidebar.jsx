@@ -5,18 +5,18 @@ import { FaTasks } from 'react-icons/fa'
 import logoPng from '/logo.png'
 import { useCallback, useEffect, useState } from 'react'
 import { shallow } from 'zustand/shallow'
-import { Button, NavItem } from '@/components/ui'
+import { Button, ConfirmationModal, NavItem, toast } from '@/components/ui'
 import { useChatStore } from '../../store/chatStore'
 import { sessionApi } from '../../services/sessionService'
 import { useSidebar } from '../../context/SidebarContext'
 
 const navItems = [
   { to: '/',                 icon: LayoutDashboard, label: 'Dashboard'         },
-  { to: '/chat/supervisor',  icon: MessageSquare,   label: 'Supervisor Agent'  },
+  { to: '/chat/supervisor',  icon: MessageSquare,   label: 'AI Workspace Assistant'  },
   { to: '/workspace/files',  icon: FolderOpen,      label: 'Documents'         },
   { to: '/workspace/calendar', icon: CalendarDays,  label: 'Calendar'          },
   { to: '/workspace/email',  icon: Mail,            label: 'Email'             },
-  { to: '/workspace/jira',   icon: FaTasks,         label: 'Jira'              },
+  { to: '/workspace/jira',   icon: FaTasks,         label: 'Project Tracking'              },
   { to: '/monitoring/tokens', icon: BarChart3,      label: 'Token Monitor'     },
   { to: '/settings',         icon: Settings,        label: 'Settings'          },
 ]
@@ -51,6 +51,11 @@ export default function Sidebar() {
   const [loadingSupSessions,   setLoadingSupSessions]   = useState(false)
   const [loadingSupHistory,    setLoadingSupHistory]    = useState(false)
   const [creatingSupSession,   setCreatingSupSession]   = useState(false)
+  const [deleteModalSessionId, setDeleteModalSessionId] = useState(null)
+  const [isDeletingSession, setIsDeletingSession]       = useState(false)
+  const [selectedSessionIds, setSelectedSessionIds]     = useState([])
+  const [bulkDeleteSessionsModalOpen, setBulkDeleteSessionsModalOpen] = useState(false)
+  const [isBulkDeletingSessions, setIsBulkDeletingSessions]           = useState(false)
 
   // ─────────────────────────────────────────────────────────────────────
   // SUPERVISOR helpers
@@ -85,6 +90,7 @@ export default function Sidebar() {
 
   const handleNewSupChat = useCallback(async () => {
     setCreatingSupSession(true)
+    clearSessionSelection()
     try {
       const sesi = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
       if (sesi) {
@@ -147,9 +153,10 @@ export default function Sidebar() {
   // ─────────────────────────────────────────────────────────────────────
   // DELETE handlers
   // ─────────────────────────────────────────────────────────────────────
-  const hapusSupSesi = async (e, sessionId) => {
-    e.stopPropagation()
+  const hapusSupSesi = async (sessionId) => {
+    setIsDeletingSession(true)
     const berhasil = await sessionApi.hapusSesiChat(sessionId)
+    setIsDeletingSession(false)
     if (!berhasil) return
     const sessions = await sessionApi.ambilSemuaSesi('general_chat')
     setSupervisorSessions(sessions)
@@ -162,6 +169,69 @@ export default function Sidebar() {
         clearSupervisor()
       }
     }
+    toast.success('Sesi chat berhasil dihapus.')
+  }
+
+  const handleDeleteClick = (e, sessionId) => {
+    e.stopPropagation()
+    setDeleteModalSessionId(sessionId)
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteModalSessionId(null)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModalSessionId) return
+    await hapusSupSesi(deleteModalSessionId)
+    setDeleteModalSessionId(null)
+  }
+
+  const toggleSelectSession = (sessionId) => {
+    setSelectedSessionIds((prev) =>
+      prev.includes(sessionId) ? prev.filter((id) => id !== sessionId) : [...prev, sessionId]
+    )
+  }
+
+  const clearSessionSelection = () => {
+    setSelectedSessionIds([])
+  }
+
+  const handleBulkDeleteSessionsClick = () => {
+    setBulkDeleteSessionsModalOpen(true)
+  }
+
+  const handleBulkDeleteSessionsCancel = () => {
+    setBulkDeleteSessionsModalOpen(false)
+  }
+
+  const handleBulkDeleteSessionsConfirm = async () => {
+    if (selectedSessionIds.length === 0) return
+    setIsBulkDeletingSessions(true)
+    let successCount = 0
+    for (const sessionId of selectedSessionIds) {
+      const berhasil = await sessionApi.hapusSesiChat(sessionId)
+      if (berhasil) successCount++
+    }
+    setIsBulkDeletingSessions(false)
+    setBulkDeleteSessionsModalOpen(false)
+
+    const sessions = await sessionApi.ambilSemuaSesi('general_chat')
+    setSupervisorSessions(sessions)
+
+    const stillActive = activeSupervisorSessionId && sessions.some((s) => s.id === activeSupervisorSessionId)
+    if (!stillActive) {
+      if (sessions.length > 0) {
+        setActiveSupervisorSession(sessions[0].id)
+        await loadSupSessionHistory(sessions[0].id)
+      } else {
+        setActiveSupervisorSession(null)
+        clearSupervisor()
+      }
+    }
+
+    setSelectedSessionIds([])
+    toast.success(`${successCount} sesi berhasil dihapus.`)
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -197,6 +267,10 @@ export default function Sidebar() {
     onNewChat,
     onSelectSession,
     onDeleteSession,
+    selectedIds,
+    onToggleSelect,
+    onBulkDelete,
+    onClearSelection,
   }) => (
     <div className="mt-3 ml-4 space-y-2 border-l border-neutral-200 pl-4 animate-fade-in">
       <Button
@@ -217,7 +291,7 @@ export default function Sidebar() {
         Riwayat
       </p>
 
-      <div className="max-h-[calc(100vh-380px)] overflow-y-auto sidebar-scrollbar space-y-0.5 pr-0.5">
+      <div className="max-h-[calc(100vh-380px)] overflow-y-auto sidebar-scrollbar">
         {loading ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 size={14} className="animate-spin text-neutral-500" />
@@ -227,62 +301,102 @@ export default function Sidebar() {
             Belum ada sesi.
           </p>
         ) : (
-          sessions.map((session) => {
-            const isActive = session.id === activeSessionId
-            return (
-              <div
-                key={session.id}
-                className={`
-                  group relative flex w-full items-center gap-1 rounded-lg border
-                  transition-all duration-150
-                  ${isActive
-                    ? 'border-primary-200 bg-primary-50/70 text-neutral-900 shadow-sm'
-                    : 'border-transparent text-neutral-500 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900'
-                   }
-                `}
-              >
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary-500" />
-                )}
-                <button
-                  type="button"
-                  onClick={() => onSelectSession(session.id)}
-                  className="flex items-start gap-2 px-2 py-1.5 text-left flex-1 min-w-0"
-                >
-                  <MessageSquare
-                    size={11}
-                    className={`mt-0.5 flex-shrink-0 ${
-                      isActive ? 'text-primary-500' : 'text-neutral-400 group-hover:text-primary-500'
-                    }`}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-medium truncate">
-                      {session.judul || 'Obrolan Baru'}
-                    </p>
-                    <p className={`mt-0.5 text-[9px] ${isActive ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                      {formatDate(session.created_at)}
-                    </p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => onDeleteSession(e, session.id)}
-                  title="Hapus sesi"
+          <div className="border border-neutral-200">
+            {sessions.map((session, idx) => {
+              const isActive = session.id === activeSessionId
+              const isSelected = selectedIds.includes(session.id)
+              const isLast = idx === sessions.length - 1
+              return (
+                <div
+                  key={session.id}
                   className={`
-                    mr-1 flex-shrink-0 rounded p-1 opacity-0 transition-all duration-150 group-hover:opacity-100
+                    group relative flex w-full items-center gap-1
+                    transition-all duration-150
+                    ${isLast ? '' : 'border-b border-neutral-200'}
                     ${isActive
-                     ? 'text-neutral-400 hover:bg-white hover:text-error'
-                      : 'text-neutral-400 hover:bg-white hover:text-error'
+                      ? 'bg-primary-50/70 text-neutral-900'
+                      : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
                      }
-                   `}
+                    ${isSelected ? 'bg-primary-50/50' : ''}
+                  `}
                 >
-                  <Trash2 size={11} />
-                </button>
-              </div>
-            )
-          })
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 bg-primary-500" />
+                  )}
+
+                  {/* Checkbox — muncul saat hover atau jika ada yg terpilih */}
+                  <div
+                    className={`flex-shrink-0 pl-3 transition-all duration-150 ${
+                      selectedIds.length > 0 || isSelected
+                        ? 'opacity-100'
+                        : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onToggleSelect(session.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-3.5 w-3.5 cursor-pointer appearance-none rounded-full border-2 border-neutral-300 bg-white checked:border-primary-500 checked:bg-primary-500 transition-all duration-150 hover:border-primary-400"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectSession(session.id)}
+                    className="flex items-start py-1.5 pr-2 text-left flex-1 min-w-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium truncate">
+                        {session.judul || 'Obrolan Baru'}
+                      </p>
+                      <p className={`mt-0.5 text-[9px] ${isActive ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                        {formatDate(session.created_at)}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => onDeleteSession(e, session.id)}
+                    title="Hapus sesi"
+                    className={`
+                      mr-2 flex-shrink-0 rounded p-1 opacity-0 transition-all duration-150 group-hover:opacity-100
+                      text-neutral-400 hover:bg-white hover:text-error
+                     `}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
+
+      {/* Bulk delete bar */}
+      {selectedIds.length > 0 && (
+        <div className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2">
+          <span className="text-[10px] text-neutral-600">
+            {selectedIds.length} terpilih
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onClearSelection}
+              className="rounded px-2 py-1 text-[10px] text-neutral-500 hover:bg-neutral-200"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              onClick={onBulkDelete}
+              className="rounded bg-error px-2 py-1 text-[10px] font-semibold text-white hover:bg-red-700"
+            >
+              Hapus ({selectedIds.length})
+            </button>
+          </div>
+        </div>
+      )}
 
       {loadHist && (
         <div className="flex items-center gap-1.5 px-1 py-1 text-[10px] text-neutral-500">
@@ -365,7 +479,11 @@ export default function Sidebar() {
                 creating: creatingSupSession,
                 onNewChat: handleNewSupChat,
                 onSelectSession: handleSelectSupSession,
-                onDeleteSession: hapusSupSesi,
+                onDeleteSession: handleDeleteClick,
+                selectedIds: selectedSessionIds,
+                onToggleSelect: toggleSelectSession,
+                onBulkDelete: handleBulkDeleteSessionsClick,
+                onClearSelection: clearSessionSelection,
               })}
             </div>
           ))}
@@ -395,6 +513,38 @@ export default function Sidebar() {
           )}
         </button>
       </aside>
+
+      {deleteModalSessionId && (
+        <ConfirmationModal
+          open={Boolean(deleteModalSessionId)}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          variant="danger"
+          title="Hapus Sesi Chat"
+          description="Apakah Anda yakin ingin menghapus sesi chat ini? Semua pesan dalam sesi ini akan dihapus secara permanen."
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isDeletingSession}
+          loadingLabel="Menghapus..."
+          icon={Trash2}
+        />
+      )}
+
+      {bulkDeleteSessionsModalOpen && (
+        <ConfirmationModal
+          open={bulkDeleteSessionsModalOpen}
+          onClose={handleBulkDeleteSessionsCancel}
+          onConfirm={handleBulkDeleteSessionsConfirm}
+          variant="danger"
+          title={`Hapus ${selectedSessionIds.length} Sesi`}
+          description={`Apakah Anda yakin ingin menghapus ${selectedSessionIds.length} sesi chat yang dipilih? Semua pesan dalam sesi ini akan dihapus secara permanen.`}
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isBulkDeletingSessions}
+          loadingLabel="Menghapus..."
+          icon={Trash2}
+        />
+      )}
     </>
   )
 }
