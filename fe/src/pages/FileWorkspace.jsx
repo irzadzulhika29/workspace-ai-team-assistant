@@ -33,12 +33,20 @@ export default function FileWorkspace() {
     filteredDocuments,
     recentDocuments,
     visibleDocuments,
+    selectedDocumentIds,
+    bulkDeleteModalOpen,
+    isBulkDeleting,
     handleCreateDocument,
     handleSelectDocument,
     handleUploaded,
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
+    toggleSelectDocument,
+    clearDocumentSelection,
+    handleBulkDeleteClick,
+    handleBulkDeleteCancel,
+    handleBulkDeleteConfirm,
     setSearchQuery,
     setActiveTab,
     setUploadModalOpen,
@@ -154,6 +162,9 @@ export default function FileWorkspace() {
                       onSelectDocument={handleSelectDocument}
                       showBadge
                       variant="recent"
+                      selectedDocumentIds={selectedDocumentIds}
+                      onToggleSelectDocument={toggleSelectDocument}
+                      hasSelectionActive={selectedDocumentIds.length > 0}
                     />
                   </div>
 
@@ -170,6 +181,31 @@ export default function FileWorkspace() {
                       selectedDocument={selectedDocument}
                       onSelectDocument={handleSelectDocument}
                       variant={activeTab === 'generated' ? 'single-row' : 'grid'}
+                      selectedDocumentIds={selectedDocumentIds}
+                      onToggleSelectDocument={toggleSelectDocument}
+                      hasSelectionActive={selectedDocumentIds.length > 0}
+                      titleExtra={
+                        selectedDocumentIds.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-neutral-500">
+                              {selectedDocumentIds.length} terpilih
+                            </span>
+                            <button
+                              onClick={clearDocumentSelection}
+                              className="rounded-lg px-3 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+                            >
+                              Batal
+                            </button>
+                            <button
+                              onClick={handleBulkDeleteClick}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-error px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+                            >
+                              <Trash2 size={12} />
+                              Hapus ({selectedDocumentIds.length})
+                            </button>
+                          </div>
+                        ) : null
+                      }
                     />
                     {shouldPaginate && totalPages > 1 && (
                       <div className="mt-4 flex items-center justify-center gap-4">
@@ -262,6 +298,22 @@ export default function FileWorkspace() {
           icon={Trash2}
         />
       ) : null}
+
+      {bulkDeleteModalOpen && (
+        <ConfirmationModal
+          open={bulkDeleteModalOpen}
+          onClose={handleBulkDeleteCancel}
+          onConfirm={handleBulkDeleteConfirm}
+          variant="danger"
+          title={`Hapus ${selectedDocumentIds.length} Dokumen`}
+          description={`Apakah Anda yakin ingin menghapus ${selectedDocumentIds.length} dokumen yang dipilih? Tindakan ini tidak dapat dibatalkan.`}
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isBulkDeleting}
+          loadingLabel="Menghapus..."
+          icon={Trash2}
+        />
+      )}
     </div>
   )
 }

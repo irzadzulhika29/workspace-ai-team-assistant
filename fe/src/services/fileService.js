@@ -68,4 +68,17 @@ export const fileApi = {
     });
     return res.data;
   },
+
+  /**
+   * Bulk delete documents from the Supabase `dokumen` table via backend.
+   * @param {string[]} documentIds - Array of UUIDs to delete
+   * @returns {Promise<any>}
+   */
+  deleteDokumenBulk: async (documentIds) => {
+    const res = await axios.delete(`${urls.getBackendUrl()}/api/dokumen/bulk`, {
+      data: { documentIds },
+      withCredentials: true,
+    });
+    return res.data;
+  },
 };

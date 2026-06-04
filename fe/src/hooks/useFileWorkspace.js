@@ -1,5 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from '@/components/ui'
 import { fileApi } from '@/services/api'
 import { normalizeDocumentRecord } from '@/utils/fileWorkspace'
 
@@ -17,6 +18,9 @@ export function useFileWorkspace() {
   const [documentToDelete, setDocumentToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDetailExpanded, setIsDetailExpanded] = useState(true)
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState([])
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const deferredSearchQuery = useDeferredValue(searchQuery)
 
   const loadDocuments = useCallback(async () => {
@@ -153,6 +157,44 @@ export function useFileWorkspace() {
     setDocumentToDelete(null)
   }, [])
 
+  const toggleSelectDocument = useCallback((id) => {
+    setSelectedDocumentIds((prev) =>
+      prev.includes(id) ? prev.filter((did) => did !== id) : [...prev, id]
+    )
+  }, [])
+
+  const clearDocumentSelection = useCallback(() => {
+    setSelectedDocumentIds([])
+  }, [])
+
+  const handleBulkDeleteClick = useCallback(() => {
+    setBulkDeleteModalOpen(true)
+  }, [])
+
+  const handleBulkDeleteCancel = useCallback(() => {
+    setBulkDeleteModalOpen(false)
+  }, [])
+
+  const handleBulkDeleteConfirm = useCallback(async () => {
+    if (selectedDocumentIds.length === 0) return
+    setIsBulkDeleting(true)
+    try {
+      await fileApi.deleteDokumenBulk(selectedDocumentIds)
+      setBulkDeleteModalOpen(false)
+      setSelectedDocumentIds([])
+      if (selectedDocument && selectedDocumentIds.includes(selectedDocument.id)) {
+        setSelectedDocument(null)
+      }
+      await loadDocuments()
+      toast.success(`${selectedDocumentIds.length} dokumen berhasil dihapus.`)
+    } catch (error) {
+      console.error('Error bulk deleting documents:', error)
+      toast.error('Gagal menghapus dokumen: ' + error.message)
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }, [selectedDocumentIds, loadDocuments, selectedDocument])
+
   return {
     mobileDetailRef,
     selectedDocument,
@@ -168,12 +210,20 @@ export function useFileWorkspace() {
     filteredDocuments,
     recentDocuments,
     visibleDocuments,
+    selectedDocumentIds,
+    bulkDeleteModalOpen,
+    isBulkDeleting,
     handleCreateDocument,
     handleSelectDocument,
     handleUploaded,
     handleDeleteClick,
     handleDeleteConfirm,
     handleDeleteCancel,
+    toggleSelectDocument,
+    clearDocumentSelection,
+    handleBulkDeleteClick,
+    handleBulkDeleteCancel,
+    handleBulkDeleteConfirm,
     setSearchQuery,
     setActiveTab,
     setUploadModalOpen,

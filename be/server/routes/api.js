@@ -152,6 +152,34 @@ router.delete('/dokumen/:documentId', requireAuth, async (req, res) => {
   }
 });
 
+// Bulk delete documents from Supabase
+router.delete('/dokumen/bulk', requireAuth, async (req, res) => {
+  try {
+    const { documentIds } = req.body;
+    const userId = req.user.id;
+
+    if (!Array.isArray(documentIds) || documentIds.length === 0) {
+      return res.status(400).json({ error: 'documentIds must be a non-empty array' });
+    }
+
+    const idsParam = documentIds.map((id) => encodeFilterValue(id)).join(',');
+    const deleteUrl = `${process.env.SUPABASE_URL}/rest/v1/dokumen?id=in.(${idsParam})&user_id=eq.${encodeFilterValue(userId)}`;
+    const deleteResponse = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders(),
+    });
+
+    if (!deleteResponse.ok) {
+      throw new Error(`Failed to delete documents: ${deleteResponse.status} ${deleteResponse.statusText}`);
+    }
+
+    res.json({ success: true, deletedCount: documentIds.length });
+  } catch (error) {
+    console.error('Error deleting dokumen bulk:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Insert token usage execution data from n8n
 router.post('/token-usage', async (req, res) => {
   try {
@@ -495,6 +523,40 @@ router.delete('/sessions/:sessionId', requireAuth, async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error deleting session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete specific messages from a chat session (bulk)
+router.delete('/sessions/:sessionId/messages', requireAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { messageIds } = req.body;
+    const userId = req.user.id;
+
+    if (!Array.isArray(messageIds) || messageIds.length === 0) {
+      return res.status(400).json({ error: 'messageIds must be a non-empty array' });
+    }
+
+    const ownedSession = await fetchOwnedChatSession(sessionId, userId);
+    if (!ownedSession) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const idsParam = messageIds.map((id) => encodeFilterValue(id)).join(',');
+    const messagesUrl = `${process.env.SUPABASE_URL}/rest/v1/chat_messages?id=in.(${idsParam})&session_id=eq.${encodeFilterValue(sessionId)}&user_id=eq.${encodeFilterValue(userId)}`;
+    const messagesResponse = await fetch(messagesUrl, {
+      method: 'DELETE',
+      headers: getSupabaseHeaders(),
+    });
+
+    if (!messagesResponse.ok) {
+      throw new Error(`Failed to delete messages: ${messagesResponse.status}`);
+    }
+
+    res.json({ success: true, deletedCount: messageIds.length });
+  } catch (error) {
+    console.error('Error deleting messages:', error);
     res.status(500).json({ error: error.message });
   }
 });
