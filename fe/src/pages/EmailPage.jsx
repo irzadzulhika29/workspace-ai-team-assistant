@@ -28,7 +28,6 @@ export default function EmailPage() {
   const [activeTab, setActiveTab] = useState("unread"); // Default to Unread tab
   const [revisingDraft, setRevisingDraft] = useState(null);
   const [summaryRefreshTrigger, setSummaryRefreshTrigger] = useState(0);
-  const [summaryPanelHeight, setSummaryPanelHeight] = useState(null);
   const summaryPanelRef = useRef(null);
 
   // Fetch emails on mount
@@ -37,28 +36,6 @@ export default function EmailPage() {
     fetchDrafts();
   }, [fetchEmails, fetchDrafts]);
 
-  useEffect(() => {
-    if (activeTab !== "unread" && activeTab !== "inbox") {
-      setSummaryPanelHeight(null);
-      return undefined;
-    }
-
-    const node = summaryPanelRef.current;
-    if (!node) return undefined;
-
-    const syncHeight = () => {
-      setSummaryPanelHeight(node.offsetHeight || null);
-    };
-
-    syncHeight();
-
-    const observer = new ResizeObserver(syncHeight);
-    observer.observe(node);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [activeTab, summaryRefreshTrigger]);
 
   const metrics = useMemo(() => {
     const inboxCount = emails.length;
@@ -289,7 +266,7 @@ export default function EmailPage() {
 
       {/* Section 3: Email Content */}
       <section className="mt-4 flex h-[calc(100dvh-15rem)] min-h-0 flex-1 overflow-hidden rounded-[24px] shadow-md">
-        <div className="flex h-full min-h-0 flex-1 overflow-hidden gap-4">
+        <div className="flex h-full min-h-0 flex-1 overflow-hidden gap-4 items-start">
           {/* Tab Content */}
           {activeTab === "unread" && (
             <>
@@ -306,28 +283,16 @@ export default function EmailPage() {
 
               {/* Middle Panel: Email List */}
               <div
-                className={`flex min-h-0 self-start flex-col overflow-hidden rounded-[20px] bg-white shadow-md ${
+                className={`min-h-0 overflow-y-auto self-start max-h-full rounded-[20px] bg-white shadow-md ${
                   selectedEmail ? "w-96" : "flex-1"
                 }`}
-                style={
-                  summaryPanelHeight ? { height: `${summaryPanelHeight}px` } : undefined
-                }
               >
-                <div className="flex-1 overflow-y-auto">
-                  <EmailList maxItems={10} unreadOnly={true} />
-                </div>
+                <EmailList maxItems={10} unreadOnly={true} />
               </div>
 
               {/* Right Panel: Email Detail */}
               {selectedEmail && (
-                <div
-                  className="flex min-h-0 flex-1 self-start"
-                  style={
-                    summaryPanelHeight
-                      ? { height: `${summaryPanelHeight}px` }
-                      : undefined
-                  }
-                >
+                <div className="flex min-h-0 flex-1">
                   <EmailDetail onDraftCreated={handleDraftCreated} />
                 </div>
               )}
@@ -349,28 +314,16 @@ export default function EmailPage() {
 
               {/* Middle Panel: Email List */}
               <div
-                className={`flex min-h-0 self-start flex-col overflow-hidden rounded-[20px] bg-white shadow-md ${
+                className={`min-h-0 overflow-y-auto self-start max-h-full rounded-[20px] bg-white shadow-md ${
                   selectedEmail ? "w-96" : "flex-1"
                 }`}
-                style={
-                  summaryPanelHeight ? { height: `${summaryPanelHeight}px` } : undefined
-                }
               >
-                <div className="flex-1 overflow-y-auto">
-                  <EmailList />
-                </div>
+                <EmailList />
               </div>
 
               {/* Right Panel: Email Detail */}
               {selectedEmail && (
-                <div
-                  className="flex min-h-0 flex-1 self-start"
-                  style={
-                    summaryPanelHeight
-                      ? { height: `${summaryPanelHeight}px` }
-                      : undefined
-                  }
-                >
+                <div className="flex min-h-0 flex-1">
                   <EmailDetail onDraftCreated={handleDraftCreated} />
                 </div>
               )}

@@ -2,21 +2,22 @@ import axios from 'axios'
 import { urls } from './api'
 
 const buildCalendarParams = () => {
-  // Get start of today in local timezone
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  // Get start of 30 days ago (to show past events too)
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - 30)
+  startDate.setHours(0, 0, 0, 0)
   
-  // Get end date (7 days from now)
+  // Get end date (90 days from now)
   const endDate = new Date()
-  endDate.setDate(endDate.getDate() + 7)
+  endDate.setDate(endDate.getDate() + 90)
   endDate.setHours(23, 59, 59, 999)
   
   return {
     calendarId: 'primary',
     singleEvents: 'true',
     orderBy: 'startTime',
-    maxResults: '50',
-    timeMin: today.toISOString(),
+    maxResults: '250',
+    timeMin: startDate.toISOString(),
     timeMax: endDate.toISOString(),
   }
 }
