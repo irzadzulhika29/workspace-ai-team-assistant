@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { MessageSquare, Plus, Trash2 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { shallow } from 'zustand/shallow'
-import { Alert, Button, ConfirmationModal, EmptyState } from '@/components/ui'
+import { Alert, Button, ConfirmationModal, EmptyState, toast } from '@/components/ui'
 import { useChatStore } from '../store/chatStore'
 import { chatApi } from '../services/chatService'
 import { sessionApi } from '../services/sessionService'
@@ -35,6 +35,7 @@ export default function SupervisorChat() {
     supervisorMessages,
     addSupervisorMessage,
     clearSupervisor,
+    removeSupervisorMessages,
     activeSupervisorSessionId,
     setActiveSupervisorSession,
     setSupervisorSessions,
@@ -45,6 +46,7 @@ export default function SupervisorChat() {
       supervisorMessages: state.supervisorMessages,
       addSupervisorMessage: state.addSupervisorMessage,
       clearSupervisor: state.clearSupervisor,
+      removeSupervisorMessages: state.removeSupervisorMessages,
       activeSupervisorSessionId: state.activeSupervisorSessionId,
       setActiveSupervisorSession: state.setActiveSupervisorSession,
       setSupervisorSessions: state.setSupervisorSessions,
@@ -61,6 +63,9 @@ export default function SupervisorChat() {
   const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState(false)
   const [isClearingHistory, setIsClearingHistory] = useState(false)
   const [creatingSession, setCreatingSession] = useState(false)
+  const [selectedMessageIds, setSelectedMessageIds] = useState([])
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const bottomRef = useAutoScroll([supervisorMessages, loading])
   const previousSessionTitleRef = useRef('')
 
@@ -297,16 +302,51 @@ export default function SupervisorChat() {
     setClearHistoryModalOpen(false)
   }, [])
 
+  const toggleSelectMessage = useCallback((id) => {
+    setSelectedMessageIds((prev) =>
+      prev.includes(id) ? prev.filter((mid) => mid !== id) : [...prev, id]
+    )
+  }, [])
+
+  const clearSelection = useCallback(() => {
+    setSelectedMessageIds([])
+  }, [])
+
   const handleClearHistoryConfirm = useCallback(() => {
     setIsClearingHistory(true)
     clearSupervisor()
+    clearSelection()
     setIsClearingHistory(false)
     setClearHistoryModalOpen(false)
-  }, [clearSupervisor])
+  }, [clearSupervisor, clearSelection])
+
+  const handleBulkDeleteClick = useCallback(() => {
+    setBulkDeleteModalOpen(true)
+  }, [])
+
+  const handleBulkDeleteCancel = useCallback(() => {
+    setBulkDeleteModalOpen(false)
+  }, [])
+
+  const handleBulkDeleteConfirm = useCallback(async () => {
+    if (!activeSupervisorSessionId || selectedMessageIds.length === 0) return
+    setIsBulkDeleting(true)
+    const berhasil = await sessionApi.hapusPesan(activeSupervisorSessionId, selectedMessageIds)
+    setIsBulkDeleting(false)
+    setBulkDeleteModalOpen(false)
+    if (!berhasil) {
+      toast.error('Gagal menghapus pesan.')
+      return
+    }
+    removeSupervisorMessages(selectedMessageIds)
+    setSelectedMessageIds([])
+    toast.success(`${selectedMessageIds.length} pesan berhasil dihapus.`)
+  }, [activeSupervisorSessionId, selectedMessageIds, removeSupervisorMessages])
 
   const handleCreateChat = useCallback(async () => {
     setCreatingSession(true)
     setError(null)
+    clearSelection()
 
     try {
       const newSession = await sessionApi.buatSesiBaru('Obrolan Baru', 'general_chat')
@@ -323,7 +363,7 @@ export default function SupervisorChat() {
     } finally {
       setCreatingSession(false)
     }
-  }, [clearSupervisor, setActiveSupervisorSession, syncSupervisorSessions])
+  }, [clearSupervisor, clearSelection, setActiveSupervisorSession, syncSupervisorSessions])
 
   useEffect(() => {
     const shouldForceNewSession =
@@ -519,14 +559,43 @@ Silakan berikan instruksi revisi untuk draft ini.`;
           />
         )}
 
-        {supervisorMessages.map((msg) => (
-          <ChatBubble 
-            key={msg.id} 
-            message={msg}
-            onSendEmail={handleSendEmail}
-            onRegenerateEmail={handleRegenerateEmail}
-          />
-        ))}
+        {supervisorMessages.map((msg) => {
+          const isSelected = selectedMessageIds.includes(msg.id)
+          const isUser = msg.role === 'user'
+          return (
+            <div
+              key={msg.id}
+              className={`group relative transition-all duration-150 ${
+                isSelected ? 'opacity-85' : ''
+              }`}
+            >
+              {/* Checkbox — muncul saat hover atau jika ada pesan terpilih */}
+              <div
+                className={`absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-150 ${
+                  isUser ? 'right-0' : 'left-0'
+                } ${
+                  selectedMessageIds.length > 0 || isSelected
+                    ? 'opacity-100'
+                    : 'opacity-0 group-hover:opacity-100'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelectMessage(msg.id)}
+                  className="h-4 w-4 cursor-pointer appearance-none rounded-full border-2 border-neutral-300 bg-white checked:border-primary-500 checked:bg-primary-500 transition-all duration-150 hover:border-primary-400"
+                />
+              </div>
+              <div className={isUser ? 'pr-8' : 'pl-8'}>
+                <ChatBubble
+                  message={msg}
+                  onSendEmail={handleSendEmail}
+                  onRegenerateEmail={handleRegenerateEmail}
+                />
+              </div>
+            </div>
+          )
+        })}
 
         {loading && (
           <div>
@@ -542,6 +611,34 @@ Silakan berikan instruksi revisi untuk draft ini.`;
 
         <div ref={bottomRef} />
       </div>
+
+      {/* Floating action bar for bulk delete */}
+      {selectedMessageIds.length > 0 && (
+        <div className="flex-shrink-0 flex items-center justify-between border-t border-neutral-200 bg-white px-6 py-3">
+          <span className="text-sm text-neutral-600">
+            {selectedMessageIds.length} pesan terpilih
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={clearSelection}
+              variant="ghost"
+              size="sm"
+              className="text-xs text-neutral-500"
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={handleBulkDeleteClick}
+              variant="destructive"
+              size="sm"
+              className="gap-1.5 text-xs"
+            >
+              <Trash2 size={13} />
+              Hapus ({selectedMessageIds.length})
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Input */}
       <MessageInput
@@ -563,6 +660,22 @@ Silakan berikan instruksi revisi untuk draft ini.`;
           confirmLabel="Hapus"
           cancelLabel="Batal"
           loading={isClearingHistory}
+          loadingLabel="Menghapus..."
+          icon={Trash2}
+        />
+      ) : null}
+
+      {bulkDeleteModalOpen ? (
+        <ConfirmationModal
+          open={bulkDeleteModalOpen}
+          onClose={handleBulkDeleteCancel}
+          onConfirm={handleBulkDeleteConfirm}
+          variant="danger"
+          title={`Hapus ${selectedMessageIds.length} Pesan`}
+          description={`Apakah Anda yakin ingin menghapus ${selectedMessageIds.length} pesan yang dipilih? Tindakan ini tidak dapat dibatalkan.`}
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          loading={isBulkDeleting}
           loadingLabel="Menghapus..."
           icon={Trash2}
         />

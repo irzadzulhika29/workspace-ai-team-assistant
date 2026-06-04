@@ -312,10 +312,28 @@ export const sessionApi = {
       await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}`, {
         withCredentials: true,
       });
-      console.log(`Riwayat chat untuk sesi ${sessionId} berhasil dihapus.`);
       return true;
     } catch (error) {
       console.error("Terjadi kesalahan saat menghapus:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Menghapus pesan-pesan tertentu dari sebuah sesi chat (bulk delete).
+   * @param {string} sessionId - UUID sesi
+   * @param {string[]} messageIds - Array UUID pesan yang akan dihapus
+   * @returns {Promise<boolean>} true jika berhasil
+   */
+  hapusPesan: async (sessionId, messageIds) => {
+    try {
+      await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}/messages`, {
+        data: { messageIds },
+        withCredentials: true,
+      });
+      return true;
+    } catch (error) {
+      console.error("Terjadi kesalahan saat menghapus pesan:", error);
       return false;
     }
   },

@@ -47,6 +47,11 @@ export const useChatStore = create(
 
       clearSupervisor: () => set({ supervisorMessages: [] }),
 
+      removeSupervisorMessages: (messageIds) =>
+        set((s) => ({
+          supervisorMessages: s.supervisorMessages.filter((m) => !messageIds.includes(m.id)),
+        })),
+
       // ── Supervisor sessions ───────────────────────────────────────────────
       setSupervisorSessions: (sessions) => set({ supervisorSessions: sessions }),
 
