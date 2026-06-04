@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Button, Input } from "@/components/ui";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+import { Alert, Button, Input, Modal, toast } from "@/components/ui";
 import {
   AlertCircle,
   Bug,
   CalendarDays,
+  Check,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   CircleDot,
   ExternalLink,
   Flag,
@@ -19,6 +23,82 @@ import {
 } from "lucide-react";
 import { FaTasks } from "react-icons/fa";
 import { jiraApi } from "../services/jiraService";
+
+
+const PRIORITY_OPTIONS = [
+  { value: "", label: "Tanpa prioritas" },
+  { value: "Highest", label: "Highest" },
+  { value: "High", label: "High" },
+  { value: "Medium", label: "Medium" },
+  { value: "Low", label: "Low" },
+  { value: "Lowest", label: "Lowest" },
+];
+
+const createDefaultIssueForm = () => ({
+  projectKey: "",
+  issueTypeId: "",
+  issueTypeName: "",
+  summary: "",
+  description: "",
+  priority: "",
+  assignee: "",
+  dueDate: "",
+  labels: "",
+});
+
+const validateIssueForm = (form) => {
+  if (!form.projectKey) return "Pilih project Jira terlebih dahulu.";
+  if (!form.issueTypeId) return "Pilih issue type terlebih dahulu.";
+  if (!form.summary.trim()) return "Judul issue wajib diisi.";
+  return "";
+};
+
+const buildAtlassianDocument = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return undefined;
+
+  return {
+    type: "doc",
+    version: 1,
+    content: [
+      {
+        type: "paragraph",
+        content: [{ type: "text", text }],
+      },
+    ],
+  };
+};
+
+const buildCreateIssuePayload = (form) => {
+  const fields = {
+    project: { key: form.projectKey },
+    issuetype: { id: form.issueTypeId },
+    summary: form.summary.trim(),
+  };
+
+  const description = buildAtlassianDocument(form.description);
+  if (description) fields.description = description;
+
+  if (form.priority) {
+    fields.priority = { name: form.priority };
+  }
+
+  if (form.assignee.trim()) {
+    fields.assignee = { accountId: form.assignee.trim() };
+  }
+
+  if (form.dueDate) {
+    fields.duedate = form.dueDate;
+  }
+
+  const labels = form.labels
+    .split(/[\n,;]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (labels.length) fields.labels = labels;
+
+  return { fields };
+};
 
 const JIRA_CACHE_KEY = "jira_issues_cache_v1";
 const JIRA_AI_SUMMARY_CACHE_KEY = "jira_ai_summary_cache_v1";
@@ -384,7 +464,7 @@ const ProgressMetricCard = ({ value, completed, inProgress, total }) => (
   </div>
 );
 
-const JiraHeaderSection = ({ loading, onSync, searchQuery, onSearchChange }) => (
+const JiraHeaderSection = ({ loading, onSync, onCompose, searchQuery, onSearchChange }) => (
   <section>
     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <div className="min-w-[280px]">
@@ -393,7 +473,7 @@ const JiraHeaderSection = ({ loading, onSync, searchQuery, onSearchChange }) => 
             <FaTasks className="h-10 w-10" />
           </div>
           <h1 className="text-[2rem] font-bold leading-tight text-[#ff623d]">
-            Jira Workspace
+            Project Tracking Workspace
           </h1>
         </div>
         <p className="mt-1 text-sm text-slate-500">
@@ -429,24 +509,18 @@ const JiraHeaderSection = ({ loading, onSync, searchQuery, onSearchChange }) => 
           <span>Refresh</span>
         </Button>
 
-        <Link
-          to="/chat/supervisor"
-          state={{
-            domain: "jira",
-            intent: "create_ticket",
-            templatePrompt:
-              "Buat tiket Jira baru berdasarkan kebutuhan saya.",
-          }}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#ff623d] px-4 py-2 text-sm text-white hover:bg-[#ff744f]"
+        <Button
+          onClick={onCompose}
+          size="sm"
+          className="gap-2 rounded-2xl bg-[#ff623d] text-sm text-white hover:bg-[#ff744f]"
         >
           <SquarePen className="h-4 w-4" />
           <span>Compose</span>
-        </Link>
+        </Button>
       </div>
     </div>
   </section>
 );
-
 const JiraLastSynced = ({ lastSyncedAt }) =>
   lastSyncedAt ? (
     <p className="text-sm text-slate-500">
@@ -756,7 +830,297 @@ const JiraBoardSection = ({
   );
 };
 
+
+const CustomSelect = ({ value, onChange, options, placeholder, disabled, loadingText, emptyText }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  let displayText = placeholder || "Pilih opsi";
+  if (disabled && loadingText) {
+    displayText = loadingText;
+  } else if (!disabled && options.length === 0 && emptyText) {
+    displayText = emptyText;
+  } else if (selectedOption) {
+    displayText = selectedOption.label;
+  }
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex h-11 w-full items-center justify-between rounded-2xl border px-4 text-sm transition-all focus:outline-none focus:ring-2 ${
+          disabled
+            ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-500"
+            : isOpen
+              ? "border-[#ff623d] bg-white text-slate-700 ring-[#ff623d]/20"
+              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 focus:border-[#ff623d] focus:ring-[#ff623d]/20"
+        }`}
+      >
+        <span className="truncate">{displayText}</span>
+        {isOpen ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+        )}
+      </button>
+
+      {isOpen && !disabled && (
+        <div className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-slate-100 bg-white p-1 shadow-lg shadow-slate-200/50 outline-none animate-in fade-in zoom-in-95">
+          {options.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-slate-500">{emptyText || "Tidak ada opsi tersedia"}</div>
+          ) : (
+            options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
+                  value === option.value
+                    ? "bg-[#fff0eb] font-medium text-[#d85a32]"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <span className="truncate">{option.label}</span>
+                {value === option.value && <Check className="h-4 w-4 shrink-0" />}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CreateIssueModal = ({
+  open,
+  form,
+  error,
+  submitting,
+  projects,
+  loadingProjects,
+  projectsError,
+  issueTypes,
+  loadingIssueTypes,
+  onClose,
+  onChange,
+  onSubmit,
+  onRetryProjects,
+  onRetryIssueTypes,
+}) => (
+  <Modal
+    open={open}
+    onClose={onClose}
+    size="lg"
+    className="rounded-[28px]"
+  >
+    <Modal.Header onClose={onClose} className="pb-3">
+      <div>
+        <Modal.Title className="text-xl">Buat issue Jira</Modal.Title>
+        <p className="mt-1 text-xs text-slate-500">
+          Tambahkan tiket baru langsung ke project Jira kamu.
+        </p>
+      </div>
+    </Modal.Header>
+
+    <Modal.Body className="max-h-[70vh] overflow-y-auto pb-2">
+      <div className="space-y-4">
+        {error ? (
+          <Alert variant="error" title="Issue belum bisa dibuat">
+            {error}
+          </Alert>
+        ) : null}
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Project & tipe</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Pilih project Jira dan tipe issue yang akan dibuat.
+            </p>
+          </div>
+
+          {projectsError ? (
+            <div className="mb-4 flex items-start gap-2 rounded-2xl bg-rose-50 px-3 py-2 text-xs text-rose-700">
+              <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
+              <span className="flex-1">{projectsError}</span>
+              <button
+                type="button"
+                onClick={onRetryProjects}
+                className="font-semibold text-rose-700 underline-offset-2 hover:underline"
+              >
+                Coba lagi
+              </button>
+            </div>
+          ) : null}
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Project
+              </label>
+              <CustomSelect
+                value={form.projectKey}
+                onChange={(val) => onChange("projectKey", val)}
+                disabled={loadingProjects}
+                placeholder="Pilih project"
+                loadingText="Memuat project..."
+                options={projects.map((p) => ({ value: p.key, label: `${p.key} — ${p.name}` }))}
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Issue type
+              </label>
+              <CustomSelect
+                value={form.issueTypeId}
+                onChange={(val) => onChange("issueTypeId", val)}
+                disabled={!form.projectKey || loadingIssueTypes}
+                placeholder={!form.projectKey ? "Pilih project dulu" : "Pilih issue type"}
+                loadingText="Memuat issue type..."
+                emptyText="Tidak ada issue type"
+                options={issueTypes.map((t) => ({ value: t.id, label: t.name }))}
+              />
+              {form.projectKey && !loadingIssueTypes && issueTypes.length === 0 ? (
+                <button
+                  type="button"
+                  onClick={onRetryIssueTypes}
+                  className="mt-1 text-xs font-semibold text-[#ff623d] underline-offset-2 hover:underline"
+                >
+                  Muat ulang issue type
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Judul issue
+            </label>
+            <Input
+              value={form.summary}
+              onChange={(event) => onChange("summary", event.target.value)}
+              placeholder="Tuliskan judul issue secara singkat"
+              className="rounded-2xl"
+            />
+          </div>
+        </section>
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Detail tambahan</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Atur prioritas, assignee, due date, dan label opsional.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Prioritas
+              </label>
+              <CustomSelect
+                value={form.priority}
+                onChange={(val) => onChange("priority", val)}
+                placeholder="Pilih prioritas"
+                options={PRIORITY_OPTIONS}
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Due date
+              </label>
+              <Input
+                type="date"
+                value={form.dueDate}
+                onChange={(event) => onChange("dueDate", event.target.value)}
+                className="h-11 rounded-2xl bg-white"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Assignee account ID
+              </label>
+              <Input
+                value={form.assignee}
+                onChange={(event) => onChange("assignee", event.target.value)}
+                placeholder="opsional, contoh: 5f8b..."
+                className="rounded-2xl"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Labels
+              </label>
+              <Input
+                value={form.labels}
+                onChange={(event) => onChange("labels", event.target.value)}
+                placeholder="Pisahkan dengan koma, contoh: bug, urgent"
+                className="rounded-2xl"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-slate-900">Deskripsi</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Jelaskan konteks, langkah reproduksi, atau ekspektasi hasil.
+            </p>
+          </div>
+
+          <textarea
+            value={form.description}
+            onChange={(event) => onChange("description", event.target.value)}
+            placeholder="Tulis deskripsi issue..."
+            rows={5}
+            className="w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 transition-all duration-150 placeholder:text-slate-400 focus:border-[#ff623d] focus:outline-none focus:ring-2 focus:ring-[#ff623d]/20"
+          />
+        </section>
+      </div>
+    </Modal.Body>
+
+    <Modal.Footer>
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-2xl"
+        onClick={onClose}
+        disabled={submitting}
+      >
+        Batal
+      </Button>
+      <Button
+        type="button"
+        className="rounded-2xl bg-[#ff623d] text-white hover:bg-[#ff744f]"
+        onClick={onSubmit}
+        disabled={submitting}
+      >
+        {submitting ? "Membuat..." : "Buat issue"}
+      </Button>
+    </Modal.Footer>
+  </Modal>
+);
+
 export default function JiraPage() {
+  const location = useLocation();
+  const autoComposeOpenedRef = useRef(false);
   const [issues, setIssues] = useState([]);
   const [aiSummary, setAiSummary] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -765,6 +1129,90 @@ export default function JiraPage() {
   const [summaryError, setSummaryError] = useState("");
   const [lastSyncedAt, setLastSyncedAt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeForm, setComposeForm] = useState(createDefaultIssueForm());
+  const [composeError, setComposeError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  
+  const [projects, setProjects] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [projectsError, setProjectsError] = useState("");
+  
+  const [issueTypes, setIssueTypes] = useState([]);
+  const [loadingIssueTypes, setLoadingIssueTypes] = useState(false);
+
+  const loadProjects = useCallback(async () => {
+    setLoadingProjects(true);
+    setProjectsError("");
+    try {
+      const data = await jiraApi.fetchProjects();
+      setProjects(data);
+    } catch (err) {
+      setProjectsError(err.message || "Gagal memuat project");
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, []);
+
+  const loadIssueTypes = useCallback(async (projectKey) => {
+    if (!projectKey) {
+      setIssueTypes([]);
+      return;
+    }
+    setLoadingIssueTypes(true);
+    try {
+      const data = await jiraApi.fetchIssueTypes(projectKey);
+      setIssueTypes(data);
+    } catch (err) {
+      setIssueTypes([]);
+    } finally {
+      setLoadingIssueTypes(false);
+    }
+  }, []);
+
+  const handleComposeOpen = useCallback(() => {
+    setComposeOpen(true);
+    setComposeForm(createDefaultIssueForm());
+    setComposeError("");
+    if (projects.length === 0) {
+      loadProjects();
+    }
+  }, [loadProjects, projects]);
+
+  const handleComposeChange = (field, value) => {
+    setComposeForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "projectKey" && prev.projectKey !== value) {
+        next.issueTypeId = "";
+        next.issueTypeName = "";
+        if (value) loadIssueTypes(value);
+        else setIssueTypes([]);
+      }
+      return next;
+    });
+  };
+
+  const handleComposeSubmit = async () => {
+    const errorMsg = validateIssueForm(composeForm);
+    if (errorMsg) {
+      setComposeError(errorMsg);
+      return;
+    }
+    setSubmitting(true);
+    setComposeError("");
+    try {
+      const payload = buildCreateIssuePayload(composeForm);
+      await jiraApi.createIssue(payload);
+      toast.success("Issue Jira berhasil dibuat!");
+      setComposeOpen(false);
+      loadIssues();
+    } catch (err) {
+      setComposeError(err.message || "Gagal membuat issue.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const loadIssues = useCallback(async () => {
     setLoading(true);
@@ -809,6 +1257,14 @@ export default function JiraPage() {
   }, [loadIssues, loadJiraSummary]);
 
   useEffect(() => {
+    if (location.state?.openCompose && !autoComposeOpenedRef.current) {
+      autoComposeOpenedRef.current = true;
+      handleComposeOpen();
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, handleComposeOpen]);
+
+  useEffect(() => {
     try {
       const cachedSummary = localStorage.getItem(JIRA_AI_SUMMARY_CACHE_KEY);
       if (cachedSummary) {
@@ -847,6 +1303,7 @@ export default function JiraPage() {
         <JiraHeaderSection
           loading={loading}
           onSync={handleRefreshAll}
+          onCompose={handleComposeOpen}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
@@ -892,6 +1349,23 @@ export default function JiraPage() {
           </>
         )}
       </div>
+
+      <CreateIssueModal
+        open={composeOpen}
+        form={composeForm}
+        error={composeError}
+        submitting={submitting}
+        projects={projects}
+        loadingProjects={loadingProjects}
+        projectsError={projectsError}
+        issueTypes={issueTypes}
+        loadingIssueTypes={loadingIssueTypes}
+        onClose={() => setComposeOpen(false)}
+        onChange={handleComposeChange}
+        onSubmit={handleComposeSubmit}
+        onRetryProjects={loadProjects}
+        onRetryIssueTypes={() => loadIssueTypes(composeForm.projectKey)}
+      />
     </div>
   );
 }

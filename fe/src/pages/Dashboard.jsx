@@ -9,6 +9,9 @@ import {
   RefreshCw,
   Search,
   TrendingUp,
+  Sparkles,
+  MessageSquare,
+  Briefcase,
 } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -39,6 +42,17 @@ import {
   StatCard,
   TokenUsage,
 } from "@/components/ui";
+
+
+const getActionMeta = (intent) => {
+  const meta = {
+    prepare_rundown: { icon: <CalendarDays className="h-4 w-4" />, bg: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=200" },
+    prepare_talking_points: { icon: <MessageSquare className="h-4 w-4" />, bg: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=200" },
+    follow_up_event: { icon: <Sparkles className="h-4 w-4" />, bg: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=200" },
+    enrich_event_notes: { icon: <Briefcase className="h-4 w-4" />, bg: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?auto=format&fit=crop&q=80&w=200" }
+  };
+  return meta[intent] || { icon: <CheckCircle2 className="h-4 w-4" />, bg: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=200" };
+};
 
 const DONE_STATUS_KEYWORDS = [
   "done",
@@ -1308,7 +1322,7 @@ export default function Dashboard() {
       
 
         <HeroBanner
-          title={`Morning, ${greetingName}`}
+          title={`Welcome, ${greetingName}`}
           description={heroDescription}
           backgroundImage={DASHBOARD_HERO_BACKGROUND}
           className="mb-5 rounded-[1.8rem] py-8"
@@ -1328,18 +1342,8 @@ export default function Dashboard() {
                     Lihat Jira
                   </ActionLink>
                   <ActionLink
-                    to="/chat/supervisor"
-                    state={withNewSupervisorSession({
-                      domain: "jira",
-                      intent: "generate_report",
-                      templatePrompt: "Buatkan laporan progres Jira hari ini",
-                      context: jiraBriefing
-                        ? { briefing: jiraBriefing }
-                        : {
-                            summary: jiraSummary,
-                            issues: jiraIssues.slice(0, 10),
-                          },
-                    })}
+                    to="/workspace/jira"
+                    state={{ openCompose: true }}
                   >
                     Buat Report
                   </ActionLink>
@@ -1528,46 +1532,27 @@ export default function Dashboard() {
                   ) : null}
                 </Carousel>
 
-                {activeAgenda ? (
-                  <div className="rounded-[1.5rem] border border-dashed border-primary-200/80 p-2">
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                      {/* <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500/80">
-                          Aksi Rekomendasi
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-neutral-900">
-                          {activeAgenda.summary || "Agenda terpilih"}
-                        </p>
-                        <p className="mt-1 text-xs text-neutral-500">
-                          Aksi ini berubah mengikuti agenda yang sedang aktif di carousel.
-                        </p>
-                      </div> */}
-                      <div className="flex flex-wrap gap-2">
-                        {activeAgendaActions.map((action, index) => (
-                          <Button
-                            key={`${action.intent || action.label || "agenda"}-${index}`}
-                            variant={ "outline"}
-                            className="rounded-full"
-                            onClick={() =>
-                              navigate(
-                                "/chat/supervisor",
-                                {
-                                  state: withNewSupervisorSession(
-                                    createAgendaActionState(
-                                    action,
-                                    activeAgenda,
-                                    calendarBriefing,
-                                  ),
-                                  ),
-                                },
-                              )
-                            }
-                          >
-                            {action.label || "Buka Supervisor"}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+                {activeAgenda && activeAgendaActions.length > 0 ? (
+                  <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {activeAgendaActions.map((action, index) => {
+                      const meta = getActionMeta(action.intent);
+                      return (
+                        <div
+                          key={`${action.intent || action.label || "agenda"}-${index}`}
+                          onClick={() => navigate("/chat/supervisor", { state: withNewSupervisorSession(createAgendaActionState(action, activeAgenda, calendarBriefing)) })}
+                          className="bg-card text-card-foreground relative flex items-center gap-3 rounded-xl border shadow-sm cursor-pointer overflow-hidden group h-20 px-3"
+                          style={{ backgroundImage: `url(${meta.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                        >
+                          <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors" />
+                          <div className="absolute inset-0 flex items-center gap-2 px-3 text-white">
+                            <div className="h-6 w-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
+                              {meta.icon}
+                            </div>
+                            <span className="font-semibold text-xs truncate drop-shadow-md">{action.label || "Buka Supervisor"}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : null}
               </>
