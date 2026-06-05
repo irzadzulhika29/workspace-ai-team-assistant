@@ -106,6 +106,109 @@ export const jiraApi = {
     }
   },
 
+  fetchProjects: async () => {
+    try {
+      const res = await axios.post(
+        `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
+        {
+          method: 'GET',
+          path: '/rest/api/3/project/search?maxResults=100',
+        },
+        { withCredentials: true }
+      )
+
+      const values = Array.isArray(res.data?.values) ? res.data.values : []
+      return values.map((project) => ({
+        id: project.id,
+        key: project.key,
+        name: project.name,
+        projectTypeKey: project.projectTypeKey,
+        avatarUrl: project.avatarUrls?.['48x48'] || project.avatarUrls?.['32x32'] || '',
+      }))
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw createJiraError(
+          'Sesi login telah berakhir. Silakan login kembali.',
+          JIRA_ERROR_CODES.SESSION_EXPIRED
+        )
+      }
+      if (error.response?.status === 404) {
+        throw createJiraError(
+          'Jira belum terhubung. Silakan hubungkan Jira di halaman Integrasi.',
+          JIRA_ERROR_CODES.NOT_CONNECTED
+        )
+      }
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error)
+      }
+      throw new Error(error.message || 'Tidak dapat mengambil daftar project Jira.')
+    }
+  },
+
+  fetchIssueTypes: async (projectKey) => {
+    if (!projectKey) return []
+
+    try {
+      const res = await axios.post(
+        `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
+        {
+          method: 'GET',
+          path: `/rest/api/3/issue/createmeta/${projectKey}/issuetypes`,
+        },
+        { withCredentials: true }
+      )
+
+      const payload = res.data?.issueTypes || res.data?.values || res.data
+      const values = Array.isArray(payload) ? payload : []
+      return values
+        .filter((type) => !type?.subtask)
+        .map((type) => ({
+          id: type.id,
+          name: type.name,
+          description: type.description || '',
+          iconUrl: type.iconUrl || '',
+        }))
+    } catch (error) {
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error)
+      }
+      throw new Error(error.message || 'Tidak dapat mengambil issue type Jira.')
+    }
+  },
+
+  createIssue: async (payload) => {
+    try {
+      const res = await axios.post(
+        `${urls.getBackendUrl()}/api/integrations/jira/proxy`,
+        {
+          method: 'POST',
+          path: '/rest/api/3/issue',
+          data: payload,
+        },
+        { withCredentials: true }
+      )
+
+      return res.data
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw createJiraError(
+          'Sesi login telah berakhir. Silakan login kembali.',
+          JIRA_ERROR_CODES.SESSION_EXPIRED
+        )
+      }
+      if (error.response?.status === 404) {
+        throw createJiraError(
+          'Jira belum terhubung. Silakan hubungkan Jira di halaman Integrasi.',
+          JIRA_ERROR_CODES.NOT_CONNECTED
+        )
+      }
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error)
+      }
+      throw new Error(error.message || 'Tidak dapat membuat issue Jira.')
+    }
+  },
+
   fetchAiSummaryTest: async () => {
     const [currentUser, jiraCredentials] = await Promise.all([
       ambilCurrentUser(),

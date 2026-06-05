@@ -63,7 +63,6 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
     try {
       // Use urls helper to get webhook URL based on settings
       const webhookUrl = urls.getEmail();
-      console.log('Email webhook URL:', webhookUrl);
 
       // Get user ID
       const currentUser = await getAuthenticatedUser();
@@ -85,13 +84,10 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
       };
 
       // Send to webhook
-      const response = await axios.post(webhookUrl, payload, {
+      await axios.post(webhookUrl, payload, {
         headers: { 'Content-Type': 'application/json' },
         timeout: 30000
       });
-
-      console.log('Webhook response:', response.data);
-
       // Add simple success message
       setMessages(prev => [...prev, {
         role: 'ai',

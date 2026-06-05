@@ -4,7 +4,6 @@ import {
   Activity,
   Calendar,
   CheckSquare,
-  Cpu,
   FileText,
   Globe,
   HelpCircle,
@@ -185,8 +184,8 @@ export default function LandingPage() {
           
           {/* Logo */}
           <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => scrollToSection('home')}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff5f3f] to-[#e84322] flex items-center justify-center text-white shadow-[0_2px_10px_rgba(232,67,34,0.3)]">
-              <Cpu className="w-4.5 h-4.5 animate-pulse" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+              <img src="/logo.png" alt="AI Team Assistant" className="w-8 h-8" />
             </div>
             <span className="font-headline font-bold text-lg tracking-tight text-slate-900">
               AI Team Assistant
@@ -315,7 +314,7 @@ export default function LandingPage() {
                       </div>
                       <div className="flex items-center space-x-2 px-2.5 py-1.5 bg-slate-800 text-[#ff623d] rounded-lg text-[10px] sm:text-xs font-semibold shadow-inner">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#ff623d]" />
-                        <span>Jira Workspace</span>
+                        <span>Project Tracking Workspace</span>
                       </div>
                     </div>
                   </div>
@@ -718,8 +717,8 @@ export default function LandingPage() {
             {/* Column 1: Info */}
             <div className="md:col-span-5 space-y-4">
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded bg-gradient-to-br from-[#ff5f3f] to-[#e84322] flex items-center justify-center text-white">
-                  <Cpu className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <img src="/logo.png" alt="AI Team Assistant" className="w-6 h-6" />
                 </div>
                 <span className="font-headline font-bold text-base text-slate-900">
                   AI Team Assistant

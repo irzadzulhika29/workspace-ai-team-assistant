@@ -431,7 +431,6 @@ export default function DraftsList({ onRevise }) {
       }
 
       const webhookUrl = urls.getEmail();
-      console.log('Email webhook URL:', webhookUrl);
 
       const payload = {
         user_id: userId,

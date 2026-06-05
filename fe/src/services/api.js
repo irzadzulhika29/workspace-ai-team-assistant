@@ -1,39 +1,6 @@
 import axios from "axios";
 
-// Axios interceptors for debugging
-if (import.meta.env.DEV) {
-  axios.interceptors.request.use(
-    (config) => {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-        withCredentials: config.withCredentials,
-        headers: config.headers,
-      });
-      return config;
-    },
-    (error) => {
-      console.error("[API Request Error]", error);
-      return Promise.reject(error);
-    }
-  );
 
-  axios.interceptors.response.use(
-    (response) => {
-      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-        status: response.status,
-        data: response.data,
-      });
-      return response;
-    },
-    (error) => {
-      console.error(`[API Response Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-      return Promise.reject(error);
-    }
-  );
-}
 
 // Re-exports
 export { chatApi } from "./chatService";

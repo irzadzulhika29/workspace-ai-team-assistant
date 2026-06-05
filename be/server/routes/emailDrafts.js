@@ -242,8 +242,6 @@ router.post('/drafts/:id/send', requireAuth, async (req, res) => {
       draft_type: draft.draft_type
     };
 
-    console.log('Sending draft to n8n webhook:', N8N_SEND_EMAIL_WEBHOOK);
-    console.log('Payload:', webhookPayload);
 
     // Send to n8n webhook
     const webhookResponse = await axios.post(N8N_SEND_EMAIL_WEBHOOK, webhookPayload, {
@@ -253,7 +251,6 @@ router.post('/drafts/:id/send', requireAuth, async (req, res) => {
       timeout: 30000 // 30 seconds
     });
 
-    console.log('Webhook response:', webhookResponse.data);
 
     // Extract sent message ID from webhook response
     const sentMessageId = webhookResponse.data?.message_id || 
@@ -351,8 +348,6 @@ router.post('/drafts/:id/revise', requireAuth, async (req, res) => {
       source_email: draft.source_email_payload || {}
     };
 
-    console.log('Sending draft revision to n8n webhook:', N8N_REVISE_DRAFT_WEBHOOK);
-    console.log('Payload:', webhookPayload);
 
     // Send to n8n webhook for AI revision
     const webhookResponse = await axios.post(N8N_REVISE_DRAFT_WEBHOOK, webhookPayload, {
@@ -362,7 +357,6 @@ router.post('/drafts/:id/revise', requireAuth, async (req, res) => {
       timeout: 30000 // 30 seconds
     });
 
-    console.log('Webhook response:', webhookResponse.data);
 
     // Extract revised content from webhook response
     const revisedBodyText = webhookResponse.data?.draftContent || 

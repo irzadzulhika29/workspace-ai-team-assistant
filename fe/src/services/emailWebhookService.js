@@ -65,8 +65,6 @@ export const sendEmailToWebhook = async (email) => {
     const payload = formatEmailPayload(email, user);
     const webhookUrl = getWebhookUrl();
     
-    console.log('Sending email to webhook:', webhookUrl);
-    console.log('Payload:', payload);
 
     const response = await axios.post(webhookUrl, payload, {
       headers: {
@@ -75,7 +73,6 @@ export const sendEmailToWebhook = async (email) => {
       timeout: 30000 // 30 seconds timeout
     });
 
-    console.log('Webhook response:', response.data);
     return {
       success: true,
       data: response.data
@@ -107,7 +104,6 @@ export const generateDraftFromWebhook = async (email, fetchDraftsCallback) => {
       throw new Error(result.error);
     }
 
-    console.log('Webhook response:', result.data);
 
     // Webhook n8n already saves draft to Supabase
     // We just need to refresh the drafts list to show the new draft

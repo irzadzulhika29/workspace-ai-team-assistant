@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom'
 
 const PAGE_TITLES = {
   '/': 'Dashboard',
-  '/chat/supervisor': 'Supervisor Agent',
+  '/chat/supervisor': 'AI Workspace Assistant',
   '/workspace/files': 'Documents',
   '/workspace/calendar': 'Calendar',
   '/workspace/email': 'Email',

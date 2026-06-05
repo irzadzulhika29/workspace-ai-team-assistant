@@ -29,11 +29,6 @@ export async function createN8nCredential({ email, accessToken, refreshToken }) 
 
     const { apiUrl, apiKey } = getN8nConfig();
 
-    console.log('📤 Creating n8n credential for:', email);
-    console.log('🔗 N8N API URL:', apiUrl);
-    console.log('🔑 Has API Key:', !!apiKey);
-    console.log('🎫 Has Access Token:', !!accessToken);
-    console.log('🎫 Has Refresh Token:', !!refreshToken);
 
     // If no refresh token, we can't create a persistent credential
     if (!refreshToken) {
@@ -79,8 +74,6 @@ export async function createN8nCredential({ email, accessToken, refreshToken }) 
     let lastError;
     for (let i = 0; i < payloads.length; i++) {
       try {
-        console.log(`🔄 Trying payload structure ${i + 1}...`);
-        console.log('📦 Payload:', JSON.stringify(payloads[i], null, 2));
 
         const response = await axios.post(
           `${apiUrl}/credentials`,
@@ -93,10 +86,8 @@ export async function createN8nCredential({ email, accessToken, refreshToken }) 
           }
         );
 
-        console.log(`✅ Created n8n credential for ${email}: ${response.data.id}`);
         return response.data.id;
       } catch (err) {
-        console.log(`❌ Structure ${i + 1} failed:`, err.response?.data?.message || err.message);
         lastError = err;
       }
     }
@@ -151,7 +142,6 @@ export async function updateN8nCredential(credentialId, { accessToken, refreshTo
       }
     );
 
-    console.log(`✅ Updated n8n credential: ${credentialId}`);
   } catch (error) {
     console.error('❌ Error updating n8n credential:', error.response?.data || error.message);
     throw new Error('Failed to update n8n credential');
@@ -179,7 +169,6 @@ export async function deleteN8nCredential(credentialId) {
       }
     );
 
-    console.log(`✅ Deleted n8n credential: ${credentialId}`);
   } catch (error) {
     console.error('❌ Error deleting n8n credential:', error.response?.data || error.message);
     // Don't throw error, just log it
