@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { Alert, Button, Input, Modal, toast } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Input,
+  LockedIntegrationState,
+  Modal,
+  toast,
+} from "@/components/ui";
 import {
   AlertCircle,
   Bug,
@@ -22,7 +29,8 @@ import {
   UserRound,
 } from "lucide-react";
 import { FaTasks } from "react-icons/fa";
-import { jiraApi } from "../services/jiraService";
+import { useAuth } from "../context/AuthContext";
+import { JIRA_ERROR_CODES, jiraApi } from "../services/jiraService";
 
 
 const PRIORITY_OPTIONS = [
@@ -1120,12 +1128,14 @@ const CreateIssueModal = ({
 
 export default function JiraPage() {
   const location = useLocation();
+  const { user } = useAuth();
   const autoComposeOpenedRef = useRef(false);
   const [issues, setIssues] = useState([]);
   const [aiSummary, setAiSummary] = useState(null);
   const [loading, setLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [error, setError] = useState("");
+  const [jiraLocked, setJiraLocked] = useState(false);
   const [summaryError, setSummaryError] = useState("");
   const [lastSyncedAt, setLastSyncedAt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1141,6 +1151,14 @@ export default function JiraPage() {
   
   const [issueTypes, setIssueTypes] = useState([]);
   const [loadingIssueTypes, setLoadingIssueTypes] = useState(false);
+  const jiraCacheKey = useMemo(
+    () => `${JIRA_CACHE_KEY}:${user?.id || "anonymous"}`,
+    [user?.id],
+  );
+  const jiraSummaryCacheKey = useMemo(
+    () => `${JIRA_AI_SUMMARY_CACHE_KEY}:${user?.id || "anonymous"}`,
+    [user?.id],
+  );
 
   const loadProjects = useCallback(async () => {
     setLoadingProjects(true);
@@ -1172,13 +1190,15 @@ export default function JiraPage() {
   }, []);
 
   const handleComposeOpen = useCallback(() => {
+    if (jiraLocked) return;
+
     setComposeOpen(true);
     setComposeForm(createDefaultIssueForm());
     setComposeError("");
     if (projects.length === 0) {
       loadProjects();
     }
-  }, [loadProjects, projects]);
+  }, [jiraLocked, loadProjects, projects]);
 
   const handleComposeChange = (field, value) => {
     setComposeForm((prev) => {
@@ -1217,6 +1237,7 @@ export default function JiraPage() {
   const loadIssues = useCallback(async () => {
     setLoading(true);
     setError("");
+    setJiraLocked(false);
 
     try {
       const items = await jiraApi.fetchIssues();
@@ -1224,32 +1245,41 @@ export default function JiraPage() {
       setIssues(normalized);
       const syncedAt = new Date().toISOString();
       setLastSyncedAt(syncedAt);
-      localStorage.setItem(
-        JIRA_CACHE_KEY,
-        JSON.stringify({ issues: normalized, syncedAt }),
-      );
+      localStorage.setItem(jiraCacheKey, JSON.stringify({ issues: normalized, syncedAt }));
     } catch (err) {
-      setError(err.message || "Tidak dapat mengambil issue Jira.");
+      const isNotConnected = err?.code === JIRA_ERROR_CODES.NOT_CONNECTED;
+      setJiraLocked(isNotConnected);
+      setError(isNotConnected ? "" : err.message || "Tidak dapat mengambil issue Jira.");
+      if (isNotConnected) {
+        setIssues([]);
+        setAiSummary(null);
+        setLastSyncedAt("");
+        localStorage.removeItem(jiraCacheKey);
+        localStorage.removeItem(jiraSummaryCacheKey);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [jiraCacheKey, jiraSummaryCacheKey]);
 
   const loadJiraSummary = useCallback(async () => {
+    if (jiraLocked) return;
+
     setSummaryLoading(true);
     setSummaryError("");
 
     try {
       const summary = await jiraApi.fetchAiSummaryTest();
       setAiSummary(summary);
-      localStorage.setItem(JIRA_AI_SUMMARY_CACHE_KEY, JSON.stringify(summary));
+      localStorage.setItem(jiraSummaryCacheKey, JSON.stringify(summary));
     } catch (err) {
+      const isNotConnected = err?.code === JIRA_ERROR_CODES.NOT_CONNECTED;
       setAiSummary(null);
-      setSummaryError(err.message || "Tidak dapat mengambil AI summary Jira.");
+      setSummaryError(isNotConnected ? "" : err.message || "Tidak dapat mengambil AI summary Jira.");
     } finally {
       setSummaryLoading(false);
     }
-  }, []);
+  }, [jiraLocked, jiraSummaryCacheKey]);
 
   const handleRefreshAll = useCallback(() => {
     loadIssues();
@@ -1266,7 +1296,7 @@ export default function JiraPage() {
 
   useEffect(() => {
     try {
-      const cachedSummary = localStorage.getItem(JIRA_AI_SUMMARY_CACHE_KEY);
+      const cachedSummary = localStorage.getItem(jiraSummaryCacheKey);
       if (cachedSummary) {
         const parsedSummary = JSON.parse(cachedSummary);
         if (parsedSummary && typeof parsedSummary === "object") {
@@ -1274,7 +1304,7 @@ export default function JiraPage() {
         }
       }
 
-      const cached = localStorage.getItem(JIRA_CACHE_KEY);
+      const cached = localStorage.getItem(jiraCacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
         const cachedIssues = Array.isArray(parsed?.issues)
@@ -1288,12 +1318,12 @@ export default function JiraPage() {
         }
       }
     } catch {
-      localStorage.removeItem(JIRA_CACHE_KEY);
-      localStorage.removeItem(JIRA_AI_SUMMARY_CACHE_KEY);
+      localStorage.removeItem(jiraCacheKey);
+      localStorage.removeItem(jiraSummaryCacheKey);
     }
 
     loadIssues();
-  }, [loadIssues]);
+  }, [jiraCacheKey, jiraSummaryCacheKey, loadIssues]);
 
   const boardGroups = useMemo(() => buildBoardGroups(issues), [issues]);
   const metrics = useMemo(() => buildMetrics(issues), [issues]);
@@ -1315,7 +1345,13 @@ export default function JiraPage() {
           </div>
         ) : null}
 
-        {loading && issues.length === 0 ? (
+        {jiraLocked ? (
+          <LockedIntegrationState
+            className="mt-6 min-h-[560px]"
+            title="Project Tracking terkunci"
+            description="Hubungkan Jira di Settings terlebih dahulu agar issue, todo, project, dan AI Issue Insights bisa digunakan dari workspace."
+          />
+        ) : loading && issues.length === 0 ? (
           <div className="mt-6 space-y-4">
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
               {Array.from({ length: 4 }).map((_, idx) => (

@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+        VITE_FRONTEND_URL: ${VITE_FRONTEND_URL}
         VITE_N8N_MODE: ${VITE_N8N_MODE}
         VITE_N8N_URL: ${VITE_N8N_URL}
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}

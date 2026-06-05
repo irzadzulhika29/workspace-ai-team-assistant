@@ -39,8 +39,10 @@ import {
   EmptyState,
   HeroBanner,
   Input,
+  LockedIntegrationState,
   StatCard,
   TokenUsage,
+  isIntegrationLockedError,
 } from "@/components/ui";
 
 
@@ -1287,6 +1289,9 @@ export default function Dashboard() {
       : buildFallbackAgendaActions(activeAgenda);
   }, [activeAgenda, agendaActionLookup]);
 
+  const calendarLocked = isIntegrationLockedError(calendarError, "google");
+  const emailLocked = isIntegrationLockedError(emailError, "google");
+
   useEffect(() => {
     if (!agendaEvents.length) {
       setActiveAgendaIndex(0);
@@ -1502,6 +1507,12 @@ export default function Dashboard() {
                 <div className="skeleton h-16 rounded-2xl" />
                 <div className="skeleton h-16 rounded-2xl" />
               </>
+            ) : calendarLocked ? (
+              <LockedIntegrationState
+                className="min-h-[360px]"
+                title="Agenda terkunci"
+                description="Hubungkan akun Google terlebih dahulu agar agenda dari Google Calendar bisa tampil di dashboard."
+              />
             ) : calendarError && !leadEvent ? (
               <Alert variant="error" title="Agenda error">
                 {calendarError}
@@ -1603,6 +1614,12 @@ export default function Dashboard() {
               Array.from({ length: 4 }).map((_, index) => (
                 <div key={index} className="skeleton h-24 rounded-2xl" />
               ))
+            ) : emailLocked ? (
+              <LockedIntegrationState
+                className="min-h-[360px]"
+                title="Email terkunci"
+                description="Hubungkan akun Google terlebih dahulu agar inbox Gmail dan smart reply bisa tampil di dashboard."
+              />
             ) : emailError && !visibleEmails.length ? (
               <Alert variant="error" title="Email sync error">
                 {emailError}

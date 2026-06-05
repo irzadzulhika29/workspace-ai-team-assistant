@@ -9,6 +9,7 @@ export * from "./empty-state";
 export * from "./hero-banner";
 export * from "./input";
 export * from "./list-item";
+export * from "./locked-integration-state";
 export * from "./modal";
 export * from "./nav-item";
 export * from "./progress-bar";

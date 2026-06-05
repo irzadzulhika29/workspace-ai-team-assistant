@@ -95,6 +95,9 @@ export const resendSignupOtp = async (email) => {
   const { error } = await supabaseClient.auth.resend({
     type: 'signup',
     email,
+    options: {
+      emailRedirectTo: getLoginRedirectUrl(),
+    },
   });
 
   if (error) {
@@ -131,6 +134,7 @@ export const preparePasswordSetup = async () => {
       email,
       options: {
         shouldCreateUser: false,
+        emailRedirectTo: getLoginRedirectUrl(),
       },
     });
 

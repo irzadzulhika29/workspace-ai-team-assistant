@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Mail, Search, RefreshCw, SquarePen } from "lucide-react";
-import { Alert, Button, Input } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Input,
+  LockedIntegrationState,
+  isIntegrationLockedError,
+} from "@/components/ui";
 import { useEmailStore } from "../store/emailStore";
 import EmailList from "../components/email/EmailList";
 import EmailDetail from "../components/email/EmailDetail";
@@ -141,6 +147,8 @@ export default function EmailPage() {
     }
   };
 
+  const isGoogleLocked = isIntegrationLockedError(error, "google");
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <section className="">
@@ -201,12 +209,21 @@ export default function EmailPage() {
         </div>
 
         {/* Error Message */}
-        {error && (
+        {error && !isGoogleLocked && (
           <Alert variant="error" className="mt-4" title="Email workspace error">
             {error}
           </Alert>
         )}
       </section>
+
+      {isGoogleLocked ? (
+        <LockedIntegrationState
+          className="mt-4 min-h-[520px]"
+          title="Email Workspace terkunci"
+          description="Hubungkan akun Google terlebih dahulu agar inbox Gmail, draft, dan smart reply bisa digunakan dari workspace."
+        />
+      ) : (
+        <>
 
       {/* Section 2: Metrics Cards */}
       <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -379,6 +396,8 @@ export default function EmailPage() {
           )}
         </div>
       </section>
+        </>
+      )}
     </div>
   );
 }
