@@ -227,190 +227,74 @@ export default function LandingPage() {
       </header>
 
       {/* 2. Hero Section */}
-      <section className="relative py-12 md:py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-orange-50/30 to-white">
+      <section className="relative py-8 md:py-10 lg:h-[calc(100vh-9.875rem)] lg:min-h-[520px] lg:py-12 overflow-hidden bg-gradient-to-b from-orange-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="flex gap-8 lg:gap-6 items-center lg:h-full">
             
             {/* Hero Left Content */}
-            <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
-              <h1 className="font-headline text-4xl sm:text-5xl lg:text-[2.85rem] font-extrabold leading-[1.12] text-slate-900 tracking-tight">
-                Satu Platform AI untuk{' '}
+            <div className="lg:col-span-4 space-y-5 text-center lg:text-left">
+              <h1 className="font-headline text-xl sm:text-5xl lg:text-5xl font-extrabold leading-[1.08] text-slate-900 tracking-tight">
+                Command Center AI untuk{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5f3f] to-[#e84322] drop-shadow-sm">
-                  Seluruh Tim Anda
+                  Kerja Tim Harian
                 </span>
               </h1>
               
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Delegasikan tugas operasional, pantau progres Jira, kelola email &amp; jadwal — semua dari satu antarmuka berbasis AI yang terintegrasi secara cerdas.
+              <p className="text-base sm:text-lg lg:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                Satukan briefing harian, email, kalender, Jira, dan dokumen dalam satu workspace. Delegasikan tugas lintas domain ke AI Workspace Assistant tanpa berpindah alat.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
                 <button
                   onClick={() => navigate('/login')}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-bold bg-[#ff623d] text-white hover:bg-[#e84322] shadow-[0_8px_20px_rgba(255,98,61,0.3)] hover:shadow-[0_12px_24px_rgba(255,98,61,0.4)] transition-all duration-300 hover:-translate-y-1"
                 >
-                  Daftar Gratis
+                  Mulai Gratis
                 </button>
                 <button
                   onClick={() => scrollToSection('features')}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-bold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all duration-300 hover:border-slate-300 hover:-translate-y-1"
                 >
-                  Lihat Demo
+                  Lihat Fitur
                 </button>
               </div>
             </div>
 
-            {/* Hero Right Mockup */}
-            <div className="lg:col-span-7 relative max-w-2xl mx-auto lg:max-w-none w-full">
-              {/* Decorative backgrounds */}
-              <div className="absolute -top-12 -right-12 w-64 h-64 bg-orange-200/40 rounded-full blur-3xl -z-10" />
-              <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-red-100/30 rounded-full blur-2xl -z-10" />
-              
-              {/* Premium CSS Mockup Window */}
-              <div className="relative rounded-2xl border border-slate-200 bg-[#f8f9fd] shadow-[0_20px_50px_rgba(0,0,0,0.08)] overflow-hidden font-sans text-xs transition-transform duration-500 hover:scale-[1.01]">
-                
-                {/* Window Title Bar */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                  </div>
-                  <div className="text-slate-400 font-semibold text-[10px] tracking-wider uppercase select-none">
-                    AI Team Assistant — EXECUTIVE CANVAS
-                  </div>
-                  <div className="w-12" />
-                </div>
-
-                <div className="flex h-[320px] sm:h-[400px]">
-                  
-                  {/* Mock Sidebar */}
-                  <div className="w-[120px] sm:w-[160px] bg-[#111111] text-slate-400 flex flex-col p-3 border-r border-slate-800">
-                    <div className="flex items-center space-x-2 mb-5 px-1.5">
-                      <div className="w-4 h-4 rounded bg-[#ff623d] flex items-center justify-center text-white text-[8px] font-bold">A</div>
-                      <span className="font-bold text-white text-[9px] sm:text-xs">AI Team Assistant</span>
-                    </div>
-                    
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center space-x-2 px-2 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-md text-[10px] sm:text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>Dashboard</span>
-                      </div>
-                      <div className="flex items-center space-x-2 px-2 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-md text-[10px] sm:text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>Supervisor</span>
-                      </div>
-                      <div className="flex items-center space-x-2 px-2 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-md text-[10px] sm:text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>Documents</span>
-                      </div>
-                      <div className="flex items-center space-x-2 px-2 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-md text-[10px] sm:text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>Calendar</span>
-                      </div>
-                      <div className="flex items-center space-x-2 px-2 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-md text-[10px] sm:text-xs">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                        <span>Email</span>
-                      </div>
-                      <div className="flex items-center space-x-2 px-2.5 py-1.5 bg-slate-800 text-[#ff623d] rounded-lg text-[10px] sm:text-xs font-semibold shadow-inner">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#ff623d]" />
-                        <span>Project Tracking Workspace</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mock Content */}
-                  <div className="flex-1 p-3 sm:p-5 flex flex-col space-y-3.5 overflow-y-auto">
-                    
-                    {/* Header */}
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-800 text-[11px] sm:text-sm">Jira Workspace</h4>
-                        <p className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">Kelola dan pantau semua issue Jira Anda dalam satu tempat.</p>
-                      </div>
-                      <div className="px-2.5 py-1.5 border border-slate-100 bg-slate-50 text-slate-400 rounded-lg text-[9px] flex items-center space-x-1.5">
-                        <span>Cari issue atau project...</span>
-                        <span className="text-[8px] bg-slate-200 px-1 rounded text-slate-500 font-mono">Ctrl K</span>
-                      </div>
-                    </div>
-
-                    {/* Progress & Stat Row */}
-                    <div className="grid grid-cols-12 gap-3">
-                      
-                      {/* Radial Progress Card */}
-                      <div className="col-span-6 bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex items-center space-x-4">
-                        <div className="relative w-12 h-12 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="24" cy="24" r="20" stroke="#f1f5f9" strokeWidth="4.5" fill="transparent" />
-                            <circle cx="24" cy="24" r="20" stroke="#ff5f3f" strokeWidth="4.5" fill="transparent"
-                              strokeDasharray={2 * Math.PI * 20}
-                              strokeDashoffset={2 * Math.PI * 20 * (1 - 0.24)} />
-                          </svg>
-                          <span className="absolute font-bold text-slate-800 text-[10px]">24%</span>
-                        </div>
-                        <div>
-                          <h5 className="font-bold text-slate-700 text-[10px] sm:text-xs">Progress Issue</h5>
-                          <p className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5">3 Completed / 11 in Progress dari 33 issues</p>
-                        </div>
-                      </div>
-
-                      {/* Stat Card 1 */}
-                      <div className="col-span-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center text-center">
-                        <span className="text-lg sm:text-xl font-bold text-slate-800">33</span>
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5">Total Issue</span>
-                      </div>
-
-                      {/* Stat Card 2 */}
-                      <div className="col-span-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-center text-center">
-                        <span className="text-lg sm:text-xl font-bold text-red-500">3</span>
-                        <span className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5">Unassigned</span>
-                      </div>
-                    </div>
-
-                    {/* AI Insights Card */}
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-bold text-slate-700 text-[10px] sm:text-xs flex items-center space-x-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#ff623d] animate-pulse" />
-                          <span>AI Insights</span>
-                        </h5>
-                        <span className="text-[8px] bg-red-50 text-[#ff623d] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">
-                          Rekomendasi
-                        </span>
-                      </div>
-                      <p className="text-[9px] sm:text-[10px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-normal">
-                        Klik tombol refresh untuk test hit AI. AI mendeteksi bottleneck di progress KAN-47. Disarankan menugaskan Task Agent untuk investigasi.
-                      </p>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
+            {/* Hero Right - Dashboard Screenshot */}
+            <div className="lg:col-span-8 relative w-full max-w-[1040px] h-[340px] sm:h-[440px] lg:h-[58vh] mx-auto lg:mr-[-48px] xl:mr-[-88px] overflow-hidden">
+              <img
+                src="/dashboard.png"
+                alt="AI Team Assistant Dashboard"
+                className="border h-full w-full object-cover object-left-top scale-[1.12]"
+              />
             </div>
           </div>
         </div>
       </section>
 
       {/* 3. Stat Bar Section */}
-      <section className="bg-gradient-to-r from-[#ff5f3f] to-[#e84322] py-8 text-white relative z-10 shadow-lg">
+      <section className="bg-gradient-to-r from-[#ff5f3f] to-[#e84322] py-5 text-white relative z-10 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1 border-r border-white/20 last:border-r-0">
-              <div className="font-headline text-3xl sm:text-4xl font-extrabold">7</div>
-              <div className="text-xs sm:text-sm text-white/80 font-medium">AI Agents Aktif</div>
+              <div className="font-headline text-3xl sm:text-4xl font-extrabold">1</div>
+              <div className="text-xs sm:text-sm text-white/80 font-medium">Command Center</div>
+              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Email, Kalender, Jira, Dokumen</div>
             </div>
             <div className="space-y-1 border-r border-white/20 last:border-r-0">
-              <div className="font-headline text-3xl sm:text-4xl font-extrabold">85+</div>
-              <div className="text-xs sm:text-sm text-white/80 font-medium">Workflow Nodes</div>
+              <div className="font-headline text-3xl sm:text-4xl font-extrabold">24/7</div>
+              <div className="text-xs sm:text-sm text-white/80 font-medium">AI Assistant</div>
+              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Siap bantu delegasi kerja</div>
             </div>
             <div className="space-y-1 border-r border-white/20 last:border-r-0">
-              <div className="font-headline text-3xl sm:text-4xl font-extrabold">&lt; 5 Detik</div>
-              <div className="text-xs sm:text-sm text-white/80 font-medium">Respons</div>
+              <div className="font-headline text-3xl sm:text-4xl font-extrabold">4</div>
+              <div className="text-xs sm:text-sm text-white/80 font-medium">Workspace Utama</div>
+              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Dashboard, Email, Calendar, Project</div>
             </div>
             <div className="space-y-1">
               <div className="font-headline text-3xl sm:text-4xl font-extrabold">FREE</div>
               <div className="text-xs sm:text-sm text-white/80 font-medium">Untuk Tim Jalin</div>
+              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Akses awal tanpa biaya</div>
             </div>
           </div>
         </div>
