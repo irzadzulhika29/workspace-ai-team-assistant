@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Send, Paperclip, X } from 'lucide-react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Send, Paperclip, X, Files, Search, FileText, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { fileApi } from '@/services/fileService'
 
 /**
  * MessageInput — text input + send button for chat with optional file upload
@@ -16,12 +17,79 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
 
+  // Document picker state
+  const [docPickerOpen, setDocPickerOpen] = useState(false)
+  const [documents, setDocuments] = useState([])
+  const [docsLoading, setDocsLoading] = useState(false)
+  const [docsError, setDocsError] = useState(null)
+  const [docSearch, setDocSearch] = useState('')
+  const [selectedDoc, setSelectedDoc] = useState(null) // { id, name }
+  const docPickerRef = useRef(null)
+  const docSearchRef = useRef(null)
+
   // Update value when initialValue changes
   useEffect(() => {
     if (initialValue) {
       setValue(initialValue)
     }
   }, [initialValue])
+
+  // Close doc picker when clicking outside
+  useEffect(() => {
+    if (!docPickerOpen) return
+    const handleClickOutside = (e) => {
+      if (docPickerRef.current && !docPickerRef.current.contains(e.target)) {
+        setDocPickerOpen(false)
+        setDocSearch('')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [docPickerOpen])
+
+  // Fetch documents when picker opens
+  const handleOpenDocPicker = useCallback(async () => {
+    if (docPickerOpen) {
+      setDocPickerOpen(false)
+      setDocSearch('')
+      return
+    }
+    setDocPickerOpen(true)
+    setDocsLoading(true)
+    setDocsError(null)
+    try {
+      const data = await fileApi.fetchDokumen()
+      setDocuments(Array.isArray(data) ? data : [])
+    } catch (err) {
+      setDocsError('Gagal memuat dokumen.')
+      console.error('[MessageInput] fetchDokumen error:', err)
+    } finally {
+      setDocsLoading(false)
+      // Focus the search after loading
+      setTimeout(() => docSearchRef.current?.focus(), 50)
+    }
+  }, [docPickerOpen])
+
+  // Insert document reference into textarea and store id+name
+  const handleSelectDoc = useCallback((doc) => {
+    const docName = doc.nama_file || doc.nama || doc.name || doc.file_name || 'dokumen'
+    const mention = `@[${docName}]`
+    setValue((prev) => {
+      const trimmed = prev.trimEnd()
+      return trimmed ? `${trimmed} ${mention} ` : `${mention} `
+    })
+    setSelectedDoc({ id: doc.id, name: docName })
+    setDocPickerOpen(false)
+    setDocSearch('')
+    textareaRef.current?.focus()
+  }, [])
+
+  const filteredDocs = documents.filter((doc) => {
+    if (!docSearch.trim()) return true
+    const q = docSearch.toLowerCase()
+    const name = (doc.nama_file || doc.nama || doc.name || doc.file_name || '').toLowerCase()
+    return name.includes(q)
+  })
 
   // Auto-resize textarea
   useEffect(() => {
@@ -34,9 +102,10 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
   const handleSend = () => {
     const trimmed = value.trim()
     if (!trimmed && !selectedFile || disabled) return
-    onSend(trimmed, selectedFile)
+    onSend(trimmed, selectedFile, selectedDoc || null)
     setValue('')
     setSelectedFile(null)
+    setSelectedDoc(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -84,6 +153,85 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
 
       {/* Input Area */}
       <div className="flex items-end gap-3">
+        {/* Document picker button */}
+        <div className="relative flex-shrink-0" ref={docPickerRef}>
+          <button
+            type="button"
+            onClick={handleOpenDocPicker}
+            disabled={disabled}
+            title="Pilih dokumen dari workspace"
+            className={`
+              flex h-11 w-11 items-center justify-center rounded-xl border transition-colors duration-150
+              ${docPickerOpen
+                ? 'border-primary-400 bg-primary-50 text-primary-600'
+                : 'border-neutral-200 bg-white text-neutral-500'}
+              ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500'}
+            `}
+          >
+            <Files size={18} />
+          </button>
+
+          {/* Dropdown */}
+          {docPickerOpen && (
+            <div className="absolute bottom-14 left-0 z-50 w-72 rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-fade-in overflow-hidden">
+              {/* Header */}
+              <div className="border-b border-neutral-100 px-3 py-2.5">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">Dokumen Workspace</p>
+                <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5">
+                  <Search size={13} className="flex-shrink-0 text-neutral-400" />
+                  <input
+                    ref={docSearchRef}
+                    type="text"
+                    value={docSearch}
+                    onChange={(e) => setDocSearch(e.target.value)}
+                    placeholder="Cari dokumen..."
+                    className="w-full bg-transparent text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* List */}
+              <div className="custom-scrollbar max-h-60 overflow-y-auto py-1">
+                {docsLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-xs text-neutral-400">
+                    <Loader2 size={14} className="animate-spin" />
+                    Memuat dokumen...
+                  </div>
+                ) : docsError ? (
+                  <div className="px-4 py-6 text-center text-xs text-error">{docsError}</div>
+                ) : filteredDocs.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-xs text-neutral-400">
+                    {docSearch ? 'Dokumen tidak ditemukan.' : 'Belum ada dokumen.'}
+                  </div>
+                ) : (
+                  filteredDocs.map((doc) => {
+                    const name = doc.nama_file || doc.nama || doc.name || doc.file_name || 'Dokumen'
+                    const type = doc.kategori || doc.tipe || ''
+                    return (
+                      <button
+                        key={doc.id}
+                        type="button"
+                        onClick={() => handleSelectDoc(doc)}
+                        className="flex w-full items-center gap-2.5 overflow-hidden px-3 py-2 text-left transition-colors hover:bg-primary-50"
+                      >
+                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-500">
+                          <FileText size={13} />
+                        </div>
+                        <div className="min-w-0 flex-1 overflow-hidden">
+                          <p className="truncate text-xs font-medium text-neutral-800" title={name}>{name}</p>
+                          {type && (
+                            <p className="truncate text-[10px] capitalize text-neutral-400">{type}</p>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {allowFile && (
           <div className="flex-shrink-0">
             <input

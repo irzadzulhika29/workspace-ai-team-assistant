@@ -96,8 +96,9 @@ export const chatApi = {
    * @param {string} action
    * @param {string|null} sessionId - Optional explicit session ID
    * @param {File|null} file - Optional file attachment
+   * @param {{id: string, name: string}|null} selectedDoc - Optional document reference
    */
-  sendToSupervisor: async (message, action = "chat", sessionId = null, file = null) => {
+  sendToSupervisor: async (message, action = "chat", sessionId = null, file = null, selectedDoc = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     if (file) {
@@ -113,6 +114,8 @@ export const chatApi = {
       formData.append("chat_type", "general_chat");
       formData.append("timestamp", new Date().toISOString());
       formData.append("file", file); // Add the file
+      if (selectedDoc?.id) formData.append("document_id", selectedDoc.id);
+      if (selectedDoc?.name) formData.append("document_name", selectedDoc.name);
       if (googleAccessToken) formData.append("google_access_token", googleAccessToken);
       appendJiraWebhookContext(formData, jiraCredentials);
 
@@ -131,6 +134,8 @@ export const chatApi = {
         user_email: userEmail,
         user_job_title: userJobTitle,
         message,
+        document_id: selectedDoc?.id || null,
+        document_name: selectedDoc?.name || null,
         context_filter: null,
         chat_type: "general_chat",
         timestamp: new Date().toISOString(),

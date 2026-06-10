@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Send, Loader2, FileText } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { chatApi } from '../../services/chatService';
 
 /**
@@ -76,18 +76,7 @@ export default function DocumentChat({ document }) {
 
   return (
     <div className="flex h-full min-h-[24rem] flex-col">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-        <div className="flex items-center gap-2">
-          <FileText size={16} className="text-blue-600" />
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-slate-800">Ask Document</h3>
-            <p className="text-xs text-slate-500 truncate">
-              {document.name}
-            </p>
-          </div>
-        </div>
-      </div>
+   
 
       {/* Messages */}
       <div className="custom-scrollbar flex-1 overflow-y-auto p-4 space-y-4 min-h-0">

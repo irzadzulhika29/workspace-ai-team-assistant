@@ -142,14 +142,14 @@ export default function SupervisorChat() {
     }
   }, [activeSessionTitle])
 
-  const handleSend = useCallback(async (text, file, options = {}) => {
+  const handleSend = useCallback(async (text, file, selectedDoc = null, options = {}) => {
     setError(null)
 
     if (!activeSupervisorSessionId) {
       setError('Belum ada sesi chat aktif. Klik tombol New Chat terlebih dahulu untuk membuat sesi baru.')
       return
     }
-    
+
     const pendingOverride = !options.displayContent && !file ? pendingPromptOverrideRef.current : null
     const shouldUsePendingOverride =
       Boolean(
@@ -168,13 +168,17 @@ export default function SupervisorChat() {
     if (shouldUsePendingOverride) {
       pendingPromptOverrideRef.current = null
     }
-    
+
     addSupervisorMessage({
       role: 'user',
       content: displayContent,
       forwardedEmail: options.forwardedEmail,
       promptCard,
-      documentAttachment: file ? { name: file.name, mimeType: file.type || null } : null,
+      documentAttachment: file
+        ? { name: file.name, mimeType: file.type || null }
+        : selectedDoc?.name
+          ? { id: selectedDoc.id, name: selectedDoc.name, source: 'workspace' }
+          : null,
     })
     setLoading(true)
     setAgentLabel('Supervisor Agent')
@@ -186,7 +190,7 @@ export default function SupervisorChat() {
         throw new Error('Belum ada sesi chat aktif. Klik tombol New Chat terlebih dahulu untuk membuat sesi baru.')
       }
 
-      const data = await chatApi.sendToSupervisor(actualText, 'chat', sessionId, file)
+      const data = await chatApi.sendToSupervisor(actualText, 'chat', sessionId, file, selectedDoc)
       const normalizedData = normalizeResponsePayload(data)
 
       const usedAgent = normalizedData?.agent_used ?? normalizedData?.agentUsed
@@ -221,10 +225,10 @@ export default function SupervisorChat() {
   // Handle send email
   const handleSendEmail = useCallback(async (emailDraft) => {
     setError(null)
-    
-    addSupervisorMessage({ 
-      role: 'user', 
-      content: `Kirim email ke ${emailDraft.to} dengan subject "${emailDraft.subject}"` 
+
+    addSupervisorMessage({
+      role: 'user',
+      content: `Kirim email ke ${emailDraft.to} dengan subject "${emailDraft.subject}"`
     })
     setLoading(true)
     setAgentLabel('Communication Agent')
@@ -256,10 +260,10 @@ export default function SupervisorChat() {
   // Handle regenerate email
   const handleRegenerateEmail = useCallback(async (emailDraft, improvementText) => {
     setError(null)
-    
-    addSupervisorMessage({ 
-      role: 'user', 
-      content: `Buat ulang draft email dengan perbaikan: "${improvementText}"` 
+
+    addSupervisorMessage({
+      role: 'user',
+      content: `Buat ulang draft email dengan perbaikan: "${improvementText}"`
     })
     setLoading(true)
     setAgentLabel('Communication Agent')
@@ -434,7 +438,7 @@ export default function SupervisorChat() {
         displayContent: displayContent || autoSendMessage,
         promptCard: promptCard || null,
       };
-      
+
       // Clear navigation state after a short delay to ensure React has updated
       setTimeout(() => {
         window.history.replaceState({}, document.title);
@@ -445,22 +449,12 @@ export default function SupervisorChat() {
     // Handle draft revision
     if (draftRevision && draft && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
-      
+
       // Set flag to prevent session reload
       setAutoSending(true);
-      
+
       // Show draft context in chat
-      const draftContext = `Draft yang akan direvisi:
-
-To: ${draft.to}
-Subject: ${draft.subject}
-
-Content:
-${draft.body_text || draft.body_html || '(No content)'}
-
----
-
-Silakan berikan instruksi revisi untuk draft ini.`;
+      const draftContext = `Draft yang akan direvisi:\n\nTo: ${draft.to}\nSubject: ${draft.subject}\n\nContent:\n${draft.body_text || draft.body_html || '(No content)'}\n\n---\n\nSilakan berikan instruksi revisi untuk draft ini.`;
 
       addSupervisorMessage({
         role: 'ai',
@@ -479,13 +473,13 @@ Silakan berikan instruksi revisi untuk draft ini.`;
     if (autoSendMessage && !preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
       console.log('[SupervisorChat] Auto-sending message');
-      
+
       // Set flag to prevent session reload
       setAutoSending(true);
-      
+
       // Wait for session history to load, then send
       setTimeout(() => {
-        handleSend(autoSendMessage, null, {
+        handleSend(autoSendMessage, null, null, {
           displayContent: displayContent || (emailContext ? 'Buatkan draft email balasan yang profesional dan sesuai konteks.' : autoSendMessage),
           forwardedEmail: emailContext,
           promptCard: promptCard || null,
