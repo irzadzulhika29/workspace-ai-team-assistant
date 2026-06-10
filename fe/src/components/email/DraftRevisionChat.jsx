@@ -6,10 +6,6 @@ import { urls } from '../../services/api';
 import { getAuthenticatedUser } from '../../services/authService';
 import { useEmailStore } from '../../store/emailStore';
 
-/**
- * DraftRevisionChat Component
- * Chat room for revising email drafts with AI
- */
 export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -24,7 +20,6 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize with draft context
   useEffect(() => {
     const draftPreview = draft.body_html || draft.body_text || '';
     const sanitizedHtml = DOMPurify.sanitize(draftPreview, {
@@ -56,19 +51,15 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
     const userMessage = input.trim();
     setInput('');
 
-    // Add user message
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
 
     try {
-      // Use urls helper to get webhook URL based on settings
       const webhookUrl = urls.getEmail();
 
-      // Get user ID
       const currentUser = await getAuthenticatedUser();
       const userId = currentUser?.id || currentUser?.email || 'unknown';
 
-      // Prepare webhook payload
       const payload = {
         user_id: userId,
         draft_id: draft.id,
@@ -83,32 +74,26 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         source_email: draft.source_email_payload || {}
       };
 
-      // Send to webhook
       await axios.post(webhookUrl, payload, {
         headers: { 'Content-Type': 'application/json' },
         timeout: 30000
       });
-      // Add simple success message
       setMessages(prev => [...prev, {
         role: 'ai',
         content: 'Draft email telah diperbarui, periksa kembali draft'
       }]);
 
-      // Notify parent to refresh draft list and get updated draft
       if (onDraftUpdated) {
-        // First refresh the drafts list
         await useEmailStore.getState().fetchDrafts();
         
-        // Then get the updated draft from the store
         const updatedDrafts = useEmailStore.getState().drafts;
         const updatedDraft = updatedDrafts.find(d => d.id === draft.id);
         
-        // Pass the updated draft to parent
         await onDraftUpdated(updatedDraft || draft);
       }
 
     } catch (error) {
-      console.error('Error revising draft:', error);
+
       setMessages(prev => [...prev, {
         role: 'ai',
         content: `Error: ${error.response?.data?.error || error.message || 'Failed to revise draft'}`
@@ -127,7 +112,6 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
 
   return (
     <div className="flex flex-col h-full bg-white border-l border-gray-200">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
         <div>
           <h3 className="text-sm font-semibold text-gray-900">Revise Draft</h3>
@@ -141,7 +125,6 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         </button>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.map((msg, index) => (
           <div
@@ -179,7 +162,6 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="border-t border-gray-200 p-4">
         <div className="flex gap-2">
           <textarea

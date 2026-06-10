@@ -2,12 +2,10 @@ import axios from 'axios'
 import { urls } from './api'
 
 const buildCalendarParams = () => {
-  // Get start of 30 days ago (to show past events too)
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - 30)
   startDate.setHours(0, 0, 0, 0)
   
-  // Get end date (90 days from now)
   const endDate = new Date()
   endDate.setDate(endDate.getDate() + 90)
   endDate.setHours(23, 59, 59, 999)
@@ -24,7 +22,6 @@ const buildCalendarParams = () => {
 
 export const calendarApi = {
   fetchCalendarEvents: async () => {
-    // Get Google access token first
     let accessToken = null
     try {
       const tokenResponse = await axios.get(`${urls.getBackendUrl()}/api/google/token`, {
@@ -32,27 +29,22 @@ export const calendarApi = {
         timeout: 5_000,
       })
       accessToken = tokenResponse.data?.access_token
-    } catch (err) {
-      console.warn('Failed to get Google access token:', err.message)
+    } catch {
+      // ignore
     }
 
-    // Hit both endpoints in parallel
     const [eventsResponse, summaryResponse] = await Promise.all([
-      // 1. Fetch calendar events from Google Calendar API via backend
       axios.get(`${urls.getBackendUrl()}/api/google/calendar`, {
         params: buildCalendarParams(),
         withCredentials: true,
         timeout: 15_000,
       }),
-      // 2. Hit n8n webhook /calendar (for AI summary) with access token
       accessToken ? axios.post(urls.getCalendar(), {
         access_token: accessToken,
         timestamp: new Date().toISOString(),
       }, {
         timeout: 5_000,
-      }).catch(err => {
-        // Silent fail - don't block calendar fetch if webhook fails
-        console.warn('n8n calendar webhook failed:', err.message)
+      }).catch(() => {
         return null
       }) : Promise.resolve(null)
     ])

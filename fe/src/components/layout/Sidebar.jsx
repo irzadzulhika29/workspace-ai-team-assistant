@@ -26,7 +26,6 @@ export default function Sidebar() {
   const isSupervisorPage = location.pathname === '/chat/supervisor'
   const { open: mobileOpen, collapsed, close: closeMobile, toggleCollapse } = useSidebar()
 
-  // ── Supervisor session state ───────────────────────────────────────────
   const {
     supervisorSessions,
     activeSupervisorSessionId,
@@ -57,9 +56,6 @@ export default function Sidebar() {
   const [bulkDeleteSessionsModalOpen, setBulkDeleteSessionsModalOpen] = useState(false)
   const [isBulkDeletingSessions, setIsBulkDeletingSessions]           = useState(false)
 
-  // ─────────────────────────────────────────────────────────────────────
-  // SUPERVISOR helpers
-  // ─────────────────────────────────────────────────────────────────────
   const loadSupSessionHistory = useCallback(async (sessionId) => {
     setLoadingSupHistory(true)
     try {
@@ -81,7 +77,7 @@ export default function Sidebar() {
       })
       setSupervisorMessages(messages)
     } catch (err) {
-      console.error('Gagal memuat riwayat supervisor:', err)
+
       setSupervisorMessages([])
     } finally {
       setLoadingSupHistory(false)
@@ -100,16 +96,15 @@ export default function Sidebar() {
         setSupervisorSessions(sessions)
       }
     } catch (err) {
-      console.error('Gagal membuat sesi supervisor baru:', err)
+      // ignore
     } finally {
       setCreatingSupSession(false)
     }
   }, [clearSupervisor, setActiveSupervisorSession, setSupervisorSessions])
 
   const loadSupSessions = useCallback(async () => {
-    // Skip loading if auto-sending (Magic Button)
     if (isAutoSending) {
-      console.log('Skipping session load - auto-send in progress');
+
       return;
     }
     
@@ -134,7 +129,7 @@ export default function Sidebar() {
         await loadSupSessionHistory(targetSessionId)
       }
     } catch (err) {
-      console.error('Gagal memuat sesi supervisor:', err)
+      // ignore
     } finally {
       setLoadingSupSessions(false)
     }
@@ -150,9 +145,6 @@ export default function Sidebar() {
     await loadSupSessionHistory(sessionId)
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // DELETE handlers
-  // ─────────────────────────────────────────────────────────────────────
   const hapusSupSesi = async (sessionId) => {
     setIsDeletingSession(true)
     const berhasil = await sessionApi.hapusSesiChat(sessionId)
@@ -234,9 +226,6 @@ export default function Sidebar() {
     toast.success(`${successCount} sesi berhasil dihapus.`)
   }
 
-  // ─────────────────────────────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────────────────────────────
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
     const d = new Date(dateStr)
@@ -257,7 +246,6 @@ export default function Sidebar() {
     path === '/' ? location.pathname === '/' : location.pathname === path
   )
 
-  // Reusable session list renderer
   const renderSessionList = ({
     sessions,
     activeSessionId,
@@ -324,7 +312,6 @@ export default function Sidebar() {
                     <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 bg-primary-500" />
                   )}
 
-                  {/* Checkbox — muncul saat hover atau jika ada yg terpilih */}
                   <div
                     className={`flex-shrink-0 pl-3 transition-all duration-150 ${
                       selectedIds.length > 0 || isSelected
@@ -373,7 +360,6 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Bulk delete bar */}
       {selectedIds.length > 0 && (
         <div className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2">
           <span className="text-[10px] text-neutral-600">
@@ -418,7 +404,6 @@ export default function Sidebar() {
         ${collapsed ? 'md:w-[72px]' : 'md:w-[270px]'}
         w-[270px]
       `}>
-        {/* Header */}
         <div className="relative flex items-center justify-between gap-3 border-b border-neutral-200 bg-gradient-stat px-4 py-5 text-white">
           <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${collapsed ? 'md:opacity-0 md:w-0' : 'opacity-100'}`}>
             <div className="flex bg-white/50 rounded-xl h-10 w-10 flex-shrink-0 items-center justify-center   shadow-stat">
@@ -431,14 +416,12 @@ export default function Sidebar() {
             </div>
           </div>
           
-          {/* Logo only when collapsed (desktop) */}
           <div className={`pointer-events-none absolute inset-0 hidden md:flex items-center justify-center transition-all duration-300 ${collapsed ? 'opacity-100' : 'opacity-0'}`}>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/95 shadow-stat">
               <img src={logoPng} alt="AI Team Assistant" className="h-6 w-6" />
             </div>
           </div>
           
-          {/* Close button — mobile only */}
           <button
             onClick={closeMobile}
             type="button"
@@ -470,7 +453,6 @@ export default function Sidebar() {
                 />
               </NavItem>
 
-              {/* Supervisor session sub-menu - hide when collapsed */}
               {!collapsed && to === '/chat/supervisor' && isSupervisorPage && renderSessionList({
                 sessions: supervisorSessions,
                 activeSessionId: activeSupervisorSessionId,
@@ -489,7 +471,6 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* Collapse toggle button - positioned at sidebar border center */}
         <button
           onClick={toggleCollapse}
           type="button"

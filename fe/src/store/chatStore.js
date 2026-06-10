@@ -1,31 +1,14 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-/**
- * @typedef {Object} ChatMessage
- * @property {string}  id
- * @property {'user'|'ai'} role
- * @property {string}  content
- * @property {string}  timestamp
- * @property {string}  [agentUsed]
- * @property {Array}   [sources]
- * @property {Object}  [actionResults]
- * @property {number}  [processingTime]
- * @property {'success'|'error'} [status]
- * @property {Object|null} [forwardedEmail]
- * @property {Object|null} [documentAttachment]
- */
-
 const initialState = {
   supervisorMessages: [],
-  isConnected:        null,  // null = unknown, true/false after first check
+  isConnected:        null,
 
-  // ── Supervisor sessions ─────────────────────────────────────────────────
-  supervisorSessions:         [],   // array sesi dari Supabase
-  activeSupervisorSessionId:  null, // UUID sesi yang sedang aktif
+  supervisorSessions:         [],
+  activeSupervisorSessionId:  null,
   
-  // ── Auto-send flag (for Magic Button) ──────────────────────────────────
-  isAutoSending:              false, // Prevent session reload during auto-send
+  isAutoSending:              false,
 }
 
 export const useChatStore = create(
@@ -33,10 +16,8 @@ export const useChatStore = create(
     (set) => ({
       ...initialState,
 
-      // ── Connection status ─────────────────────────────────────────────────
       setConnected: (status) => set({ isConnected: status }),
 
-      // ── Supervisor ────────────────────────────────────────────────────────
       addSupervisorMessage: (msg) =>
         set((s) => ({
           supervisorMessages: [
@@ -52,7 +33,6 @@ export const useChatStore = create(
           supervisorMessages: s.supervisorMessages.filter((m) => !messageIds.includes(m.id)),
         })),
 
-      // ── Supervisor sessions ───────────────────────────────────────────────
       setSupervisorSessions: (sessions) => set({ supervisorSessions: sessions }),
 
       setActiveSupervisorSession: (id) =>
@@ -60,7 +40,6 @@ export const useChatStore = create(
 
       setSupervisorMessages: (messages) => set({ supervisorMessages: messages }),
       
-      // ── Auto-send control ─────────────────────────────────────────────────
       setAutoSending: (status) => set({ isAutoSending: status }),
     }),
     {

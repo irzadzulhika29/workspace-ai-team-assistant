@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+
       setUser(null);
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
       await logoutWorkspace();
       setUser(null);
     } catch (error) {
-      console.error('Logout failed:', error);
+      // ignore
     }
   }, []);
 

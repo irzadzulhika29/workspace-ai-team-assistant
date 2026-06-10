@@ -122,7 +122,7 @@ const readBriefingsCache = (userId) => {
 
     return parsed;
   } catch (error) {
-    console.warn("Failed to read dashboard briefings cache:", error);
+
     return null;
   }
 };
@@ -131,7 +131,7 @@ const writeBriefingsCache = (userId, payload) => {
   try {
     localStorage.setItem(getBriefingsCacheKey(userId), JSON.stringify(payload));
   } catch (error) {
-    console.warn("Failed to write dashboard briefings cache:", error);
+    // ignore
   }
 };
 
@@ -768,9 +768,7 @@ const TopBar = ({
           <p className="truncate text-sm font-semibold text-neutral-900">
             {user?.name || "Admin"}
           </p>
-          {/* <p className="truncate text-xs text-neutral-500">
-            {user?.email || "Workspace User"}
-          </p> */}
+          
         </div>
       </div>
     </div>
@@ -891,7 +889,7 @@ export default function Dashboard() {
       const items = await jiraApi.fetchIssues();
       setJiraIssues(Array.isArray(items) ? items : []);
     } catch (err) {
-      console.error("Dashboard Jira error:", err);
+
       const isNotConnected = err?.code === JIRA_ERROR_CODES.NOT_CONNECTED;
       setJiraNotConnected(isNotConnected);
       setJiraError(isNotConnected ? "" : err.message || "Tidak dapat mengambil progres Jira.");
@@ -919,7 +917,7 @@ export default function Dashboard() {
           try {
             return await emailApi.getEmail(message.id);
           } catch (err) {
-            console.error("Error fetching email detail:", err);
+
             return null;
           }
         }),
@@ -927,7 +925,7 @@ export default function Dashboard() {
 
       setUnreadEmails(emailDetails.filter(Boolean));
     } catch (err) {
-      console.error("Dashboard Email error:", err);
+
       setEmailError(err.message || "Tidak dapat mengambil email.");
       setUnreadEmails([]);
     } finally {
@@ -1030,10 +1028,7 @@ export default function Dashboard() {
         );
         googleAccessToken = tokenResponse.data.access_token || null;
       } catch (err) {
-        console.warn(
-          "Could not fetch Google token:",
-          err.response?.data || err.message,
-        );
+        // ignore
       }
 
       let jiraAuthBase64 = null;
@@ -1054,10 +1049,7 @@ export default function Dashboard() {
           jiraSubdomain = jiraCredentials.subdomain;
         }
       } catch (err) {
-        console.warn(
-          "Could not fetch Jira credentials:",
-          err.response?.data || err.message,
-        );
+        // ignore
       }
 
       const response = await fetch(urls.getBriefings(), {
@@ -1088,7 +1080,7 @@ export default function Dashboard() {
         loadTokenUsage(),
       ]);
     } catch (err) {
-      console.error("Error refreshing briefings:", err);
+
       setRefreshError(
         "Gagal refresh briefings. Data n8n belum memberi payload lengkap atau webhook sedang gagal.",
       );

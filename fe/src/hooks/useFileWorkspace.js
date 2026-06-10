@@ -32,7 +32,7 @@ export function useFileWorkspace() {
       setSupabaseDocs(documents)
       setSelectedDocument(null)
     } catch (err) {
-      console.error('Gagal memuat dokumen dari Supabase:', err)
+
       setFetchError(err.message)
     } finally {
       setIsLoading(false)
@@ -145,7 +145,7 @@ export function useFileWorkspace() {
         setSelectedDocument(null)
       }
     } catch (error) {
-      console.error('Error deleting document:', error)
+
       alert('Gagal menghapus dokumen: ' + error.message)
     } finally {
       setIsDeleting(false)
@@ -188,7 +188,7 @@ export function useFileWorkspace() {
       await loadDocuments()
       toast.success(`${selectedDocumentIds.length} dokumen berhasil dihapus.`)
     } catch (error) {
-      console.error('Error bulk deleting documents:', error)
+
       toast.error('Gagal menghapus dokumen: ' + error.message)
     } finally {
       setIsBulkDeleting(false)

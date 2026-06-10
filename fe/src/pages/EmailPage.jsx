@@ -36,7 +36,6 @@ export default function EmailPage() {
   const [summaryRefreshTrigger, setSummaryRefreshTrigger] = useState(0);
   const summaryPanelRef = useRef(null);
 
-  // Fetch emails on mount
   useEffect(() => {
     fetchEmails();
     fetchDrafts();
@@ -60,17 +59,11 @@ export default function EmailPage() {
     };
   }, [emails, drafts]);
 
-  /**
-   * Handle search submit
-   */
   const handleSearch = (e) => {
     e.preventDefault();
     searchEmails(searchQuery);
   };
 
-  /**
-   * Handle tab change
-   */
   const handleTabChange = (tab) => {
     setActiveTab(tab);
 
@@ -84,7 +77,6 @@ export default function EmailPage() {
         setFilter("unreadOnly", true);
         break;
       case "drafts":
-        // Fetch drafts from Supabase
         useEmailStore.getState().fetchDrafts();
         break;
       case "sent":
@@ -96,36 +88,22 @@ export default function EmailPage() {
     }
   };
 
-  /**
-   * Handle refresh
-   */
   const handleRefresh = () => {
     fetchEmails();
     setSummaryRefreshTrigger((value) => value + 1);
   };
 
-  /**
-   * Handle revise draft
-   */
   const handleReviseDraft = (draft) => {
     setRevisingDraft(draft);
   };
 
-  /**
-   * Handle draft updated from chat
-   */
   const handleDraftUpdated = async (updatedDraft) => {
-    // Update the draft being revised with the latest version
     if (updatedDraft) {
       setRevisingDraft(updatedDraft);
     }
-    // Refresh drafts list
     await useEmailStore.getState().fetchDrafts();
   };
 
-  /**
-   * Handle draft created - switch to drafts tab
-   */
   const handleDraftCreated = () => {
     setActiveTab("drafts");
     useEmailStore.getState().fetchDrafts();
@@ -140,10 +118,7 @@ export default function EmailPage() {
       await generateDraftFromWebhook(emailDetail, fetchDrafts);
       setActiveTab("drafts");
     } catch (replyError) {
-      console.error(
-        "Failed creating reply draft from summary action:",
-        replyError,
-      );
+      // ignore
     }
   };
 
@@ -208,7 +183,6 @@ export default function EmailPage() {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && !isGoogleLocked && (
           <Alert variant="error" className="mt-4" title="Email workspace error">
             {error}
@@ -225,7 +199,6 @@ export default function EmailPage() {
       ) : (
         <>
 
-      {/* Section 2: Metrics Cards */}
       <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <button
           type="button"
@@ -281,13 +254,10 @@ export default function EmailPage() {
         </button>
       </section>
 
-      {/* Section 3: Email Content */}
       <section className="mt-4 flex h-[calc(100dvh-15rem)] min-h-0 flex-1 overflow-hidden rounded-[24px] shadow-md">
         <div className="flex h-full min-h-0 flex-1 overflow-hidden gap-4 items-start">
-          {/* Tab Content */}
           {activeTab === "unread" && (
             <>
-              {/* Left Panel: Email Summary (Permanent) */}
               <div
                 ref={summaryPanelRef}
                 className="min-h-0 w-80 self-start overflow-hidden rounded-[20px] bg-white shadow-md"
@@ -298,7 +268,6 @@ export default function EmailPage() {
                 />
               </div>
 
-              {/* Middle Panel: Email List */}
               <div
                 className={`min-h-0 overflow-y-auto self-start max-h-full rounded-[20px] bg-white shadow-md ${
                   selectedEmail ? "w-96" : "flex-1"
@@ -307,7 +276,6 @@ export default function EmailPage() {
                 <EmailList maxItems={10} unreadOnly={true} />
               </div>
 
-              {/* Right Panel: Email Detail */}
               {selectedEmail && (
                 <div className="flex min-h-0 flex-1">
                   <EmailDetail onDraftCreated={handleDraftCreated} />
@@ -318,7 +286,6 @@ export default function EmailPage() {
 
           {activeTab === "inbox" && (
             <>
-              {/* Left Panel: Email Summary (Permanent) */}
               <div
                 ref={summaryPanelRef}
                 className="min-h-0 w-80 self-start overflow-hidden rounded-[20px] bg-white shadow-md"
@@ -329,7 +296,6 @@ export default function EmailPage() {
                 />
               </div>
 
-              {/* Middle Panel: Email List */}
               <div
                 className={`min-h-0 overflow-y-auto self-start max-h-full rounded-[20px] bg-white shadow-md ${
                   selectedEmail ? "w-96" : "flex-1"
@@ -338,7 +304,6 @@ export default function EmailPage() {
                 <EmailList />
               </div>
 
-              {/* Right Panel: Email Detail */}
               {selectedEmail && (
                 <div className="flex min-h-0 flex-1">
                   <EmailDetail onDraftCreated={handleDraftCreated} />
@@ -349,7 +314,6 @@ export default function EmailPage() {
 
           {activeTab === "drafts" && (
             <>
-              {/* Drafts List */}
               <div
                 className={
                   revisingDraft
@@ -360,7 +324,6 @@ export default function EmailPage() {
                 <DraftsList onRevise={handleReviseDraft} />
               </div>
 
-              {/* Draft Revision Chat */}
               {revisingDraft && (
                 <div className="flex h-full min-h-0 w-1/2 flex-col overflow-hidden rounded-[20px] bg-white shadow-md">
                   <DraftRevisionChat
@@ -375,7 +338,6 @@ export default function EmailPage() {
 
           {activeTab === "sent" && (
             <>
-              {/* Sent Email List */}
               <div
                 className={`flex h-full min-h-0 flex-col overflow-hidden rounded-[20px] bg-white shadow-md ${
                   selectedEmail ? "w-96" : "flex-1"
@@ -386,7 +348,6 @@ export default function EmailPage() {
                 </div>
               </div>
 
-              {/* Email Detail */}
               {selectedEmail && (
                 <div className="flex h-full min-h-0 flex-1">
                   <EmailDetail onDraftCreated={handleDraftCreated} />

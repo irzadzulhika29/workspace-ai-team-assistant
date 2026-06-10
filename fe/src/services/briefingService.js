@@ -1,10 +1,6 @@
 import axios from 'axios';
 import { urls } from './api';
 
-/**
- * Service untuk mengelola AI Briefing Dashboard
- */
-
 const api = axios.create({
   baseURL: urls.getBackendUrl(),
   withCredentials: true,
@@ -71,35 +67,15 @@ const normalizeBriefingsResponse = (payload) => {
 };
 
 export const ambilSemuaBriefing = async () => {
-  try {
-    const response = await api.get('/api/dashboard/briefings');
-    return normalizeBriefingsResponse(response.data);
-  } catch (error) {
-    console.error('Error fetching dashboard briefings:', error);
-    throw error;
-  }
+  const response = await api.get('/api/dashboard/briefings');
+  return normalizeBriefingsResponse(response.data);
 };
 
-/**
- * Mengambil briefing untuk domain tertentu
- * @param {string} domain - Domain briefing (jira, calendar, email)
- * @returns {Promise<Object>} Briefing data
- */
 export const ambilBriefingDomain = async (domain) => {
-  try {
-    const response = await api.get(`/api/dashboard/briefings/${domain}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching ${domain} briefing:`, error);
-    throw error;
-  }
+  const response = await api.get(`/api/dashboard/briefings/${domain}`);
+  return response.data;
 };
 
-/**
- * Trigger generate briefing via n8n webhook,
- * lalu baca snapshot terbaru dari backend.
- * @returns {Promise<Object>} Response dari webhook n8n
- */
 export const refreshBriefingViaWebhook = async () => {
   const [user, googleAccessToken, jiraCredentials] = await Promise.all([
     ambilCurrentUser(),
@@ -114,21 +90,11 @@ export const refreshBriefingViaWebhook = async () => {
     ...(jiraCredentials && { jira_credentials: jiraCredentials }),
   };
 
-  try {
-    await webhookApi.post(urls.getBriefings(), payload);
-    const response = await api.get('/api/dashboard/briefings');
-    return normalizeBriefingsResponse(response.data);
-  } catch (error) {
-    console.error('Error refreshing briefings via webhook:', error);
-    throw error;
-  }
+  await webhookApi.post(urls.getBriefings(), payload);
+  const response = await api.get('/api/dashboard/briefings');
+  return normalizeBriefingsResponse(response.data);
 };
 
-/**
- * Helper untuk format waktu last updated
- * @param {string} generatedAt - ISO timestamp
- * @returns {string} Formatted relative time
- */
 export const formatLastUpdated = (generatedAt) => {
   if (!generatedAt) return 'Belum pernah diupdate';
   
@@ -145,11 +111,6 @@ export const formatLastUpdated = (generatedAt) => {
   return `${diffDays} hari yang lalu`;
 };
 
-/**
- * Helper untuk mendapatkan warna badge priority
- * @param {string} priority - high, medium, low
- * @returns {string} Tailwind color class
- */
 export const getPriorityColor = (priority) => {
   const colors = {
     high: 'bg-red-100 text-red-800 border-red-200',
@@ -159,11 +120,6 @@ export const getPriorityColor = (priority) => {
   return colors[priority] || colors.medium;
 };
 
-/**
- * Helper untuk mendapatkan icon domain
- * @param {string} domain - jira, calendar, email
- * @returns {string} Icon name
- */
 export const getDomainIcon = (domain) => {
   const icons = {
     jira: '📊',
@@ -173,11 +129,6 @@ export const getDomainIcon = (domain) => {
   return icons[domain] || '📋';
 };
 
-/**
- * Helper untuk mendapatkan label domain
- * @param {string} domain - jira, calendar, email
- * @returns {string} Display label
- */
 export const getDomainLabel = (domain) => {
   const labels = {
     jira: 'Jira Progress',
@@ -187,11 +138,6 @@ export const getDomainLabel = (domain) => {
   return labels[domain] || domain;
 };
 
-/**
- * Helper untuk mendapatkan route detail domain
- * @param {string} domain - jira, calendar, email
- * @returns {string} Route path
- */
 export const getDomainRoute = (domain) => {
   const routes = {
     jira: '/workspace/jira',

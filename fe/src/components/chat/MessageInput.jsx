@@ -3,21 +3,12 @@ import { Send, Paperclip, X, Files, Search, FileText, Loader2 } from 'lucide-rea
 import { Button } from '@/components/ui'
 import { fileApi } from '@/services/fileService'
 
-/**
- * MessageInput — text input + send button for chat with optional file upload
- * @param {Function} props.onSend - called with (text, file)
- * @param {boolean}  props.disabled
- * @param {string}   props.placeholder
- * @param {boolean}  props.allowFile - whether to show file upload button
- * @param {string}   props.initialValue - initial text value
- */
 export default function MessageInput({ onSend, disabled = false, placeholder = 'Ketik pesan...', allowFile = false, initialValue = '' }) {
   const [value, setValue] = useState(initialValue)
   const [selectedFile, setSelectedFile] = useState(null)
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
 
-  // Document picker state
   const [docPickerOpen, setDocPickerOpen] = useState(false)
   const [documents, setDocuments] = useState([])
   const [docsLoading, setDocsLoading] = useState(false)
@@ -27,14 +18,12 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
   const docPickerRef = useRef(null)
   const docSearchRef = useRef(null)
 
-  // Update value when initialValue changes
   useEffect(() => {
     if (initialValue) {
       setValue(initialValue)
     }
   }, [initialValue])
 
-  // Close doc picker when clicking outside
   useEffect(() => {
     if (!docPickerOpen) return
     const handleClickOutside = (e) => {
@@ -47,7 +36,6 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [docPickerOpen])
 
-  // Fetch documents when picker opens
   const handleOpenDocPicker = useCallback(async () => {
     if (docPickerOpen) {
       setDocPickerOpen(false)
@@ -62,15 +50,13 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
       setDocuments(Array.isArray(data) ? data : [])
     } catch (err) {
       setDocsError('Gagal memuat dokumen.')
-      console.error('[MessageInput] fetchDokumen error:', err)
+
     } finally {
       setDocsLoading(false)
-      // Focus the search after loading
       setTimeout(() => docSearchRef.current?.focus(), 50)
     }
   }, [docPickerOpen])
 
-  // Insert document reference into textarea and store id+name
   const handleSelectDoc = useCallback((doc) => {
     const docName = doc.nama_file || doc.nama || doc.name || doc.file_name || 'dokumen'
     const mention = `@[${docName}]`
@@ -91,7 +77,6 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
     return name.includes(q)
   })
 
-  // Auto-resize textarea
   useEffect(() => {
     const el = textareaRef.current
     if (!el) return
@@ -134,7 +119,6 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
 
   return (
     <div className="border-t border-neutral-200 bg-white px-4 py-4 md:px-6">
-      {/* File Preview Area */}
       {selectedFile && (
         <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 animate-fade-in">
           <Paperclip size={14} className="text-neutral-500" />
@@ -151,9 +135,7 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
         </div>
       )}
 
-      {/* Input Area */}
       <div className="flex items-end gap-3">
-        {/* Document picker button */}
         <div className="relative flex-shrink-0" ref={docPickerRef}>
           <button
             type="button"
@@ -171,10 +153,8 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
             <Files size={18} />
           </button>
 
-          {/* Dropdown */}
           {docPickerOpen && (
             <div className="absolute bottom-14 left-0 z-50 w-72 rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-fade-in overflow-hidden">
-              {/* Header */}
               <div className="border-b border-neutral-100 px-3 py-2.5">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">Dokumen Workspace</p>
                 <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5">
@@ -190,7 +170,6 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
                 </div>
               </div>
 
-              {/* List */}
               <div className="custom-scrollbar max-h-60 overflow-y-auto py-1">
                 {docsLoading ? (
                   <div className="flex items-center justify-center gap-2 py-8 text-xs text-neutral-400">

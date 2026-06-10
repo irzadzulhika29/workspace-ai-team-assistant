@@ -9,7 +9,7 @@ export const tokenUsageApi = {
       })
       return res.data
     } catch (error) {
-      console.error('Gagal mengambil data token usage:', error)
+
       throw new Error(error.response?.data?.error || 'Tidak dapat mengambil data token usage.')
     }
   },

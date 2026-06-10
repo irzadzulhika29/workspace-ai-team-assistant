@@ -4,9 +4,6 @@ import { useEmailStore } from '../../store/emailStore';
 import { generateDraftFromWebhook } from '../../services/emailWebhookService';
 import DOMPurify from 'dompurify';
 
-/**
- * EmailDetail Component - Display full email content
- */
 export default function EmailDetail({ onDraftCreated }) {
   const { selectedEmail, loadingDetail, clearSelectedEmail, markAsRead, toggleStar, fetchDrafts } = useEmailStore();
   const [generatingDraft, setGeneratingDraft] = useState(false);
@@ -45,9 +42,6 @@ export default function EmailDetail({ onDraftCreated }) {
 
   const email = selectedEmail;
 
-  /**
-   * Format date to readable format
-   */
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
@@ -60,23 +54,14 @@ export default function EmailDetail({ onDraftCreated }) {
     });
   };
 
-  /**
-   * Check if email is unread
-   */
   const isUnread = () => {
     return email.labelIds?.includes('UNREAD');
   };
 
-  /**
-   * Check if email is starred
-   */
   const isStarred = () => {
     return email.labelIds?.includes('STARRED');
   };
 
-  /**
-   * Sanitize and render HTML email body
-   */
   const renderEmailBody = () => {
     const bodyContent = email.htmlBody || email.body;
     
@@ -84,7 +69,6 @@ export default function EmailDetail({ onDraftCreated }) {
       return <p className="text-gray-500 italic">No content</p>;
     }
 
-    // Sanitize HTML to prevent XSS
     const sanitizedHtml = DOMPurify.sanitize(bodyContent, {
       ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'div', 'span', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img'],
       ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'style', 'class']
@@ -98,19 +82,13 @@ export default function EmailDetail({ onDraftCreated }) {
     );
   };
 
-  /**
-   * Handle Draft Reply - Create draft by sending email to webhook
-   */
   const handleDraftReply = async () => {
     setGeneratingDraft(true);
 
     try {
-      // Send email to webhook to generate draft
-      // Note: Webhook n8n already saves draft to Supabase
       const result = await generateDraftFromWebhook(email, fetchDrafts);
 
       if (result.success) {
-        // Notify parent to switch to drafts tab
         if (onDraftCreated) {
           onDraftCreated();
         }
@@ -118,7 +96,7 @@ export default function EmailDetail({ onDraftCreated }) {
         alert('Failed to create draft. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating draft:', error);
+
       alert(`Error creating draft: ${error.message}`);
     } finally {
       setGeneratingDraft(false);
@@ -127,7 +105,6 @@ export default function EmailDetail({ onDraftCreated }) {
 
   return (
     <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white">
-      {/* Header */}
       <div className="border-b border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <button
@@ -139,7 +116,6 @@ export default function EmailDetail({ onDraftCreated }) {
           </button>
 
           <div className="flex items-center gap-2">
-            {/* Draft Reply Button */}
             <button
               onClick={handleDraftReply}
               disabled={generatingDraft}
@@ -178,7 +154,6 @@ export default function EmailDetail({ onDraftCreated }) {
           </div>
         </div>
 
-        {/* Email Metadata */}
         <div className="space-y-2">
           <h1 className="text-sm font-semibold text-gray-900">
             {email.subject || '(No subject)'}
@@ -213,12 +188,10 @@ export default function EmailDetail({ onDraftCreated }) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {/* Email Body */}
         <div className="p-6">
           {renderEmailBody()}
         </div>
 
-        {/* Attachments */}
         {email.attachments && email.attachments.length > 0 && (
           <div className="border-t border-gray-200 p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">

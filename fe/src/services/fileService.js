@@ -14,16 +14,7 @@ const fetchCurrentUser = async () => {
     return null;
   }
 };
-
-// ─── File / Document API ──────────────────────────────────────────────────────
 export const fileApi = {
-  /**
-   * Upload a document for indexing via n8n webhook.
-   * @param {File} file
-   * @param {string} folder - "input" | "output"
-   * @param {string} fileName
-   * @returns {Promise<any>}
-   */
   uploadDocument: async (file, folder = "input", fileName = "") => {
     const currentUser = await fetchCurrentUser();
 
@@ -46,10 +37,6 @@ export const fileApi = {
     return res.data;
   },
 
-  /**
-   * Fetch all documents from the Supabase `dokumen` table via backend.
-   * @returns {Promise<Array>} array of document records
-   */
   fetchDokumen: async () => {
     const res = await axios.get(`${urls.getBackendUrl()}/api/dokumen`, {
       withCredentials: true,
@@ -57,11 +44,6 @@ export const fileApi = {
     return res.data;
   },
 
-  /**
-   * Delete a document from the Supabase `dokumen` table via backend.
-   * @param {string} documentId - UUID of the document to delete
-   * @returns {Promise<any>}
-   */
   deleteDokumen: async (documentId) => {
     const res = await axios.delete(`${urls.getBackendUrl()}/api/dokumen/${documentId}`, {
       withCredentials: true,
@@ -69,11 +51,6 @@ export const fileApi = {
     return res.data;
   },
 
-  /**
-   * Bulk delete documents from the Supabase `dokumen` table via backend.
-   * @param {string[]} documentIds - Array of UUIDs to delete
-   * @returns {Promise<any>}
-   */
   deleteDokumenBulk: async (documentIds) => {
     const res = await axios.delete(`${urls.getBackendUrl()}/api/dokumen/bulk`, {
       data: { documentIds },

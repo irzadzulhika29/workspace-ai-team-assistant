@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   AlertCircle,
   CheckCircle,
@@ -16,7 +16,7 @@ const getCurrentUser = async () => {
   try {
     return await getAuthenticatedUser();
   } catch (error) {
-    console.error('Error getting current user:', error);
+
     return null;
   }
 };
@@ -31,7 +31,7 @@ const getGoogleAccessToken = async () => {
 
     return response.data?.access_token || null;
   } catch (error) {
-    console.error('Error getting Google access token:', error);
+
     return null;
   }
 };
@@ -52,7 +52,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
       const parsed = JSON.parse(cached);
       return parsed.data;
     } catch (err) {
-      console.error('Error loading cached summary:', err);
+
       return null;
     }
   };
@@ -67,11 +67,11 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
         })
       );
     } catch (err) {
-      console.error('Error saving summary to cache:', err);
+      // ignore
     }
   };
 
-  const fetchEmailSummary = async (forceRefresh = false) => {
+  const fetchEmailSummary = useCallback(async (forceRefresh = false) => {
     try {
       if (!forceRefresh) {
         const cached = loadCachedSummary();
@@ -117,12 +117,12 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
         setError('Failed to fetch email summary');
       }
     } catch (err) {
-      console.error('Error fetching email summary:', err);
+
       setError(err.response?.data?.error || err.message || 'Failed to fetch email summary');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const cached = loadCachedSummary();
@@ -130,7 +130,6 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
       setSummaryData(cached);
     }
     setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -138,8 +137,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
       setLoading(true);
       fetchEmailSummary(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshTrigger]);
+  }, [refreshTrigger, fetchEmailSummary]);
 
   if (loading) {
     return (

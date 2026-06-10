@@ -1,17 +1,11 @@
 import React from 'react';
 import { X, Download, FileText } from 'lucide-react'
 
-/**
- * FilePreviewModal — overlay with PDF/document preview
- * @param {Object}   props.file - { name, url, type }
- * @param {Function} props.onClose
- */
 export default function FilePreviewModal({ file, onClose }) {
   if (!file) return null
 
   const isPdf = file.name?.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf'
 
-  // Validasi URL: harus ada, harus string, dan harus dimulai dengan http:// atau https://
   const isValidUrl = (url) => {
     if (!url || typeof url !== 'string') return false
     const trimmed = url.trim()
@@ -20,16 +14,7 @@ export default function FilePreviewModal({ file, onClose }) {
 
   const hasValidUrl = isValidUrl(file.url)
 
-  // Debug log untuk investigasi (bisa dihapus setelah fix)
-  if (import.meta.env.DEV) {
-    console.log('[FilePreviewModal] Debug:', {
-      fileName: file.name,
-      rawUrl: file.url,
-      urlType: typeof file.url,
-      hasValidUrl,
-      isPdf
-    })
-  }
+
 
   return (
     <div
@@ -41,7 +26,6 @@ export default function FilePreviewModal({ file, onClose }) {
         w-full max-w-4xl h-[90vh]
         border border-gray-200 animate-slide-up overflow-hidden
       ">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <FileText size={16} className="text-slate-400 flex-shrink-0" />
@@ -67,7 +51,6 @@ export default function FilePreviewModal({ file, onClose }) {
           </div>
         </div>
 
-        {/* Preview */}
         <div className="flex-1 overflow-hidden">
           {!hasValidUrl ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">

@@ -3,19 +3,7 @@ import { urls } from './api';
 
 const BACKEND_URL = urls.getBackendUrl();
 
-/**
- * Email Service - Gmail API wrapper
- */
 export const emailApi = {
-  /**
-   * List emails from inbox
-   * @param {Object} options - Query options
-   * @param {string} options.q - Gmail search query
-   * @param {number} options.maxResults - Max results (default: 50)
-   * @param {string} options.pageToken - Pagination token
-   * @param {string} options.labelIds - Comma-separated label IDs
-   * @returns {Promise<Object>} { messages, nextPageToken, resultSizeEstimate }
-   */
   listEmails: async (options = {}) => {
     try {
       const { q, maxResults = 50, pageToken, labelIds = 'INBOX' } = options;
@@ -33,8 +21,6 @@ export const emailApi = {
 
       return response.data;
     } catch (error) {
-      console.error('Error listing emails:', error);
-      // Better error handling
       if (error.response?.status === 401) {
         throw new Error('Sesi login telah berakhir. Silakan login kembali.');
       }
@@ -45,127 +31,61 @@ export const emailApi = {
     }
   },
 
-  /**
-   * Get single email detail
-   * @param {string} messageId - Gmail message ID
-   * @returns {Promise<Object>} Full email data
-   */
   getEmail: async (messageId) => {
-    try {
-      const response = await axios.get(
-        `${BACKEND_URL}/api/google/gmail/messages/${messageId}`,
-        { withCredentials: true }
-      );
+    const response = await axios.get(
+      `${BACKEND_URL}/api/google/gmail/messages/${messageId}`,
+      { withCredentials: true }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error getting email:', error);
-      throw error;
-    }
+    return response.data;
   },
 
-  /**
-   * Send new email
-   * @param {Object} emailData - Email data
-   * @param {string} emailData.to - Recipient email
-   * @param {string} emailData.subject - Email subject
-   * @param {string} emailData.body - Email body (HTML or plain text)
-   * @param {string} emailData.cc - CC recipients (optional)
-   * @param {string} emailData.bcc - BCC recipients (optional)
-   * @returns {Promise<Object>} Sent message data
-   */
   sendEmail: async (emailData) => {
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/google/gmail/messages/send`,
-        emailData,
-        { withCredentials: true }
-      );
+    const response = await axios.post(
+      `${BACKEND_URL}/api/google/gmail/messages/send`,
+      emailData,
+      { withCredentials: true }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error sending email:', error);
-      throw error;
-    }
+    return response.data;
   },
 
-  /**
-   * Mark email as read or unread
-   * @param {string} messageId - Gmail message ID
-   * @param {boolean} read - True to mark as read, false for unread
-   * @returns {Promise<Object>} Modified message data
-   */
   markAsRead: async (messageId, read = true) => {
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/google/gmail/messages/${messageId}/modify`,
-        {
-          addLabelIds: read ? [] : ['UNREAD'],
-          removeLabelIds: read ? ['UNREAD'] : []
-        },
-        { withCredentials: true }
-      );
+    const response = await axios.post(
+      `${BACKEND_URL}/api/google/gmail/messages/${messageId}/modify`,
+      {
+        addLabelIds: read ? [] : ['UNREAD'],
+        removeLabelIds: read ? ['UNREAD'] : []
+      },
+      { withCredentials: true }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error marking email as read:', error);
-      throw error;
-    }
+    return response.data;
   },
 
-  /**
-   * Star or unstar email
-   * @param {string} messageId - Gmail message ID
-   * @param {boolean} starred - True to star, false to unstar
-   * @returns {Promise<Object>} Modified message data
-   */
   toggleStar: async (messageId, starred = true) => {
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/google/gmail/messages/${messageId}/modify`,
-        {
-          addLabelIds: starred ? ['STARRED'] : [],
-          removeLabelIds: starred ? [] : ['STARRED']
-        },
-        { withCredentials: true }
-      );
+    const response = await axios.post(
+      `${BACKEND_URL}/api/google/gmail/messages/${messageId}/modify`,
+      {
+        addLabelIds: starred ? ['STARRED'] : [],
+        removeLabelIds: starred ? [] : ['STARRED']
+      },
+      { withCredentials: true }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error toggling star:', error);
-      throw error;
-    }
+    return response.data;
   },
 
-  /**
-   * Search emails
-   * @param {string} searchQuery - Gmail search query
-   * @returns {Promise<Object>} Search results
-   */
   searchEmails: async (searchQuery) => {
-    try {
-      return await emailApi.listEmails({ q: searchQuery });
-    } catch (error) {
-      console.error('Error searching emails:', error);
-      throw error;
-    }
+    return await emailApi.listEmails({ q: searchQuery });
   },
 
-  /**
-   * Get Gmail labels
-   * @returns {Promise<Object>} Labels data
-   */
   getLabels: async () => {
-    try {
-      const response = await axios.get(
-        `${BACKEND_URL}/api/google/gmail/labels`,
-        { withCredentials: true }
-      );
+    const response = await axios.get(
+      `${BACKEND_URL}/api/google/gmail/labels`,
+      { withCredentials: true }
+    );
 
-      return response.data;
-    } catch (error) {
-      console.error('Error getting labels:', error);
-      throw error;
-    }
+    return response.data;
   }
 };

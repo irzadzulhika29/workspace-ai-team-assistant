@@ -1,9 +1,6 @@
 import axios from "axios";
 import { urls } from "./api";
 
-// ─── Chat Session API ─────────────────────────────────────────────────────────
-// CRUD operasi untuk tabel `chat_sessions` dan `chat_messages`.
-
 const parseStoredAiOutput = (rawOutput) => {
   if (!rawOutput || typeof rawOutput !== 'string') {
     return { content: rawOutput ?? '', actionResults: {} }
@@ -42,7 +39,7 @@ const parseStoredAiOutput = (rawOutput) => {
           content = nested.message
         }
       } catch {
-        // Keep original content if it is not a JSON control payload.
+        // ignore
       }
     }
 
@@ -132,7 +129,7 @@ const parseStoredUserInput = (rawInput) => {
         }
       }
     } catch {
-      // Fall through to legacy/plain-text parsing.
+      // ignore
     }
   }
 
@@ -189,12 +186,6 @@ const parseStoredUserInput = (rawInput) => {
 }
 
 export const sessionApi = {
-  /**
-   * Membuat sesi chat baru di tabel `chat_sessions`.
-   * @param {string} judulChat
-   * @param {string} chatType - Tipe chat: 'rag_chat' atau 'general_chat'
-   * @returns {Promise<Object|null>} objek sesi { id, judul, chat_type, created_at }
-   */
   buatSesiBaru: async (judulChat = "Obrolan Baru", chatType = "general_chat") => {
     try {
       const res = await axios.post(`${urls.getBackendUrl()}/api/sessions`, {
@@ -205,16 +196,11 @@ export const sessionApi = {
       });
       return res.data;
     } catch (error) {
-      console.error("Gagal membuat sesi baru:", error);
+
       return null;
     }
   },
 
-  /**
-   * Mengambil semua sesi chat, diurutkan terbaru di atas.
-   * @param {string|null} chatType - Filter berdasarkan tipe chat ('rag_chat' / 'general_chat'), atau null untuk semua.
-   * @returns {Promise<Array>} array sesi
-   */
   ambilSemuaSesi: async (chatType = null) => {
     try {
       const params = chatType ? { chat_type: chatType } : {};
@@ -224,17 +210,11 @@ export const sessionApi = {
       });
       return res.data;
     } catch (error) {
-      console.error("Gagal mengambil daftar sesi:", error);
+
       return [];
     }
   },
 
-  /**
-   * Mengambil riwayat chat dari sesi tertentu dan mengkonversi ke format yang diharapkan.
-   * Juga inject URL dokumen untuk pesan yang memiliki trigger PDF.
-   * @param {string} sessionId - UUID sesi
-   * @returns {Promise<Array>} array pesan yang sudah diformat
-   */
   ambilRiwayatChat: async (sessionId) => {
     try {
       const res = await axios.get(`${urls.getBackendUrl()}/api/sessions/${sessionId}/history`, {
@@ -245,9 +225,7 @@ export const sessionApi = {
       let docIndex = 0;
       const messages = [];
 
-      // Konversi dari struktur chat_messages (input/output) ke format yang diharapkan
       for (const row of rows) {
-        // Tambahkan pesan user (input)
         if (row.input && row.input.trim()) {
           const parsedInput = parseStoredUserInput(row.input);
           messages.push({
@@ -263,12 +241,10 @@ export const sessionApi = {
           });
         }
 
-        // Tambahkan pesan AI (output)
         if (row.output && row.output.trim()) {
           const parsedOutput = parseStoredAiOutput(row.output);
           let content = parsedOutput.content;
 
-          // Cek apakah ini trigger PDF dan inject URL jika ada
           const isPdfTrigger =
             content.includes("Unduh Dokumen (PDF)") ||
             content.includes("Unduh Presentasi (PDF)") ||
@@ -296,17 +272,11 @@ export const sessionApi = {
 
       return messages;
     } catch (error) {
-      console.error("Gagal mengambil riwayat chat:", error);
+
       return [];
     }
   },
 
-  /**
-   * Menghapus sesi chat beserta seluruh pesannya.
-   * Pertama hapus isi pesan di `chat_messages`, lalu hapus sesi di `chat_sessions`.
-   * @param {string} sessionId - UUID sesi
-   * @returns {Promise<boolean>} true jika berhasil
-   */
   hapusSesiChat: async (sessionId) => {
     try {
       await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}`, {
@@ -314,17 +284,11 @@ export const sessionApi = {
       });
       return true;
     } catch (error) {
-      console.error("Terjadi kesalahan saat menghapus:", error);
+
       return false;
     }
   },
 
-  /**
-   * Menghapus pesan-pesan tertentu dari sebuah sesi chat (bulk delete).
-   * @param {string} sessionId - UUID sesi
-   * @param {string[]} messageIds - Array UUID pesan yang akan dihapus
-   * @returns {Promise<boolean>} true jika berhasil
-   */
   hapusPesan: async (sessionId, messageIds) => {
     try {
       await axios.delete(`${urls.getBackendUrl()}/api/sessions/${sessionId}/messages`, {
@@ -333,7 +297,7 @@ export const sessionApi = {
       });
       return true;
     } catch (error) {
-      console.error("Terjadi kesalahan saat menghapus pesan:", error);
+
       return false;
     }
   },

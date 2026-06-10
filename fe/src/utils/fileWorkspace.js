@@ -26,7 +26,7 @@ export const normalizeFileUrl = (rawUrl) => {
     return `${SUPABASE_BASE_URL}${cleaned}`
   }
 
-  console.warn('[normalizeFileUrl] Format URL tidak dikenali:', rawUrl)
+
   return null
 }
 

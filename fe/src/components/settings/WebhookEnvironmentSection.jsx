@@ -16,7 +16,7 @@ export default function WebhookEnvironmentSection({ webhookMode, webhookUrl, onM
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy webhook URL:', err);
+      // ignore
     }
   };
 

@@ -47,9 +47,6 @@ const buttonClassName = {
     'inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600',
 };
 
-/**
- * SendDraftModal - confirmation modal showing summary before sending
- */
 function SendDraftModal({ open, draft, onClose, onConfirm, sending }) {
   if (!draft) return null;
 
@@ -101,9 +98,6 @@ function SendDraftModal({ open, draft, onClose, onConfirm, sending }) {
   );
 }
 
-/**
- * DeleteDraftModal - danger confirmation for delete
- */
 function DeleteDraftModal({ open, draft, onClose, onConfirm, deleting }) {
   if (!draft) return null;
 
@@ -149,9 +143,6 @@ function DeleteDraftModal({ open, draft, onClose, onConfirm, deleting }) {
   );
 }
 
-/**
- * ReviseDraftModal - collects revision instructions and sends to AI
- */
 function ReviseDraftModal({ open, draft, onClose, onConfirm, revising }) {
   const [instructions, setInstructions] = useState('');
 
@@ -209,9 +200,6 @@ function ReviseDraftModal({ open, draft, onClose, onConfirm, revising }) {
   );
 }
 
-/**
- * DraftCard Component - Individual draft item
- */
 const DraftCard = ({ draft, onSend, onRevise, onDelete, onSave, saving }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -359,9 +347,6 @@ const DraftCard = ({ draft, onSend, onRevise, onDelete, onSave, saving }) => {
   );
 };
 
-/**
- * DraftsList Component - Display and manage email drafts
- */
 export default function DraftsList({ onRevise }) {
   const { drafts, fetchDrafts, deleteDraft, updateDraft, reviseDraft, loading } = useEmailStore();
 
@@ -386,13 +371,10 @@ export default function DraftsList({ onRevise }) {
         body_html: draft.body_html
       });
     } catch (error) {
-      console.error('Error persisting draft edits:', error);
+      // ignore
     }
   };
 
-  /**
-   * Open send confirmation modal with edited draft
-   */
   const handleSendRequest = (draft, { isDirty } = {}) => {
     setSendModal({ open: true, draft, isDirty });
   };
@@ -402,9 +384,6 @@ export default function DraftsList({ onRevise }) {
     setSendModal({ open: false, draft: null });
   };
 
-  /**
-   * Confirm send - persist manual edits first, then send
-   */
   const handleSendConfirm = async (draft) => {
     setSending(true);
     try {
@@ -457,17 +436,11 @@ export default function DraftsList({ onRevise }) {
 
       setSendModal({ open: false, draft: null });
       await fetchDrafts();
-    } catch (error) {
-      console.error('Error sending draft:', error);
-      throw error;
     } finally {
       setSending(false);
     }
   };
 
-  /**
-   * Open revise modal with edited draft
-   */
   const handleReviseRequest = (draft) => {
     setReviseModal({ open: true, draft });
   };
@@ -477,14 +450,10 @@ export default function DraftsList({ onRevise }) {
     setReviseModal({ open: false, draft: null });
   };
 
-  /**
-   * Confirm revise with AI - also propagates to parent for side-panel
-   */
   const handleReviseConfirm = async (draft, instructions) => {
     setRevising(true);
     try {
       if (sendModal?.isDirty === undefined) {
-        // Persist current edits first so revise uses the edited content
         await persistEdits(draft);
       }
       await reviseDraft(draft.id, instructions);
@@ -492,17 +461,11 @@ export default function DraftsList({ onRevise }) {
       if (onRevise) {
         onRevise(draft);
       }
-    } catch (error) {
-      console.error('Error revising draft:', error);
-      throw error;
     } finally {
       setRevising(false);
     }
   };
 
-  /**
-   * Open delete confirmation modal
-   */
   const handleDeleteRequest = (draft) => {
     setDeleteModal({ open: true, draft });
   };
@@ -512,25 +475,16 @@ export default function DraftsList({ onRevise }) {
     setDeleteModal({ open: false, draft: null });
   };
 
-  /**
-   * Confirm delete
-   */
   const handleDeleteConfirm = async (draftId) => {
     setDeleting(true);
     try {
       await deleteDraft(draftId);
       setDeleteModal({ open: false, draft: null });
-    } catch (error) {
-      console.error('Error deleting draft:', error);
-      throw error;
     } finally {
       setDeleting(false);
     }
   };
 
-  /**
-   * Save manual edits
-   */
   const handleSave = async (draftId, updates) => {
     setSavingDraftId(draftId);
     try {

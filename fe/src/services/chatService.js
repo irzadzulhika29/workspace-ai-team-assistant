@@ -2,7 +2,6 @@ import axios from "axios";
 import { urls, getSessionId } from "./api";
 import { integrationApi } from "./integrationService";
 
-// ─── Helper ──────────────────────────────────────────────────────────────────
 const post = async (getUrl, payload) => {
   const res = await axios.post(getUrl(), payload, {
     timeout: 120_000,
@@ -41,8 +40,6 @@ const appendJiraWebhookContext = (formData, jiraCredentials) => {
   }
 };
 
-// Fetch a fresh Google access token from the backend.
-// Returns null silently if the user hasn't connected Google or if the request fails.
 const fetchGoogleToken = async () => {
   try {
     const res = await axios.get(`${getBackendUrl()}/api/google/token`, {
@@ -88,21 +85,11 @@ const getUserScopedContext = async () => {
   };
 };
 
-// ─── Chat API ─────────────────────────────────────────────────────────────────
 export const chatApi = {
-  /**
-   * Send a message to the Supervisor Agent.
-   * @param {string} message
-   * @param {string} action
-   * @param {string|null} sessionId - Optional explicit session ID
-   * @param {File|null} file - Optional file attachment
-   * @param {{id: string, name: string}|null} selectedDoc - Optional document reference
-   */
   sendToSupervisor: async (message, action = "chat", sessionId = null, file = null, selectedDoc = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
     if (file) {
-      // Create FormData if file is present
       const formData = new FormData();
       formData.append("action", action);
       formData.append("session_id", sessionId || getSessionId());
@@ -110,10 +97,10 @@ export const chatApi = {
       formData.append("user_name", userName);
       formData.append("user_email", userEmail);
       formData.append("user_job_title", userJobTitle);
-      formData.append("message", message || ""); // Message can be empty if sending only a file
+      formData.append("message", message || "");
       formData.append("chat_type", "general_chat");
       formData.append("timestamp", new Date().toISOString());
-      formData.append("file", file); // Add the file
+      formData.append("file", file);
       if (selectedDoc?.id) formData.append("document_id", selectedDoc.id);
       if (selectedDoc?.name) formData.append("document_name", selectedDoc.name);
       if (googleAccessToken) formData.append("google_access_token", googleAccessToken);
@@ -125,7 +112,6 @@ export const chatApi = {
       });
       return res.data;
     } else {
-      // Regular JSON request if no file
       return post(urls.getSupervisor, {
         action,
         session_id: sessionId || getSessionId(),
@@ -145,11 +131,6 @@ export const chatApi = {
     }
   },
 
-  /**
-   * Send email draft (kirim email yang sudah dibuat)
-   * @param {Object} emailDraft - Draft email object with to, subject, message
-   * @param {string|null} sessionId - Optional explicit session ID
-   */
   sendEmail: async (emailDraft, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken } = await getUserScopedContext();
     
@@ -180,12 +161,6 @@ ${bodyHtml}
     });
   },
 
-  /**
-   * Regenerate email draft with improvements
-   * @param {Object} emailDraft - Original draft email
-   * @param {string} improvementText - User's improvement instructions
-   * @param {string|null} sessionId - Optional explicit session ID
-   */
   regenerateEmail: async (emailDraft, improvementText, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
@@ -233,12 +208,6 @@ Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
     });
   },
 
-  /**
-   * Send a message with document context (for Document Q&A)
-   * @param {string} message - User's question
-   * @param {Object} documentContext - Document metadata (id, name, url)
-   * @param {string|null} sessionId - Optional explicit session ID
-   */
   sendMessage: async (message, documentContext = {}, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 
@@ -260,12 +229,6 @@ Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
     });
   },
 
-  /**
-   * Send a message to Document Chat endpoint (dedicated RAG for documents)
-   * @param {string} message - User's question
-   * @param {Object} documentContext - Document metadata (id, name, url)
-   * @param {string|null} sessionId - Optional explicit session ID
-   */
   sendToDocumentChat: async (message, documentContext = {}, sessionId = null) => {
     const { userId, userName, userEmail, userJobTitle, googleAccessToken, jiraCredentials } = await getUserScopedContext();
 

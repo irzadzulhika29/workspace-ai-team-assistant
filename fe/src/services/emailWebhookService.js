@@ -2,35 +2,18 @@ import axios from 'axios';
 import { urls } from './api';
 import { getAuthenticatedUser } from './authService';
 
-/**
- * Email Webhook Service
- * Handles sending email data to n8n webhook for AI draft generation
- */
-
-// Use urls helper to get webhook URL based on settings (follows toggle mode)
 const getWebhookUrl = () => {
-  return urls.getEmail(); // Uses environment and mode from localStorage
+  return urls.getEmail();
 };
 
-/**
- * Get current user info from backend
- * @returns {Promise<Object|null>} User info or null
- */
 const getCurrentUser = async () => {
   try {
     return await getAuthenticatedUser();
   } catch (error) {
-    console.error('Error getting current user:', error);
     return null;
   }
 };
 
-/**
- * Format email data for webhook payload
- * @param {Object} email - Email object from Gmail API
- * @param {Object} user - Current user info
- * @returns {Object} Formatted payload
- */
 export const formatEmailPayload = (email, user = null) => {
   return {
     user_id: user?.id || user?.email || 'unknown',
@@ -52,14 +35,8 @@ export const formatEmailPayload = (email, user = null) => {
   };
 };
 
-/**
- * Send email to webhook for draft generation
- * @param {Object} email - Email object
- * @returns {Promise<Object>} Response from webhook
- */
 export const sendEmailToWebhook = async (email) => {
   try {
-    // Get current user
     const user = await getCurrentUser();
     
     const payload = formatEmailPayload(email, user);
@@ -70,7 +47,7 @@ export const sendEmailToWebhook = async (email) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 30000 // 30 seconds timeout
+      timeout: 30000
     });
 
     return {
@@ -78,9 +55,8 @@ export const sendEmailToWebhook = async (email) => {
       data: response.data
     };
   } catch (error) {
-    console.error('Error sending email to webhook:', error);
+
     
-    // Return error details
     return {
       success: false,
       error: error.response?.data || error.message || 'Failed to send email to webhook'
@@ -88,37 +64,21 @@ export const sendEmailToWebhook = async (email) => {
   }
 };
 
-/**
- * Send email to webhook and get draft from response
- * Note: Webhook n8n already saves draft to Supabase, so we don't need to save again
- * @param {Object} email - Email object
- * @param {Function} fetchDraftsCallback - Callback to refresh drafts list
- * @returns {Promise<Object>} Result
- */
 export const generateDraftFromWebhook = async (email, fetchDraftsCallback) => {
-  try {
-    // Send email to webhook
-    const result = await sendEmailToWebhook(email);
+  const result = await sendEmailToWebhook(email);
 
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-
-
-    // Webhook n8n already saves draft to Supabase
-    // We just need to refresh the drafts list to show the new draft
-    if (fetchDraftsCallback) {
-      await fetchDraftsCallback();
-    }
-
-    return {
-      success: true,
-      webhookResponse: result.data
-    };
-  } catch (error) {
-    console.error('Error generating draft from webhook:', error);
-    throw error;
+  if (!result.success) {
+    throw new Error(result.error);
   }
+
+  if (fetchDraftsCallback) {
+    await fetchDraftsCallback();
+  }
+
+  return {
+    success: true,
+    webhookResponse: result.data
+  };
 };
 
 export default {

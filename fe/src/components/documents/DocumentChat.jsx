@@ -4,10 +4,6 @@ import remarkGfm from 'remark-gfm';
 import { Send, Loader2 } from 'lucide-react';
 import { chatApi } from '../../services/chatService';
 
-/**
- * DocumentChat Component
- * Chat interface for asking questions about a specific document
- */
 export default function DocumentChat({ document }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -22,7 +18,6 @@ export default function DocumentChat({ document }) {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize with welcome message
   useEffect(() => {
     setMessages([
       {
@@ -38,26 +33,23 @@ export default function DocumentChat({ document }) {
     const userMessage = input.trim();
     setInput('');
 
-    // Add user message
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
 
     try {
-      // Send to /chat-document endpoint (dedicated for document Q&A)
       const response = await chatApi.sendToDocumentChat(userMessage, {
         document_id: document.id,
         document_name: document.name,
         document_url: document.url
       });
 
-      // Add AI response (handle {output: "..."} format from /chat-document)
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: response.output || response.message || response.response || 'No response received'
       }]);
 
     } catch (error) {
-      console.error('Error sending message:', error);
+
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `Error: ${error.message || 'Failed to get response'}`
@@ -78,7 +70,6 @@ export default function DocumentChat({ document }) {
     <div className="flex h-full min-h-[24rem] flex-col">
    
 
-      {/* Messages */}
       <div className="custom-scrollbar flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {messages.map((msg, index) => (
           <div
@@ -131,7 +122,6 @@ export default function DocumentChat({ document }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="border-t border-gray-100 p-4 bg-white">
         <div className="flex gap-2">
           <textarea

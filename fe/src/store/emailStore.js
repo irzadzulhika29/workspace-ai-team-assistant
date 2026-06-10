@@ -2,22 +2,15 @@ import { create } from 'zustand';
 import { emailApi } from '../services/emailService';
 import * as emailDraftService from '../services/emailDraftService';
 
-/**
- * Email Store - Zustand state management for email feature
- */
 export const useEmailStore = create((set, get) => ({
-  // Email list state
   emails: [],
   nextPageToken: null,
   resultSizeEstimate: 0,
   
-  // Selected email for detail view
   selectedEmail: null,
   
-  // Drafts state
   drafts: [],
   
-  // Filters
   filters: {
     labelIds: 'INBOX',
     query: '',
@@ -25,24 +18,17 @@ export const useEmailStore = create((set, get) => ({
     starredOnly: false
   },
   
-  // UI state
   loading: false,
   loadingDetail: false,
   error: null,
   composeModalOpen: false,
   
-  /**
-   * Fetch emails from Gmail
-   * @param {Object} options - Query options
-   * @param {boolean} append - If true, append to existing emails (pagination)
-   */
   fetchEmails: async (options = {}, append = false) => {
     set({ loading: true, error: null });
     
     try {
       const { filters } = get();
       
-      // Build query based on filters
       let query = options.query || filters.query || '';
       
       if (filters.unreadOnly && !query.includes('is:unread')) {
@@ -67,7 +53,7 @@ export const useEmailStore = create((set, get) => ({
         loading: false
       });
     } catch (error) {
-      console.error('Error fetching emails:', error);
+
       set({ 
         error: error.response?.data?.error || error.message || 'Failed to fetch emails',
         loading: false 
@@ -75,9 +61,6 @@ export const useEmailStore = create((set, get) => ({
     }
   },
   
-  /**
-   * Load more emails (pagination)
-   */
   loadMoreEmails: async () => {
     const { nextPageToken } = get();
     
@@ -88,10 +71,6 @@ export const useEmailStore = create((set, get) => ({
     await get().fetchEmails({ pageToken: nextPageToken }, true);
   },
   
-  /**
-   * Select and load email detail
-   * @param {string} messageId - Gmail message ID
-   */
   selectEmail: async (messageId) => {
     set({ loadingDetail: true, error: null });
     
@@ -103,11 +82,9 @@ export const useEmailStore = create((set, get) => ({
         loadingDetail: false
       });
       
-      // Mark as read if it's unread
       if (emailDetail.labelIds?.includes('UNREAD')) {
         await emailApi.markAsRead(messageId, true);
         
-        // Update email in list
         const { emails } = get();
         const updatedEmails = emails.map(email => 
           email.id === messageId 
@@ -117,7 +94,7 @@ export const useEmailStore = create((set, get) => ({
         set({ emails: updatedEmails });
       }
     } catch (error) {
-      console.error('Error selecting email:', error);
+
       set({ 
         error: error.response?.data?.error || error.message || 'Failed to load email',
         loadingDetail: false 
@@ -125,17 +102,10 @@ export const useEmailStore = create((set, get) => ({
     }
   },
   
-  /**
-   * Clear selected email (close detail view)
-   */
   clearSelectedEmail: () => {
     set({ selectedEmail: null });
   },
   
-  /**
-   * Send new email
-   * @param {Object} emailData - Email data (to, subject, body, cc, bcc)
-   */
   sendEmail: async (emailData) => {
     set({ loading: true, error: null });
     
@@ -147,12 +117,11 @@ export const useEmailStore = create((set, get) => ({
         composeModalOpen: false
       });
       
-      // Refresh email list
       await get().fetchEmails();
       
       return { success: true };
     } catch (error) {
-      console.error('Error sending email:', error);
+
       set({ 
         error: error.response?.data?.error || error.message || 'Failed to send email',
         loading: false 
@@ -161,16 +130,10 @@ export const useEmailStore = create((set, get) => ({
     }
   },
   
-  /**
-   * Mark email as read/unread
-   * @param {string} messageId - Gmail message ID
-   * @param {boolean} read - True to mark as read
-   */
   markAsRead: async (messageId, read = true) => {
     try {
       await emailApi.markAsRead(messageId, read);
       
-      // Update email in list
       const { emails, selectedEmail } = get();
       const updatedEmails = emails.map(email => {
         if (email.id === messageId) {
@@ -184,7 +147,6 @@ export const useEmailStore = create((set, get) => ({
       
       set({ emails: updatedEmails });
       
-      // Update selected email if it's the same
       if (selectedEmail?.id === messageId) {
         const labelIds = read 
           ? selectedEmail.labelIds.filter(l => l !== 'UNREAD')
@@ -192,15 +154,11 @@ export const useEmailStore = create((set, get) => ({
         set({ selectedEmail: { ...selectedEmail, labelIds } });
       }
     } catch (error) {
-      console.error('Error marking email as read:', error);
+
       set({ error: error.response?.data?.error || error.message });
     }
   },
   
-  /**
-   * Toggle star on email
-   * @param {string} messageId - Gmail message ID
-   */
   toggleStar: async (messageId) => {
     try {
       const { emails } = get();
@@ -209,7 +167,6 @@ export const useEmailStore = create((set, get) => ({
       
       await emailApi.toggleStar(messageId, !isStarred);
       
-      // Update email in list
       const updatedEmails = emails.map(e => {
         if (e.id === messageId) {
           const labelIds = isStarred
@@ -222,7 +179,6 @@ export const useEmailStore = create((set, get) => ({
       
       set({ emails: updatedEmails });
       
-      // Update selected email if it's the same
       const { selectedEmail } = get();
       if (selectedEmail?.id === messageId) {
         const labelIds = isStarred
@@ -231,16 +187,11 @@ export const useEmailStore = create((set, get) => ({
         set({ selectedEmail: { ...selectedEmail, labelIds } });
       }
     } catch (error) {
-      console.error('Error toggling star:', error);
+
       set({ error: error.response?.data?.error || error.message });
     }
   },
   
-  /**
-   * Set filter
-   * @param {string} filterKey - Filter key (labelIds, query, unreadOnly, starredOnly)
-   * @param {any} value - Filter value
-   */
   setFilter: (filterKey, value) => {
     set(state => ({
       filters: {
@@ -249,14 +200,9 @@ export const useEmailStore = create((set, get) => ({
       }
     }));
     
-    // Refresh emails with new filter
     get().fetchEmails();
   },
   
-  /**
-   * Search emails
-   * @param {string} searchQuery - Search query
-   */
   searchEmails: async (searchQuery) => {
     set(state => ({
       filters: {
@@ -268,30 +214,18 @@ export const useEmailStore = create((set, get) => ({
     await get().fetchEmails({ query: searchQuery });
   },
   
-  /**
-   * Open compose modal
-   */
   openComposeModal: () => {
     set({ composeModalOpen: true });
   },
   
-  /**
-   * Close compose modal
-   */
   closeComposeModal: () => {
     set({ composeModalOpen: false });
   },
   
-  /**
-   * Refresh emails (reload current view)
-   */
   refreshEmails: async () => {
     await get().fetchEmails();
   },
 
-  /**
-   * Fetch drafts from Supabase
-   */
   fetchDrafts: async () => {
     set({ loading: true, error: null });
 
@@ -299,7 +233,7 @@ export const useEmailStore = create((set, get) => ({
       const drafts = await emailDraftService.listDrafts({ status: 'draft' });
       set({ drafts, loading: false });
     } catch (error) {
-      console.error('Error fetching drafts:', error);
+
       set({
         error: error.response?.data?.error || error.message || 'Failed to fetch drafts',
         loading: false
@@ -307,48 +241,32 @@ export const useEmailStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Create draft from email reply
-   * @param {Object} draftData - Draft data
-   */
   createDraft: async (draftData) => {
-    try {
-      const draft = await emailDraftService.createDraft(draftData);
-      
-      // Add to local state
-      set(state => ({
-        drafts: [draft, ...state.drafts]
-      }));
+    const draft = await emailDraftService.createDraft(draftData);
+    
+    set(state => ({
+      drafts: [draft, ...state.drafts]
+    }));
 
-      return draft;
-    } catch (error) {
-      console.error('Error creating draft:', error);
-      throw error;
-    }
+    return draft;
   },
 
-  /**
-   * Send draft email
-   * @param {string} draftId - Draft ID
-   */
   sendDraft: async (draftId) => {
     set({ loading: true, error: null });
 
     try {
       const sentDraft = await emailDraftService.sendDraft(draftId);
 
-      // Remove draft from list
       set(state => ({
         drafts: state.drafts.filter(d => d.id !== draftId),
         loading: false
       }));
 
-      // Refresh email list
       await get().fetchEmails();
 
       return { success: true, draft: sentDraft };
     } catch (error) {
-      console.error('Error sending draft:', error);
+
       set({
         error: error.response?.data?.error || error.message || 'Failed to send email',
         loading: false
@@ -357,39 +275,22 @@ export const useEmailStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Update draft fields (manual edits)
-   * @param {string} draftId - Draft ID
-   * @param {Object} updates - Fields to update (subject, to_email, body_text, etc.)
-   * @returns {Promise<Object>} Updated draft
-   */
   updateDraft: async (draftId, updates) => {
-    try {
-      const updatedDraft = await emailDraftService.updateDraft(draftId, updates);
+    const updatedDraft = await emailDraftService.updateDraft(draftId, updates);
 
-      set(state => ({
-        drafts: state.drafts.map(d => (d.id === draftId ? updatedDraft : d))
-      }));
+    set(state => ({
+      drafts: state.drafts.map(d => (d.id === draftId ? updatedDraft : d))
+    }));
 
-      return updatedDraft;
-    } catch (error) {
-      console.error('Error updating draft:', error);
-      throw error;
-    }
+    return updatedDraft;
   },
 
-  /**
-   * Revise draft with AI
-   * @param {string} draftId - Draft ID
-   * @param {string} instructions - Revision instructions
-   */
   reviseDraft: async (draftId, instructions) => {
     set({ loading: true, error: null });
 
     try {
       const revisedDraft = await emailDraftService.reviseDraft(draftId, instructions);
 
-      // Update draft in list
       set(state => ({
         drafts: state.drafts.map(d =>
           d.id === draftId ? revisedDraft : d
@@ -399,7 +300,7 @@ export const useEmailStore = create((set, get) => ({
 
       return { success: true, draft: revisedDraft };
     } catch (error) {
-      console.error('Error revising draft:', error);
+
       set({
         error: error.response?.data?.error || error.message || 'Failed to revise draft',
         loading: false
@@ -408,27 +309,14 @@ export const useEmailStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Delete draft
-   * @param {string} draftId - Draft ID
-   */
   deleteDraft: async (draftId) => {
-    try {
-      await emailDraftService.deleteDraft(draftId);
-      
-      set(state => ({
-        drafts: state.drafts.filter(d => d.id !== draftId)
-      }));
-    } catch (error) {
-      console.error('Error deleting draft:', error);
-      throw error;
-    }
+    await emailDraftService.deleteDraft(draftId);
+    
+    set(state => ({
+      drafts: state.drafts.filter(d => d.id !== draftId)
+    }));
   },
 
-  /**
-   * Get draft by ID
-   * @param {string} draftId - Draft ID
-   */
   getDraft: (draftId) => {
     const { drafts } = get();
     return drafts.find(d => d.id === draftId);

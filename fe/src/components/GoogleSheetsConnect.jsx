@@ -26,13 +26,12 @@ export default function GoogleSheetsConnect() {
         loading: false
       });
     } catch (error) {
-      console.error('Error checking connection status:', error);
+
       setStatus({ connected: false, loading: false, email: null, name: null, picture: null });
     }
   };
 
   const handleConnect = () => {
-    // Open OAuth in popup
     const width = 500;
     const height = 600;
     const left = window.screen.width / 2 - width / 2;
@@ -44,11 +43,10 @@ export default function GoogleSheetsConnect() {
       `width=${width},height=${height},left=${left},top=${top}`
     );
 
-    // Listen for popup close
     const checkPopup = setInterval(() => {
       if (popup.closed) {
         clearInterval(checkPopup);
-        checkConnectionStatus(); // Refresh status
+        checkConnectionStatus();
       }
     }, 500);
   };
@@ -62,7 +60,7 @@ export default function GoogleSheetsConnect() {
       await axios.post('/api/auth/google/disconnect');
       setStatus({ connected: false, email: null, name: null, picture: null, loading: false });
     } catch (error) {
-      console.error('Error disconnecting:', error);
+
       alert('Failed to disconnect. Please try again.');
     }
   };

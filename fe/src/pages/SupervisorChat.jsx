@@ -25,7 +25,6 @@ export default function SupervisorChat() {
   const pendingPromptOverrideRef = useRef(null);
   const processedDashboardNavKeyRef = useRef(null);
 
-  // Reset autoSendProcessed when location changes
   useEffect(() => {
     autoSendProcessed.current = false;
   }, [location.pathname]);
@@ -222,7 +221,6 @@ export default function SupervisorChat() {
     }
   }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
 
-  // Handle send email
   const handleSendEmail = useCallback(async (emailDraft) => {
     setError(null)
 
@@ -257,7 +255,6 @@ export default function SupervisorChat() {
     }
   }, [addSupervisorMessage, activeSupervisorSessionId, syncSupervisorSessions])
 
-  // Handle regenerate email
   const handleRegenerateEmail = useCallback(async (emailDraft, improvementText) => {
     setError(null)
 
@@ -409,29 +406,20 @@ export default function SupervisorChat() {
     syncSupervisorSessions,
   ])
 
-  // Handle auto-send from navigation state (Magic Button from Email, Calendar, or Draft Revision)
   useEffect(() => {
     const autoSendMessage = location.state?.autoSendMessage;
     const emailContext = location.state?.emailContext;
     const draftRevision = location.state?.draftRevision;
     const draft = location.state?.draft;
-    const preFillOnly = location.state?.preFillOnly; // Explicit flag for pre-fill only
+    const preFillOnly = location.state?.preFillOnly;
     const displayContent = location.state?.displayContent;
     const promptCard = location.state?.promptCard;
 
-    console.log('[SupervisorChat] Navigation state:', {
-      autoSendMessage: autoSendMessage ? 'present' : 'none',
-      displayContent: displayContent ? 'present' : 'none',
-      preFillOnly,
-      emailContext: emailContext ? 'present' : 'none',
-      draftRevision,
-      autoSendProcessed: autoSendProcessed.current
-    });
 
-    // Handle pre-filled message (from FileWorkspace or CalendarPage - explicit pre-fill only)
+
     if (autoSendMessage && preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
-      console.log('[SupervisorChat] Pre-filling message:', autoSendMessage.substring(0, 50) + '...');
+
       setPrefilledMessage(displayContent || autoSendMessage);
       pendingPromptOverrideRef.current = {
         rawText: autoSendMessage,
@@ -439,21 +427,17 @@ export default function SupervisorChat() {
         promptCard: promptCard || null,
       };
 
-      // Clear navigation state after a short delay to ensure React has updated
       setTimeout(() => {
         window.history.replaceState({}, document.title);
       }, 100);
       return;
     }
 
-    // Handle draft revision
     if (draftRevision && draft && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
 
-      // Set flag to prevent session reload
       setAutoSending(true);
 
-      // Show draft context in chat
       const draftContext = `Draft yang akan direvisi:\n\nTo: ${draft.to}\nSubject: ${draft.subject}\n\nContent:\n${draft.body_text || draft.body_html || '(No content)'}\n\n---\n\nSilakan berikan instruksi revisi untuk draft ini.`;
 
       addSupervisorMessage({
@@ -461,41 +445,33 @@ export default function SupervisorChat() {
         content: draftContext,
       });
 
-      // Clear flag
       setTimeout(() => setAutoSending(false), 1000);
 
-      // Clear navigation state
       window.history.replaceState({}, document.title);
       return;
     }
 
-    // Handle auto-send message (from Email or other sources without preFillOnly flag)
     if (autoSendMessage && !preFillOnly && !autoSendProcessed.current) {
       autoSendProcessed.current = true;
-      console.log('[SupervisorChat] Auto-sending message');
 
-      // Set flag to prevent session reload
+
       setAutoSending(true);
 
-      // Wait for session history to load, then send
       setTimeout(() => {
         handleSend(autoSendMessage, null, null, {
           displayContent: displayContent || (emailContext ? 'Buatkan draft email balasan yang profesional dan sesuai konteks.' : autoSendMessage),
           forwardedEmail: emailContext,
           promptCard: promptCard || null,
         });
-        // Clear flag after send completes
         setTimeout(() => setAutoSending(false), 2000);
       }, 1500);
 
-      // Clear navigation state to prevent re-sending on refresh
       window.history.replaceState({}, document.title);
     }
   }, [location.state, handleSend, setAutoSending, addSupervisorMessage]);
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-neutral-50">
-      {/* Page header */}
       <div className="sticky top-0 z-20 flex flex-shrink-0 items-center justify-between border-b border-neutral-200 bg-white/95 px-6 py-4 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary-500 shadow-sm">
@@ -526,7 +502,6 @@ export default function SupervisorChat() {
         )}
       </div>
 
-      {/* Message list */}
       <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-6 py-6 space-y-5">
         {supervisorMessages.length === 0 && !loading && (
           <EmptyState
@@ -563,7 +538,6 @@ export default function SupervisorChat() {
                 isSelected ? 'opacity-85' : ''
               }`}
             >
-              {/* Checkbox — muncul saat hover atau jika ada pesan terpilih */}
               <div
                 className={`absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-150 ${
                   isUser ? 'right-0' : 'left-0'
@@ -606,7 +580,6 @@ export default function SupervisorChat() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Floating action bar for bulk delete */}
       {selectedMessageIds.length > 0 && (
         <div className="flex-shrink-0 flex items-center justify-between border-t border-neutral-200 bg-white px-6 py-3">
           <span className="text-sm text-neutral-600">
@@ -634,7 +607,6 @@ export default function SupervisorChat() {
         </div>
       )}
 
-      {/* Input */}
       <MessageInput
         onSend={handleSend}
         disabled={loading}
