@@ -171,6 +171,26 @@ const includesKeyword = (value, keywords) => {
   return keywords.some((keyword) => normalized.includes(keyword));
 };
 
+const issueMatchesSearch = (issue, query) => {
+  if (!query) return true;
+
+  return [
+    issue?._key,
+    issue?._summary,
+    issue?._status,
+    issue?._statusCategoryName,
+    issue?._assignee,
+    issue?._priority,
+    issue?._projectName,
+    issue?._issueType,
+    issue?._reporter,
+    issue?._labels,
+    issue?._dueDate,
+    issue?._updatedAt,
+    getField(issue, "fields.description", "description"),
+  ].some((value) => normalizeText(value).includes(query));
+};
+
 const getStatusCategoryKey = (issue) => {
   const categoryKey = normalizeText(
     getField(
@@ -1325,8 +1345,13 @@ export default function JiraPage() {
     loadIssues();
   }, [jiraCacheKey, jiraSummaryCacheKey, loadIssues]);
 
-  const boardGroups = useMemo(() => buildBoardGroups(issues), [issues]);
-  const metrics = useMemo(() => buildMetrics(issues), [issues]);
+  const normalizedSearchQuery = normalizeText(searchQuery);
+  const filteredIssues = useMemo(
+    () => issues.filter((issue) => issueMatchesSearch(issue, normalizedSearchQuery)),
+    [issues, normalizedSearchQuery],
+  );
+  const boardGroups = useMemo(() => buildBoardGroups(filteredIssues), [filteredIssues]);
+  const metrics = useMemo(() => buildMetrics(filteredIssues), [filteredIssues]);
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
       <div className="space-y-5">
@@ -1371,6 +1396,16 @@ export default function JiraPage() {
             </p>
             <p className="mt-1 text-xs text-slate-500">
               Klik tombol sync untuk menarik data Jira terbaru.
+            </p>
+          </div>
+        ) : filteredIssues.length === 0 ? (
+          <div className="mt-6 rounded-[24px] bg-white px-6 py-16 text-center">
+            <Bug size={30} className="mx-auto text-slate-300" />
+            <p className="mt-4 text-sm font-medium text-slate-700">
+              Tidak ada issue yang cocok dengan pencarian.
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Coba kata kunci lain untuk menampilkan issue Jira.
             </p>
           </div>
         ) : (

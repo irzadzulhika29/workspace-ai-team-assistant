@@ -16,12 +16,50 @@ import DraftRevisionChat from "../components/email/DraftRevisionChat";
 import { emailApi } from "../services/emailService";
 import { generateDraftFromWebhook } from "../services/emailWebhookService";
 
+const normalizeSearchText = (value) => String(value || "").toLowerCase();
+
+const emailMatchesQuery = (email, query) => {
+  if (!query) return true;
+
+  return [
+    email?.from,
+    email?.to,
+    email?.subject,
+    email?.snippet,
+    email?.body,
+    email?.bodyText,
+    email?.body_text,
+    email?.threadId,
+  ]
+    .map(normalizeSearchText)
+    .some((value) => value.includes(query));
+};
+
+const draftMatchesQuery = (draft, query) => {
+  if (!query) return true;
+
+  const source = draft?.source_email_payload || {};
+
+  return [
+    draft?.to_email,
+    draft?.subject,
+    draft?.body_text,
+    draft?.body_html,
+    draft?.source_message_id,
+    draft?.source_thread_id,
+    source?.from,
+    source?.subject,
+    source?.snippet,
+  ]
+    .map(normalizeSearchText)
+    .some((value) => value.includes(query));
+};
+
 export default function EmailPage() {
   const {
     fetchEmails,
     fetchDrafts,
     openComposeModal,
-    searchEmails,
     setFilter,
     selectedEmail,
     emails,
@@ -59,10 +97,15 @@ export default function EmailPage() {
     };
   }, [emails, drafts]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    searchEmails(searchQuery);
-  };
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredEmails = useMemo(
+    () => emails.filter((email) => emailMatchesQuery(email, normalizedSearchQuery)),
+    [emails, normalizedSearchQuery],
+  );
+  const filteredDrafts = useMemo(
+    () => (drafts || []).filter((draft) => draftMatchesQuery(draft, normalizedSearchQuery)),
+    [drafts, normalizedSearchQuery],
+  );
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -143,7 +186,7 @@ export default function EmailPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSearch} className="w-full max-w-[540px]">
+          <form onSubmit={(e) => e.preventDefault()} className="w-full max-w-[540px]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
@@ -273,7 +316,7 @@ export default function EmailPage() {
                   selectedEmail ? "w-96" : "flex-1"
                 }`}
               >
-                <EmailList maxItems={10} unreadOnly={true} />
+                <EmailList maxItems={10} unreadOnly={true} emailsOverride={filteredEmails} />
               </div>
 
               {selectedEmail && (
@@ -301,7 +344,7 @@ export default function EmailPage() {
                   selectedEmail ? "w-96" : "flex-1"
                 }`}
               >
-                <EmailList />
+                <EmailList emailsOverride={filteredEmails} />
               </div>
 
               {selectedEmail && (
@@ -321,7 +364,7 @@ export default function EmailPage() {
                     : "flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
                 }
               >
-                <DraftsList onRevise={handleReviseDraft} />
+                <DraftsList onRevise={handleReviseDraft} draftsOverride={filteredDrafts} />
               </div>
 
               {revisingDraft && (
@@ -344,7 +387,7 @@ export default function EmailPage() {
                 }`}
               >
                 <div className="flex-1 overflow-y-auto">
-                  <EmailList />
+                  <EmailList emailsOverride={filteredEmails} />
                 </div>
               </div>
 

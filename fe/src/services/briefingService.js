@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { urls } from './api';
+import { getWebhookUserIdentity } from './authService';
 
 const api = axios.create({
   baseURL: urls.getBackendUrl(),
@@ -85,7 +86,7 @@ export const refreshBriefingViaWebhook = async () => {
 
   const payload = {
     timestamp: new Date().toISOString(),
-    ...(user?.id && { user_id: user.id, userId: user.id }),
+    ...(await getWebhookUserIdentity(user)),
     ...(googleAccessToken && { google_access_token: googleAccessToken }),
     ...(jiraCredentials && { jira_credentials: jiraCredentials }),
   };

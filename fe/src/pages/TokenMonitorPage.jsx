@@ -64,9 +64,7 @@ const compareValues = (firstValue, secondValue, direction) => {
 const getSortableValue = (row, column) => {
   switch (column) {
     case 'workflow':
-      return row.workflow_name || row.workflow_id || ''
-    case 'model':
-      return row.llm_model || ''
+      return row.workflow_name || ''
     case 'input':
       return row.input_tokens || 0
     case 'completion':
@@ -109,7 +107,7 @@ const summaryCards = (summary) => [
     label: 'Completion Tokens',
     value: formatNumber(summary.totalCompletionTokens),
     icon: Cpu,
-    caption: 'Akumulasi completion token model',
+    caption: 'Akumulasi completion token',
   },
 ]
 
@@ -163,8 +161,6 @@ export default function TokenMonitorPage() {
       const searchable = [
         row.execution_id,
         row.workflow_name,
-        row.workflow_id,
-        row.llm_model,
         row.timestamp,
       ]
         .filter(Boolean)
@@ -197,7 +193,7 @@ export default function TokenMonitorPage() {
               </h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Pantau penggunaan token model LLM per workflow dari telemetry Supabase.
+              Pantau penggunaan token LLM per workflow dari telemetry Supabase.
             </p>
           </div>
 
@@ -208,7 +204,7 @@ export default function TokenMonitorPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Cari workflow, execution ID, atau model..."
+                placeholder="Cari workflow atau execution ID..."
                 className="h-auto w-full rounded-2xl bg-white px-4 py-4 pl-14 pr-16 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#ff623d]/20"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500">
@@ -306,9 +302,6 @@ export default function TokenMonitorPage() {
                       <Column id="workflow" isRowHeader allowsSorting>
                         Workflow
                       </Column>
-                      <Column id="model" allowsSorting>
-                        Model
-                      </Column>
                       <Column id="input" allowsSorting>
                         Input
                       </Column>
@@ -337,14 +330,9 @@ export default function TokenMonitorPage() {
                                   {row.workflow_name || 'Tanpa nama workflow'}
                                 </p>
                                 <p className="mt-1 truncate text-xs text-slate-500">
-                                  {row.workflow_id || row.execution_id}
+                                  Eksekusi {row.execution_id || '-'}
                                 </p>
                               </div>
-                            </Cell>
-                            <Cell>
-                              <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                                {row.llm_model || '-'}
-                              </span>
                             </Cell>
                             <Cell className="text-sm text-slate-700">
                               {formatNumber(row.input_tokens)}

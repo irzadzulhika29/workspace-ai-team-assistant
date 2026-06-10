@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { urls } from '../../services/api';
-import { getAuthenticatedUser } from '../../services/authService';
+import { getAuthenticatedUser, getWebhookUserIdentity } from '../../services/authService';
 
 const getCurrentUser = async () => {
   try {
@@ -97,8 +97,9 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
       }
 
       const webhookUrl = urls.getEmailSummary();
+      const userIdentity = await getWebhookUserIdentity(user);
       const payload = {
-        user_id: user.id,
+        ...userIdentity,
         google_access_token: googleAccessToken
       };
 
@@ -273,7 +274,7 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
                 return (
                 <li
                   key={`${actionId}-${index}`}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-slate-300 bg-white px-3.5 py-3"
+                  className="rounded-2xl border border-slate-300 bg-white px-3.5 py-3"
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <span
@@ -287,20 +288,24 @@ export default function Top5EmailSummary({ refreshTrigger = 0, onReplyAction }) 
                     >
                       <ListTodo size={18} />
                     </span>
-                    <span className="text-sm leading-6 text-slate-800">{recText}</span>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {isReplyCandidate && (
-                      <button
-                        type="button"
-                        onClick={() => handleReplyClick(action, index)}
-                        disabled={replyingActionId === actionId}
-                        className="rounded-xl border border-[#ff623d] px-3 py-1 text-xs font-semibold text-[#ff623d] transition-colors hover:bg-[#fff4ef] disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {replyingActionId === actionId ? 'Creating...' : 'Reply Email'}
-                      </button>
-                    )}
-                    <ChevronRight size={18} className="text-[#f59b70]" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm leading-6 text-slate-800">{recText}</span>
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        {isReplyCandidate ? (
+                          <button
+                            type="button"
+                            onClick={() => handleReplyClick(action, index)}
+                            disabled={replyingActionId === actionId}
+                            className="rounded-xl border border-[#ff623d] px-3 py-1 text-xs font-semibold text-[#ff623d] transition-colors hover:bg-[#fff4ef] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {replyingActionId === actionId ? 'Creating...' : 'Reply Email'}
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+                        <ChevronRight size={18} className="shrink-0 text-[#f59b70]" />
+                      </div>
+                    </div>
                   </div>
                 </li>
               )})}

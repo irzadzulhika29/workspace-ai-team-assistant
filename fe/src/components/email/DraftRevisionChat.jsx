@@ -3,7 +3,7 @@ import { X, Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 import { urls } from '../../services/api';
-import { getAuthenticatedUser } from '../../services/authService';
+import { getAuthenticatedUser, getWebhookUserIdentity } from '../../services/authService';
 import { useEmailStore } from '../../store/emailStore';
 
 export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
@@ -58,10 +58,13 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
       const webhookUrl = urls.getEmail();
 
       const currentUser = await getAuthenticatedUser();
-      const userId = currentUser?.id || currentUser?.email || 'unknown';
+      const userIdentity = await getWebhookUserIdentity(currentUser);
+      if (!userIdentity.user_id) {
+        throw new Error('User not authenticated');
+      }
 
       const payload = {
-        user_id: userId,
+        ...userIdentity,
         draft_id: draft.id,
         action: 'revise',
         revision_instructions: userMessage,

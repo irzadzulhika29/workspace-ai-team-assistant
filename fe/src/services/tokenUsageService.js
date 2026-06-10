@@ -6,6 +6,7 @@ export const tokenUsageApi = {
     try {
       const res = await axios.get(`${urls.getBackendUrl()}/api/token-usage`, {
         params: { limit, ...options },
+        withCredentials: true,
       })
       return res.data
     } catch (error) {

@@ -7,14 +7,14 @@ import { useEmailStore } from '../../store/emailStore';
  * @param {number} maxItems - Maximum number of items to display
  * @param {boolean} unreadOnly - Show only unread emails
  */
-export default function EmailList({ maxItems, unreadOnly = false }) {
+export default function EmailList({ maxItems, unreadOnly = false, emailsOverride = null }) {
   const { emails, loading, selectedEmail, selectEmail, toggleStar } = useEmailStore();
 
   // Filter emails based on props
-  let displayEmails = emails;
+  let displayEmails = Array.isArray(emailsOverride) ? emailsOverride : emails;
   
   if (unreadOnly) {
-    displayEmails = emails.filter(email => email.labelIds?.includes('UNREAD'));
+    displayEmails = displayEmails.filter(email => email.labelIds?.includes('UNREAD'));
   }
   
   if (maxItems) {

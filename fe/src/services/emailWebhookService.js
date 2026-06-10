@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { urls } from './api';
-import { getAuthenticatedUser } from './authService';
+import { getAuthenticatedUser, getWebhookUserIdentity } from './authService';
 
 const getWebhookUrl = () => {
   return urls.getEmail();
@@ -15,8 +15,10 @@ const getCurrentUser = async () => {
 };
 
 export const formatEmailPayload = (email, user = null) => {
+  const userId = user?.id || '';
+
   return {
-    user_id: user?.id || user?.email || 'unknown',
+    ...(userId && { user_id: userId, userId }),
     user_name: user?.name || 'Unknown User',
     id: email.id,
     threadId: email.threadId,
@@ -38,8 +40,12 @@ export const formatEmailPayload = (email, user = null) => {
 export const sendEmailToWebhook = async (email) => {
   try {
     const user = await getCurrentUser();
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
     
     const payload = formatEmailPayload(email, user);
+    Object.assign(payload, await getWebhookUserIdentity(user));
     const webhookUrl = getWebhookUrl();
     
 

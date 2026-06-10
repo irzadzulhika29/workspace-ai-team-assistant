@@ -1276,19 +1276,20 @@ export default function CalendarPage() {
   const hasConflicts = Boolean(aiSummary?.source_metrics?.has_conflict);
 
   const metrics = useMemo(() => {
-    const withMeetCount = filteredEvents.filter((event) => event.hangoutLink).length;
-    const ongoingCount = filteredEvents.filter(
+    const visibleEvents = [...todayEvents, ...upcomingEvents];
+    const withMeetCount = visibleEvents.filter((event) => event.hangoutLink).length;
+    const ongoingCount = visibleEvents.filter(
       (event) => getEventStatus(event) === "ongoing",
     ).length;
 
     return {
-      total: filteredEvents.length,
+      total: todayEvents.length + upcomingEvents.length,
       today: todayEvents.length,
       upcoming: upcomingEvents.length,
       withMeet: withMeetCount,
       ongoing: ongoingCount,
     };
-  }, [filteredEvents, todayEvents, upcomingEvents]);
+  }, [todayEvents, upcomingEvents]);
 
   const handleEventSelect = (event) => {
     setSelectedEvent(event);
@@ -1466,7 +1467,7 @@ export default function CalendarPage() {
         <MetricCard
           title="All Events"
           value={metrics.total}
-          description="Seluruh event dari hasil sinkronisasi"
+          description="Total agenda hari ini dan yang akan datang"
         />
         <MetricCard
           title="Today"

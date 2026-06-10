@@ -16,6 +16,7 @@ import {
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { urls, tokenUsageApi } from "../services/api";
+import { getWebhookUserIdentity } from "../services/authService";
 import { calendarApi } from "../services/calendarService";
 import { JIRA_ERROR_CODES, jiraApi } from "../services/jiraService";
 import { emailApi } from "../services/emailService";
@@ -390,6 +391,7 @@ const buildActionPromptWithAgendaContext = (action, event) => {
   const contextBlock = `Konteks agenda lengkap:\n${eventDetails}`;
 
   if (!basePrompt) return contextBlock;
+  if (/Konteks agenda lengkap:/i.test(basePrompt)) return basePrompt;
   if (basePrompt.includes(eventDetails)) return basePrompt;
   return `${basePrompt}\n\n${contextBlock}`;
 };
@@ -1052,13 +1054,16 @@ export default function Dashboard() {
         // ignore
       }
 
+      const userIdentity = await getWebhookUserIdentity(
+        user?.id ? { id: user.id } : null,
+      );
       const response = await fetch(urls.getBriefings(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...(user?.id && { user_id: user.id, userId: user.id }),
+          ...userIdentity,
           google_access_token: googleAccessToken,
           jira_auth_base64: jiraAuthBase64,
           jira_subdomain: jiraSubdomain,
@@ -1782,10 +1787,6 @@ export default function Dashboard() {
                         ))}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="mt-3 rounded-xl border border-primary-100 bg-primary-50/45 px-3 py-2 text-xs text-neutral-600">
-                    Persentase batang dihitung dari total input + completion token per hari terhadap limit 1M token di bulan {tokenMonthLabel}.
                   </div>
                 </div>
               </>

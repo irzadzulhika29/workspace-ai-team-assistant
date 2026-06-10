@@ -25,6 +25,20 @@ export const getAuthenticatedUser = async () => {
   return status?.authenticated ? status.user : null;
 };
 
+export const getWebhookUserIdentity = async (fallbackUser = null) => {
+  const user = fallbackUser?.id ? fallbackUser : await getAuthenticatedUser();
+  const userId = user?.id || "";
+
+  if (!userId) {
+    return {};
+  }
+
+  return {
+    user_id: userId,
+    userId,
+  };
+};
+
 export const exchangeSupabaseSession = async (session) => {
   const accessToken = session?.access_token;
 

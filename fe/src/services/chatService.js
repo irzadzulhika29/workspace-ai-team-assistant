@@ -94,6 +94,7 @@ export const chatApi = {
       formData.append("action", action);
       formData.append("session_id", sessionId || getSessionId());
       formData.append("user_id", userId);
+      formData.append("userId", userId);
       formData.append("user_name", userName);
       formData.append("user_email", userEmail);
       formData.append("user_job_title", userJobTitle);
@@ -116,6 +117,7 @@ export const chatApi = {
         action,
         session_id: sessionId || getSessionId(),
         user_id: userId,
+        userId,
         user_name: userName,
         user_email: userEmail,
         user_job_title: userJobTitle,
@@ -151,6 +153,7 @@ ${bodyHtml}
       action: "send_email",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      userId,
       user_name: userName,
       user_email: userEmail,
       user_job_title: userJobTitle,
@@ -197,6 +200,7 @@ Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      userId,
       user_name: userName,
       user_email: userEmail,
       user_job_title: userJobTitle,
@@ -215,6 +219,7 @@ Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      userId,
       user_name: userName,
       user_email: userEmail,
       user_job_title: userJobTitle,
@@ -236,6 +241,7 @@ Tolong hasilkan draft email revisi final berdasarkan draft di atas.`;
       action: "chat",
       session_id: sessionId || getSessionId(),
       user_id: userId,
+      userId,
       user_name: userName,
       user_email: userEmail,
       user_job_title: userJobTitle,

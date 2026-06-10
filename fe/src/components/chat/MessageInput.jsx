@@ -135,7 +135,7 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
         </div>
       )}
 
-      <div className="flex items-end gap-3">
+      <div className="flex items-center gap-3">
         <div className="relative flex-shrink-0" ref={docPickerRef}>
           <button
             type="button"
@@ -143,18 +143,18 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
             disabled={disabled}
             title="Pilih dokumen dari workspace"
             className={`
-              flex h-11 w-11 items-center justify-center rounded-xl border transition-colors duration-150
+              flex h-12 w-12 items-center justify-center rounded-2xl border transition-colors duration-150
               ${docPickerOpen
                 ? 'border-primary-400 bg-primary-50 text-primary-600'
                 : 'border-neutral-200 bg-white text-neutral-500'}
               ${disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500'}
             `}
           >
-            <Files size={18} />
+            <Files size={19} />
           </button>
 
           {docPickerOpen && (
-            <div className="absolute bottom-14 left-0 z-50 w-72 rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-fade-in overflow-hidden">
+            <div className="absolute bottom-16 left-0 z-50 w-72 rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-fade-in overflow-hidden">
               <div className="border-b border-neutral-100 px-3 py-2.5">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">Dokumen Workspace</p>
                 <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-1.5">
@@ -224,17 +224,17 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
             <label
               htmlFor="file-upload"
               className={`
-                flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-500
+                flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-500
                 transition-colors duration-150
                 ${disabled ? 'cursor-not-allowed opacity-50 hover:bg-white hover:text-neutral-500' : 'hover:border-primary-200 hover:bg-primary-50 hover:text-primary-500'}
               `}
             >
-              <Paperclip size={18} />
+              <Paperclip size={19} />
             </label>
           </div>
         )}
 
-        <div className="flex-1 rounded-[1.25rem] border border-neutral-200 bg-white px-4 py-2 shadow-sm transition-all duration-150 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20">
+        <div className="flex min-h-12 flex-1 items-center rounded-[1.35rem] border border-neutral-200 bg-white px-4 py-0 shadow-sm transition-all duration-150 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20">
           <textarea
             ref={textareaRef}
             value={value}
@@ -243,7 +243,7 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="custom-scrollbar min-h-[44px] w-full resize-none bg-transparent py-0.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="custom-scrollbar max-h-40 min-h-5 w-full resize-none bg-transparent py-0 text-sm leading-5 text-neutral-800 placeholder:text-neutral-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             style={{ maxHeight: '160px' }}
           />
         </div>
@@ -252,10 +252,10 @@ export default function MessageInput({ onSend, disabled = false, placeholder = '
           onClick={handleSend}
           disabled={disabled || (!value.trim() && !selectedFile)}
           size="icon"
-          className="h-11 w-11 flex-shrink-0 rounded-xl"
+          className="h-12 w-12 flex-shrink-0 rounded-2xl"
           aria-label="Kirim pesan"
         >
-          <Send size={16} />
+          <Send size={19} />
         </Button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { Send, Edit3, Trash2, Mail, Clock, Save, Check, AlertTriangle, Sparkles 
 import { useEmailStore } from '../../store/emailStore';
 import axios from 'axios';
 import { urls } from '../../services/api';
-import { getAuthenticatedUser } from '../../services/authService';
+import { getAuthenticatedUser, getWebhookUserIdentity } from '../../services/authService';
 import { Modal, Button } from '@/components/ui';
 
 const htmlToPlainText = (html) =>
@@ -347,8 +347,9 @@ const DraftCard = ({ draft, onSend, onRevise, onDelete, onSave, saving }) => {
   );
 };
 
-export default function DraftsList({ onRevise }) {
+export default function DraftsList({ onRevise, draftsOverride = null }) {
   const { drafts, fetchDrafts, deleteDraft, updateDraft, reviseDraft, loading } = useEmailStore();
+  const displayDrafts = Array.isArray(draftsOverride) ? draftsOverride : drafts;
 
   const [savingDraftId, setSavingDraftId] = useState(null);
   const [sendModal, setSendModal] = useState({ open: false, draft: null });
@@ -393,7 +394,10 @@ export default function DraftsList({ onRevise }) {
 
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
       const currentUser = await getAuthenticatedUser();
-      const userId = currentUser?.id || currentUser?.email || 'unknown';
+      const userIdentity = await getWebhookUserIdentity(currentUser);
+      if (!userIdentity.user_id) {
+        throw new Error('User not authenticated');
+      }
 
       const tokenResponse = await axios.get(`${backendUrl}/api/google/token`, {
         withCredentials: true
@@ -412,7 +416,7 @@ export default function DraftsList({ onRevise }) {
       const webhookUrl = urls.getEmail();
 
       const payload = {
-        user_id: userId,
+        ...userIdentity,
         draft_id: draft.id,
         action: 'send',
         current_draft: {
@@ -506,13 +510,19 @@ export default function DraftsList({ onRevise }) {
     );
   }
 
-  if (!drafts || drafts.length === 0) {
+  if (!displayDrafts || displayDrafts.length === 0) {
     return (
       <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center p-6 text-gray-500">
         <div className="text-center">
           <Mail className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p className="text-lg font-medium">No drafts yet</p>
-          <p className="text-sm">Use &quot;Magic Reply&quot; to create AI-powered email drafts</p>
+          <p className="text-lg font-medium">
+            {Array.isArray(draftsOverride) ? "No matching drafts" : "No drafts yet"}
+          </p>
+          <p className="text-sm">
+            {Array.isArray(draftsOverride)
+              ? "Try a different search keyword"
+              : "Use \"Magic Reply\" to create AI-powered email drafts"}
+          </p>
         </div>
       </div>
     );
@@ -523,13 +533,13 @@ export default function DraftsList({ onRevise }) {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Email Drafts</h2>
         <p className="text-sm text-gray-600">
-          {drafts.length} draft{drafts.length !== 1 ? 's' : ''} ready to send
+          {displayDrafts.length} draft{displayDrafts.length !== 1 ? 's' : ''} ready to send
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
         <div className="grid grid-cols-1 gap-4">
-          {drafts.map((draft) => (
+          {displayDrafts.map((draft) => (
             <DraftCard
               key={draft.id}
               draft={draft}

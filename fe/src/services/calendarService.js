@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { urls } from './api'
+import { getWebhookUserIdentity } from './authService'
 
 const buildCalendarParams = () => {
   const startDate = new Date()
@@ -23,6 +24,7 @@ const buildCalendarParams = () => {
 export const calendarApi = {
   fetchCalendarEvents: async () => {
     let accessToken = null
+    let userIdentity = {}
     try {
       const tokenResponse = await axios.get(`${urls.getBackendUrl()}/api/google/token`, {
         withCredentials: true,
@@ -32,6 +34,11 @@ export const calendarApi = {
     } catch {
       // ignore
     }
+    try {
+      userIdentity = await getWebhookUserIdentity()
+    } catch {
+      userIdentity = {}
+    }
 
     const [eventsResponse, summaryResponse] = await Promise.all([
       axios.get(`${urls.getBackendUrl()}/api/google/calendar`, {
@@ -40,6 +47,7 @@ export const calendarApi = {
         timeout: 15_000,
       }),
       accessToken ? axios.post(urls.getCalendar(), {
+        ...userIdentity,
         access_token: accessToken,
         timestamp: new Date().toISOString(),
       }, {

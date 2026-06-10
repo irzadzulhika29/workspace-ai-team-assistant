@@ -39,3 +39,7 @@ Thumbs.db
 credential/
 
 .codex
+
+docs/
+
+.husky

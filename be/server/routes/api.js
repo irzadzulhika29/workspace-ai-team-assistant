@@ -197,6 +197,7 @@ router.post('/token-usage', async (req, res) => {
       input_tokens,
       completion_tokens,
       execution_time,
+      user_id,
     } = req.body;
 
     if (
@@ -220,6 +221,10 @@ router.post('/token-usage', async (req, res) => {
       input_tokens,
       completion_tokens,
     };
+
+    if (user_id !== undefined && user_id !== null) {
+      payload.user_id = String(user_id).trim() || null;
+    }
 
     if (timestamp) {
       payload.timestamp = timestamp;
@@ -251,7 +256,7 @@ router.post('/token-usage', async (req, res) => {
 });
 
 // Get token usage summary and recent execution logs
-router.get('/token-usage', async (req, res) => {
+router.get('/token-usage', requireAuth, async (req, res) => {
   try {
     const requestedLimit = Number.parseInt(req.query.limit, 10);
     const limit = Number.isInteger(requestedLimit)
@@ -269,6 +274,8 @@ router.get('/token-usage', async (req, res) => {
     }
 
     const filterSegments = [];
+    filterSegments.push(`user_id=eq.${encodeFilterValue(req.user.id)}`);
+
     if (periodStart) {
       filterSegments.push(`timestamp=gte.${encodeURIComponent(periodStart.toISOString())}`);
     }
@@ -278,8 +285,8 @@ router.get('/token-usage', async (req, res) => {
 
     const filterQuery = filterSegments.length ? `&${filterSegments.join('&')}` : '';
 
-    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens,execution_time&order=timestamp.desc&limit=${limit}${filterQuery}`;
-    const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens,timestamp${filterQuery}`;
+    const recentUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=id,execution_id,timestamp,workflow_id,workflow_name,llm_model,input_tokens,completion_tokens,execution_time,user_id&order=timestamp.desc&limit=${limit}${filterQuery}`;
+    const summaryUrl = `${process.env.SUPABASE_URL}/rest/v1/execution_token_usage?select=workflow_id,workflow_name,input_tokens,completion_tokens,timestamp,user_id${filterQuery}`;
 
     const [recentResponse, summaryResponse] = await Promise.all([
       fetch(recentUrl, {
