@@ -103,16 +103,6 @@ export const sendDraft = async (draftId) => {
   return response.data.draft;
 };
 
-export const reviseDraft = async (draftId, revisionNote) => {
-  const response = await axios.post(
-    `${backendUrl}/api/email/drafts/${draftId}/revise`,
-    { revision_note: revisionNote },
-    { withCredentials: true }
-  );
-
-  return response.data.draft;
-};
-
 export default {
   listDrafts,
   getDraft,
@@ -120,6 +110,5 @@ export default {
   updateDraft,
   deleteDraft,
   sendDraft,
-  reviseDraft,
   getCurrentUserId
 };

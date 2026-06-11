@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { X, Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
@@ -142,7 +144,15 @@ export default function DraftRevisionChat({ draft, onClose, onDraftUpdated }) {
               }`}
             >
               {msg.content && (
-                <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
+                msg.role === 'user' ? (
+                  <div className="whitespace-pre-wrap text-sm">{msg.content}</div>
+                ) : (
+                  <div className="prose prose-sm max-w-none prose-p:my-1 prose-strong:font-semibold prose-strong:text-gray-900">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+                )
               )}
               {msg.htmlContent && (
                 <div

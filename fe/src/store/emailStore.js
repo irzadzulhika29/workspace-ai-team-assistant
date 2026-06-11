@@ -285,30 +285,6 @@ export const useEmailStore = create((set, get) => ({
     return updatedDraft;
   },
 
-  reviseDraft: async (draftId, instructions) => {
-    set({ loading: true, error: null });
-
-    try {
-      const revisedDraft = await emailDraftService.reviseDraft(draftId, instructions);
-
-      set(state => ({
-        drafts: state.drafts.map(d =>
-          d.id === draftId ? revisedDraft : d
-        ),
-        loading: false
-      }));
-
-      return { success: true, draft: revisedDraft };
-    } catch (error) {
-
-      set({
-        error: error.response?.data?.error || error.message || 'Failed to revise draft',
-        loading: false
-      });
-      throw error;
-    }
-  },
-
   deleteDraft: async (draftId) => {
     await emailDraftService.deleteDraft(draftId);
     

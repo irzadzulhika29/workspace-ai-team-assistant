@@ -8,6 +8,8 @@ import AgentCard from '../ui/AgentCard'
 import SourceCitation from './SourceCitation'
 
 const MARKDOWN_SYNTAX_RE = /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>\s)|\|.*\||```|\*\*|__/
+const SEND_EMAIL_PROMPT_RE =
+  /^KIRIMKAN SEKARANG email lengkap dibawah ini ke alamat:\s*(.+?)\r?\n\r?\n---\r?\nSUBJECT:\s*(.+?)\r?\n\r?\n([\s\S]*?)\r?\n---\s*$/i
 
 const normalizeAiContent = (content) => {
   if (typeof content !== 'string' || content.length === 0) {
@@ -24,6 +26,23 @@ const normalizeAiContent = (content) => {
     .join('  \n')
 }
 
+const parseSendEmailPrompt = (content) => {
+  if (typeof content !== 'string') {
+    return null
+  }
+
+  const match = content.trim().match(SEND_EMAIL_PROMPT_RE)
+  if (!match) {
+    return null
+  }
+
+  return {
+    to: match[1].trim(),
+    subject: match[2].trim(),
+    message: match[3].trim(),
+  }
+}
+
 /**
  * ChatBubble — renders a single chat message (user or AI)
  * @param {import('../../store/chatStore').ChatMessage} props.message
@@ -32,6 +51,10 @@ const normalizeAiContent = (content) => {
  */
 function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
   const isUser = message.role === 'user'
+  const sendEmailPreview = useMemo(
+    () => (isUser ? parseSendEmailPrompt(message.content) : null),
+    [isUser, message.content],
+  )
 
   const renderedAiContent = useMemo(
     () => (isUser ? '' : normalizeAiContent(message.content)),
@@ -59,7 +82,9 @@ function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
 
   const roleLabel = isUser ? 'You' : (message.agentUsed ? `${message.agentUsed} agent` : 'Supervisor Agent')
   const bubbleClassName = isUser
-    ? 'bg-primary-500 text-white rounded-[1.4rem] rounded-br-md shadow-stat'
+    ? sendEmailPreview
+      ? 'border border-neutral-200 bg-white text-neutral-800 rounded-[1.4rem] rounded-br-md shadow-sm'
+      : 'bg-primary-500 text-white rounded-[1.4rem] rounded-br-md shadow-stat'
     : 'border border-neutral-200 bg-white text-neutral-800 rounded-[1.4rem] rounded-bl-md shadow-sm'
 
   return (
@@ -82,7 +107,28 @@ function ChatBubble({ message, onSendEmail, onRegenerateEmail }) {
         <div className={`px-4 py-3 text-sm leading-relaxed ${bubbleClassName}`}>
           {isUser ? (
             <div className="space-y-3">
-              <p className="whitespace-pre-wrap break-words text-white">{message.content}</p>
+              {sendEmailPreview ? (
+                <section className="w-fit max-w-md rounded-xl border border-white/20 bg-white px-4 py-3 text-left text-neutral-800 shadow-sm">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary-600">
+                    <Mail size={14} />
+                    Email siap dikirim
+                  </div>
+                  <dl className="mt-3 space-y-2 text-xs">
+                    <div className="flex gap-3">
+                      <dt className="w-14 flex-shrink-0 font-semibold text-neutral-500">To</dt>
+                      <dd className="min-w-0 break-words text-neutral-800">{sendEmailPreview.to}</dd>
+                    </div>
+                    <div className="flex gap-3">
+                      <dt className="w-14 flex-shrink-0 font-semibold text-neutral-500">Subject</dt>
+                      <dd className="min-w-0 break-words font-medium text-neutral-900">
+                        {sendEmailPreview.subject}
+                      </dd>
+                    </div>
+                  </dl>
+                </section>
+              ) : (
+                <p className="whitespace-pre-wrap break-words text-white">{message.content}</p>
+              )}
               {message.forwardedEmail && (
                 <Card className="rounded-xl border-white/15 bg-white/10 shadow-none hover:shadow-none">
                   <CardContent className="space-y-2 px-3 py-3">

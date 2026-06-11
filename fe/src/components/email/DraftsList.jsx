@@ -348,7 +348,7 @@ const DraftCard = ({ draft, onSend, onRevise, onDelete, onSave, saving }) => {
 };
 
 export default function DraftsList({ onRevise, draftsOverride = null }) {
-  const { drafts, fetchDrafts, deleteDraft, updateDraft, reviseDraft, loading } = useEmailStore();
+  const { drafts, fetchDrafts, deleteDraft, updateDraft, loading } = useEmailStore();
   const displayDrafts = Array.isArray(draftsOverride) ? draftsOverride : drafts;
 
   const [savingDraftId, setSavingDraftId] = useState(null);
@@ -457,13 +457,44 @@ export default function DraftsList({ onRevise, draftsOverride = null }) {
   const handleReviseConfirm = async (draft, instructions) => {
     setRevising(true);
     try {
-      if (sendModal?.isDirty === undefined) {
-        await persistEdits(draft);
+      await persistEdits(draft);
+
+      const currentUser = await getAuthenticatedUser();
+      const userIdentity = await getWebhookUserIdentity(currentUser);
+      if (!userIdentity.user_id) {
+        throw new Error('User not authenticated');
       }
-      await reviseDraft(draft.id, instructions);
+
+      await axios.post(
+        urls.getEmail(),
+        {
+          ...userIdentity,
+          draft_id: draft.id,
+          action: 'revise',
+          revision_instructions: instructions,
+          current_draft: {
+            to: draft.to_email,
+            subject: draft.subject,
+            body_text: draft.body_text,
+            body_html: draft.body_html
+          },
+          source_email: draft.source_email_payload || {}
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000
+        }
+      );
+
+      await fetchDrafts();
       setReviseModal({ open: false, draft: null });
+
       if (onRevise) {
-        onRevise(draft);
+        const updatedDraft = useEmailStore
+          .getState()
+          .drafts
+          .find((item) => item.id === draft.id);
+        onRevise(updatedDraft || draft);
       }
     } finally {
       setRevising(false);

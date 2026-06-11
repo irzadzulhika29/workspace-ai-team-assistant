@@ -361,7 +361,7 @@ export default function EmailPage() {
                 className={
                   revisingDraft
                     ? "flex h-full min-h-0 w-1/2 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
-                    : "flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
+                    : "flex h-full min-h-0 w-1/2 flex-col overflow-hidden rounded-[20px] bg-white shadow-md"
                 }
               >
                 <DraftsList onRevise={handleReviseDraft} draftsOverride={filteredDrafts} />
