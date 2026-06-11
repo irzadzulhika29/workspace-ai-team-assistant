@@ -8,7 +8,6 @@ import {
   Globe,
   HelpCircle,
   Mail,
-  Sparkles,
   Users,
   X,
 } from 'lucide-react';
@@ -25,153 +24,44 @@ export default function LandingPage() {
 
   const features = [
     {
-      title: 'Supervisor Agent',
-      desc: 'Mengawasi alur kerja tim dan memberikan rekomendasi prioritas tugas secara cerdas.',
+      title: 'Dashboard Workspace',
+      desc: 'Lihat briefing harian, agenda terdekat, progres pekerjaan, dan rekomendasi prioritas dari seluruh workspace dalam satu command center.',
       icon: <Activity className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center">
-          {/* Radar Scanning Visual */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(232,67,34,0.15)_0%,transparent_70%)]" />
-          <div className="relative w-28 h-28 border border-[#ff623d]/20 rounded-full flex items-center justify-center">
-            <div className="w-20 h-20 border border-[#ff623d]/30 rounded-full flex items-center justify-center">
-              <div className="w-10 h-10 border border-[#ff623d]/40 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-[#ff623d] rounded-full animate-ping" />
-              </div>
-            </div>
-            {/* Scanning line */}
-            <div className="absolute inset-0 border-t-2 border-[#ff623d]/60 rounded-full animate-spin [animation-duration:4s]" />
-            {/* Blips */}
-            <div className="absolute top-4 left-6 w-1.5 h-1.5 bg-[#ff623d] rounded-full animate-pulse" />
-            <div className="absolute bottom-6 right-8 w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse [animation-delay:1s]" />
-            <div className="absolute top-10 right-4 w-2 h-2 bg-[#ff623d] rounded-full animate-pulse [animation-delay:0.5s]" />
-          </div>
-        </div>
-      ),
+      agent: 'Supervisor Agent',
+      image: '/feature/aidashboard.png',
+      span: 'lg:col-span-2',
     },
     {
-      title: 'Knowledge Agent',
-      desc: 'Akses cepat ke dokumentasi internal dan pengetahuan korporat tanpa harus mencari manual.',
-      icon: <Sparkles className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center">
-          {/* Connected Network Nodes */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
-          <svg className="w-32 h-32 text-slate-700" viewBox="0 0 100 100">
-            {/* Lines */}
-            <line x1="50" y1="50" x2="20" y2="30" stroke="currentColor" strokeWidth="0.5" />
-            <line x1="50" y1="50" x2="80" y2="30" stroke="currentColor" strokeWidth="0.5" />
-            <line x1="50" y1="50" x2="30" y2="75" stroke="currentColor" strokeWidth="0.5" />
-            <line x1="50" y1="50" x2="70" y2="75" stroke="currentColor" strokeWidth="0.5" />
-            <line x1="20" y1="30" x2="80" y2="30" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2" />
-            <line x1="30" y1="75" x2="70" y2="75" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2" />
-            {/* Nodes */}
-            <circle cx="50" cy="50" r="6" className="fill-[#ff623d] stroke-[#ff623d]/30 stroke-[4px]" />
-            <circle cx="20" cy="30" r="4" className="fill-slate-600 hover:fill-[#ff623d] transition-colors" />
-            <circle cx="80" cy="30" r="4" className="fill-slate-600 hover:fill-[#ff623d] transition-colors" />
-            <circle cx="30" cy="75" r="4" className="fill-slate-600 hover:fill-[#ff623d] transition-colors" />
-            <circle cx="70" cy="75" r="4" className="fill-slate-600 hover:fill-[#ff623d] transition-colors" />
-          </svg>
-        </div>
-      ),
-    },
-    {
-      title: 'Scheduler Agent',
-      desc: 'Sinkronisasi jadwal tim secara otomatis dan atur pertemuan tanpa konflik waktu.',
-      icon: <Calendar className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center p-4">
-          {/* Calendar visual */}
-          <div className="w-28 bg-slate-900 border border-slate-800 rounded-lg shadow-lg overflow-hidden text-[9px] font-sans">
-            <div className="bg-red-500/20 border-b border-red-500/30 px-2 py-1 flex items-center justify-between text-red-400 font-bold">
-              <span>JANUARI</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            </div>
-            <div className="grid grid-cols-7 gap-1 p-2 text-slate-500 text-center font-mono">
-              <span>S</span><span>S</span><span>R</span><span>K</span><span>J</span><span>S</span><span>M</span>
-              <span className="text-slate-700">28</span><span className="text-slate-700">29</span><span className="text-slate-700">30</span>
-              <span className="text-slate-300 font-bold bg-[#ff623d]/20 text-[#ff623d] rounded-sm">1</span>
-              <span className="text-slate-300">2</span><span className="text-slate-300">3</span><span className="text-slate-300">4</span>
-              <span className="text-slate-300">5</span><span className="text-slate-300">6</span>
-              <span className="text-slate-300 bg-slate-800 rounded-sm">7</span>
-              <span className="text-slate-300">8</span><span className="text-slate-300">9</span><span className="text-slate-300">10</span><span className="text-slate-300">11</span>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Communication Agent',
-      desc: 'Draft email, ringkasan chat Slack, dan korespondensi eksternal dalam sekejap.',
+      title: 'Email Workspace',
+      desc: 'Kelola inbox, baca email prioritas, dapatkan insight, buat draft balasan, dan lanjutkan korespondensi tanpa berpindah aplikasi.',
       icon: <Mail className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center p-4">
-          {/* Messaging Bubble Visual */}
-          <div className="w-full max-w-[130px] space-y-2">
-            <div className="flex items-start space-x-1.5">
-              <div className="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0 flex items-center justify-center text-[7px] font-bold text-white">U</div>
-              <div className="bg-slate-800 text-slate-300 p-1.5 rounded-r-lg rounded-bl-lg text-[8px] leading-tight">
-                Draft email follow-up klien...
-              </div>
-            </div>
-            <div className="flex items-start space-x-1.5 justify-end">
-              <div className="bg-[#ff623d]/20 border border-[#ff623d]/30 text-[#ff623d] p-1.5 rounded-l-lg rounded-br-lg text-[8px] leading-tight max-w-[100px]">
-                Subjek: Kelanjutan Project
-                Halo Tim, Berikut draf...
-              </div>
-              <div className="w-4 h-4 rounded-full bg-[#ff623d] flex-shrink-0 flex items-center justify-center text-[7px] font-bold text-white">AI</div>
-            </div>
-          </div>
-        </div>
-      ),
+      agent: 'Communication Agent',
+      image: '/feature/aiemail.png',
+      span: 'lg:col-span-2',
     },
     {
-      title: 'Task Agent',
-      desc: 'Integrasi langsung ke Jira untuk membuat, mengedit, dan memantau tiket pekerjaan.',
+      title: 'Task Progress Workspace',
+      desc: 'Pantau issue Jira dalam board To Do, In Progress, dan Done, lalu lihat blocker, overdue, serta rekomendasi tindakan berikutnya.',
       icon: <CheckSquare className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center p-3">
-          {/* Kanban / Workflow Card Visual */}
-          <div className="grid grid-cols-2 gap-2 w-full max-w-[150px]">
-            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded text-[8px] flex flex-col space-y-1">
-              <span className="text-slate-500 font-bold text-[7px] uppercase tracking-wider">TO DO</span>
-              <div className="bg-slate-800 p-1 rounded border border-slate-700 text-slate-300">
-                KAN-47 Fix auth bug
-              </div>
-            </div>
-            <div className="bg-slate-900 border border-slate-800 p-1.5 rounded text-[8px] flex flex-col space-y-1">
-              <span className="text-slate-500 font-bold text-[7px] uppercase tracking-wider">IN PROGRESS</span>
-              <div className="bg-[#ff623d]/10 border border-[#ff623d]/30 p-1 rounded text-[#ff623d] flex items-center justify-between">
-                <span>KAN-29 API Sync</span>
-                <span className="w-1 h-1 rounded-full bg-[#ff623d] animate-ping" />
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
+      agent: 'Task Agent',
+      image: '/feature/aijira.png',
+      span: 'lg:col-span-2',
     },
     {
-      title: 'Document Agent',
-      desc: 'Ringkas dokumen panjang, analisis PDF, dan buat laporan draf otomatis.',
+      title: 'Document Workspace',
+      desc: 'Upload dan kelola PDF atau DOCX, lalu tanyakan isi dokumen dengan pencarian konteks berbasis vector dan RAG.',
       icon: <FileText className="w-6 h-6 text-[#ff623d]" />,
-      visual: (
-        <div className="relative w-full h-full bg-[#111111] overflow-hidden flex items-center justify-center p-3">
-          {/* Document Summary layout */}
-          <div className="w-28 bg-slate-900 border border-slate-800 rounded-lg p-2 flex flex-col space-y-1.5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-              <span className="text-[8px] font-bold text-slate-400">report_q2.pdf</span>
-              <span className="text-[7px] text-green-500 font-bold bg-green-500/10 px-1 rounded">Parsed</span>
-            </div>
-            <div className="space-y-1">
-              <div className="h-1 bg-slate-800 rounded w-full" />
-              <div className="h-1 bg-slate-800 rounded w-5/6" />
-              <div className="h-1 bg-[#ff623d]/30 rounded w-4/6" />
-            </div>
-            <div className="bg-[#ff623d]/10 p-1 rounded border border-[#ff623d]/20 text-[7px] text-[#ff623d] leading-normal font-sans">
-              Summary: Profit naik 14%, cost operasional turun 8% berkat otomasi AI.
-            </div>
-          </div>
-        </div>
-      ),
+      agent: 'Knowledge Agent · RAG',
+      image: '/feature/aidocument.png',
+      span: 'lg:col-span-3',
+    },
+    {
+      title: 'Calendar Workspace',
+      desc: 'Kelola agenda Google Calendar, lihat potensi konflik, buat meeting baru, dan siapkan tindak lanjut berdasarkan konteks event.',
+      icon: <Calendar className="w-6 h-6 text-[#ff623d]" />,
+      agent: 'Scheduler Agent',
+      image: '/feature/aicalendar.png',
+      span: 'lg:col-span-3',
     },
   ];
 
@@ -287,9 +177,9 @@ export default function LandingPage() {
               <div className="text-[11px] sm:text-xs text-white/65 font-medium">Siap bantu delegasi kerja</div>
             </div>
             <div className="space-y-1 border-r border-white/20 last:border-r-0">
-              <div className="font-headline text-3xl sm:text-4xl font-extrabold">4</div>
+              <div className="font-headline text-3xl sm:text-4xl font-extrabold">5</div>
               <div className="text-xs sm:text-sm text-white/80 font-medium">Workspace Utama</div>
-              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Dashboard, Email, Calendar, Project</div>
+              <div className="text-[11px] sm:text-xs text-white/65 font-medium">Dashboard, Email, Calendar, Project, Document</div>
             </div>
             <div className="space-y-1">
               <div className="font-headline text-3xl sm:text-4xl font-extrabold">FREE</div>
@@ -319,54 +209,10 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
-            {/* Visual Chip (Left) */}
+            {/* Visual (Left) */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[340px] aspect-square rounded-3xl bg-[#111111] p-6 border border-slate-800 shadow-2xl overflow-hidden flex flex-col justify-between group">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,98,61,0.12)_0%,transparent_65%)]" />
-                
-                {/* Board grid patterns */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:20px_20px]" />
-
-                {/* Corner light markers */}
-                <div className="absolute top-4 left-4 w-1.5 h-1.5 rounded-full bg-red-500/50" />
-                <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-red-500/50" />
-                <div className="absolute bottom-4 left-4 w-1.5 h-1.5 rounded-full bg-red-500/50" />
-                <div className="absolute bottom-4 right-4 w-1.5 h-1.5 rounded-full bg-red-500/50" />
-
-                {/* Chip Center */}
-                <div className="m-auto relative w-24 h-24 bg-gradient-to-br from-[#222] to-[#111] border-2 border-slate-700/60 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(232,67,34,0.2)] group-hover:border-[#ff623d]/50 transition-all duration-500">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#ff5f3f] to-[#e84322] rounded-2xl opacity-10 blur group-hover:opacity-30 transition-opacity" />
-                  
-                  {/* Pins around the chip */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex space-x-1.5">
-                    <div className="w-1.5 h-3 bg-slate-700/60 rounded-b-sm" />
-                    <div className="w-1.5 h-3 bg-[#ff623d] rounded-b-sm" />
-                    <div className="w-1.5 h-3 bg-slate-700/60 rounded-b-sm" />
-                  </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5">
-                    <div className="w-1.5 h-3 bg-slate-700/60 rounded-t-sm" />
-                    <div className="w-1.5 h-3 bg-[#ff623d] rounded-t-sm" />
-                    <div className="w-1.5 h-3 bg-slate-700/60 rounded-t-sm" />
-                  </div>
-                  <div className="absolute -left-3 top-1/2 -translate-y-1/2 flex flex-col space-y-1.5">
-                    <div className="h-1.5 w-3 bg-slate-700/60 rounded-r-sm" />
-                    <div className="h-1.5 w-3 bg-[#ff623d] rounded-r-sm" />
-                    <div className="h-1.5 w-3 bg-slate-700/60 rounded-r-sm" />
-                  </div>
-                  <div className="absolute -right-3 top-1/2 -translate-y-1/2 flex flex-col space-y-1.5">
-                    <div className="h-1.5 w-3 bg-slate-700/60 rounded-l-sm" />
-                    <div className="h-1.5 w-3 bg-[#ff623d] rounded-l-sm" />
-                    <div className="h-1.5 w-3 bg-slate-700/60 rounded-l-sm" />
-                  </div>
-
-                  <span className="font-headline font-black text-2xl tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-                    AI
-                  </span>
-                </div>
-
-                <div className="text-center text-[10px] text-slate-500 font-mono tracking-widest uppercase">
-                  Engine Orchestrator
-                </div>
+              <div className="relative w-full max-w-[400px] aspect-square rounded-3xl bg-transparent flex items-center justify-center">
+                <img src="/aiagent.png" alt="AI Agents" className="w-full h-full object-contain drop-shadow-2xl" />
               </div>
             </div>
 
@@ -405,23 +251,31 @@ export default function LandingPage() {
               FITUR-FITUR
             </span>
             <h2 className="font-headline text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
-              Yang bisa dilakukan AI Assistant ini.
+              Lima workspace untuk kerja tim sehari-hari.
             </h2>
-            <p className="text-slate-500 text-sm sm:text-base max-w-md mx-auto">
-              Agen-agen khusus untuk efisiensi maksimal bagi seluruh divisi kerja.
+            <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto">
+              Kelola briefing, email, task progress, dokumen, dan kalender dari satu tempat, dengan agent khusus pada setiap alur kerja.
             </p>
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feat, i) => (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-6">
+            {features.map((feat) => (
               <div
-                key={i}
-                className="group flex flex-col bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1.5"
+                key={feat.title}
+                className={`group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.09)] ${feat.span}`}
               >
                 {/* Visual Area */}
-                <div className="h-44 w-full bg-[#111111] overflow-hidden border-b border-slate-100 relative">
-                  {feat.visual}
+                <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-slate-100 bg-slate-50">
+                  <img
+                    src={feat.image}
+                    alt={`Ilustrasi ${feat.title}`}
+                    className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.025]"
+                    loading="lazy"
+                  />
+                  <div className="absolute left-4 top-4 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[11px] font-bold text-[#e84322] shadow-sm backdrop-blur">
+                    {feat.agent}
+                  </div>
                 </div>
                 
                 {/* Content Area */}
@@ -505,29 +359,6 @@ export default function LandingPage() {
               </p>
             </div>
 
-          </div>
-
-          {/* Connection Status Ribbon */}
-          <div className="mt-16 bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-            <div className="flex flex-wrap items-center justify-center md:justify-between gap-4 text-xs font-bold text-slate-700 tracking-wider">
-              <span className="text-[#ff623d] uppercase">YANG SUDAH TERHUBUNG:</span>
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#ff623d]" />
-                <span>143 EKSEKUSI AI</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#ff623d]" />
-                <span>2M+ TOKEN DIPROSES</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#ff623d]" />
-                <span>7 AGEN AKTIF</span>
-              </div>
-              <div className="flex items-center space-x-2 text-[#ff623d]">
-                <span className="w-2 h-2 rounded-full bg-[#ff623d]" />
-                <span>GOOGLE WORKSPACE + JIRA</span>
-              </div>
-            </div>
           </div>
 
         </div>
