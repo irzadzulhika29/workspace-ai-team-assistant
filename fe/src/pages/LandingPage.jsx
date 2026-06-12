@@ -212,7 +212,7 @@ export default function LandingPage() {
             {/* Visual (Left) */}
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-full max-w-[400px] aspect-square rounded-3xl bg-transparent flex items-center justify-center">
-                <img src="/aiagent.png" alt="AI Agents" className="w-full h-full object-contain drop-shadow-2xl" />
+                <img src="/feature/aiagent.png" alt="AI Agents" className="w-full h-full object-contain drop-shadow-2xl" />
               </div>
             </div>
 
